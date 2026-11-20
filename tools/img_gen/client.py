@@ -42,7 +42,7 @@ def _with_retries(
                 raise
             delay = retry_delay * (2**attempt)
             print(
-                f"图像 API 请求失败，{delay:.1f}s 后重试 "
+                f"Image API request failed, retrying in {delay:.1f}s "
                 f"({attempt + 1}/{max_retries}): {exc}"
             )
             time.sleep(delay)
@@ -51,12 +51,12 @@ def _with_retries(
 
 def _extract_first_image_b64(response: object) -> str:
     if not getattr(response, "data", None):
-        raise RuntimeError("未在响应中找到图片数据")
+        raise RuntimeError("No image data found in the response")
 
     first = response.data[0]
     image_b64 = getattr(first, "b64_json", None) or getattr(first, "b64", None)
     if not image_b64:
-        raise RuntimeError("未在响应中找到图片 base64 数据")
+        raise RuntimeError("No base64 image data found in the response")
     return image_b64
 
 

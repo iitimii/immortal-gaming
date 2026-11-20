@@ -18,7 +18,7 @@ def timestamped_png_path(output_dir: str | Path, prefix: str = "") -> Path:
 def save_png(data: bytes, output_dir: str | Path, *, prefix: str = "") -> Path:
     output_path = timestamped_png_path(output_dir, prefix=prefix)
     output_path.write_bytes(data)
-    print(f"图片已保存: {output_path}")
+    print(f"Image saved: {output_path}")
     return output_path
 
 

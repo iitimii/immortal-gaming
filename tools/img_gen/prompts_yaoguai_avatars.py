@@ -3,20 +3,20 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 YAOGUAI_COMMON_PROMPT_BASE = (
-    "二次元漫画风格，略微Q版，正面看镜头。"
-    "纯白背景，背景必须干净无纹理、无阴影、无渐变、无雾气、无光晕、无边框。"
-    "角色完整居中，只露出完整头部、面部和少量肩颈，头发和发饰不要接触图片边缘，主体边缘清晰。"
-    "保留明显但好看的妖族特征，像素风格，细节别太多。"
+    "Anime manga style, slightly chibi, facing the camera head-on. "
+    "Pure white background; the background must be clean, with no texture, shadow, gradient, mist, glow or border. "
+    "The character is complete and centered, showing only the complete head, face and a little of the shoulders and neck; hair and hair ornaments must not touch the image edges; the subject has crisp edges. "
+    "Keep the yao race traits clearly visible but attractive. Pixel art style, not too much detail."
 )
 
-FEMALE_YAOGUAI_PROMPT_BASE = f"一个好看的仙侠妖族女性角色头像。{YAOGUAI_COMMON_PROMPT_BASE}"
-MALE_YAOGUAI_PROMPT_BASE = f"一个好看的仙侠妖族男性角色头像。{YAOGUAI_COMMON_PROMPT_BASE}"
+FEMALE_YAOGUAI_PROMPT_BASE = f"An attractive xianxia yao female character avatar. {YAOGUAI_COMMON_PROMPT_BASE}"
+MALE_YAOGUAI_PROMPT_BASE = f"An attractive xianxia yao male character avatar. {YAOGUAI_COMMON_PROMPT_BASE}"
 
 REALM_ORDER = [
-    ("qi_refining", "练气"),
-    ("foundation", "筑基"),
-    ("golden_core", "金丹"),
-    ("nascent_soul", "元婴"),
+    ("qi_refining", "Qi Refinement"),
+    ("foundation", "Foundation Establishment"),
+    ("golden_core", "Golden Core"),
+    ("nascent_soul", "Nascent Soul"),
 ]
 
 YAOGUAI_REALM_SLUGS = [realm_slug for realm_slug, _ in REALM_ORDER]
@@ -25,256 +25,256 @@ SPECIES_REALMS = {
     "fox": [
         (
             "qi_refining",
-            "练气",
-            "练气阶段外观：狐耳绒毛更朴素柔软，眼尾妆很浅，狐形饰物简单，神情带一点青涩。"
-            "不要新增额外符纹或大面积光效。",
+            "Qi Refinement",
+            "Qi Refinement stage look: fox-ear fur plainer and softer, very light makeup at the eye corners, simple fox-shaped ornaments, a slightly inexperienced expression. "
+            "Do not add extra runes or large-area light effects.",
         ),
         (
             "foundation",
-            "筑基",
-            "筑基阶段外观：狐耳轮廓更清楚，眼尾妆更精致，狐形饰物略华丽，眼神更沉稳。"
-            "只增强原有发色、耳饰和贴身微光。",
+            "Foundation Establishment",
+            "Foundation Establishment stage look: clearer fox-ear contours, more refined makeup at the eye corners, slightly more ornate fox-shaped ornaments, calmer eyes. "
+            "Only enhance the existing hair color, earrings and close-fitting faint glow.",
         ),
         (
             "golden_core",
-            "金丹",
-            "金丹阶段外观：瞳孔高光更亮，眼尾红妆或金妆更凝练，狐形饰物质感更细致。"
-            "原有狐耳、发梢和耳坠有轻微亮泽，效果克制。",
+            "Golden Core",
+            "Golden Core stage look: brighter pupil highlights, more condensed red or gold makeup at the eye corners, finer texture on fox-shaped ornaments. "
+            "The existing fox ears, hair tips and earrings have a slight sheen; keep the effect restrained.",
         ),
         (
             "nascent_soul",
-            "元婴",
-            "元婴阶段外观：神情空灵优雅，狐耳和发丝更轻盈，眼尾妆清透，原有狐形饰物更精美。"
-            "只保留贴身柔光，不出现背景光环。",
+            "Nascent Soul",
+            "Nascent Soul stage look: ethereal and elegant expression, lighter fox ears and hair strands, translucent makeup at the eye corners, more exquisite existing fox-shaped ornaments. "
+            "Keep only a soft close-fitting glow; no background halo.",
         ),
     ],
     "wolf": [
         (
             "qi_refining",
-            "练气",
-            "练气阶段外观：狼耳略显蓬松，脸颊狼纹很浅，衣领朴素，眼神有年轻锐气。"
-            "不要新增额外符纹或大面积光效。",
+            "Qi Refinement",
+            "Qi Refinement stage look: slightly fluffy wolf ears, very faint wolf markings on the cheeks, a plain collar, eyes with youthful sharpness. "
+            "Do not add extra runes or large-area light effects.",
         ),
         (
             "foundation",
-            "筑基",
-            "筑基阶段外观：狼耳轮廓更清晰，脸颊狼纹更稳定，眼神沉稳锐利，发饰略精致。"
-            "只增强原有冷色高光。",
+            "Foundation Establishment",
+            "Foundation Establishment stage look: clearer wolf-ear contours, steadier wolf markings on the cheeks, calm and sharp eyes, slightly more refined hair ornaments. "
+            "Only enhance the existing cool-toned highlights.",
         ),
         (
             "golden_core",
-            "金丹",
-            "金丹阶段外观：瞳孔高光更集中，狼纹边缘更利落，护额或兽牙饰物质感更强。"
-            "原有冷光略微增强但贴近主体。",
+            "Golden Core",
+            "Golden Core stage look: more focused pupil highlights, crisper edges on the wolf markings, stronger texture on the forehead guard or beast-fang ornaments. "
+            "The existing cool light is slightly stronger but stays close to the subject.",
         ),
         (
             "nascent_soul",
-            "元婴",
-            "元婴阶段外观：神情冷静空灵，狼耳和发丝更轻盈，狼纹清晰优雅，冷色贴身光更柔和。"
-            "不要出现背景月亮或场景。",
+            "Nascent Soul",
+            "Nascent Soul stage look: calm, ethereal expression, lighter wolf ears and hair strands, clear and elegant wolf markings, softer cool-toned close-fitting light. "
+            "No background moon or scenery.",
         ),
     ],
     "bird": [
         (
             "qi_refining",
-            "练气",
-            "练气阶段外观：羽饰更朴素，眼尾彩纹很浅，羽冠较小，神情轻快青涩。"
-            "不要新增额外符纹或大面积光效。",
+            "Qi Refinement",
+            "Qi Refinement stage look: plainer feather ornaments, very faint colored markings at the eye corners, a small feather crest, a light, inexperienced expression. "
+            "Do not add extra runes or large-area light effects.",
         ),
         (
             "foundation",
-            "筑基",
-            "筑基阶段外观：羽冠和耳羽轮廓更清楚，眼尾彩纹更稳定，羽毛饰物略精致。"
-            "只增强原有羽色和贴身微光。",
+            "Foundation Establishment",
+            "Foundation Establishment stage look: clearer feather crest and ear-feather contours, steadier colored markings at the eye corners, slightly more refined feather ornaments. "
+            "Only enhance the existing feather colors and close-fitting faint glow.",
         ),
         (
             "golden_core",
-            "金丹",
-            "金丹阶段外观：瞳孔高光更明亮，羽冠层次更清晰，彩羽饰物有细小金属光泽。"
-            "原有彩纹更凝练，不新增背景羽翼。",
+            "Golden Core",
+            "Golden Core stage look: brighter pupil highlights, clearer layering of the feather crest, colorful feather ornaments with a fine metallic sheen. "
+            "Existing colored markings are more condensed; do not add background wings.",
         ),
         (
             "nascent_soul",
-            "元婴",
-            "元婴阶段外观：神情空灵轻盈，羽饰更细致柔和，发丝和羽冠微亮。"
-            "只保留贴身清透光，不出现展开翅膀或背景特效。",
+            "Nascent Soul",
+            "Nascent Soul stage look: ethereal, airy expression, finer and softer feather ornaments, hair strands and feather crest faintly glowing. "
+            "Keep only a clear close-fitting light; no spread wings or background effects.",
         ),
     ],
     "snake": [
         (
             "qi_refining",
-            "练气",
-            "练气阶段外观：竖瞳光泽较弱，鳞纹很浅，蛇形饰物简单，神情带一点冷淡青涩。"
-            "不要新增额外符纹或大面积光效。",
+            "Qi Refinement",
+            "Qi Refinement stage look: slit pupils with a weak sheen, very faint scale patterns, simple snake-shaped ornaments, a slightly cold, inexperienced expression. "
+            "Do not add extra runes or large-area light effects.",
         ),
         (
             "foundation",
-            "筑基",
-            "筑基阶段外观：竖瞳更清晰，细鳞纹更稳定，蛇形耳饰略精致，眼神更冷静。"
-            "只增强原有冷色微光。",
+            "Foundation Establishment",
+            "Foundation Establishment stage look: clearer slit pupils, steadier fine scale patterns, slightly more refined snake-shaped earrings, calmer eyes. "
+            "Only enhance the existing cool-toned faint glow.",
         ),
         (
             "golden_core",
-            "金丹",
-            "金丹阶段外观：竖瞳高光更锐利，鳞纹边缘更利落，蛇形饰物有细小金属质感。"
-            "原有眼影和鳞片光泽更明显但克制。",
+            "Golden Core",
+            "Golden Core stage look: sharper slit-pupil highlights, crisper edges on the scale patterns, snake-shaped ornaments with a fine metallic texture. "
+            "Existing eyeshadow and scale sheen are more visible but restrained.",
         ),
         (
             "nascent_soul",
-            "元婴",
-            "元婴阶段外观：神情空灵神秘，竖瞳清透，鳞纹优雅细致，发丝带轻微冷光。"
-            "不要出现背景蛇影或大面积雾气。",
+            "Nascent Soul",
+            "Nascent Soul stage look: ethereal, mysterious expression, clear slit pupils, elegant and delicate scale patterns, hair strands with a faint cool light. "
+            "No background snake silhouettes or large areas of mist.",
         ),
     ],
     "turtle": [
         (
             "qi_refining",
-            "练气",
-            "练气阶段外观：龟甲纹饰较朴素，玉石饰物简单，眼神温和青涩，衣领厚实素净。"
-            "不要新增额外符纹或大面积光效。",
+            "Qi Refinement",
+            "Qi Refinement stage look: plainer tortoiseshell patterns, simple jade ornaments, gentle and inexperienced eyes, a thick, plain collar. "
+            "Do not add extra runes or large-area light effects.",
         ),
         (
             "foundation",
-            "筑基",
-            "筑基阶段外观：龟甲纹饰更清楚，玉石饰物略精致，眼神沉稳，衣领纹理更整齐。"
-            "只增强原有青绿色或玉色微光。",
+            "Foundation Establishment",
+            "Foundation Establishment stage look: clearer tortoiseshell patterns, slightly more refined jade ornaments, calm eyes, neater collar texture. "
+            "Only enhance the existing teal or jade-colored faint glow.",
         ),
         (
             "golden_core",
-            "金丹",
-            "金丹阶段外观：瞳孔高光更稳定，龟甲纹边缘更利落，玉石饰物有温润光泽。"
-            "衣领可有细小几何纹，整体厚重但不夸张。",
+            "Golden Core",
+            "Golden Core stage look: steadier pupil highlights, crisper edges on the tortoiseshell patterns, jade ornaments with a warm, smooth luster. "
+            "The collar may have small geometric patterns; solid and weighty overall but not exaggerated.",
         ),
         (
             "nascent_soul",
-            "元婴",
-            "元婴阶段外观：神情安宁空灵，龟甲纹优雅细致，玉石饰物更清透，贴身柔光沉稳。"
-            "不要出现背景法阵或大面积光环。",
+            "Nascent Soul",
+            "Nascent Soul stage look: peaceful, ethereal expression, elegant and delicate tortoiseshell patterns, more translucent jade ornaments, a steady soft close-fitting glow. "
+            "No background magic circles or large halos.",
         ),
     ],
 }
 
 SPECIES_NAMES = {
-    "fox": "狐",
-    "wolf": "狼",
-    "bird": "鸟",
-    "snake": "蛇",
-    "turtle": "龟",
+    "fox": "Fox",
+    "wolf": "Wolf",
+    "bird": "Bird",
+    "snake": "Snake",
+    "turtle": "Turtle",
 }
 
 FEMALE_SPECIES_AFFIXES = {
     "fox": [
-        "狐族特征，柔软白金长发，蓬松狐耳，琥珀眼眸，眼尾红妆，细金铃铛发饰，神情狡黠甜美。",
-        "狐族特征，绯红卷发，深红狐耳，浅金竖瞳，桃花额印，毛绒耳坠，微笑妩媚。",
-        "狐族特征，墨黑长发，银尖狐耳，蓝紫眼眸，白玉狐形发簪，表情清冷神秘。",
-        "狐族特征，浅茶色双鬟发，奶白狐耳，蜜糖色眼眸，红绳小铃发饰，神情灵动俏皮。",
-        "狐族特征，银粉渐变长发，粉白狐耳，玫瑰金眼眸，细珠流苏耳饰，眉眼温柔明艳。",
-        "狐族特征，青灰色高马尾，灰蓝狐耳，淡紫眼眸，青玉狐尾形发夹，表情聪慧警觉。",
-        "狐族特征，栗色蓬松短发，赤棕狐耳，橙金眼眸，铜钱小耳坠，笑意活泼明快。",
-        "狐族特征，月白长直发，银白狐耳，冰蓝眼眸，白绸发带和小狐面饰，气质清雅疏离。",
-        "狐族特征，乌金挑染长发，黑金狐耳，琥珀竖瞳，金丝狐纹额饰，神情华贵从容。",
+        "Fox yao traits, soft platinum-blonde long hair, fluffy fox ears, amber eyes, red makeup at the eye corners, fine gold bell hair ornament, sly and sweet expression.",
+        "Fox yao traits, crimson curly hair, deep red fox ears, pale gold slit pupils, peach blossom forehead mark, fluffy earrings, charming smile.",
+        "Fox yao traits, ink-black long hair, silver-tipped fox ears, blue-violet eyes, white jade fox-shaped hairpin, cool and mysterious expression.",
+        "Fox yao traits, light tea-brown double hair loops, milky white fox ears, honey-colored eyes, red string hair ornament with small bells, lively and playful expression.",
+        "Fox yao traits, silver-to-pink gradient long hair, pinkish-white fox ears, rose-gold eyes, fine beaded tassel earrings, gentle and radiant features.",
+        "Fox yao traits, blue-gray high ponytail, gray-blue fox ears, pale violet eyes, green jade fox-tail-shaped hair clip, clever and alert expression.",
+        "Fox yao traits, chestnut fluffy short hair, russet fox ears, orange-gold eyes, small copper-coin earrings, lively and cheerful smile.",
+        "Fox yao traits, moon-white long straight hair, silver-white fox ears, icy blue eyes, white silk hair ribbon and small fox mask ornament, elegant and aloof air.",
+        "Fox yao traits, long black hair with gold streaks, black-gold fox ears, amber slit pupils, gold filigree fox-pattern forehead ornament, noble and composed expression.",
     ],
     "wolf": [
-        "狼族特征，苍灰短发，尖狼耳，冰蓝眼眸，脸颊浅色狼纹，黑银护额，眼神锐利。",
-        "狼族特征，深蓝狼尾发型，银灰狼耳，金色瞳孔，兽牙耳饰，眉眼野性张扬。",
-        "狼族特征，雪白长辫，白色狼耳，浅蓝眼眸，额间月牙印，神情沉静冷冽。",
-        "狼族特征，烟黑齐肩发，黑灰狼耳，银色眼眸，皮绳兽牙发坠，神情冷酷警醒。",
-        "狼族特征，浅褐短卷发，棕色狼耳，琥珀眼眸，毛绒领边，笑容爽朗野性。",
-        "狼族特征，银蓝高束发，蓝灰狼耳，极浅蓝瞳，细铁环耳饰，眉眼锋利克制。",
-        "狼族特征，暗红挑染短发，深灰狼耳，赤金眼眸，黑色额带，神情桀骜凶悍。",
-        "狼族特征，雾白蓬松短发，白灰狼耳，淡灰眼眸，骨片小发饰，气质安静孤高。",
-        "狼族特征，青黑长发，墨色狼耳，绿金眼眸，脸侧深色狼纹，表情沉着危险。",
+        "Wolf yao traits, ash-gray short hair, pointed wolf ears, icy blue eyes, pale wolf markings on the cheeks, black-silver forehead guard, sharp eyes.",
+        "Wolf yao traits, dark blue wolf-cut hair, silver-gray wolf ears, golden pupils, beast-fang earrings, wild and bold features.",
+        "Wolf yao traits, snow-white long braid, white wolf ears, light blue eyes, crescent moon mark on the forehead, calm and chilly expression.",
+        "Wolf yao traits, smoky black shoulder-length hair, black-gray wolf ears, silver eyes, leather-cord beast-fang hair pendant, cold and vigilant expression.",
+        "Wolf yao traits, light brown short curly hair, brown wolf ears, amber eyes, fluffy collar trim, hearty and wild smile.",
+        "Wolf yao traits, silver-blue high-tied hair, blue-gray wolf ears, very pale blue pupils, thin iron-ring earrings, sharp yet restrained features.",
+        "Wolf yao traits, short hair with dark red streaks, dark gray wolf ears, red-gold eyes, black headband, untamed and fierce expression.",
+        "Wolf yao traits, misty white fluffy short hair, white-gray wolf ears, pale gray eyes, small bone-chip hair ornaments, quiet and solitary air.",
+        "Wolf yao traits, blue-black long hair, ink-colored wolf ears, green-gold eyes, dark wolf markings on the side of the face, composed and dangerous expression.",
     ],
     "bird": [
-        "鸟族特征，孔雀蓝长发，羽状耳羽，翠金眼眸，彩羽步摇，眼尾彩色纹样，笑容骄傲。",
-        "鸟族特征，白羽短发，细小羽冠，浅金眼眸，羽毛耳饰，神情轻盈明亮。",
-        "鸟族特征，乌黑长发，鸦羽发饰，暗紫眼眸，黑羽耳坠，表情冷艳安静。",
-        "鸟族特征，朱红长发，赤色耳羽，金橙眼眸，红羽发簪，神情热烈明快。",
-        "鸟族特征，淡青短发，青绿色耳羽，水蓝眼眸，细羽发夹，气质清新轻巧。",
-        "鸟族特征，金棕卷发，雀羽耳饰，琥珀眼眸，眼尾浅金纹样，笑容灵巧机敏。",
-        "鸟族特征，银灰长发，鹤羽发冠，浅灰蓝眼眸，白羽耳坠，神情优雅宁静。",
-        "鸟族特征，紫蓝渐变发，细长彩羽耳饰，蓝紫眼眸，彩色额羽，表情梦幻柔和。",
-        "鸟族特征，深绿盘发，翠羽发簪，翡翠眼眸，眼尾细翠纹，神情端庄骄矜。",
+        "Bird yao traits, peacock-blue long hair, feathered ear plumes, emerald-gold eyes, colorful feather dangling hairpin, colorful markings at the eye corners, proud smile.",
+        "Bird yao traits, white-feathered short hair, small feather crest, pale gold eyes, feather earrings, light and bright expression.",
+        "Bird yao traits, jet-black long hair, crow-feather hair ornament, dark violet eyes, black feather earrings, cold and quiet beauty.",
+        "Bird yao traits, vermilion long hair, red ear plumes, gold-orange eyes, red feather hairpin, passionate and cheerful expression.",
+        "Bird yao traits, pale cyan short hair, teal ear plumes, aqua-blue eyes, fine feather hair clips, fresh and nimble air.",
+        "Bird yao traits, golden-brown curly hair, sparrow-feather earrings, amber eyes, pale gold markings at the eye corners, clever and quick-witted smile.",
+        "Bird yao traits, silver-gray long hair, crane-feather hair crown, pale gray-blue eyes, white feather earrings, elegant and serene expression.",
+        "Bird yao traits, violet-to-blue gradient hair, long slender colorful feather earrings, blue-violet eyes, colorful forehead feathers, dreamy and soft expression.",
+        "Bird yao traits, dark green updo, kingfisher-feather hairpin, jade-green eyes, fine emerald markings at the eye corners, dignified and proud expression.",
     ],
     "snake": [
-        "蛇族特征，墨绿长直发，金色竖瞳，细鳞耳饰，眼尾青绿色眼影，微笑危险优雅。",
-        "蛇族特征，银白盘发，淡青竖瞳，额角细小鳞纹，透明玉簪，表情冷淡。",
-        "蛇族特征，紫黑卷发，暗金竖瞳，蛇形耳坠，唇色偏紫，神情慵懒神秘。",
-        "蛇族特征，青蓝长发，碧色竖瞳，脸侧细小青鳞，水滴形耳坠，表情清冷柔韧。",
-        "蛇族特征，黑茶低马尾，琥珀竖瞳，浅褐鳞纹，铜蛇发扣，神情沉静机敏。",
-        "蛇族特征，浅紫短发，淡金竖瞳，眼尾紫色细纹，银蛇形发夹，笑容狡黠。",
-        "蛇族特征，苍白长发，冰青竖瞳，额间细鳞额饰，白玉蛇纹耳饰，气质幽冷。",
-        "蛇族特征，赤褐卷发，赤金竖瞳，脸颊红鳞小纹，红铜耳环，神情热烈危险。",
-        "蛇族特征，孔雀绿盘发，翠金竖瞳，颈侧细鳞纹，翡翠蛇形发簪，表情华丽神秘。",
+        "Snake yao traits, dark green long straight hair, golden slit pupils, fine scale earrings, teal eyeshadow at the eye corners, dangerously elegant smile.",
+        "Snake yao traits, silver-white updo, pale cyan slit pupils, tiny scale patterns at the corners of the forehead, transparent jade hairpin, cold expression.",
+        "Snake yao traits, purple-black curly hair, dark gold slit pupils, snake-shaped earrings, purplish lips, languid and mysterious expression.",
+        "Snake yao traits, teal-blue long hair, jade-green slit pupils, tiny green scales on the side of the face, water-drop earrings, cool yet supple expression.",
+        "Snake yao traits, dark tea-brown low ponytail, amber slit pupils, light brown scale patterns, copper snake hair clasp, calm and shrewd expression.",
+        "Snake yao traits, light purple short hair, pale gold slit pupils, fine purple lines at the eye corners, silver snake-shaped hair clip, sly smile.",
+        "Snake yao traits, pale long hair, icy cyan slit pupils, fine-scale forehead ornament, white jade snake-pattern earrings, eerie and cold air.",
+        "Snake yao traits, reddish-brown curly hair, red-gold slit pupils, small red scale markings on the cheeks, red copper earrings, fiery and dangerous expression.",
+        "Snake yao traits, peacock-green updo, emerald-gold slit pupils, fine scale patterns on the side of the neck, jade snake-shaped hairpin, gorgeous and mysterious expression.",
     ],
     "turtle": [
-        "龟族特征，深棕盘发，温和圆眼，龟甲纹发簪，青玉耳坠，神情安稳柔和。",
-        "龟族特征，墨绿短发，浅绿色眼眸，龟甲纹额饰，厚重玉石发扣，表情沉静。",
-        "龟族特征，灰青长发，淡金眼眸，玄色龟甲形发冠，脸颊细小青纹，气息厚重安宁。",
-        "龟族特征，浅棕双髻发，温润黑眼，浅青龟甲发夹，圆玉耳坠，神情乖巧沉稳。",
-        "龟族特征，青黑长直发，碧绿色眼眸，龟甲纹玉簪，厚实衣领，表情安静可靠。",
-        "龟族特征，米白短发，淡棕眼眸，白玉龟甲额饰，青绳发带，气质朴素温和。",
-        "龟族特征，暗金盘发，金褐眼眸，玄金龟甲发冠，脸侧细小几何纹，神情端庄厚重。",
-        "龟族特征，松绿色长辫，湖绿色眼眸，青铜龟甲耳饰，玉石小发扣，表情慢热专注。",
-        "龟族特征，灰白高髻发，淡青眼眸，墨玉龟甲发簪，厚重青纹衣领，气质古朴安宁。",
+        "Turtle yao traits, dark brown updo, gentle round eyes, tortoiseshell-pattern hairpin, green jade earrings, calm and soft expression.",
+        "Turtle yao traits, dark green short hair, light green eyes, tortoiseshell-pattern forehead ornament, heavy jade hair clasp, calm expression.",
+        "Turtle yao traits, gray-teal long hair, pale gold eyes, deep black tortoiseshell-shaped hair crown, small teal markings on the cheeks, steady and tranquil aura.",
+        "Turtle yao traits, light brown double buns, warm dark eyes, pale teal tortoiseshell hair clip, round jade earrings, well-behaved and steady expression.",
+        "Turtle yao traits, blue-black long straight hair, jade-green eyes, tortoiseshell-pattern jade hairpin, thick collar, quiet and dependable expression.",
+        "Turtle yao traits, off-white short hair, pale brown eyes, white jade tortoiseshell forehead ornament, teal cord hair band, simple and gentle air.",
+        "Turtle yao traits, dark gold updo, golden-brown eyes, black-gold tortoiseshell hair crown, small geometric patterns on the side of the face, dignified and steady expression.",
+        "Turtle yao traits, pine-green long braid, lake-green eyes, bronze tortoiseshell earrings, small jade hair clasp, slow-to-warm and focused expression.",
+        "Turtle yao traits, gray-white high bun, pale cyan eyes, black jade tortoiseshell hairpin, heavy teal-patterned collar, archaic and tranquil air.",
     ],
 }
 
 MALE_SPECIES_AFFIXES = {
     "fox": [
-        "狐族特征，白金长发，蓬松狐耳，琥珀眼眸，眼尾红纹，细金耳扣，神情狡黠俊美。",
-        "狐族特征，绯红短发，深红狐耳，浅金竖瞳，桃花额印，毛绒领口，嘴角轻挑。",
-        "狐族特征，墨黑束发，银尖狐耳，蓝紫眼眸，白玉狐形发冠，表情清冷神秘。",
-        "狐族特征，浅茶色短发，奶白狐耳，蜜糖色眼眸，红绳小铃耳饰，神情灵巧亲和。",
-        "狐族特征，银粉渐变长发，粉白狐耳，玫瑰金眼眸，细珠流苏发扣，眉眼温润俊秀。",
-        "狐族特征，青灰色高束发，灰蓝狐耳，淡紫眼眸，青玉狐纹发冠，表情聪慧警觉。",
-        "狐族特征，栗色蓬松短发，赤棕狐耳，橙金眼眸，铜钱小耳坠，笑容潇洒明快。",
-        "狐族特征，月白长直发，银白狐耳，冰蓝眼眸，白绸束发和小狐面饰，气质清雅疏离。",
-        "狐族特征，乌金挑染长发，黑金狐耳，琥珀竖瞳，金丝狐纹额饰，神情华贵从容。",
+        "Fox yao traits, platinum-blonde long hair, fluffy fox ears, amber eyes, red markings at the eye corners, fine gold ear studs, sly and handsome expression.",
+        "Fox yao traits, crimson short hair, deep red fox ears, pale gold slit pupils, peach blossom forehead mark, fluffy collar, slight smirk.",
+        "Fox yao traits, ink-black tied-up hair, silver-tipped fox ears, blue-violet eyes, white jade fox-shaped hair crown, cool and mysterious expression.",
+        "Fox yao traits, light tea-brown short hair, milky white fox ears, honey-colored eyes, red string earrings with small bells, clever and friendly expression.",
+        "Fox yao traits, silver-to-pink gradient long hair, pinkish-white fox ears, rose-gold eyes, fine beaded tassel hair clasp, gentle and handsome features.",
+        "Fox yao traits, blue-gray high-tied hair, gray-blue fox ears, pale violet eyes, green jade fox-pattern hair crown, clever and alert expression.",
+        "Fox yao traits, chestnut fluffy short hair, russet fox ears, orange-gold eyes, small copper-coin earrings, carefree and cheerful smile.",
+        "Fox yao traits, moon-white long straight hair, silver-white fox ears, icy blue eyes, hair tied with white silk and a small fox mask ornament, elegant and aloof air.",
+        "Fox yao traits, long black hair with gold streaks, black-gold fox ears, amber slit pupils, gold filigree fox-pattern forehead ornament, noble and composed expression.",
     ],
     "wolf": [
-        "狼族特征，苍灰短发，尖狼耳，冰蓝眼眸，脸颊浅色狼纹，黑银护额，眼神锋利。",
-        "狼族特征，深蓝狼尾发型，银灰狼耳，金色瞳孔，兽牙耳饰，浓眉野性张扬。",
-        "狼族特征，雪白长辫，白色狼耳，浅蓝眼眸，额间月牙印，神情沉静冷冽。",
-        "狼族特征，烟黑短发，黑灰狼耳，银色眼眸，皮绳兽牙发坠，神情冷酷警醒。",
-        "狼族特征，浅褐短卷发，棕色狼耳，琥珀眼眸，毛绒领边，笑容爽朗野性。",
-        "狼族特征，银蓝高束发，蓝灰狼耳，极浅蓝瞳，细铁环耳饰，眉眼锋利克制。",
-        "狼族特征，暗红挑染短发，深灰狼耳，赤金眼眸，黑色额带，神情桀骜凶悍。",
-        "狼族特征，雾白蓬松短发，白灰狼耳，淡灰眼眸，骨片小发饰，气质安静孤高。",
-        "狼族特征，青黑长发，墨色狼耳，绿金眼眸，脸侧深色狼纹，表情沉着危险。",
+        "Wolf yao traits, ash-gray short hair, pointed wolf ears, icy blue eyes, pale wolf markings on the cheeks, black-silver forehead guard, piercing eyes.",
+        "Wolf yao traits, dark blue wolf-cut hair, silver-gray wolf ears, golden pupils, beast-fang earrings, thick brows, wild and bold.",
+        "Wolf yao traits, snow-white long braid, white wolf ears, light blue eyes, crescent moon mark on the forehead, calm and chilly expression.",
+        "Wolf yao traits, smoky black short hair, black-gray wolf ears, silver eyes, leather-cord beast-fang hair pendant, cold and vigilant expression.",
+        "Wolf yao traits, light brown short curly hair, brown wolf ears, amber eyes, fluffy collar trim, hearty and wild smile.",
+        "Wolf yao traits, silver-blue high-tied hair, blue-gray wolf ears, very pale blue pupils, thin iron-ring earrings, sharp yet restrained features.",
+        "Wolf yao traits, short hair with dark red streaks, dark gray wolf ears, red-gold eyes, black headband, untamed and fierce expression.",
+        "Wolf yao traits, misty white fluffy short hair, white-gray wolf ears, pale gray eyes, small bone-chip hair ornaments, quiet and solitary air.",
+        "Wolf yao traits, blue-black long hair, ink-colored wolf ears, green-gold eyes, dark wolf markings on the side of the face, composed and dangerous expression.",
     ],
     "bird": [
-        "鸟族特征，孔雀蓝长发，羽状耳羽，翠金眼眸，彩羽发冠，眼尾彩色纹样，笑容骄傲。",
-        "鸟族特征，白羽短发，细小羽冠，浅金眼眸，羽毛耳饰，神情轻盈明亮。",
-        "鸟族特征，乌黑长发，鸦羽发饰，暗紫眼眸，黑羽耳坠，表情冷峻安静。",
-        "鸟族特征，朱红长发，赤色耳羽，金橙眼眸，红羽发冠，神情热烈明快。",
-        "鸟族特征，淡青短发，青绿色耳羽，水蓝眼眸，细羽发夹，气质清新轻巧。",
-        "鸟族特征，金棕卷发，雀羽耳饰，琥珀眼眸，眼尾浅金纹样，笑容灵巧机敏。",
-        "鸟族特征，银灰长发，鹤羽发冠，浅灰蓝眼眸，白羽耳坠，神情优雅宁静。",
-        "鸟族特征，紫蓝渐变发，细长彩羽耳饰，蓝紫眼眸，彩色额羽，表情梦幻柔和。",
-        "鸟族特征，深绿束发，翠羽发冠，翡翠眼眸，眼尾细翠纹，神情端庄骄矜。",
+        "Bird yao traits, peacock-blue long hair, feathered ear plumes, emerald-gold eyes, colorful feather hair crown, colorful markings at the eye corners, proud smile.",
+        "Bird yao traits, white-feathered short hair, small feather crest, pale gold eyes, feather earrings, light and bright expression.",
+        "Bird yao traits, jet-black long hair, crow-feather hair ornament, dark violet eyes, black feather earrings, stern and quiet expression.",
+        "Bird yao traits, vermilion long hair, red ear plumes, gold-orange eyes, red feather hair crown, passionate and cheerful expression.",
+        "Bird yao traits, pale cyan short hair, teal ear plumes, aqua-blue eyes, fine feather hair clips, fresh and nimble air.",
+        "Bird yao traits, golden-brown curly hair, sparrow-feather earrings, amber eyes, pale gold markings at the eye corners, clever and quick-witted smile.",
+        "Bird yao traits, silver-gray long hair, crane-feather hair crown, pale gray-blue eyes, white feather earrings, elegant and serene expression.",
+        "Bird yao traits, violet-to-blue gradient hair, long slender colorful feather earrings, blue-violet eyes, colorful forehead feathers, dreamy and soft expression.",
+        "Bird yao traits, dark green tied-up hair, kingfisher-feather hair crown, jade-green eyes, fine emerald markings at the eye corners, dignified and proud expression.",
     ],
     "snake": [
-        "蛇族特征，墨绿长直发，金色竖瞳，细鳞耳饰，眼尾青绿色眼影，微笑危险优雅。",
-        "蛇族特征，银白束发，淡青竖瞳，额角细小鳞纹，透明玉冠，表情冷淡。",
-        "蛇族特征，紫黑卷发，暗金竖瞳，蛇形耳坠，唇色偏紫，神情慵懒神秘。",
-        "蛇族特征，青蓝长发，碧色竖瞳，脸侧细小青鳞，水滴形耳坠，表情清冷柔韧。",
-        "蛇族特征，黑茶低束发，琥珀竖瞳，浅褐鳞纹，铜蛇发扣，神情沉静机敏。",
-        "蛇族特征，浅紫短发，淡金竖瞳，眼尾紫色细纹，银蛇形发夹，笑容狡黠。",
-        "蛇族特征，苍白长发，冰青竖瞳，额间细鳞额饰，白玉蛇纹耳饰，气质幽冷。",
-        "蛇族特征，赤褐卷发，赤金竖瞳，脸颊红鳞小纹，红铜耳环，神情热烈危险。",
-        "蛇族特征，孔雀绿束发，翠金竖瞳，颈侧细鳞纹，翡翠蛇形发冠，表情华丽神秘。",
+        "Snake yao traits, dark green long straight hair, golden slit pupils, fine scale earrings, teal eyeshadow at the eye corners, dangerously elegant smile.",
+        "Snake yao traits, silver-white tied-up hair, pale cyan slit pupils, tiny scale patterns at the corners of the forehead, transparent jade crown, cold expression.",
+        "Snake yao traits, purple-black curly hair, dark gold slit pupils, snake-shaped earrings, purplish lips, languid and mysterious expression.",
+        "Snake yao traits, teal-blue long hair, jade-green slit pupils, tiny green scales on the side of the face, water-drop earrings, cool yet supple expression.",
+        "Snake yao traits, dark tea-brown low-tied hair, amber slit pupils, light brown scale patterns, copper snake hair clasp, calm and shrewd expression.",
+        "Snake yao traits, light purple short hair, pale gold slit pupils, fine purple lines at the eye corners, silver snake-shaped hair clip, sly smile.",
+        "Snake yao traits, pale long hair, icy cyan slit pupils, fine-scale forehead ornament, white jade snake-pattern earrings, eerie and cold air.",
+        "Snake yao traits, reddish-brown curly hair, red-gold slit pupils, small red scale markings on the cheeks, red copper earrings, fiery and dangerous expression.",
+        "Snake yao traits, peacock-green tied-up hair, emerald-gold slit pupils, fine scale patterns on the side of the neck, jade snake-shaped hair crown, gorgeous and mysterious expression.",
     ],
     "turtle": [
-        "龟族特征，深棕束发，温和圆眼，龟甲纹发簪，青玉耳坠，神情安稳柔和。",
-        "龟族特征，墨绿短发，浅绿色眼眸，龟甲纹额饰，厚重玉石发扣，表情沉静。",
-        "龟族特征，灰青长发，淡金眼眸，玄色龟甲形发冠，脸颊细小青纹，神情厚重安宁。",
-        "龟族特征，浅棕束发，温润黑眼，浅青龟甲发夹，圆玉耳坠，神情谦和沉稳。",
-        "龟族特征，青黑长直发，碧绿色眼眸，龟甲纹玉簪，厚实衣领，表情安静可靠。",
-        "龟族特征，米白短发，淡棕眼眸，白玉龟甲额饰，青绳发带，气质朴素温和。",
-        "龟族特征，暗金束发，金褐眼眸，玄金龟甲发冠，脸侧细小几何纹，神情端庄厚重。",
-        "龟族特征，松绿色长辫，湖绿色眼眸，青铜龟甲耳饰，玉石小发扣，表情慢热专注。",
-        "龟族特征，灰白高束发，淡青眼眸，墨玉龟甲发簪，厚重青纹衣领，气质古朴安宁。",
+        "Turtle yao traits, dark brown tied-up hair, gentle round eyes, tortoiseshell-pattern hairpin, green jade earrings, calm and soft expression.",
+        "Turtle yao traits, dark green short hair, light green eyes, tortoiseshell-pattern forehead ornament, heavy jade hair clasp, calm expression.",
+        "Turtle yao traits, gray-teal long hair, pale gold eyes, deep black tortoiseshell-shaped hair crown, small teal markings on the cheeks, steady and tranquil expression.",
+        "Turtle yao traits, light brown tied-up hair, warm dark eyes, pale teal tortoiseshell hair clip, round jade earrings, modest and steady expression.",
+        "Turtle yao traits, blue-black long straight hair, jade-green eyes, tortoiseshell-pattern jade hairpin, thick collar, quiet and dependable expression.",
+        "Turtle yao traits, off-white short hair, pale brown eyes, white jade tortoiseshell forehead ornament, teal cord hair band, simple and gentle air.",
+        "Turtle yao traits, dark gold tied-up hair, golden-brown eyes, black-gold tortoiseshell hair crown, small geometric patterns on the side of the face, dignified and steady expression.",
+        "Turtle yao traits, pine-green long braid, lake-green eyes, bronze tortoiseshell earrings, small jade hair clasp, slow-to-warm and focused expression.",
+        "Turtle yao traits, gray-white high-tied hair, pale cyan eyes, black jade tortoiseshell hairpin, heavy teal-patterned collar, archaic and tranquil air.",
     ],
 }
 
@@ -348,7 +348,7 @@ def yaoguai_avatar_prompt_records(
                             realm_name=realm_name,
                             appearance_prompt=affix,
                             realm_prompt=realm_prompt,
-                            prompt=prompt_base + affix + realm_prompt,
+                            prompt=f"{prompt_base} {affix} {realm_prompt}",
                         )
                     )
     return records

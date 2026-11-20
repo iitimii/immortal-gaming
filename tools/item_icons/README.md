@@ -1,17 +1,17 @@
 # Item Icon Generation
 
-这个目录用于批量生成物品图标，目标覆盖：
+This directory batch-generates item icons, covering:
 
-- `weapon`：兵器
-- `elixir`：丹药
-- `auxiliary`：辅助装备
-- `technique`：功法
-- `goldfinger`：外挂
-- `material`：其他材料
+- `weapon`: weapons
+- `elixir`: elixirs
+- `auxiliary`: auxiliary equipment
+- `technique`: techniques
+- `goldfinger`: goldfingers (innate talents)
+- `material`: other materials
 
 ## Secrets
 
-真实 key 放在 `tools/item_icons/.env`，该文件已由本目录 `.gitignore` 忽略。
+Put the real key in `tools/item_icons/.env`; that file is ignored by this directory's `.gitignore`.
 
 ```env
 ITEM_ICON_API_KEY=sk-user-...
@@ -20,7 +20,7 @@ ITEM_ICON_API_MODEL=gpt-image-2
 ITEM_ICON_API_SIZE=1024x1024
 ```
 
-也可以通过同名环境变量注入，避免落盘。
+You can also inject the same names as environment variables to avoid writing them to disk.
 
 ## Connectivity
 
@@ -29,7 +29,7 @@ $env:ITEM_ICON_API_KEY="sk-user-..."
 python -m tools.item_icons.ping_api
 ```
 
-成功后会写入 `tools/item_icons/connectivity.png` 和 `connectivity.json`。这些验证产物不会进 git。
+On success it writes `tools/item_icons/connectivity.png` and `connectivity.json`. These verification artifacts are not committed to git.
 
 ## Manifest
 
@@ -37,7 +37,7 @@ python -m tools.item_icons.ping_api
 python -m tools.item_icons.build_manifest
 ```
 
-脚本从 `static/game_configs/*.csv` 生成待打图清单，输出到 `manifest.generated.json`，该文件默认忽略。
+The script builds the list of items to draw from `static/game_configs/*.csv` and writes it to `manifest.generated.json`, which is ignored by default.
 
 ## Postprocess
 
@@ -47,10 +47,10 @@ python -m tools.item_icons.postprocess clean split/weapon_batch_001_01.png proce
 python -m tools.item_icons.postprocess pixelate processed/weapon_1001.alpha.png processed/weapon_1001.png
 ```
 
-后续正式流水线建议：
+Suggested production pipeline:
 
-1. 从 manifest 按 category 和视觉相似度分批，每批 9 或 16 个物品。
-2. 用 `prompts.build_contact_sheet_prompt()` 生成 3x3 或 4x4 大图。
-3. 切图、抠掉 `#ff00ff` 背景、像素化到统一尺寸。
-4. 人工或脚本检查空白率、透明角、尺寸和文件名。
-5. 发布到 `web/src/assets/icons/items/`，再生成前端映射文件。
+1. Batch the manifest by category and visual similarity, 9 or 16 items per batch.
+2. Use `prompts.build_contact_sheet_prompt()` to generate a 3x3 or 4x4 contact sheet.
+3. Split the sheet, remove the `#ff00ff` background and pixelate to a uniform size.
+4. Check blank ratio, transparent corners, size and filenames manually or with a script.
+5. Publish to `web/src/assets/icons/items/`, then generate the frontend mapping file.

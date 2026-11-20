@@ -26,22 +26,22 @@ def _hex_to_rgb(value: str) -> tuple[int, int, int]:
 
 
 PREVIEW_ITEMS = [
-    IconPromptItem("weapon_preview_sword", "weapon", "练气剑", "市井铁匠铺打造的铁剑，勉强能用。", "simple iron sword"),
-    IconPromptItem("elixir_preview_breakthrough", "elixir", "练气破境丹", "凝聚灵气，辅助突破瓶颈的丹药。", "round jade pill"),
-    IconPromptItem("auxiliary_preview_banner", "auxiliary", "万魂幡", "阴气森森的魂幡。", "dark soul banner"),
-    IconPromptItem("technique_preview_gold_body", "technique", "混元金身", "佛门护教神功，浑身坚若金石。", "golden scripture manual"),
-    IconPromptItem("goldfinger_preview_fortune", "goldfinger", "气运之子", "被天地眷顾，机缘主动靠近。", "lucky celestial token"),
-    IconPromptItem("fallback_weapon", "fallback", "兵器兜底", "通用武器图标。", "generic weapon"),
-    IconPromptItem("fallback_elixir", "fallback", "丹药兜底", "通用丹药图标。", "generic pill bottle"),
-    IconPromptItem("fallback_technique", "fallback", "功法兜底", "通用功法秘籍图标。", "generic cultivation book"),
-    IconPromptItem("fallback_unknown", "fallback", "未知物品兜底", "通用未知物品图标。", "mysterious item pouch"),
+    IconPromptItem("weapon_preview_sword", "weapon", "Qi Refinement Sword", "An iron sword forged by a local blacksmith, barely usable.", "simple iron sword"),
+    IconPromptItem("elixir_preview_breakthrough", "elixir", "Qi Refinement Breakthrough Pill", "A pill that condenses spiritual qi to help break through a bottleneck.", "round jade pill"),
+    IconPromptItem("auxiliary_preview_banner", "auxiliary", "Ten Thousand Souls Banner", "A soul banner seething with yin energy.", "dark soul banner"),
+    IconPromptItem("technique_preview_gold_body", "technique", "Primordial Golden Body", "A Buddhist guardian divine art that makes the whole body as hard as gold and stone.", "golden scripture manual"),
+    IconPromptItem("goldfinger_preview_fortune", "goldfinger", "Child of Fortune", "Favored by heaven and earth; opportunities come of their own accord.", "lucky celestial token"),
+    IconPromptItem("fallback_weapon", "fallback", "Fallback Weapon", "Generic weapon icon.", "generic weapon"),
+    IconPromptItem("fallback_elixir", "fallback", "Fallback Elixir", "Generic elixir icon.", "generic pill bottle"),
+    IconPromptItem("fallback_technique", "fallback", "Fallback Technique", "Generic cultivation manual icon.", "generic cultivation book"),
+    IconPromptItem("fallback_unknown", "fallback", "Fallback Unknown Item", "Generic unknown item icon.", "mysterious item pouch"),
 ]
 
 
 def _load_fal_config() -> FalImageConfig:
     api_key = os.environ.get("FAL_KEY") or os.environ.get("ITEM_ICON_FAL_KEY")
     if not api_key:
-        raise RuntimeError("请通过 FAL_KEY 或 ITEM_ICON_FAL_KEY 设置 fal API key")
+        raise RuntimeError("Set the fal API key via FAL_KEY or ITEM_ICON_FAL_KEY")
     return FalImageConfig(
         api_key=api_key,
         model=os.environ.get("ITEM_ICON_FAL_MODEL", "openai/gpt-image-2"),
