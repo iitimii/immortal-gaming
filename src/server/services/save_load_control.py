@@ -123,6 +123,7 @@ async def load_game_into_runtime(
 
     async def _do_load():
         runtime.clear_roleplay_session()
+        runtime.reset_simulation_speed()
         save_meta = get_save_info(target_path)
         if save_meta:
             save_lang = save_meta.get("language")

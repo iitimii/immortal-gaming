@@ -137,3 +137,57 @@ async def test_run_mutation_serializes_concurrent_operations():
         "second:start",
         "second:end",
     ]
+
+
+def test_simulation_speed_defaults_to_1x_and_accepts_allowed_values():
+    from src.server.runtime.speed import ALLOWED_SIMULATION_SPEEDS
+
+    runtime = GameSessionRuntime(dict(DEFAULT_GAME_STATE))
+
+    assert runtime.get_simulation_speed() == 1.0
+    assert runtime.get_allowed_simulation_speeds() == [0.5, 1.0, 2.0, 4.0]
+    for speed in ALLOWED_SIMULATION_SPEEDS:
+        assert runtime.set_simulation_speed(speed) == speed
+        assert runtime.get_simulation_speed() == speed
+
+    # Integer and numeric-string inputs normalize to the allowed float values.
+    assert runtime.set_simulation_speed(2) == 2.0
+    assert runtime.set_simulation_speed("0.5") == 0.5
+
+
+@pytest.mark.parametrize("bad_speed", [0, 3, -1, 8, "fast", None, True, float("nan")])
+def test_set_simulation_speed_rejects_unsupported_values(bad_speed):
+    from fastapi import HTTPException
+
+    runtime = GameSessionRuntime(dict(DEFAULT_GAME_STATE))
+    runtime.set_simulation_speed(2.0)
+
+    with pytest.raises(HTTPException) as exc_info:
+        runtime.set_simulation_speed(bad_speed)
+
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail["code"] == "INVALID_SIMULATION_SPEED"
+    assert exc_info.value.detail["details"]["allowed_speeds"] == [0.5, 1.0, 2.0, 4.0]
+    assert runtime.get_simulation_speed() == 2.0
+
+
+def test_simulation_speed_falls_back_to_default_for_missing_or_corrupt_state():
+    assert GameSessionRuntime({}).get_simulation_speed() == 1.0
+    assert GameSessionRuntime({"simulation_speed": 3.3}).get_simulation_speed() == 1.0
+
+
+def test_simulation_speed_resets_on_reset_and_pending_initialization():
+    state = dict(DEFAULT_GAME_STATE)
+    runtime = GameSessionRuntime(state)
+
+    runtime.set_simulation_speed(4.0)
+    runtime.reset_to_idle()
+    assert state["simulation_speed"] == 1.0
+
+    runtime.set_simulation_speed(0.5)
+    runtime.mark_pending_initialization(clear_world=True)
+    assert state["simulation_speed"] == 1.0
+
+    runtime.set_simulation_speed(2.0)
+    runtime.replace_with_defaults()
+    assert state["simulation_speed"] == 1.0

@@ -48,6 +48,8 @@ export interface InitialStateDTO {
   active_domains?: HiddenDomainInfo[];
   world_revision?: number;
   is_paused?: boolean;
+  speed?: number;
+  allowed_speeds?: number[];
 }
 
 export interface TickPayloadDTO {
@@ -468,7 +470,16 @@ export interface InitStatusDTO {
   llm_check_pending?: boolean;
   is_paused?: boolean;
   pause_reason?: string;
+  /** Simulation speed multiplier (runtime only, resets to 1 on start/reset/load). */
+  speed?: number;
+  allowed_speeds?: number[];
   roleplay?: RoleplaySessionDTO | null;
+}
+
+export interface SetSpeedResponseDTO {
+  status: 'ok';
+  speed: number;
+  allowed_speeds: number[];
 }
 
 export type RoleplayPromptRequestType = 'decision' | 'choice' | 'conversation';

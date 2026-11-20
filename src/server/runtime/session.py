@@ -7,6 +7,11 @@ from typing import Any, Awaitable, Callable
 
 from src.server.services.public_api_contract import raise_public_error
 from src.server.services.roleplay_state import create_roleplay_session_dict
+from src.server.runtime.speed import (
+    ALLOWED_SIMULATION_SPEEDS,
+    DEFAULT_SIMULATION_SPEED,
+    normalize_simulation_speed,
+)
 
 
 DEFAULT_GAME_STATE: dict[str, Any] = {
@@ -14,6 +19,7 @@ DEFAULT_GAME_STATE: dict[str, Any] = {
     "sim": None,
     "is_paused": True,
     "roleplay_auto_paused": False,
+    "simulation_speed": DEFAULT_SIMULATION_SPEED,
     "init_status": "idle",
     "init_phase": 0,
     "init_phase_name": "",
@@ -135,6 +141,7 @@ class GameSessionRuntime:
                 "run_config": run_config,
                 "is_paused": True,
                 "roleplay_auto_paused": False,
+                "simulation_speed": DEFAULT_SIMULATION_SPEED,
                 "init_status": "idle",
                 "init_phase": 0,
                 "init_phase_name": "",
@@ -166,6 +173,7 @@ class GameSessionRuntime:
             self._state["current_save_path"] = None
         self._state["is_paused"] = True
         self._state["roleplay_auto_paused"] = False
+        self.reset_simulation_speed()
         self._state["init_status"] = "pending"
         self._state["init_phase"] = 0
         self._state["init_phase_name"] = ""
@@ -194,6 +202,28 @@ class GameSessionRuntime:
 
     def set_paused(self, paused: bool) -> None:
         self._state["is_paused"] = bool(paused)
+
+    def get_simulation_speed(self) -> float:
+        speed = normalize_simulation_speed(self._state.get("simulation_speed", DEFAULT_SIMULATION_SPEED))
+        return DEFAULT_SIMULATION_SPEED if speed is None else speed
+
+    def get_allowed_simulation_speeds(self) -> list[float]:
+        return list(ALLOWED_SIMULATION_SPEEDS)
+
+    def set_simulation_speed(self, speed: Any) -> float:
+        normalized = normalize_simulation_speed(speed)
+        if normalized is None:
+            raise_public_error(
+                status_code=400,
+                code="INVALID_SIMULATION_SPEED",
+                message=f"Unsupported simulation speed: {speed}",
+                details={"allowed_speeds": self.get_allowed_simulation_speeds()},
+            )
+        self._state["simulation_speed"] = normalized
+        return normalized
+
+    def reset_simulation_speed(self) -> None:
+        self._state["simulation_speed"] = DEFAULT_SIMULATION_SPEED
 
     def set_roleplay_auto_paused(self, paused: bool) -> None:
         self._state["roleplay_auto_paused"] = bool(paused)
