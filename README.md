@@ -199,6 +199,19 @@ Additional notes:
 
 </details>
 
+<details>
+<summary><b>Headless Simulation Runner (Click to expand)</b></summary>
+
+For balancing and regression checks you can create a world and run the simulator without the web server or frontend. It reuses the normal game-start initialization and always runs in rule-based test mode, so no LLM is ever called.
+
+```bash
+python -m src.run.headless --months 120 --seed 42 --avatars 20 --json summary.json --save
+```
+
+Options: `--months N` (default 120), `--seed S` (same seed and options give the same summary), `--map <preset id>`, `--avatars N`, `--sects N`, `--json PATH` (`-` for stdout), `--save` (saves through the normal save path under `CWS_DATA_DIR`), `--quiet`, `--verbose`. The summary reports the final date, living/dead counts, births and awakenings, the realm distribution, top sects, event counts, the most active avatars, and average/p95 step time. The exit code is non-zero on bad arguments (2) or a simulator failure (1).
+
+</details>
+
 ### 💭 Why make this?
 The world in cultivation web novels is wonderful, but readers can only ever observe a corner of it.
 
