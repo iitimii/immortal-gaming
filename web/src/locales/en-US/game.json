@@ -171,7 +171,19 @@
     "export_scope_avatar": "Only {avatar}",
     "export_scope_major": "Major events only",
     "export_download": "Download",
-    "export_failed": "Export failed: {error}"
+    "export_failed": "Export failed: {error}",
+    "filter_watched": "Watched",
+    "filter_watched_title": "Show only events involving watched cultivators",
+    "filter_watched_disabled": "Watch a cultivator to use this filter",
+    "empty_watched": "No events for watched cultivators"
+  },
+  "watchlist": {
+    "title": "Watchlist",
+    "empty": "Star a cultivator in their detail panel to follow them here.",
+    "unwatch": "Unwatch {name}",
+    "deceased": "Deceased",
+    "expand": "Show watchlist",
+    "collapse": "Hide watchlist"
   },
   "roleplay": {
     "panel": {
@@ -569,7 +581,9 @@
         "placeholder": "Enter objective...",
         "set_failed": "Failed to set",
         "clear_confirm": "Are you sure you want to clear the long-term objective?"
-      }
+      },
+      "watch": "Watch",
+      "unwatch": "Unwatch"
     },
     "region": {
       "view_sect": "View Sect Details",

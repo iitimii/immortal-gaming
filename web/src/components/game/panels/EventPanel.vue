@@ -4,6 +4,7 @@ import EventStreamList from '@/components/game/EventStreamList.vue'
 import EventExportMenu from '@/components/game/panels/EventExportMenu.vue'
 import { useI18n } from 'vue-i18n'
 import { useEventPanel } from '@/composables/useEventPanel'
+import starIcon from '@/assets/icons/ui/lucide/star.svg'
 
 const { t } = useI18n()
 const {
@@ -11,6 +12,10 @@ const {
   filterValue1,
   filterSectValue,
   filterMajorScope,
+  filterWatchedOnly,
+  canFilterWatched,
+  watchedFilterTitle,
+  toggleWatchedOnly,
   eventListRef,
   roleplayLockedAvatarName,
   filterOptions,
@@ -37,6 +42,19 @@ const {
         <span v-if="roleplayLockedAvatarName" class="roleplay-event-lock">
           {{ t('game.event_panel.roleplay_locked', { avatar: roleplayLockedAvatarName }) }}
         </span>
+        <button
+          class="watched-filter"
+          :class="{ 'is-active': filterWatchedOnly }"
+          type="button"
+          data-testid="watched-filter"
+          :disabled="!filterWatchedOnly && !canFilterWatched"
+          :aria-pressed="filterWatchedOnly ? 'true' : 'false'"
+          :title="watchedFilterTitle"
+          @click="toggleWatchedOnly"
+        >
+          <span class="watched-filter-icon" :style="{ '--icon-url': `url(${starIcon})` }" aria-hidden="true"></span>
+          {{ t('game.event_panel.filter_watched') }}
+        </button>
         <n-select
           v-model:value="filterSectValue"
           :options="sectFilterOptions"
@@ -129,6 +147,53 @@ const {
 
 .event-filter {
   width: 120px;
+}
+
+.watched-filter {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: transparent;
+  color: #aaa;
+  font-size: 11px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.watched-filter:hover:not(:disabled) {
+  color: #ddd;
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.watched-filter.is-active {
+  color: #f2c94c;
+  border-color: rgba(242, 201, 76, 0.45);
+  background: rgba(242, 201, 76, 0.1);
+}
+
+.watched-filter:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.watched-filter-icon {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  background-color: currentColor;
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 .event-list {

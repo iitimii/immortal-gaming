@@ -701,6 +701,21 @@ class TestEventManagerPagination:
         assert len(events) == 1
         assert events[0].content == "A1+A2"
 
+    def test_get_events_paginated_with_any_of_filter(self, event_manager):
+        """Any-of avatar filter returns events touching at least one avatar, once each."""
+        event_manager.add_event(make_event(100, 1, "A1 only", ["a1"]))
+        event_manager.add_event(make_event(100, 2, "A1+A2", ["a1", "a2"]))
+        event_manager.add_event(make_event(100, 3, "A3 only", ["a3"]))
+        event_manager.add_event(make_event(100, 4, "A2 only", ["a2"]))
+
+        events, cursor, has_more = event_manager.get_events_paginated(any_avatar_ids=["a1", "a2"], limit=2)
+        assert [e.content for e in events] == ["A2 only", "A1+A2"]
+        assert has_more is True
+
+        older, _, has_more = event_manager.get_events_paginated(any_avatar_ids=["a1", "a2"], cursor=cursor, limit=2)
+        assert [e.content for e in older] == ["A1 only"]
+        assert has_more is False
+
     def test_get_events_paginated_no_more(self, event_manager):
         """Test pagination when there are no more events."""
         event_manager.add_event(make_event(100, 1, "Event 1"))
@@ -715,6 +730,17 @@ class TestEventManagerPagination:
 
 class TestEventManagerMemoryMode:
     """EventManager tests in memory fallback mode."""
+
+    def test_any_of_filter_in_memory(self, memory_event_manager):
+        """Memory mode applies the same any-of avatar semantics as SQLite."""
+        memory_event_manager.add_event(make_event(100, 1, "A1 only", ["a1"]))
+        memory_event_manager.add_event(make_event(100, 2, "A1+A2", ["a1", "a2"]))
+        memory_event_manager.add_event(make_event(100, 3, "A3 only", ["a3"]))
+
+        events, _, has_more = memory_event_manager.get_events_paginated(any_avatar_ids=["a2", "a1"])
+
+        assert [e.content for e in events] == ["A1+A2", "A1 only"]
+        assert has_more is False
 
     def test_add_and_get_events(self, memory_event_manager):
         """Test basic operations in memory mode."""

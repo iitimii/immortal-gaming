@@ -6,7 +6,7 @@ Provides a facade for writing and querying events, backed preferably by SQLite s
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Callable, List, Optional, TYPE_CHECKING
+from typing import Callable, List, Optional, Sequence, TYPE_CHECKING
 from src.classes.event_query import EventAudience, EventMemoryScope, EventPage, EventQuery, matches_memory_scope
 
 if TYPE_CHECKING:
@@ -195,8 +195,12 @@ class EventManager:
             related = {str(item) for item in (event.related_avatars or [])}
             if query.audience is EventAudience.OBSERVED:
                 matched = self._is_observed_by(event, query.avatar_ids[0])
-            else:
+            elif query.avatar_ids:
                 matched = all(avatar_id in related for avatar_id in query.avatar_ids)
+            elif query.any_avatar_ids:
+                matched = any(avatar_id in related for avatar_id in query.any_avatar_ids)
+            else:
+                matched = True
             if not matched or not matches_memory_scope(event, query.memory_scope):
                 continue
             if query.sect_id is not None and query.sect_id not in (getattr(event, "related_sects", None) or []):
@@ -222,6 +226,7 @@ class EventManager:
         major_scope: Optional[str] = None,
         cursor: Optional[str] = None,
         limit: int = 100,
+        any_avatar_ids: Optional[Sequence[str]] = None,
     ) -> tuple[List["Event"], Optional[str], bool]:
         """
         Query events with pagination.
@@ -229,6 +234,7 @@ class EventManager:
         Args:
             avatar_id: filter by a single avatar.
             avatar_id_pair: pair query (events between two avatars).
+            any_avatar_ids: events related to at least one of these avatars.
             sect_id: filter by a single sect.
             cursor: pagination cursor; fetch events before this position.
             limit: page size.
@@ -242,6 +248,7 @@ class EventManager:
         avatar_ids = avatar_id_pair or ((avatar_id,) if avatar_id else ())
         page = self.query_page(EventQuery(
             avatar_ids=tuple(str(item) for item in avatar_ids),
+            any_avatar_ids=tuple(dict.fromkeys(str(item) for item in (any_avatar_ids or ()))),
             sect_id=sect_id,
             memory_scope=EventMemoryScope(major_scope) if major_scope in {"major", "minor"} else EventMemoryScope.ALL,
             cursor=cursor,

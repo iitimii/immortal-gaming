@@ -429,6 +429,7 @@ class EventStorage:
         major_scope: Optional[str] = None,
         cursor: Optional[str] = None,
         limit: int = 100,
+        any_avatar_ids: tuple[str, ...] = (),
     ) -> EventPage["Event"]:
         """
         Query events with pagination.
@@ -436,6 +437,7 @@ class EventStorage:
         Args:
             avatar_id: filter by a single avatar.
             avatar_id_pair: pair query (events between two avatars).
+            any_avatar_ids: events related to at least one of these avatars.
             sect_id: filter by a single sect.
             cursor: pagination cursor; fetch events before this position.
             limit: page size.
@@ -473,6 +475,17 @@ class EventStorage:
                         JOIN event_avatars ea ON e.id = ea.event_id AND ea.avatar_id = ?
                     """
                     params.append(avatar_id)
+                elif any_avatar_ids:
+                    # Any-of query: events related to at least one avatar.
+                    placeholders = ", ".join("?" for _ in any_avatar_ids)
+                    base_query = f"""
+                        SELECT DISTINCT
+                            e.rowid, e.id, e.month_stamp, e.content, e.is_major, e.is_story,
+                            e.event_type, e.render_key, e.render_params, e.subject_snapshots, e.created_at
+                        FROM events e
+                        JOIN event_avatars ea ON e.id = ea.event_id AND ea.avatar_id IN ({placeholders})
+                    """
+                    params.extend(any_avatar_ids)
                 elif sect_id is not None:
                     # Sect query.
                     base_query = """
@@ -566,6 +579,7 @@ class EventStorage:
                 major_scope=None if query.memory_scope is EventMemoryScope.ALL else query.memory_scope.value,
                 cursor=query.cursor,
                 limit=query.limit,
+                any_avatar_ids=query.any_avatar_ids,
             )
 
         if len(query.avatar_ids) != 1:

@@ -156,6 +156,51 @@ class TestGetEventsAPI:
         assert len(data["events"]) == 1
         assert data["events"][0]["content"] == "Event between"
 
+    def test_get_events_by_any_of_avatar_ids(self, client_with_world):
+        response = client_with_world.get("/api/v1/query/events?avatar_ids=a2,missing")
+
+        assert response.status_code == 200
+        data = response.json()["data"]
+
+        contents = {event["content"] for event in data["events"]}
+        assert contents == {"Event 2", "Event between"}
+
+    def test_get_events_by_any_of_avatar_ids_dedupes_shared_events(self, client_with_world):
+        response = client_with_world.get("/api/v1/query/events?avatar_ids=a1,a2")
+
+        assert response.status_code == 200
+        data = response.json()["data"]
+
+        ids = [event["id"] for event in data["events"]]
+        assert len(ids) == 5
+        assert len(set(ids)) == 5
+
+    def test_get_events_by_any_of_avatar_ids_paginates(self, client_with_world):
+        first = client_with_world.get("/api/v1/query/events?avatar_ids=a1,a2&limit=3").json()["data"]
+        assert len(first["events"]) == 3
+        assert first["has_more"] is True
+
+        second = client_with_world.get(
+            f"/api/v1/query/events?avatar_ids=a1,a2&limit=3&cursor={first['next_cursor']}"
+        ).json()["data"]
+        assert len(second["events"]) == 2
+        assert second["has_more"] is False
+        assert {e["id"] for e in first["events"]}.isdisjoint({e["id"] for e in second["events"]})
+
+    def test_get_events_by_any_of_avatar_ids_with_major_scope(self, client_with_world):
+        response = client_with_world.get("/api/v1/query/events?avatar_ids=a1,a2&major_scope=major")
+
+        assert response.status_code == 200
+        contents = [event["content"] for event in response.json()["data"]["events"]]
+        assert contents == ["Major event"]
+
+    def test_get_events_rejects_too_many_avatar_ids(self, client_with_world):
+        ids = ",".join(f"id{i}" for i in range(201))
+        response = client_with_world.get(f"/api/v1/query/events?avatar_ids={ids}")
+
+        assert response.status_code == 400
+        assert response.json()["detail"]["code"] == "TOO_MANY_AVATAR_IDS"
+
     def test_get_events_by_major_scope_major(self, client_with_world):
         response = client_with_world.get("/api/v1/query/events?avatar_id=a1&major_scope=major")
 

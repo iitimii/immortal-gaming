@@ -52,6 +52,8 @@ export const useWorldStore = defineStore('world', () => {
   const activeDomains = shallowRef<HiddenDomainInfo[]>([]);
   const lastWorldRevision = ref(0);
   const avatarDirectoryRevision = ref(0);
+  // Stable run id from the backend ('' when unknown); scopes per-run local preferences.
+  const playthroughId = ref('');
   
   // Is world loaded (map + initial state)
   const isLoaded = ref(false);
@@ -92,6 +94,7 @@ export const useWorldStore = defineStore('world', () => {
     setTime(stateRes.year, stateRes.month);
     startYear.value = stateRes.year;
     startMonth.value = stateRes.month;
+    playthroughId.value = stateRes.playthroughId || '';
     avatarStore.setAvatarsFromState(stateRes);
 
     currentPhenomenon.value = stateRes.phenomenon;
@@ -164,6 +167,7 @@ export const useWorldStore = defineStore('world', () => {
     activeDomains.value = [];
     lastWorldRevision.value = 0;
     avatarDirectoryRevision.value = 0;
+    playthroughId.value = '';
     isLoaded.value = false;
     
     avatarStore.reset();
@@ -239,6 +243,7 @@ export const useWorldStore = defineStore('world', () => {
     activeDomains,
     lastWorldRevision,
     avatarDirectoryRevision,
+    playthroughId,
     isLoaded,
 
     // Actions

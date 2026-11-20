@@ -585,6 +585,24 @@ describe('useWorldStore', () => {
       expect(store.isLoaded).toBe(true)
     })
 
+    it('exposes the run id and marks the avatar list complete on each snapshot', async () => {
+      vi.mocked(worldApi.fetchInitialState).mockResolvedValue({
+        year: 150,
+        month: 8,
+        avatars: [createMockAvatar({ id: 'a1' })],
+        playthroughId: 'run-1',
+      })
+      const before = avatarStore.snapshotRevision
+
+      await store.fetchState()
+
+      expect(store.playthroughId).toBe('run-1')
+      expect(avatarStore.snapshotRevision).toBe(before + 1)
+
+      store.reset()
+      expect(store.playthroughId).toBe('')
+    })
+
     it('should preserve existing events when refreshing a snapshot', async () => {
       eventStore.events = [createMockEvent({ id: 'e1' })]
       vi.mocked(worldApi.fetchInitialState).mockResolvedValue({

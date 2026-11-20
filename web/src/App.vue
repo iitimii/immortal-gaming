@@ -15,6 +15,7 @@ import StepOnceButton from './components/game/StepOnceButton.vue'
 import InfoPanelContainer from './components/game/panels/info/InfoPanelContainer.vue'
 import StatusBar from './components/layout/StatusBar.vue'
 import EventPanel from './components/game/panels/EventPanel.vue'
+import WatchlistPanel from './components/game/panels/WatchlistPanel.vue'
 import SystemMenu from './components/SystemMenu.vue'
 import LoadingOverlay from './components/LoadingOverlay.vue'
 import KeyboardShortcutsOverlay from './components/KeyboardShortcutsOverlay.vue'
@@ -306,6 +307,7 @@ watch(sidebarWidth, width => {
               @mousedown="onResizerMouseDown"
             ></div>
             <aside class="sidebar" :style="{ width: sidebarWidth + 'px' }">
+              <WatchlistPanel />
               <EventPanel />
             </aside>
           </div>
