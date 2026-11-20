@@ -53,6 +53,7 @@ from .inflict_gu import InflictGu
 from .set_formation import SetFormation
 from .dig_grave import DigGrave
 from .take_treasure import TakeTreasure
+from .wander import Wander
 
 # Register with ActionRegistry (marking whether each is an actually executable action)
 register_action(actual=False)(Action)
@@ -105,6 +106,7 @@ register_action(actual=True)(InflictGu)
 register_action(actual=True)(SetFormation)
 register_action(actual=True)(DigGrave)
 register_action(actual=True)(TakeTreasure)
+register_action(actual=True)(Wander)
 # Talk has moved to the mutual_action module and is registered there
 
 __all__ = [
@@ -160,4 +162,5 @@ __all__ = [
     "SetFormation",
     "DigGrave",
     "TakeTreasure",
+    "Wander",
 ]
