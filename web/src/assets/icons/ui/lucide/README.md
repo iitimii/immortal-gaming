@@ -70,3 +70,4 @@ Suggested mapping:
 - `scale.svg`: rules, governance, or balance
 - `flag.svg`: sect, faction, or force marker
 - `chart-bar.svg`: world statistics
+- `milestone.svg`: world chronicle of firsts

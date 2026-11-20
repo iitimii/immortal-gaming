@@ -35,6 +35,7 @@ def create_public_query_router(
     build_world_secret_meta: Callable[[], dict] | None = None,
     build_world_secret_overview: Callable[[], dict] | None = None,
     build_world_statistics: Callable[[], dict] | None = None,
+    build_world_milestones: Callable[[], dict] | None = None,
 ) -> APIRouter:
     router = APIRouter()
 
@@ -218,5 +219,10 @@ def create_public_query_router(
         if query_service is not None:
             return ok_response(query_service.get_world_statistics())
         return ok_response(build_world_statistics())
+    @router.get("/api/v1/query/world/milestones")
+    def get_world_milestones_v1():
+        if query_service is not None:
+            return ok_response(query_service.get_world_milestones())
+        return ok_response(build_world_milestones())
 
     return router

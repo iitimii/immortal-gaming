@@ -22,6 +22,7 @@ class SectRuntimeLoadSection:
         load_opportunities(world, world_data.get("opportunities"))
         world.deceased_manager.load_from_list(world_data.get("deceased_records", []))
         world.poi_manager.load_from_list(world_data.get("pois", []))
+        world.milestones.load_from_dict(world_data.get("milestones"))
 
         for sect in sects_by_id.values():
             sect.magic_stone = 0

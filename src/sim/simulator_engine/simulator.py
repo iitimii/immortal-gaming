@@ -43,6 +43,7 @@ class Simulator:
         17. Process interactions from events (second round, including newly generated events)
         18. Computed relations update (e.g. second-order relations)
         19. Every January: yearly world maintenance
-        20. Finalize events, persist them, write logs, and advance the month
+        20. World milestone ("Chronicle of Firsts") detection
+        21. Finalize events, persist them, write logs, and advance the month
         """
         return await SimulationPhaseRunner(self).run()

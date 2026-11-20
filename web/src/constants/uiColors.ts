@@ -10,6 +10,7 @@ export const STATUS_BAR_COLORS = {
   hiddenDomain: '#b78a52',
   worldSecret: '#ba8ad4',
   worldStatistics: '#5fb8c2',
+  chronicle: '#5fb7b0',
 } as const
 
 export const PHENOMENON_RARITY_COLORS: Record<string, string> = {
@@ -115,5 +116,13 @@ export const SYSTEM_PANEL_THEMES = {
     title: '#bfe6ea',
     empty: '#7f9699',
     border: '#27403f',
+  },
+  chronicle: {
+    accent: STATUS_BAR_COLORS.chronicle,
+    accentStrong: '#9ad8d2',
+    accentSoft: 'rgba(95, 183, 176, 0.14)',
+    title: '#bfe6e2',
+    empty: '#7f9896',
+    border: '#2b4442',
   },
 } as const

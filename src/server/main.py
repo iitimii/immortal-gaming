@@ -61,6 +61,7 @@ from src.server.services.game_queries import (
     get_world_secret_meta as get_world_secret_meta_query,
     get_world_secret_overview as get_world_secret_overview_query,
     get_world_statistics as get_world_statistics_query,
+    get_world_milestones as get_world_milestones_query,
     get_world_map,
     get_world_state,
 )
@@ -312,6 +313,7 @@ query_dependencies = GameQueryDependencies(
     get_world_secret_meta_query=get_world_secret_meta_query,
     get_world_secret_overview_query=get_world_secret_overview_query,
     get_world_statistics_query=get_world_statistics_query,
+    get_world_milestones_query=get_world_milestones_query,
 )
 settings_service = SettingsServiceProxy(get_settings_service)
 
