@@ -7,9 +7,9 @@ from src.i18n import t
 @dataclass
 class Orthodoxy:
     """
-    道统 (Orthodoxy)
+    Orthodoxy
     
-    代表修炼的根本理念与方式：道、佛、儒等。
+    Represents the fundamental philosophy and method of cultivation: Dao, Buddhism, Confucianism, etc.
     """
     id: str
     name: str
@@ -19,7 +19,7 @@ class Orthodoxy:
 
     def get_info(self, detailed: bool = False) -> Dict[str, Any]:
         """
-        获取道统信息
+        Get orthodoxy info.
         """
         from src.i18n import t
         info = {
@@ -33,7 +33,7 @@ class Orthodoxy:
         return info
 
 def _load_orthodoxy_data() -> Dict[str, Orthodoxy]:
-    """从配表加载 orthodoxy 数据"""
+    """Load orthodoxy data from the config table."""
     data = {}
     raw_data = game_configs.get("orthodoxy", [])
     
@@ -45,7 +45,7 @@ def _load_orthodoxy_data() -> Dict[str, Orthodoxy]:
         name = get_str(row, "name_id")
         desc = get_str(row, "desc_id")
         
-        # 解析 effects
+        # Parse effects
         effects_str = get_str(row, "effects")
         effects = load_effect_from_str(effects_str)
         effect_desc = format_effects_to_text(effects)
@@ -61,16 +61,16 @@ def _load_orthodoxy_data() -> Dict[str, Orthodoxy]:
         
     return data
 
-# 全局容器
+# Global containers
 orthodoxy_by_id: Dict[str, Orthodoxy] = {}
 
 def reload():
-    """重新加载数据"""
+    """Reload data."""
     new_data = _load_orthodoxy_data()
     orthodoxy_by_id.clear()
     orthodoxy_by_id.update(new_data)
 
-# 初始化
+# Initialization
 reload()
 
 def get_orthodoxy(oid: str) -> Optional[Orthodoxy]:

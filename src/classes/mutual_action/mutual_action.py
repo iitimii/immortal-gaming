@@ -41,22 +41,22 @@ class _MutualActionResponseScenario:
 
 class MutualAction(DefineAction, LLMAction, ActualActionMixin, TargetingMixin):
     """
-    互动动作：A 对 B 发起动作，B 可以给出响应（由 LLM 决策）。
-    子类需要定义：
-      - ACTION_NAME_ID: 当前动作名的 msgid
-      - DESC_ID: 动作语义说明的 msgid
-      - REQUIREMENTS_ID: 可执行条件的 msgid
-      - RESPONSE_ACTIONS: 响应可选的 action name 列表（直接可执行）
-      - PARAMS: 参数，需要包含 target_avatar
+    Mutual action: A initiates an action toward B, and B can respond (decided by the LLM).
+    Subclasses must define:
+      - ACTION_NAME_ID: msgid of the action name
+      - DESC_ID: msgid of the action's semantic description
+      - REQUIREMENTS_ID: msgid of the executable conditions
+      - RESPONSE_ACTIONS: list of action names available as responses (directly executable)
+      - PARAMS: params, must include target_avatar
     """
     
-    # 多语言 ID（子类覆盖）
+    # i18n IDs (overridden by subclasses)
     ACTION_NAME_ID: str = "mutual_action_name"
     DESC_ID: str = ""
     REQUIREMENTS_ID: str = "mutual_action_requirements"
     STORY_PROMPT_ID: str = ""
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI: str = "💬"
     PARAMS: dict = {"target_avatar": "Avatar"}
     PARAM_OPTION_SOURCES: dict[str, ParamOptionSource] = {
@@ -66,7 +66,7 @@ class MutualAction(DefineAction, LLMAction, ActualActionMixin, TargetingMixin):
     RESPONSE_EVENT_STYLE: str = "reply"
     SHOW_RESPONSE_EVENT: bool = False
     
-    # 响应动作 -> msgid 的映射（子类可覆盖）
+    # Response action -> msgid mapping (subclasses may override)
     RESPONSE_LABEL_IDS: dict[str, str] = {
         "Accept": "feedback_accept",
         "Reject": "feedback_reject",
@@ -78,28 +78,28 @@ class MutualAction(DefineAction, LLMAction, ActualActionMixin, TargetingMixin):
     
     @classmethod
     def get_action_name(cls) -> str:
-        """获取动作名称的翻译"""
+        """Get the translated action name."""
         if cls.ACTION_NAME_ID:
             return t(cls.ACTION_NAME_ID)
         return cls.__name__
     
     @classmethod
     def get_desc(cls) -> str:
-        """获取动作描述的翻译"""
+        """Get the translated action description."""
         if cls.DESC_ID:
             return t(cls.DESC_ID)
         return ""
     
     @classmethod
     def get_requirements(cls) -> str:
-        """获取可执行条件的翻译"""
+        """Get the translated executable conditions."""
         if cls.REQUIREMENTS_ID:
             return t(cls.REQUIREMENTS_ID)
         return ""
     
     @classmethod
     def get_response_label(cls, response_name: str) -> str:
-        """获取响应标签的翻译"""
+        """Get the translated response label."""
         msgid = cls.RESPONSE_LABEL_IDS.get(response_name, "")
         if msgid:
             return t(msgid)
@@ -107,17 +107,17 @@ class MutualAction(DefineAction, LLMAction, ActualActionMixin, TargetingMixin):
     
     @classmethod
     def get_story_prompt(cls) -> str:
-        """获取故事提示词的翻译"""
+        """Get the translated story prompt."""
         if cls.STORY_PROMPT_ID:
             return t(cls.STORY_PROMPT_ID)
         return ""
 
     def __init__(self, avatar: "Avatar", world: "World"):
         super().__init__(avatar, world)
-        # 异步响应任务句柄与缓存结果
+        # Async response task handle and cached result
         self._response_task: asyncio.Task | None = None
         self._response_cached: dict | None = None
-        # 记录动作开始时间，用于生成事件的时间戳
+        # Record the action start time, used as the timestamp of generated events
         self._start_month_stamp: int | None = None
 
     def _get_template_path(self) -> Path:
@@ -133,7 +133,7 @@ class MutualAction(DefineAction, LLMAction, ActualActionMixin, TargetingMixin):
         avatar_name_1 = self.avatar.name
         avatar_name_2 = target_avatar.name
         
-        # avatar1 使用 expanded_info（包含非详细信息和共同事件），避免重复
+        # avatar1 uses expanded_info (non-detailed info plus shared events) to avoid duplication
         expanded_info = self.avatar.get_expanded_info(other_avatar=target_avatar, detailed=False)
         
         avatar_infos = {
@@ -144,8 +144,8 @@ class MutualAction(DefineAction, LLMAction, ActualActionMixin, TargetingMixin):
         world_info = self.world.static_info
 
         response_actions = self.RESPONSE_ACTIONS
-        desc = self.get_desc()  # 使用 classmethod 获取翻译
-        action_name = self.get_action_name()  # 使用 classmethod 获取翻译
+        desc = self.get_desc()  # Get the translation via classmethod
+        action_name = self.get_action_name()  # Get the translation via classmethod
         return {
             "world_info": world_info,
             "avatar_infos": avatar_infos,
@@ -154,12 +154,12 @@ class MutualAction(DefineAction, LLMAction, ActualActionMixin, TargetingMixin):
             "action_name": action_name,
             "action_info": desc,
             "response_actions": response_actions,
-            # 保留模板兼容字段，避免修改 prompt 渲染链路时出现双端不一致
+            # Keep the template compatibility field to avoid inconsistencies when changing the prompt rendering chain
             "feedback_actions": response_actions,
         }
 
     async def _call_llm_response(self, infos: dict) -> dict:
-        """异步调用 LLM 获取响应"""
+        """Asynchronously call the LLM for a response."""
         template_path = self._get_template_path()
         return await call_llm_with_task_name("interaction_feedback", template_path, infos)
 
@@ -230,9 +230,9 @@ class MutualAction(DefineAction, LLMAction, ActualActionMixin, TargetingMixin):
         push_start_event: bool = True,
     ) -> None:
         """
-        将响应决定落地为目标角色的立即动作（清空后加载单步动作链）。
+        Apply the response decision as the target's immediate action (clear, then load a single-step action chain).
         """
-        # 若当前已是同类同参动作，直接跳过，避免重复“发起战斗”等事件刷屏
+        # If the current action is already the same class with the same params, skip it, to avoid spamming events like "starts a battle"
         try:
             cur = target_avatar.current_action
             if cur is not None:
@@ -242,24 +242,24 @@ class MutualAction(DefineAction, LLMAction, ActualActionMixin, TargetingMixin):
                         return
         except Exception:
             pass
-        # 抢占：清空后续计划并中断其当前动作
+        # Preempt: clear subsequent plans and interrupt the current action
         self.preempt_avatar(target_avatar)
-        # 先加载为计划
+        # Load it as a plan first
         target_avatar.load_decide_result_chain([(action_name, action_params)], target_avatar.thinking, "")
-        # 立即提交为当前动作，触发开始事件
+        # Commit immediately as the current action, triggering the start event
         start_event = target_avatar.commit_next_plan()
         if push_start_event and start_event is not None and start_event != NULL_EVENT:
-            # 侧边栏仅推送一次（由动作发起方承担），另一侧仅写历史
+            # The sidebar is pushed only once (by the initiator); the other side only writes history
             EventHelper.push_pair(start_event, initiator=self.avatar, target=target_avatar, to_sidebar_once=True)
 
     def _settle_response(self, target_avatar: "Avatar", response_name: str) -> None:
         """
-        子类实现：把响应映射为具体动作
+        Implemented by subclasses: map the response to a concrete action
         """
         pass
 
     def _apply_response(self, target_avatar: "Avatar", response_name: str) -> None:
-        # 默认不额外记录，由事件系统承担
+        # No extra recording by default; handled by the event system
         return
 
     def _handle_response_result(self, target_avatar: "Avatar", result: dict) -> ActionResult:
@@ -300,18 +300,18 @@ class MutualAction(DefineAction, LLMAction, ActualActionMixin, TargetingMixin):
         return target_avatar
     
     async def _execute(self, target_avatar: "Avatar|str") -> None:
-        """异步执行互动动作 (deprecated, use step instead)"""
-        # 仅为兼容 DefineAction 接口，实际逻辑在 step 中
+        """Run the mutual action asynchronously (deprecated, use step instead)."""
+        # Only for compatibility with the DefineAction interface; the actual logic is in step
         pass
 
-    # 实现 ActualActionMixin 接口
+    # Implement the ActualActionMixin interface
     def can_start(self, target_avatar: "Avatar|str") -> tuple[bool, str]:
         """
-        检查互动动作能否启动：目标需在发起者的交互范围内。
-        子类通过实现 _can_start 来添加额外检查。
+        Check whether the mutual action can start: the target must be within the initiator's interaction range.
+        Subclasses add extra checks by implementing _can_start.
 
-        注意：此方法未使用 TargetingMixin.validate_target_avatar()，
-        因为需要额外检查 target == self.avatar 和调用子类的 _can_start()。
+        Note: this method doesn't use TargetingMixin.validate_target_avatar(),
+        because it additionally checks target == self.avatar and calls the subclass's _can_start().
         """
         target = self._get_target_avatar(target_avatar)
         if target is None:
@@ -320,33 +320,33 @@ class MutualAction(DefineAction, LLMAction, ActualActionMixin, TargetingMixin):
             return False, t("Cannot initiate interaction with self")
         if self._is_dead_avatar(target):
             return False, t("Target is already dead")
-        # 调用子类的额外检查
+        # Call the subclass's extra checks
         return self._can_start(target)
 
     def _can_start(self, target: "Avatar") -> tuple[bool, str]:
         """
-        子类实现此方法来添加特定的启动条件检查。
-        参数 target 已经过基类验证（存在且在交互范围内）。
-        默认返回 True。
+        Implemented by subclasses to add specific start condition checks.
+        The target param has already been validated by the base class (exists and within interaction range).
+        Returns True by default.
         """
         return True, ""
 
     def start(self, target_avatar: "Avatar|str") -> Event:
         """
-        启动互动动作，返回开始事件
+        Start the mutual action and return the start event
         """
         target = self._get_target_avatar(target_avatar)
         if self._is_dead_avatar(target):
             return NULL_EVENT
 
-        # 记录开始时间
+        # Record the start time
         self._start_month_stamp = self.world.month_stamp
         target_name = target.name if target is not None else str(target_avatar)
         action_name = self.get_action_name()
         rel_ids = [self.avatar.id]
         if target is not None:
             rel_ids.append(target.id)
-        # 根据IS_MAJOR类变量设置事件类型
+        # Set the event type from the IS_MAJOR class variable
         is_major = self.__class__.IS_MAJOR if hasattr(self.__class__, 'IS_MAJOR') else False
         
         content = t("{initiator} initiates {action} with {target}",
@@ -357,13 +357,13 @@ class MutualAction(DefineAction, LLMAction, ActualActionMixin, TargetingMixin):
 
     def step(self, target_avatar: "Avatar|str") -> ActionResult:
         """
-        异步化：首帧发起LLM任务并返回RUNNING；任务完成后在后续帧落地响应并完成。
+        Async: the first frame launches the LLM task and returns RUNNING; once the task completes, later frames apply the response and finish.
         """
         target = self._get_target_avatar(target_avatar)
         if target is None or self._is_dead_avatar(target):
             return ActionResult(status=ActionStatus.FAILED, events=[])
 
-        # 若无任务，创建异步任务
+        # If there is no task, create an async task
         if self._response_task is None and self._response_cached is None:
             loop = asyncio.get_running_loop()
             # Some unit tests patch get_running_loop() with a bare MagicMock just to
@@ -374,7 +374,7 @@ class MutualAction(DefineAction, LLMAction, ActualActionMixin, TargetingMixin):
             else:
                 return ActionResult(status=ActionStatus.RUNNING, events=[])
 
-        # 若任务已完成，消费结果
+        # If the task is done, consume the result
         if self._response_task is not None and self._response_task.done():
             self._response_cached = self._response_task.result()
             self._response_task = None
@@ -389,20 +389,20 @@ class MutualAction(DefineAction, LLMAction, ActualActionMixin, TargetingMixin):
 
     async def finish(self, target_avatar: "Avatar|str") -> list[Event]:
         """
-        完成互动动作，事件已在 step 中处理，无需额外事件
+        Finish the mutual action; events were handled in step, so no extra event is needed
         """
         return []
 
 
 class InvitationAction(MutualAction):
-    """邀请/请求型互动，目标主要做出接受或拒绝的回应。"""
+    """Invitation/request-type interaction; the target mainly accepts or refuses."""
 
     RESPONSE_EVENT_STYLE = "reply"
     SHOW_RESPONSE_EVENT = False
 
 
 class PressureAction(MutualAction):
-    """施压/敌对型互动，目标主要做出逃离、应战等应对。"""
+    """Pressure/hostile-type interaction; the target mainly flees, fights back, etc."""
 
     RESPONSE_EVENT_STYLE = "reply"
     SHOW_RESPONSE_EVENT = False

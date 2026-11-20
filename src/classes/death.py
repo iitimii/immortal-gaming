@@ -8,28 +8,28 @@ if TYPE_CHECKING:
 
 def handle_death(world: World, avatar: Avatar, reason: Union[str, DeathReason]) -> None:
     """
-    处理角色死亡的统一入口。
-    负责将角色标记为死亡，清理行动队列，但保留角色数据。
+    Unified entry point for handling avatar death.
+    Marks the avatar as dead and clears the action queue, but keeps the avatar data.
     
     Args:
-        world: 世界对象
-        avatar: 死亡的角色
-        reason: 死亡原因（DeathReason对象或字符串）
+        world: the world object
+        avatar: the dead avatar
+        reason: cause of death (DeathReason object or string)
     """
     reason_str = str(reason)
     
-    # 标记为死亡（软删除）
+    # Mark as dead (soft delete)
     avatar.set_dead(reason_str, world.month_stamp)
 
-    # 在死亡坐标生成墓碑。战斗夺宝发生在 handle_death 前，因此这里只保留剩余装备。
+    # Create a grave at the death coordinates. Kill-and-grab happens before handle_death, so only the remaining equipment is kept here.
     poi_manager = getattr(world, "poi_manager", None)
     if poi_manager is not None and hasattr(poi_manager, "create_grave_from_avatar"):
         poi_manager.create_grave_from_avatar(avatar, current_month=int(world.month_stamp))
     
-    # 从管理器中归档（硬移动），并记录变更
+    # Archive from the manager (hard move) and record the change
     world.avatar_manager.handle_death(avatar.id)
 
-    # 记录已故档案（独立于 AvatarManager，不受 cleanup 影响）
+    # Record the deceased archive (independent of AvatarManager, unaffected by cleanup)
     world.deceased_manager.record_death(avatar)
     
-    # 可以在这里触发其他逻辑，比如检查是否有继承人等
+    # Other logic can be triggered here, e.g. checking for heirs

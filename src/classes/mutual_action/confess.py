@@ -20,27 +20,27 @@ if TYPE_CHECKING:
 
 @cooldown_action
 class Confess(InvitationAction):
-    """表白：向交互范围内的修士表白，若对方接受则结为道侣。
+    """Confess: confess feelings to a cultivator within interaction range; if accepted, they become Dao companions.
     """
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "confess_action_name"
     DESC_ID = "confess_description"
     REQUIREMENTS_ID = "confess_requirements"
     STORY_PROMPT_ID = "confess_story_prompt"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "💌"
     PARAMS = {"target_avatar": "AvatarName"}
     RESPONSE_ACTIONS = ["Accept", "Reject"]
     
-    # 表白的社交冷却：避免频繁请求
+    # Social cooldown for confessions: avoid frequent requests
     ACTION_CD_MONTHS: int = 6
-    # 表白是大事（长期记忆）
+    # Confession is a major event (long-term memory)
     IS_MAJOR: bool = True
 
     def _can_start(self, target: "Avatar") -> tuple[bool, str]:
-        """检查表白特有的启动条件"""
+        """Check the confession-specific start conditions."""
         from src.classes.observe import is_within_observation
         if not is_within_observation(self.avatar, target):
             return False, t("Target not within interaction range")
@@ -61,20 +61,20 @@ class Confess(InvitationAction):
                    initiator=self.avatar.name, target=target_name)
         event = Event(self.world.month_stamp, content, related_avatars=rel_ids, is_major=False)
         
-        # 记录开始文本用于故事生成
+        # Record the start text for story generation
         self._start_event_content = event.content
-        # 初始化内部标记
+        # Initialize internal flags
         self._confess_success = False
         return event
 
     def _settle_response(self, target_avatar: "Avatar", response_name: str) -> None:
         fb = str(response_name).strip()
         if fb == "Accept":
-            # 接受则结为道侣
+            # If accepted, become Dao companions
             self.avatar.become_lovers_with(target_avatar)
             self._confess_success = True
         else:
-            # 拒绝
+            # Refused
             self._confess_success = False
 
     async def finish(self, target_avatar: "Avatar|str", **kwargs) -> list[Event]:
@@ -109,7 +109,7 @@ class Confess(InvitationAction):
         
         events.append(result_event)
 
-        # 生成表白小故事
+        # Generate the confession story
         start_text = getattr(self, "_start_event_content", "") or result_event.content
         story_event = await StoryEventService.maybe_create_story(
             kind=StoryEventKind.RELATIONSHIP_MAJOR,

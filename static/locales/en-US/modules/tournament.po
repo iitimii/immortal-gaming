@@ -34,8 +34,8 @@ msgstr "Human 1st (Cultivation/Body Tempering +50%, Epiphany +10%)"
 msgid "Event Type: World Martial Arts Tournament\nScene Setting: The tournament is held to determine the strongest cultivators of the realm."
 msgstr "Event Type: World Martial Arts Tournament\nScene Setting: The tournament is held to determine the strongest cultivators of the realm."
 
-msgid "\n【Tournament Information】\n"
-msgstr "\n【Tournament Information】\n"
+msgid "\n[Tournament Information]\n"
+msgstr "\n[Tournament Information]\n"
 
 msgid "List: {list_name}\n"
 msgstr "List: {list_name}\n"
@@ -43,8 +43,8 @@ msgstr "List: {list_name}\n"
 msgid "Winner: {winner}\n"
 msgstr "Winner: {winner}\n"
 
-msgid "\n【Finalists Information】\n"
-msgstr "\n【Finalists Information】\n"
+msgid "\n[Finalists Information]\n"
+msgstr "\n[Finalists Information]\n"
 
 msgid "tournament_story_prompt"
 msgstr "Please write a vivid story (about 400-500 words) based on the tournament results above. Describe the intense martial arts clash between the two finalists, the details of their artifact collisions, the majestic presence of the final winner, and the reactions of the crowd. The tone should fit a cultivation world setting. Output plain text only without markdown syntax."

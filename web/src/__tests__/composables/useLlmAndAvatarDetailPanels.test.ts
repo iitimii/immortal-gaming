@@ -41,57 +41,57 @@ vi.mock('@/api', () => ({
 
 const i18n = createI18n({
   legacy: false,
-  locale: 'zh-CN',
+  locale: 'en-US',
   messages: {
-    'zh-CN': {
+    'en-US': {
       common: {
-        confirm: '确认',
-        cancel: '取消',
+        confirm: 'Confirm',
+        cancel: 'Cancel',
       },
       ui: {
-        other: '其他',
+        other: 'Other',
         create_avatar: {
           gender_labels: {
-            male: '男',
-            female: '女',
+            male: 'Male',
+            female: 'Female',
           },
         },
       },
       llm: {
-        fetch_failed: '加载失败',
-        base_url_required: '需要地址',
-        test_success: '测试成功',
-        save_success: '保存成功',
-        test_save_failed_title: '失败',
-        preset_applied: '已应用{name}{extra}',
-        preset_extra_local: '本地',
-        preset_extra_key: '密钥',
-        preset_extra_keep_saved_key: '保留已保存密钥',
-        preset_extra_keep_draft_key: '保留当前密钥',
+        fetch_failed: 'Failed to load',
+        base_url_required: 'Base URL required',
+        test_success: 'Test succeeded',
+        save_success: 'Saved',
+        test_save_failed_title: 'Failed',
+        preset_applied: 'Applied {name} ({extra})',
+        preset_extra_local: 'local',
+        preset_extra_key: 'API key required',
+        preset_extra_keep_saved_key: 'keeping saved key',
+        preset_extra_keep_draft_key: 'keeping current key',
         clear_key: {
-          title: '清除密钥？',
-          content: '确认清除密钥？',
-          confirm: '清除',
-          success: '已清除',
-          failed: '清除失败',
+          title: 'Clear key?',
+          content: 'Confirm clearing the key?',
+          confirm: 'Clear',
+          success: 'Cleared',
+          failed: 'Clear failed',
         },
         placeholders: {
-          api_key: '输入密钥',
-          api_key_saved: '输入新密钥可替换',
+          api_key: 'Enter key',
+          api_key_saved: 'Enter a new key to replace',
         },
         modes: {
-          default: '默认',
-          default_desc: '默认说明',
-          normal: '常规',
-          normal_desc: '常规说明',
-          fast: '快速',
-          fast_desc: '快速说明',
+          default: 'Default',
+          default_desc: 'Default mode description',
+          normal: 'Normal',
+          normal_desc: 'Normal mode description',
+          fast: 'Fast',
+          fast_desc: 'Fast mode description',
         },
         formats: {
           openai: 'OpenAI',
-          openai_desc: 'OpenAI 格式',
+          openai_desc: 'OpenAI format',
           anthropic: 'Anthropic',
-          anthropic_desc: 'Anthropic 格式',
+          anthropic_desc: 'Anthropic format',
         },
         presets: {
           qwen: 'Qwen',
@@ -110,27 +110,27 @@ const i18n = createI18n({
       },
       game: {
         ranking: {
-          heaven: '天榜',
+          heaven: 'Heaven List',
         },
         info_panel: {
           avatar: {
-            weapon_meta: '熟练 {value}',
+            weapon_meta: 'Proficiency {value}',
             stats: {
-              rogue: '散修',
+              rogue: 'Rogue Cultivator',
             },
             sections: {
-              goldfinger: '金手指',
+              goldfinger: 'Goldfinger',
             },
             adjust: {
               categories: {
-                technique: '功法',
-                weapon: '武器',
-                auxiliary: '辅修',
+                technique: 'Technique',
+                weapon: 'Weapon',
+                auxiliary: 'Auxiliary',
               },
             },
             modals: {
-              clear_confirm: '确认清除？',
-              set_failed: '设置失败',
+              clear_confirm: 'Confirm clear?',
+              set_failed: 'Failed to set',
             },
           },
         },
@@ -162,24 +162,24 @@ async function settle() {
 
 const avatarData = (): AvatarDetail => ({
   id: 'a1',
-  name: '李青',
+  name: 'Li Qing',
   realm: 'QI_REFINEMENT',
   pic_id: 1,
   level: 1,
   age: 20,
   lifespan: 100,
-  origin: '山村',
+  origin: 'Mountain Village',
   hp: { cur: 10, max: 10 },
   gender: 'Male',
   alignment: 'GOOD',
-  root: '金',
+  root: 'Metal',
   luck: 0,
   magic_stone: 0,
-  appearance: '清秀',
+  appearance: 'Fair',
   base_battle_strength: 10,
-  emotion: { emoji: ':)', name: '平静' },
+  emotion: { emoji: ':)', name: 'Calm' },
   is_dead: false,
-  current_effects: '[功法] 攻击+1；速度+2\n未标注效果',
+  current_effects: '[Technique] Attack+1; Speed+2\nUnlabeled effect',
   personas: [],
   materials: [],
   relations: [],
@@ -332,7 +332,7 @@ describe('useLlmConfigPanel', () => {
     panel.config.value.base_url = ''
     await panel.handleTestAndSave()
 
-    expect(messageMock.warning).toHaveBeenCalledWith('需要地址')
+    expect(messageMock.warning).toHaveBeenCalledWith('Base URL required')
     expect(llmApi.testConnection).not.toHaveBeenCalled()
   })
 })
@@ -345,32 +345,32 @@ describe('useAvatarDetailPanel helpers', () => {
   })
 
   it('parses effect lines with source and fallback source', () => {
-    expect(parseAvatarEffectLine('[功法] 攻击+1；速度+2', i18n.global.t)).toEqual({
-      source: '功法',
-      segments: ['攻击+1', '速度+2'],
+    expect(parseAvatarEffectLine('[Technique] Attack+1; Speed+2', i18n.global.t)).toEqual({
+      source: 'Technique',
+      segments: ['Attack+1', 'Speed+2'],
     })
-    expect(parseAvatarEffectLine('未标注效果', i18n.global.t)).toEqual({
-      source: '其他',
-      segments: ['未标注效果'],
+    expect(parseAvatarEffectLine('Unlabeled effect', i18n.global.t)).toEqual({
+      source: 'Other',
+      segments: ['Unlabeled effect'],
     })
   })
 
   it('builds relation meta lines without stranger attitude', () => {
     expect(buildAvatarRelationMetaLines({
       target_id: 'a2',
-      name: '青岚',
-      relation: '道侣 / 友好',
+      name: 'Qing Lan',
+      relation: 'Dao Partner / Friendly',
       relation_type: 'lover',
       numeric_relation: 'friend',
       friendliness: 12,
       realm: 'QI_REFINEMENT',
-      sect: '青云宗',
-    })).toEqual(['道侣', '友好（12）'])
+      sect: 'Azure Cloud Sect',
+    })).toEqual(['Dao Partner', 'Friendly (12)'])
 
     expect(buildAvatarRelationMetaLines({
       target_id: 'a3',
-      name: '陌生人',
-      relation: '陌生',
+      name: 'A Stranger',
+      relation: 'Stranger',
       relation_type: '',
       numeric_relation: 'stranger',
       friendliness: 0,
@@ -385,19 +385,18 @@ describe('useAvatarDetailPanel helpers', () => {
     const panel = mountComposable(() => useAvatarDetailPanel(
       avatarData,
       i18n.global.t,
-      { value: 'zh-CN' },
       { refreshDetail, select } as any,
       () => true,
       vi.fn(),
     ))
 
-    expect(panel.formattedRanking.value).toBe('天榜第二')
+    expect(panel.formattedRanking.value).toBe('Heaven Rank 2')
     expect(panel.parsedCurrentEffects.value).toHaveLength(2)
     expect(panel.groupedRelations.value.parents).toHaveLength(2)
 
-    panel.objectiveContent.value = '闭关突破'
+    panel.objectiveContent.value = 'Seclusion breakthrough'
     await panel.handleSetObjective()
-    expect(avatarApi.setLongTermObjective).toHaveBeenCalledWith('a1', '闭关突破')
+    expect(avatarApi.setLongTermObjective).toHaveBeenCalledWith('a1', 'Seclusion breakthrough')
     expect(refreshDetail).toHaveBeenCalled()
 
     await panel.handleClearObjective()

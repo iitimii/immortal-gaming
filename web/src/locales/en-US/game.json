@@ -113,7 +113,19 @@
       "WORLD_INFO_OFFICIAL_TITLE": "Official Rank",
       "WORLD_INFO_CULTIVATION_ALIAS_DESC": "The same cultivation ranks have different names in each tradition: Daoists and rogue cultivators use Qi Refinement, Foundation Establishment, Core Formation, and Nascent Soul; martial cultivators use Body Tempering, Tendon-Tempering, Martial Master, and Martial Saint; Confucian cultivators use Vital Qi Cultivation, Principle Illumination, Mandate Establishment, and Great Scholar; Buddhist cultivators use Novice Monk, Monk, Arhat, and Bodhisattva; yao cultivators use Spirit Awakening, Form Transformation, Demon Core, and Demon King. These names map to the same underlying realm sequence; they change narrative and interface wording, but not breakthrough, power, lifespan, item grade, or other rules.",
       "WORLD_INFO_CULTIVATION_ALIAS_NAME": "Realm Aliases",
-      "WORLD_INFO_CULTIVATION_ALIAS_TITLE": "Realm Aliases"
+      "WORLD_INFO_CULTIVATION_ALIAS_TITLE": "Realm Aliases",
+      "WORLD_INFO_RACE_TITLE": "Race",
+      "WORLD_INFO_RACE_NAME": "Race",
+      "WORLD_INFO_RACE_DESC": "The world contains both human and yao cultivators. Yao include fox, wolf, bird, snake, turtle, and other races, each with different instincts: foxes are clever and sly, wolves are fierce hunters, birds excel at migration and scouting, snakes are patient and venomous, and turtles are long-lived and defensive. Yao can cultivate and join sects that accept them, but some sects that emphasize human rites or Confucian order do not accept yao.",
+      "WORLD_INFO_GU_TITLE": "Gu",
+      "WORLD_INFO_GU_NAME": "Gu",
+      "WORLD_INFO_GU_DESC": "Gu arts require a cultivator to carry a Gu tool and have the ability to inflict Gu before applying it to an observable target. Different Gu act in different ways: Mind-Sinking Gu subtly shifts relationships, Blood-Devouring Gu periodically damages life, while Essence-Eroding Gu and Heart-Disordering Gu disturb cultivation. Inflicting Gu has a success rate affected by the tool, the caster's bonuses, and the target's Gu resistance; failure may be detected and harm the relationship.",
+      "WORLD_INFO_FORMATION_TITLE": "Formations",
+      "WORLD_INFO_FORMATION_NAME": "Formations",
+      "WORLD_INFO_FORMATION_DESC": "Formations require a cultivator to carry a formation disk and have formation-setting ability before placing a temporary regional effect at the current location. Different formations suit different regions: cultivation grounds and sect regions can hold spirit-gathering, mountain-guarding, clarity, and similar arrays; cities can hold healing arrays; mines, herb fields, and beast domains can hold vein-seeking, wood-growth, and beast-driving arrays. Formations consume spirit stones and expire after their duration ends.",
+      "WORLD_INFO_OPPORTUNITY_TITLE": "Opportunity",
+      "WORLD_INFO_OPPORTUNITY_NAME": "Opportunity",
+      "WORLD_INFO_OPPORTUNITY_DESC": "Cultivators may occasionally feel a sudden stir of fate, sensing that a person or place is tied to their own opportunity. If they follow the sense, they may gain treasure or a boon, return empty-handed, or meet danger; if they delay too long, the opportunity fades away."
     }
   },
   "controls": {
@@ -563,9 +575,9 @@
       "sections": {
         "grave": "Grave",
         "deceased": "Deceased",
-          "goods": "Grave Goods",
-          "treasure": "Treasure",
-          "treasure_info": "Treasure Details"
+        "goods": "Grave Goods",
+        "treasure": "Treasure",
+        "treasure_info": "Treasure Details"
       },
       "location": "Location",
       "name": "Name",
@@ -577,11 +589,11 @@
       "auxiliary": "Auxiliary",
       "rogue": "Rogue",
       "unknown": "Unknown",
-        "empty_goods": "No retrievable goods remain in the grave",
-        "source": "Source",
-        "attempt_count": "Attempts",
-        "expires_month": "Fades in month",
-        "empty_treasure": "The treasure has lost its spiritual power"
+      "empty_goods": "No retrievable goods remain in the grave",
+      "source": "Source",
+      "attempt_count": "Attempts",
+      "expires_month": "Fades in month",
+      "empty_treasure": "The treasure has lost its spiritual power"
     }
   },
   "deceased": {

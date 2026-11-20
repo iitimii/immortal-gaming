@@ -237,7 +237,7 @@ def _require_world(runtime):
 
 
 def get_deceased_list(runtime) -> dict[str, Any]:
-    """返回所有已故角色档案列表。"""
+    """Return the list of all deceased avatar records."""
     world = _require_world(runtime)
     records = world.deceased_manager.get_all_records()
     return {"deceased": [r.to_dict() for r in records]}
@@ -257,7 +257,7 @@ def get_world_secret_overview(runtime) -> dict[str, Any]:
 
 
 def get_avatar_overview(runtime) -> dict[str, Any]:
-    """返回角色总览摘要与最近死亡角色。"""
+    """Return the avatar overview summary and recently deceased avatars."""
     world = _require_world(runtime)
 
     living_avatars = list(getattr(world.avatar_manager, "avatars", {}).values())

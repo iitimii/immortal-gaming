@@ -14,28 +14,28 @@ from .mutual_action import InvitationAction
 
 class Talk(InvitationAction):
     """
-    攀谈：向交互范围内的某个NPC发起攀谈。
-    - 接受后自动进入 Conversation
+    Talk: strike up a conversation with an NPC within interaction range.
+    - Automatically enters Conversation once accepted
     """
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "talk_action_name"
     DESC_ID = "talk_description"
     REQUIREMENTS_ID = "talk_requirements"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "👋"
     PARAMS = {"target_avatar": "AvatarName"}
     RESPONSE_ACTIONS: list[str] = ["Talk", "Reject"]
     
-    # 自定义反馈标签
+    # Custom feedback labels
     RESPONSE_LABEL_IDS: dict[str, str] = {
         "Talk": "feedback_talk",
         "Reject": "feedback_reject",
     }
     
     def _can_start(self, target: "Avatar") -> tuple[bool, str]:
-        """攀谈无额外检查条件"""
+        """Talk has no extra start conditions."""
         from src.classes.observe import is_within_observation
         if not is_within_observation(self.avatar, target):
             return False, t("Target not within interaction range")
@@ -43,29 +43,29 @@ class Talk(InvitationAction):
     
     def _handle_response_result(self, target: "Avatar", result: dict) -> ActionResult:
         """
-        处理 LLM 返回的响应结果。
+        Handle the response returned by the LLM.
         """
         response = str(result.get("response", result.get("feedback", ""))).strip()
         
         events_to_return = []
         
-        # 处理响应
+        # Handle the response
         if response == "Talk":
-            # 接受攀谈后直接进入 Conversation，避免“接受攀谈”与后续对话正文重复
-            # 将 Conversation 加入计划队列并立即提交
+            # After accepting, enter Conversation directly, avoiding duplication between "accepted the talk" and the conversation body
+            # Add Conversation to the plan queue and commit it immediately
             self.avatar.load_decide_result_chain(
                 [("Conversation", {"target_avatar": target.name})],
                 self.avatar.thinking,
                 self.avatar.short_term_objective,
                 prepend=True
             )
-            # 立即提交为当前动作
+            # Commit immediately as the current action
             start_event = self.avatar.commit_next_plan()
             if start_event is not None:
                 pass
 
         else:
-            # 拒绝攀谈
+            # Talk refused
             content = t("{target} rejected {initiator}'s talk invitation",
                        target=target.name, initiator=self.avatar.name)
             reject_event = Event(
@@ -78,5 +78,5 @@ class Talk(InvitationAction):
         return ActionResult(status=ActionStatus.COMPLETED, events=events_to_return)
     
     def step(self, target_avatar: "Avatar|str", **kwargs) -> ActionResult:
-        """调用父类的通用异步 step 逻辑"""
+        """Call the parent's generic async step logic."""
         return super().step(target_avatar=target_avatar)

@@ -56,14 +56,14 @@ function showClosedMessage() {
   document.body.appendChild(message)
 }
 
-// Sidebar resizer 状态
+// Sidebar resizer state
 const { sidebarWidth, isResizing, onResizerMouseDown } = useSidebarResize()
 
 function syncLayoutCssVars(width: number) {
   document.documentElement.style.setProperty('--cws-sidebar-width', `${width}px`)
 }
 
-// 1. 游戏初始化逻辑
+// 1. Game initialization
 const { 
   initStatus, 
   gameInitialized, 
@@ -129,7 +129,7 @@ const {
   onResumeGame: () => systemStore.resume(),
 })
 
-// 事件处理
+// Event handlers
 function onKeydown(e: KeyboardEvent) {
   if (shouldBlockControls.value) return
   controlHandleKeydown(e)
@@ -188,7 +188,7 @@ onMounted(() => {
   syncLayoutCssVars(sidebarWidth.value)
   settingStore.hydrate().finally(() => {
     useAudio().init()
-    useBgm().init() // 确保 BGM 系统在 App 层级初始化，避免 Watcher 被子组件卸载
+    useBgm().init() // Initialize BGM at the App level so its watchers are not torn down with child components
   })
 })
 
@@ -221,9 +221,9 @@ watch(sidebarWidth, width => {
           <div class="main-content">
             <div class="map-container">
               <div class="map-stage">
-                <!-- 顶部控制栏 -->
+                <!-- Top control bar -->
                 <div class="top-controls">
-                  <!-- 暂停/播放按钮 -->
+                  <!-- Pause/play button -->
                   <button class="control-btn pause-toggle" @click="toggleManualPause" :title="isManualPaused ? t('game.controls.resume') : t('game.controls.pause')">
                     <span
                       class="control-btn-icon"
@@ -232,7 +232,7 @@ watch(sidebarWidth, width => {
                     ></span>
                   </button>
 
-                  <!-- 菜单按钮 -->
+                  <!-- Menu button -->
                   <button class="control-btn menu-toggle" @click="openGameMenu()">
                     <span
                       class="control-btn-icon"
@@ -242,7 +242,7 @@ watch(sidebarWidth, width => {
                   </button>
                 </div>
 
-                <!-- 暂停状态提示 -->
+                <!-- Paused indicator -->
                 <div v-if="isManualPaused" class="pause-indicator">
                   <div class="pause-text">{{ t('game.controls.paused') }}</div>
                 </div>

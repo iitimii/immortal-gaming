@@ -8,7 +8,7 @@ from typing import Iterable, List, Tuple
 @dataclass
 class Appearance:
     """
-    外貌/颜值
+    Appearance / looks
     """
     level: int  # 1~10
     name: str
@@ -21,13 +21,13 @@ class Appearance:
 
     def get_detailed_info(self, gender: object | None = None) -> str:
         """
-        根据性别返回更贴切的描述；若未提供性别或无法识别，则默认使用男性描述。
-        不依赖具体 Gender 类型，避免循环导入。
+        Return a more fitting description by gender; if gender isn't given or can't be recognized, the male description is used by default.
+        Doesn't depend on a concrete Gender type, to avoid circular imports.
         """
         from src.i18n import t
         g = str(gender) if gender is not None else ""
         s = g.lower()
-        use_female = (g == "女") or (s == "female")
+        use_female = s == "female"
         desc = self.desc_female if use_female else self.desc_male
         return f"{t(self.name)}({self.level}) - {t(desc)}"
 
@@ -58,16 +58,16 @@ _APPEARANCE_POOL: List[Appearance] = _build_pool(_LEVEL_DATA)
 
 
 def get_random_appearance() -> Appearance:
-    """返回一个随机外貌实例。"""
-    # 重新构造实例，避免共享同一个对象引用
+    """Return a random appearance instance."""
+    # Construct a new instance to avoid sharing the same object reference
     base = random.choice(_APPEARANCE_POOL)
     return Appearance(level=base.level, name=base.name, desc_male=base.desc_male, desc_female=base.desc_female)
 
 
 def get_appearance_by_level(level: int) -> Appearance:
     """
-    按等级(1~10)返回外貌实例；越界时夹在范围内。
-    返回新实例，避免外部持有池中引用。
+    Return an appearance instance by level (1-10); out-of-range values are clamped.
+    Returns a new instance so callers don't hold references into the pool.
     """
     lv = int(level)
     if lv < 1:

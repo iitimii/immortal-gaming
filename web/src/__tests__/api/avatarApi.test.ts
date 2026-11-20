@@ -81,13 +81,13 @@ describe('avatarApi', () => {
     await avatarApi.generateCustomContent({
       category: 'weapon',
       realm: 'CORE_FORMATION',
-      user_prompt: '想要一把金丹剑',
+      user_prompt: 'I want a Core Formation sword',
     })
 
     expect(postMock).toHaveBeenCalledWith('/api/v1/command/avatar/generate-custom-content', {
       category: 'weapon',
       realm: 'CORE_FORMATION',
-      user_prompt: '想要一把金丹剑',
+      user_prompt: 'I want a Core Formation sword',
     }, { timeoutMs: 120000 })
   })
 
@@ -97,12 +97,12 @@ describe('avatarApi', () => {
 
     await avatarApi.generateCustomContent({
       category: 'goldfinger',
-      user_prompt: '想要一个偏签到流的外挂',
+      user_prompt: 'I want a daily check-in style cheat',
     })
 
     expect(postMock).toHaveBeenCalledWith('/api/v1/command/avatar/generate-custom-content', {
       category: 'goldfinger',
-      user_prompt: '想要一个偏签到流的外挂',
+      user_prompt: 'I want a daily check-in style cheat',
     }, { timeoutMs: 120000 })
   })
 
@@ -116,7 +116,7 @@ describe('avatarApi', () => {
         id: '0',
         category: 'auxiliary',
         realm: 'CORE_FORMATION',
-        name: '草稿',
+        name: 'Draft',
         effects: { extra_max_hp: 30 },
       } as any,
     })
@@ -127,7 +127,7 @@ describe('avatarApi', () => {
         id: '0',
         category: 'auxiliary',
         realm: 'CORE_FORMATION',
-        name: '草稿',
+        name: 'Draft',
         effects: { extra_max_hp: 30 },
       },
     })
@@ -139,12 +139,12 @@ describe('avatarApi', () => {
 
     await avatarApi.generateCustomContent({
       category: 'technique',
-      user_prompt: '我想要一本偏火属性的功法',
+      user_prompt: 'I want a fire-aligned technique',
     })
 
     expect(postMock).toHaveBeenCalledWith('/api/v1/command/avatar/generate-custom-content', {
       category: 'technique',
-      user_prompt: '我想要一本偏火属性的功法',
+      user_prompt: 'I want a fire-aligned technique',
     }, { timeoutMs: 120000 })
   })
 
@@ -173,13 +173,13 @@ describe('avatarApi', () => {
     await avatarApi.submitRoleplayDecision({
       avatar_id: 'avatar_1',
       request_id: 'req_1',
-      command_text: '先调息恢复一下',
+      command_text: 'Meditate to recover first',
     })
 
     expect(postMock).toHaveBeenCalledWith('/api/v1/command/roleplay/submit-decision', {
       avatar_id: 'avatar_1',
       request_id: 'req_1',
-      command_text: '先调息恢复一下',
+      command_text: 'Meditate to recover first',
     })
   })
 
@@ -202,24 +202,24 @@ describe('avatarApi', () => {
 
   it('posts roleplay conversation messages', async () => {
     const { avatarApi } = await import('@/api/modules/avatar')
-    postMock.mockResolvedValue({ status: 'ok', messages: [], reply: '回应' })
+    postMock.mockResolvedValue({ status: 'ok', messages: [], reply: 'Reply' })
 
     await avatarApi.sendRoleplayConversation({
       avatar_id: 'avatar_1',
       request_id: 'req_conv_1',
-      message: '你好',
+      message: 'Hello',
     })
 
     expect(postMock).toHaveBeenCalledWith('/api/v1/command/roleplay/conversation/send', {
       avatar_id: 'avatar_1',
       request_id: 'req_conv_1',
-      message: '你好',
+      message: 'Hello',
     })
   })
 
   it('posts roleplay conversation end requests', async () => {
     const { avatarApi } = await import('@/api/modules/avatar')
-    postMock.mockResolvedValue({ status: 'ok', summary: '二人谈笑风生。' })
+    postMock.mockResolvedValue({ status: 'ok', summary: 'The two chatted and laughed.' })
 
     await avatarApi.endRoleplayConversation({
       avatar_id: 'avatar_1',

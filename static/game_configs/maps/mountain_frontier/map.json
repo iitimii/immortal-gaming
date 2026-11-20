@@ -7,96 +7,96 @@
   "wilderness_tile": "plain",
   "region_overrides": {
     "104": {
-      "name": "北境雪脊",
-      "desc": "高寒雪线沿着山脊铺开，冷风把平地也切成了坡地。"
+      "name": "Northern Snow Ridge",
+      "desc": "The high snow line spreads along the ridges, and cold winds have carved even the flat ground into slopes."
     },
     "107": {
-      "name": "断岭群峰",
-      "desc": "山势最硬的骨架区，峰峦互相挤压，形成层层断岭。"
+      "name": "Broken Ridge Peaks",
+      "desc": "The hardest backbone of the mountains, where peaks press against one another and form layer upon layer of broken ridges."
     },
     "108": {
-      "name": "寒玉高峰",
-      "desc": "终年积雪的高峰区，视野开阔，却也最难穿越。"
+      "name": "Cold Jade Summit",
+      "desc": "High peaks under year-round snow, with sweeping views but the hardest passage of all."
     },
     "110": {
-      "name": "林谷夹道",
-      "desc": "山林与峡谷并行，形成一条曲折而隐蔽的山间通路。"
+      "name": "Forest Valley Pass",
+      "desc": "Mountain forest and gorge run side by side, forming a winding, hidden path through the mountains."
     },
     "111": {
-      "name": "火山前庭",
-      "desc": "火山外缘的过渡带，岩热与冷风在这里短兵相接。"
+      "name": "Volcano Forecourt",
+      "desc": "The transitional belt at the volcano's outer edge, where rock heat and cold wind clash at close quarters."
     },
     "114": {
-      "name": "万山腹地",
-      "desc": "群山重叠的核心地带，路窄、峰密、地势极险。"
+      "name": "Heart of Ten Thousand Mountains",
+      "desc": "The core where mountains overlap; the roads are narrow, the peaks dense, and the terrain extremely perilous."
     },
     "101": {
-      "name": "山口平坝",
-      "desc": "群山之间少见的平坝，河谷在此稍稍展开，是边境人烟汇聚处。"
+      "name": "Pass Flatland",
+      "desc": "A rare stretch of flat land among the mountains where the river valley opens a little; the frontier's people gather here."
     },
     "102": {
-      "name": "西麓黄土带",
-      "desc": "西侧山麓的干燥黄土与碎石坡，风沙从山口灌入，却不是开阔大漠。"
+      "name": "Western Foothills Loess Belt",
+      "desc": "Dry loess and gravel slopes in the western foothills; wind-blown sand pours in through the passes, yet this is no open desert."
     },
     "103": {
-      "name": "南岭密林",
-      "desc": "南部山脚下的湿热密林，雨雾顺着山势盘绕不散。"
+      "name": "Southern Ridge Jungle",
+      "desc": "Hot, humid jungle at the foot of the southern mountains, where rain and mist coil along the slopes and never disperse."
     },
     "105": {
-      "name": "东境狭海",
-      "desc": "东侧贴着山崖延展的狭海，海岸很窄，常被群峰逼成断续港湾。"
+      "name": "Eastern Frontier Narrow Sea",
+      "desc": "A narrow sea stretching along the eastern cliffs; the coast is thin and often squeezed by the peaks into broken coves."
     },
     "106": {
-      "name": "峡河奔流",
-      "desc": "穿山而过的急河，水声在峡壁间回荡，许多道路都沿河谷展开。"
+      "name": "Rushing Gorge River",
+      "desc": "A swift river cutting through the mountains, its roar echoing between the gorge walls; many roads follow its valley."
     },
     "112": {
-      "name": "谷地良田",
-      "desc": "山谷间被河水滋养出的田地，面积不大，却是边境难得的粮仓。"
+      "name": "Valley Farmland",
+      "desc": "Fields nourished by the river in the mountain valleys; small in area, yet a rare granary for the frontier."
     },
     "113": {
-      "name": "南麓毒泽",
-      "desc": "南麓林地深处的湿泽，冷山水与腐殖土混成危险泥沼。"
+      "name": "Southern Foothills Poison Marsh",
+      "desc": "A wet marsh deep in the southern foothill woods, where cold mountain water and humus mix into a treacherous bog."
     },
     "115": {
-      "name": "紫竹山坳",
-      "desc": "山坳中的紫竹幽境，竹林贴着岩壁生长，风过时声音格外清冷。"
+      "name": "Purple Bamboo Hollow",
+      "desc": "A secluded purple bamboo realm in a mountain hollow, where bamboo grows against the rock walls and the wind sounds especially cold and clear."
     },
     "116": {
-      "name": "东北冻原",
-      "desc": "山脉东北侧的冻土高原，寒风越过雪线后在此长久盘踞。"
+      "name": "Northeastern Tundra",
+      "desc": "A frozen plateau on the northeastern side of the range, where cold winds settle for long spells after crossing the snow line."
     },
     "117": {
-      "name": "西岭碎星坡",
-      "desc": "西岭外缘的碎石坡地，陨铁传说和风化岩层让这里寸步难行。"
+      "name": "Western Ridge Shattered Star Slope",
+      "desc": "Gravel slopes on the outer edge of the Western Ridge, where legends of meteoric iron and weathered rock make every step a struggle."
     },
     "118": {
-      "name": "东海遗屿",
-      "desc": "东境狭海外的一枚遗世小岛，像从山海交界处剥落出去的碎片。"
+      "name": "Eastern Sea Lost Islet",
+      "desc": "A forgotten islet beyond the Eastern Frontier Narrow Sea, like a fragment that broke off where mountain meets sea."
     },
     "201": {
-      "name": "西岭金府",
-      "desc": "西岭断峰深处的金行洞府，剑鸣常在石壁间来回震荡。"
+      "name": "Western Ridge Gold Mansion",
+      "desc": "A Metal-element cave dwelling deep among the broken peaks of the Western Ridge, where sword hums often reverberate between the stone walls."
     },
     "203": {
-      "name": "峡河玄水境",
-      "desc": "峡河转折处的水行秘境，急流切开石壁，深潭中灵气凝寒。"
+      "name": "Gorge River Mystic Water Realm",
+      "desc": "A Water-element secret realm at a bend of the gorge river, where rapids cut through stone walls and the spiritual qi in the deep pools runs cold."
     },
     "302": {
-      "name": "西岭驿城",
-      "desc": "建在西麓山口的边境驿城，矿队、猎户与远行修士都在此补给。"
+      "name": "Western Ridge Post Town",
+      "desc": "A frontier post town at the western foothill pass, where mining crews, hunters, and traveling cultivators all resupply."
     },
     "304": {
-      "name": "峡河城",
-      "desc": "坐落在峡河下游的水路城，山货与灵材沿急河汇入此地。"
+      "name": "Gorge River City",
+      "desc": "A river city on the lower gorge river, where mountain goods and spirit materials flow in along the rapids."
     },
     "409": {
-      "name": "南麓浮空岛",
-      "desc": "悬在南麓毒泽上方的浮空岛群，以云桥和飞舟避开下方瘴气。"
+      "name": "Southern Foothills Floating Islands",
+      "desc": "A cluster of floating islands hanging above the Southern Foothills Poison Marsh, using cloud bridges and flying boats to avoid the miasma below."
     },
     "411": {
-      "name": "南山迷踪天",
-      "desc": "南部群山中的折叠山门，山径与阵法互相套叠，极难辨清方向。"
+      "name": "Southern Mountains Maze Heaven",
+      "desc": "A folded mountain gate in the southern mountains, where trails and arrays overlap so tightly that direction is nearly impossible to discern."
     }
   },
   "region_rows": [

@@ -28,25 +28,25 @@ const {
 
 <template>
   <div class="loading-overlay">
-    <!-- 背景层 - 只有这层透明度变化 -->
+    <!-- Background layer - only this layer fades -->
     <div 
       class="bg-layer"
       :style="{ opacity: bgOpacity }"
     ></div>
 
-    <!-- 背景装饰 -->
+    <!-- Background decoration -->
     <div class="bg-decoration" :style="{ opacity: bgOpacity }">
       <div class="glow glow-1"></div>
       <div class="glow glow-2"></div>
     </div>
 
-    <!-- 主内容 -->
+    <!-- Main content -->
     <div class="content">
-      <!-- 标题 -->
+      <!-- Title -->
       <h1 class="title">{{ t('loading.title') }}</h1>
       <p class="subtitle">{{ t('loading.subtitle') }}</p>
 
-      <!-- 进度圆环 -->
+      <!-- Progress ring -->
       <div class="progress-ring">
         <svg width="220" height="220" viewBox="0 0 220 220">
           <defs>
@@ -62,14 +62,14 @@ const {
               </feMerge>
             </filter>
           </defs>
-          <!-- 背景圆环 -->
+          <!-- Ring track -->
           <circle
             class="track"
             cx="110"
             cy="110"
             :r="radius"
           />
-          <!-- 进度圆环 -->
+          <!-- Progress ring -->
           <circle
             class="progress"
             :class="{ error: isError }"
@@ -82,7 +82,7 @@ const {
           />
         </svg>
         
-        <!-- 圆环内容 -->
+        <!-- Ring content -->
         <div class="ring-content">
           <div class="percentage" :class="{ error: isError }">
             <span
@@ -98,7 +98,7 @@ const {
 
       <div class="phase-text">{{ isError ? t('loading.error') : phaseText }}</div>
 
-      <!-- 错误信息 -->
+      <!-- Error message -->
       <div v-if="isError" class="error-section">
         <p class="error-message">{{ errorMessage }}</p>
         <button class="retry-btn" @click="handleRetry">
@@ -114,7 +114,7 @@ const {
       </div>
     </div>
 
-    <!-- 底部信息 -->
+    <!-- Footer -->
     <div class="footer">
       <div class="elapsed">{{ t('loading.elapsed', { seconds: localElapsed }) }}</div>
       <div class="version" v-if="props.status?.version">{{ t('common.version', 'Version') }} v{{ props.status.version }}</div>
@@ -133,7 +133,7 @@ const {
   justify-content: center;
 }
 
-/* 背景层 - 只有这层会变透明，带模糊效果 */
+/* Background layer - the only layer that fades, with blur */
 .bg-layer {
   position: absolute;
   inset: 0;
@@ -143,7 +143,7 @@ const {
   transition: opacity 0.5s ease;
 }
 
-/* 背景装饰 */
+/* Background decoration */
 .bg-decoration {
   position: absolute;
   inset: 0;
@@ -181,7 +181,7 @@ const {
   50% { transform: translate(30px, -20px); }
 }
 
-/* 主内容 */
+/* Main content */
 .content {
   display: flex;
   flex-direction: column;
@@ -208,7 +208,7 @@ const {
   text-transform: uppercase;
 }
 
-/* 进度圆环 */
+/* Progress ring */
 .progress-ring {
   width: 220px;
   height: 220px;
@@ -269,7 +269,7 @@ const {
   min-height: 1.5em;
 }
 
-/* 错误区域 */
+/* Error area */
 .error-section {
   margin-top: 40px;
   display: flex;
@@ -332,7 +332,7 @@ const {
   height: 1em;
 }
 
-/* Tips 区域 */
+/* Tips area */
 .tips-section {
   margin-top: 50px;
   text-align: center;
@@ -354,7 +354,7 @@ const {
   transition: opacity 0.3s ease;
 }
 
-/* 底部 */
+/* Footer */
 .footer {
   position: absolute;
   bottom: 24px;

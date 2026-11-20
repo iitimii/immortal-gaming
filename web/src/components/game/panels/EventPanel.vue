@@ -64,7 +64,7 @@ const {
     </div>
     <div v-else-if="displayEvents.length === 0" class="empty">{{ emptyEventMessage }}</div>
     <div v-else class="event-list" ref="eventListRef" @scroll="handleScroll">
-      <!-- 顶部加载指示器 -->
+      <!-- Top loading indicator -->
       <div v-if="eventStore.eventsHasMore" class="load-more-hint">
         <span v-if="eventStore.eventsLoading">{{ t('common.loading') }}</span>
         <span v-else>{{ t('game.event_panel.load_more') }}</span>

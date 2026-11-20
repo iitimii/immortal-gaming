@@ -4,9 +4,8 @@ import { NButton } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 import { useBgm } from '../composables/useBgm'
 import { withBasePublicPath } from '@/utils/assetUrls'
-import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
 
-// 定义事件
+// Events
 const emit = defineEmits<{
   (e: 'action', key: string): void
 }>()
@@ -16,15 +15,15 @@ const videoRef = ref<HTMLVideoElement | null>(null)
 const splashPosterUrl = withBasePublicPath('assets/splash.png')
 const splashVideoUrl = withBasePublicPath('assets/splash.mp4')
 
-// 视频播放控制逻辑
+// Video playback control
 onMounted(() => {
-  // 播放背景音乐
+  // Play background music
   useBgm().play('splash')
 
   if (!videoRef.value) return
   
   const video = videoRef.value
-  // 整体基础速度设为 0.8
+  // Base playback rate 0.8
   video.playbackRate = 0.8
 
   const handleTimeUpdate = () => {
@@ -33,9 +32,9 @@ onMounted(() => {
 
     const remaining = duration - video.currentTime
     
-    // 当剩余时间小于 2 秒时开始线性减速
+    // Slow down linearly in the last 2 seconds
     if (remaining < 2 && remaining > 0) {
-      // 从 0.8 逐渐降低，最低保持在 0.35 左右避免视觉卡顿感
+      // Ease from 0.8 down to about 0.35 to avoid a choppy look
       const targetRate = 0.35 + (0.8 - 0.35) * (remaining / 2)
       video.playbackRate = targetRate
     }
@@ -44,7 +43,7 @@ onMounted(() => {
   video.addEventListener('timeupdate', handleTimeUpdate)
 })
 
-// 定义按钮列表
+// Menu buttons
 const menuOptions = computed(() => [
   { label: t('ui.start_game'), subLabel: t('splash.subtitle_start_en'), key: 'start', disabled: false },
   { label: t('ui.load_game'), subLabel: t('splash.subtitle_load_en'), key: 'load', disabled: false },
@@ -61,7 +60,6 @@ function handleClick(key: string) {
 
 <template>
   <div class="splash-container">
-    <LocaleSwitcher variant="splash" />
     <video
       ref="videoRef"
       class="splash-video"
@@ -72,7 +70,7 @@ function handleClick(key: string) {
     >
       <source :src="splashVideoUrl" type="video/mp4" />
     </video>
-    <!-- 左侧模糊层 -->
+    <!-- Left blur panel -->
     <div class="glass-panel">
       <div class="title-area">
         <h1>{{ t('splash.title') }}</h1>
@@ -114,7 +112,7 @@ function handleClick(key: string) {
   z-index: 500;
   display: flex;
   align-items: center;
-  background-color: #000; /* 视频加载前的底色 */
+  background-color: #000; /* Background before the video loads */
   overflow: hidden;
 }
 
@@ -128,15 +126,15 @@ function handleClick(key: string) {
   z-index: 0;
 }
 
-/* 左侧毛玻璃面板 */
+/* Left frosted-glass panel */
 .glass-panel {
   position: relative;
   z-index: 1;
   box-sizing: border-box;
   width: clamp(360px, 42vw, 460px);
   height: 100%;
-  background: rgba(0, 0, 0, 0.4); /* 半透明黑底 */
-  backdrop-filter: blur(20px); /* 核心模糊效果 */
+  background: rgba(0, 0, 0, 0.4); /* Translucent black */
+  backdrop-filter: blur(20px); /* Main blur effect */
   -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
@@ -177,19 +175,19 @@ function handleClick(key: string) {
   gap: clamp(8px, 1.4vh, 16px);
 }
 
-/* 按钮样式微调 */
+/* Button tweaks */
 .menu-btn {
-  height: clamp(50px, 6.3vh, 60px); /* 随语言和视口高度收缩，避免长语种顶出首屏 */
+  height: clamp(50px, 6.3vh, 60px); /* Shrinks with viewport height so long labels stay above the fold */
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
   
-  /* 核心修复：强制内容左对齐 */
+  /* Key fix: force left-aligned content */
   justify-content: flex-start;
   text-align: left;
-  padding-left: clamp(22px, 3vw, 32px); /* 统一的左侧留白 */
+  padding-left: clamp(22px, 3vw, 32px); /* Consistent left padding */
 }
 
-/* 修复 Naive UI 按钮内容可能默认居中的问题 */
+/* Override Naive UI centering button content by default */
 .menu-btn :deep(.n-button__content) {
   justify-content: flex-start;
   width: 100%;
@@ -198,7 +196,7 @@ function handleClick(key: string) {
 .btn-content {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* 左对齐 */
+  align-items: flex-start; /* Left-align */
   width: 100%;
 }
 
@@ -225,7 +223,7 @@ function handleClick(key: string) {
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
 }
 
-/* 针对移动端的简单适配（虽然这种游戏一般是桌面端） */
+/* Basic mobile adjustments (the game is mainly for desktop) */
 @media (max-width: 768px) {
   .glass-panel {
     width: min(100%, 420px);

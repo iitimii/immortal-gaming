@@ -62,7 +62,7 @@ class TestCooldownAction:
         can_start, reason = action.can_start(target_avatar=MagicMock())
         
         assert can_start is False
-        assert "冷却中" in reason
+        assert "on cooldown" in reason
         assert "4" in reason  # 6 - 2 = 4 months remaining
 
     def test_cooldown_expired_allows_start(self):
@@ -88,7 +88,7 @@ class TestCooldownAction:
             can_start, reason = action.can_start(target_avatar=target)
         
         # Should not fail due to cooldown.
-        assert "冷却" not in reason
+        assert "cooldown" not in reason.lower()
 
     @pytest.mark.asyncio
     async def test_cooldown_not_recorded_on_finish_failure(self):

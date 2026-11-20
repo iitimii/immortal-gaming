@@ -86,7 +86,7 @@ def test_luanxin_gu_reduces_exp_when_triggered(base_world):
 
     assert target.cultivation_progress.exp == 20
     assert len(events) == 1
-    assert "乱心蛊" in events[0].content
+    assert "Mind-Disorder Gu" in events[0].content
 
 
 def test_expired_gu_effect_does_not_tick(base_world):

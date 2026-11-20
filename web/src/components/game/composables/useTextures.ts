@@ -8,13 +8,13 @@ import { getAvatarIndexSlug, getAvatarPortraitUrl, getRealmAssetSlug, getGameAss
 import { normalizeAvatarAssetLibraries, type AvatarAssetLibraries } from '@/utils/avatarAssets'
 import { POI_ICON_URLS } from '@/utils/poiIcons'
 
-// 设置全局纹理缩放模式为 nearest (像素风)
+// Global texture scale mode: nearest (pixel art)
 TextureStyle.defaultOptions.scaleMode = 'nearest'
 
-// 地形变体配置
-// startIndex: 变体索引起始值，默认为 0
+// Terrain variant config
+// startIndex: first variant index, defaults to 0
 const TILE_VARIANTS: Record<string, { prefix: string, count: number, startIndex?: number }> = {
-  // 从 0 开始的变体 (0-8)
+  // Variants starting at 0 (0-8)
   'GLACIER': { prefix: 'glacier', count: 9, startIndex: 0 },
   'MOUNTAIN': { prefix: 'mountain', count: 9, startIndex: 0 },
   'DESERT': { prefix: 'desert', count: 9, startIndex: 0 }, 
@@ -28,7 +28,7 @@ const TILE_VARIANTS: Record<string, { prefix: string, count: number, startIndex?
   'SWAMP': { prefix: 'swamp', count: 9, startIndex: 0 },
 }
 
-// 全局纹理缓存，避免重复加载。Pixi Texture 不能进入 Vue 深层响应式代理。
+// Global texture cache to avoid reloading. Pixi textures must not be wrapped in deep Vue reactivity.
 const textures = shallowRef<Record<string, Texture>>({})
 const isLoaded = ref(false)
 const availableAvatars = ref<AvatarAssetLibraries>({
@@ -71,7 +71,7 @@ function resolveAvatarPortraitId(
   if (avatar.pic_id) return avatar.pic_id
 
   const gender = String(avatar.gender || '').toLowerCase()
-  const genderKey = gender === 'female' || gender === '女' ? 'female' : 'male'
+  const genderKey = gender === 'female' ? 'female' : 'male'
   const raceKey = String(avatar.race || 'human').toLowerCase()
   const library = libraries[raceKey] || libraries.human
   const list = library?.[genderKey]
@@ -87,12 +87,12 @@ function resolveAvatarPortraitId(
 
 export function useTextures() {
   
-  // 基础纹理加载（地图块、角色）
+  // Base texture loading (tiles, avatars)
   const loadBaseTextures = async () => {
     if (baseTexturesPromise) return baseTexturesPromise
 
     baseTexturesPromise = (async () => {
-    // 1. 获取最新的 Avatar Meta 并检查是否有变化
+    // 1. Fetch the latest avatar meta and check whether it changed
     let metaChanged = false
     try {
         const meta = await avatarApi.fetchAvatarMeta()
@@ -108,7 +108,7 @@ export function useTextures() {
         
     } catch (e) {
         logWarn('Textures load avatar meta', e)
-        // Fallback: 只有在列表为空时才使用默认值
+        // Fallback: only use defaults when the list is empty
         if (availableAvatars.value.human.male.length === 0) {
             availableAvatars.value.human = {
               male: Array.from({length: 48}, (_, i) => i + 1),
@@ -118,8 +118,8 @@ export function useTextures() {
         }
     }
 
-    // 2. 如果已经加载过，且元数据没有变化，则跳过
-    // 注意：如果 metaChanged 为 true，即使 isLoaded 为 true 也要重新执行加载逻辑（Pixi Assets 会处理去重）
+    // 2. Skip if already loaded and the meta is unchanged
+    // Note: if metaChanged is true, reload even when isLoaded is true (Pixi Assets dedupes)
     if (isLoaded.value && !metaChanged) {
         return
     }
@@ -185,7 +185,7 @@ export function useTextures() {
 
     await Promise.all([...tilePromises, ...variantPromises, ...cloudPromises])
 
-    // 为没有基础纹理的变体类型设置默认纹理（使用第0个变体作为默认值）
+    // Give variant types without a base texture a default (variant 0)
     Object.keys(TILE_VARIANTS).forEach(key => {
         if (!textures.value[key] && textures.value[`${key}_0`]) {
             setTexture(key, textures.value[`${key}_0`])
@@ -200,13 +200,13 @@ export function useTextures() {
     return baseTexturesPromise
   }
 
-  // 动态加载宗门纹理（按需）- 加载4个切片用于渲染
+  // Load sect textures on demand (4 slices)
   const loadSectTexture = async (sectId: number) => {
       if ([0, 1, 2, 3].every(i => textures.value[`sect_${sectId}_${i}`])) return
       const existingPromise = sectTexturePromises.get(sectId)
       if (existingPromise) return existingPromise
 
-      // 加载4个切片 _0, _1, _2, _3
+      // Load the 4 slices _0, _1, _2, _3
       const slicePromises = [0, 1, 2, 3].map(async (i) => {
           const key = `sect_${sectId}_${i}`
           if (textures.value[key]) return
@@ -229,13 +229,13 @@ export function useTextures() {
       return promise
   }
 
-  // 动态加载城市纹理（按需）- 加载4个切片用于渲染
+  // Load city textures on demand (4 slices)
   const loadCityTexture = async (cityId: number) => {
       if ([0, 1, 2, 3].every(i => textures.value[`city_${cityId}_${i}`])) return
       const existingPromise = cityTexturePromises.get(cityId)
       if (existingPromise) return existingPromise
 
-      // 加载4个切片 _0, _1, _2, _3
+      // Load the 4 slices _0, _1, _2, _3
       const extensions = ['.jpg', '.png']
       
       const slicePromises = [0, 1, 2, 3].map(async (i) => {
@@ -369,12 +369,12 @@ export function useTextures() {
     await Promise.all(promises)
   }
 
-  // 获取地形纹理（支持随机变体）
+  // Get a terrain texture (with random variants)
   const getTileTexture = (type: string, x: number, y: number): Texture | undefined => {
     const variantConfig = TILE_VARIANTS[type]
     if (variantConfig) {
-      // 使用噪声聚类算法替代纯随机 Hash
-      // 让变体在地图上呈现自然的群落分布，减少视觉噪点
+      // Use noise clustering instead of a pure random hash
+      // so variants form natural clusters with less visual noise
       const index = getClusteredTileVariant(x, y, variantConfig.count)
       const variantKey = `${type}_${index}`
       

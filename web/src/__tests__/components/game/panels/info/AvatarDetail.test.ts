@@ -41,9 +41,9 @@ describe('AvatarDetail', () => {
 
   const i18n = createI18n({
     legacy: false,
-    locale: 'zh-CN',
+    locale: 'en-US',
     messages: {
-      'zh-CN': {
+      'en-US': {
         game: {
           info_panel: {
             avatar: {
@@ -212,25 +212,25 @@ describe('AvatarDetail', () => {
       relations: [
         {
           target_id: 'avatar_2',
-          name: '青岚',
-          relation: '道侣 / 友好',
+          name: 'Qing Lan',
+          relation: 'Dao Companion / Friendly',
           relation_type: 'lovers',
           identity_relations: ['lovers'],
           numeric_relation: 'friend',
           friendliness: 12,
-          realm: '金丹后期',
-          sect: '凌霄剑宗',
+          realm: 'Core Formation Late',
+          sect: 'Lingxiao Sword Sect',
         },
         {
           target_id: 'avatar_3',
-          name: '丹七杀',
-          relation: '陌生',
+          name: 'Dan Qisha',
+          relation: 'Stranger',
           relation_type: '',
           identity_relations: [],
           numeric_relation: 'stranger',
           friendliness: 0,
-          realm: '金丹后期',
-          sect: '金丹后期',
+          realm: 'Core Formation Late',
+          sect: 'Core Formation Late',
         },
       ],
     }
@@ -258,12 +258,12 @@ describe('AvatarDetail', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('道侣')
-    expect(wrapper.text()).toContain('友好（12）')
-    expect(wrapper.text()).not.toContain('态度：陌生')
-    expect(wrapper.text()).not.toContain('身份：')
-    expect(wrapper.text()).not.toContain('态度：')
-    expect(wrapper.text()).not.toContain('丹七杀')
+    expect(wrapper.text()).toContain('Dao Companion')
+    expect(wrapper.text()).toMatch(/Friendly \(12\)/)
+    expect(wrapper.text()).not.toContain('Attitude: Stranger')
+    expect(wrapper.text()).not.toContain('Identity:')
+    expect(wrapper.text()).not.toContain('Attitude:')
+    expect(wrapper.text()).not.toContain('Dan Qisha')
   })
 
   it('renders long effect sources as separate rows with segmented content', () => {
@@ -311,9 +311,9 @@ describe('AvatarDetail', () => {
           ...mockAvatarData,
           goldfinger: {
             id: '1',
-            name: '气运之子',
-            desc: '天命偏爱，机缘主动靠近',
-            effect_desc: '气运 +20',
+            name: 'Child of Fortune',
+            desc: 'Favored by fate; fortune comes seeking',
+            effect_desc: 'Luck +20',
           },
         } as any,
       },
@@ -342,8 +342,8 @@ describe('AvatarDetail', () => {
     expect(entityRowSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         item: expect.objectContaining({
-          name: '气运之子',
-          desc: '天命偏爱，机缘主动靠近',
+          name: 'Child of Fortune',
+          desc: 'Favored by fate; fortune comes seeking',
         }),
       }),
     )
@@ -368,9 +368,9 @@ describe('AvatarDetail', () => {
           ...mockAvatarData,
           race: {
             id: 'fox',
-            name: '狐族',
-            desc: '狐族灵慧狡黠',
-            effect_desc: '采集材料 +1',
+            name: 'Fox Folk',
+            desc: 'Fox folk are clever and cunning',
+            effect_desc: 'Material gathering +1',
           },
         } as any,
       },
@@ -394,7 +394,7 @@ describe('AvatarDetail', () => {
     })
 
     expect(wrapper.text()).toContain('Race')
-    expect(wrapper.text()).toContain('狐族')
+    expect(wrapper.text()).toContain('Fox Folk')
 
     const raceStat = wrapper.findAll('.stat-item').find(item => item.text().includes('Race'))
     expect(raceStat).toBeTruthy()
@@ -403,10 +403,10 @@ describe('AvatarDetail', () => {
 
     expect(secondaryItem).toMatchObject({
       id: 'fox',
-      name: '狐族',
-      effect_desc: '采集材料 +1',
+      name: 'Fox Folk',
+      effect_desc: 'Material gathering +1',
     })
-    expect(wrapper.text()).toContain('狐族')
+    expect(wrapper.text()).toContain('Fox Folk')
   })
 
   it('prefers cultivation alias display and shows canonical equivalent', () => {
@@ -421,12 +421,12 @@ describe('AvatarDetail', () => {
             realm_id: 'FOUNDATION_ESTABLISHMENT',
             stage_id: 'MIDDLE_STAGE',
             level: 42,
-            canonical_realm_name: '筑基',
-            canonical_stage_name: '中期',
-            canonical_full_name: '筑基中期',
-            display_realm_name: '易筋',
-            display_stage_name: '中成',
-            display_full_name: '易筋中成',
+            canonical_realm_name: 'Foundation Establishment',
+            canonical_stage_name: 'Middle',
+            canonical_full_name: 'Foundation Establishment Middle',
+            display_realm_name: 'Sinew Tempering',
+            display_stage_name: 'Intermediate',
+            display_full_name: 'Sinew Tempering Intermediate',
           },
         } as any,
       },
@@ -446,9 +446,9 @@ describe('AvatarDetail', () => {
       },
     })
 
-    expect(wrapper.find('.avatar-realm').text()).toBe('易筋中成')
-    expect(wrapper.find('.avatar-realm-canonical').text()).toContain('筑基中期')
-    expect(wrapper.text()).toContain('易筋中成')
+    expect(wrapper.find('.avatar-realm').text()).toBe('Sinew Tempering Intermediate')
+    expect(wrapper.find('.avatar-realm-canonical').text()).toContain('Foundation Establishment Middle')
+    expect(wrapper.text()).toContain('Sinew Tempering Intermediate')
   })
 
   it('does not fall back to hardcoded Chinese when race detail is missing', () => {
@@ -481,7 +481,7 @@ describe('AvatarDetail', () => {
     const raceStat = wrapper.findAll('.stat-item').find(item => item.text().includes('Race'))
 
     expect(raceStat).toBeTruthy()
-    expect(raceStat!.text()).not.toContain('人族')
+    expect(raceStat!.text()).not.toContain('Human')
   })
 
   it('passes goldfinger category and current item into adjust panel when clicking edit', async () => {
@@ -501,9 +501,9 @@ describe('AvatarDetail', () => {
           ...mockAvatarData,
           goldfinger: {
             id: '1',
-            name: '气运之子',
-            desc: '天命眷顾',
-            effect_desc: '气运 +20',
+            name: 'Child of Fortune',
+            desc: 'Blessed by fate',
+            effect_desc: 'Luck +20',
           },
         } as any,
       },
@@ -537,7 +537,7 @@ describe('AvatarDetail', () => {
     expect(capturedProps?.category).toBe('goldfinger')
     expect(capturedProps?.currentItem).toMatchObject({
       id: '1',
-      name: '气运之子',
+      name: 'Child of Fortune',
     })
   })
 })

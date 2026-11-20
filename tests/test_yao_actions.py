@@ -20,13 +20,13 @@ async def test_turtle_rest_recovers_hp_and_gains_exp(avatar_in_city):
     ok, reason = action.can_start()
     assert ok, reason
     assert action.duration_months == 3
-    assert action.start().content == f"{avatar_in_city.name}开始休息。"
+    assert action.start().content == f"{avatar_in_city.name} begins resting."
 
     events = await action.finish()
 
     assert avatar_in_city.hp.cur > old_hp
     assert avatar_in_city.cultivation_progress.exp == old_exp + 90
-    assert "修为经验" in events[0].content
+    assert "cultivation experience" in events[0].content
 
 
 @pytest.mark.asyncio
@@ -43,7 +43,7 @@ async def test_human_rest_does_not_gain_exp(avatar_in_city):
 
     assert avatar_in_city.hp.cur > old_hp
     assert avatar_in_city.cultivation_progress.exp == old_exp
-    assert "修为经验" not in events[0].content
+    assert "cultivation experience" not in events[0].content
 
 
 @pytest.mark.asyncio
@@ -64,7 +64,7 @@ async def test_wolf_eat_mortals_reduces_population_and_gains_exp(avatar_in_city)
 
     assert region.population < old_population
     assert avatar_in_city.cultivation_progress.exp > old_exp
-    assert "吃掉" in events[0].content
+    assert " ate " in events[0].content
 
 
 def test_eat_mortals_blocks_human_and_righteous_yao(avatar_in_city):

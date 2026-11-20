@@ -9,19 +9,19 @@ from src.systems.cultivation import Realm
 @dataclass
 class Plant:
     """
-    植物
+    Plant
     """
     id: int
     name: str
     desc: str
     realm: Realm
-    material_ids: list[int] = field(default_factory=list)  # 该植物对应的物品IDs
+    material_ids: list[int] = field(default_factory=list)  # Item IDs for this plant
     
-    # 这些字段将在__post_init__中设置
-    materials: list[Material] = field(init=False, default_factory=list)  # 该植物对应的物品实例
+    # These fields are set in __post_init__
+    materials: list[Material] = field(init=False, default_factory=list)  # Item instances for this plant
     
     def __post_init__(self):
-        """初始化物品实例"""
+        """Initialize item instances."""
         for material_id in self.material_ids:
             if material_id in materials_by_id:
                 self.materials.append(materials_by_id[material_id])
@@ -34,10 +34,10 @@ class Plant:
     
     def get_info(self) -> str:
         """
-        获取植物的详细信息，包括名字、描述、境界和材料
+        Get the plant's detailed info, including name, description, realm and materials
         """
         from src.i18n import t
-        # 使用格式化字符串 msgid
+        # Use a format-string msgid
         base_info = t("[{name}] ({realm})", name=self.name, realm=str(self.realm))
         info_parts = [base_info, self.desc]
         
@@ -60,7 +60,7 @@ class Plant:
         }
 
 def _load_plants() -> tuple[dict[int, Plant], dict[str, Plant]]:
-    """从配表加载plant数据"""
+    """Load plant data from the config table."""
     plants_by_id: dict[int, Plant] = {}
     plants_by_name: dict[str, Plant] = {}
     
@@ -84,7 +84,7 @@ plants_by_id: dict[int, Plant] = {}
 plants_by_name: dict[str, Plant] = {}
 
 def reload():
-    """重新加载数据，保留全局字典引用"""
+    """Reload data while preserving the global dict references."""
     new_id, new_name = _load_plants()
     
     plants_by_id.clear()
@@ -93,5 +93,5 @@ def reload():
     plants_by_name.clear()
     plants_by_name.update(new_name)
 
-# 模块初始化时执行一次
+# Run once at module import
 reload()

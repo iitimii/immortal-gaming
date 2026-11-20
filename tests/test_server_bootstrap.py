@@ -131,7 +131,7 @@ def test_patch_standard_streams_installs_dummy_for_missing_stdout(monkeypatch):
 
     assert sys.stdout is not None
     assert sys.stdout.encoding == "utf-8"
-    assert sys.stdout.write("中文 output") == 0
+    assert sys.stdout.write("Ünïcödé ✓ output") == 0
     monkeypatch.setattr(sys, "stdout", original_stdout)
 
 

@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest'
 
 /**
- * SectInfluenceLayer 现在直接绘制后端返回的真实占领格与边界边。
- * 这里验证基础几何数据的计数，避免在测试环境挂载 Pixi。
+ * SectInfluenceLayer now draws the real occupied tiles and border edges returned by the backend.
+ * These tests check the basic geometry counts without mounting Pixi in the test environment.
  */
 function collectBoundaryEdges(ownedTiles: Array<{ x: number; y: number }>) {
   const tileSet = new Set(ownedTiles.map((tile) => `${tile.x},${tile.y}`))

@@ -86,9 +86,7 @@ def test_electron_builder_limits_locales_to_enabled_product_languages():
     project_root = get_project_root()
     config = (project_root / "desktop" / "electron-builder.config.cjs").read_text(encoding="utf-8")
 
-    assert "electronLanguages" in config
-    for locale in ("zh-CN", "zh-TW", "en-US", "ja", "fr", "vi"):
-        assert f"'{locale}'" in config
+    assert "electronLanguages: ['en-US']" in config
 
 
 def test_steam_frontend_build_avoids_fragile_vendor_chunks():

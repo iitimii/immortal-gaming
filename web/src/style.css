@@ -59,7 +59,7 @@ a {
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
-  background-color: transparent; /* 关键：修复白色背景问题 */
+  background-color: transparent; /* Important: fixes the white background issue */
 }
 
 ::-webkit-scrollbar-track {
@@ -76,7 +76,7 @@ a {
   background: #666;
 }
 
-/* 修复 Firefox 的滚动条 */
+/* Firefox scrollbar fix */
 * {
   scrollbar-width: thin;
   scrollbar-color: #444 transparent;

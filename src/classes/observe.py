@@ -10,23 +10,23 @@ if TYPE_CHECKING:
 
 
 _OBSERVATION_RADIUS_BY_REALM: dict[Realm, int] = {
-    Realm.Qi_Refinement: 3,            # 练气
-    Realm.Foundation_Establishment: 5, # 筑基
-    Realm.Core_Formation: 7,           # 金丹
-    Realm.Nascent_Soul: 9,             # 元婴
+    Realm.Qi_Refinement: 3,            # Qi Refinement
+    Realm.Foundation_Establishment: 5, # Foundation Establishment
+    Realm.Core_Formation: 7,           # Core Formation
+    Realm.Nascent_Soul: 9,             # Nascent Soul
 }
 
 
 def get_observation_radius_by_realm(realm: Realm) -> int:
     """
-    根据境界返回感知半径（基于曼哈顿距离）。
+    Return the perception radius by realm (based on Manhattan distance).
     """
     return _OBSERVATION_RADIUS_BY_REALM.get(realm, 2)
 
 
 def get_avatar_observation_radius(avatar: "Avatar") -> int:
     """
-    获取角色的感知半径。
+    Get the avatar's perception radius.
     """
     base = get_observation_radius_by_realm(avatar.cultivation_progress.realm)
     extra_raw = avatar.effects.get("extra_observation_radius", 0)
@@ -36,16 +36,16 @@ def get_avatar_observation_radius(avatar: "Avatar") -> int:
 
 def is_within_observation(initiator: "Avatar", other: "Avatar") -> bool:
     """
-    判断 other 是否处于 initiator 的交互范围内：
-    汉明距离(曼哈顿距离) <= initiator 的感知半径。
+    Determine whether other is within the initiator's interaction range:
+    Manhattan distance <= the initiator's perception radius.
     """
     return get_avatar_distance(initiator, other) <= get_avatar_observation_radius(initiator)
 
 
 def get_observable_avatars(initiator: "Avatar", avatars: Iterable["Avatar"]) -> List["Avatar"]:
     """
-    从给定集合中过滤出处于 initiator 交互范围内的角色（不包含 initiator 本人）。
-    算法：线性扫描 O(N)，与现有管理器遍历复杂度一致。
+    Filter the avatars within the initiator's interaction range from the given collection (excluding the initiator).
+    Algorithm: linear scan O(N), consistent with existing manager iteration complexity.
     """
     result: list["Avatar"] = []
     for v in avatars:

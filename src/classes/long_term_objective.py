@@ -1,6 +1,6 @@
 """
-长期目标模块
-为角色生成和管理长期目标（5-10年）
+Long-term objective module
+Generates and manages long-term objectives (5-10 years) for avatars
 """
 from __future__ import annotations
 from dataclasses import dataclass
@@ -22,36 +22,36 @@ logger = get_logger().logger
 
 @dataclass
 class LongTermObjective:
-    """长期目标类"""
-    content: str  # 目标内容
-    origin: str  # "llm" 或 "user"
-    set_year: int  # 设定时的年份
+    """Long-term objective."""
+    content: str  # Objective content
+    origin: str  # "llm" or "user"
+    set_year: int  # Year it was set
 
 
 def can_generate_long_term_objective(avatar: "Avatar") -> bool:
     """
-    检查角色是否需要生成/更新长期目标
+    Check whether the avatar needs to generate/update its long-term objective
     
-    规则：
-    1. 已有用户设定的目标，永不自动生成
-    2. 无目标时，可以生成
-    3. 距离上次设定 <5年，不生成
-    4. 距离上次设定 ≥10年，必定生成
-    5. 距离上次设定 5-10年，按概率生成（渐进概率）
+    Rules:
+    1. If there's a user-set objective, never auto-generate
+    2. With no objective, may generate
+    3. Less than 5 years since last set: don't generate
+    4. 10 or more years since last set: always generate
+    5. 5-10 years since last set: generate with probability (increasing gradually)
     
     Args:
-        avatar: 要检查的角色
+        avatar: the avatar to check
         
     Returns:
-        是否应该生成长期目标
+        Whether a long-term objective should be generated
     """
-    # 已有用户设定的目标，不再自动生成
+    # A user-set objective exists; no more auto-generation
     if avatar.long_term_objective and avatar.long_term_objective.origin == "user":
         return False
     
     current_year = avatar.world.month_stamp.get_year()
     
-    # 首次设定（无目标）
+    # First time setting (no objective)
     if not avatar.long_term_objective:
         return True
     
@@ -61,31 +61,31 @@ def can_generate_long_term_objective(avatar: "Avatar") -> bool:
         return False
     elif years_passed >= 10:
         return True
-    else:  # 5-10年之间
-        # 渐进概率：5年时10%，随时间推移逐渐增加，接近10年时接近100%
+    else:  # Between 5 and 10 years
+        # Gradual probability: 10% at 5 years, increasing over time, approaching 100% near 10 years
         probability = (years_passed - 5) / 5 * 0.9 + 0.1
         return random.random() < probability
 
 
 async def generate_long_term_objective(avatar: "Avatar") -> Optional[LongTermObjective]:
     """
-    为角色生成长期目标
+    Generate a long-term objective for the avatar
     
-    调用LLM基于角色信息和事件历史生成合适的长期目标
+    Call the LLM to generate a suitable long-term objective based on the avatar's info and event history
     
     Args:
-        avatar: 要生成长期目标的角色
+        avatar: the avatar to generate a long-term objective for
         
     Returns:
-        生成的LongTermObjective对象，失败则返回None
+        The generated LongTermObjective, or None on failure
     """
-    # 准备世界信息（仅获取已知区域 + 距离信息）
+    # Prepare world info (only known regions + distance info)
     world_info = avatar.world.get_info(avatar=avatar)
     
-    # 获取 expanded_info（包含详细信息和事件历史）
+    # Get expanded_info (detailed info and event history)
     expanded_info = avatar.get_expanded_info(detailed=True)
     
-    # 准备模板参数
+    # Prepare template params
     template_path = CONFIG.paths.templates / "long_term_objective.txt"
     infos = {
         "world_info": world_info,
@@ -94,13 +94,13 @@ async def generate_long_term_objective(avatar: "Avatar") -> Optional[LongTermObj
         "general_action_infos": get_action_infos_str(avatar),
     }
     
-    # 调用LLM并自动解析JSON（使用配置的模型模式）
+    # Call the LLM and parse the JSON automatically (using the configured model mode)
     response_data = await call_llm_with_task_name("long_term_objective", template_path, infos)
     
     content = response_data.get("long_term_objective", "").strip()
     
     if not content:
-        logger.warning(f"为角色 {avatar.name} 生成长期目标失败：返回空内容")
+        logger.warning(f"Failed to generate a long-term objective for avatar {avatar.name}: empty content returned")
         return None
     
     current_year = avatar.world.month_stamp.get_year()
@@ -110,7 +110,7 @@ async def generate_long_term_objective(avatar: "Avatar") -> Optional[LongTermObj
         set_year=current_year
     )
     
-    logger.info(f"为角色 {avatar.name} 生成长期目标：{content}")
+    logger.info(f"Generated a long-term objective for avatar {avatar.name}: {content}")
     
     return objective
         
@@ -118,15 +118,15 @@ async def generate_long_term_objective(avatar: "Avatar") -> Optional[LongTermObj
 
 async def process_avatar_long_term_objective(avatar: "Avatar") -> Optional[Event]:
     """
-    处理单个角色的长期目标生成/更新
+    Handle long-term objective generation/update for a single avatar
     
-    检查角色是否需要生成目标，需要则生成并返回对应事件
+    Check whether the avatar needs an objective; if so, generate it and return the corresponding event
     
     Args:
-        avatar: 要处理的角色
+        avatar: the avatar to process
         
     Returns:
-        生成的事件，如果不需要生成或生成失败则返回None
+        The generated event, or None if not needed or generation failed
     """
     if not can_generate_long_term_objective(avatar):
         return None
@@ -139,9 +139,9 @@ async def process_avatar_long_term_objective(avatar: "Avatar") -> Optional[Event
     
     avatar.long_term_objective = new_objective
     
-    # 生成事件
+    # Generate the event
     if old_objective:
-        # 更新目标
+        # Update the objective
         event = Event(
             avatar.world.month_stamp,
             t("{avatar_name} deliberated and redefined their long-term objective: {objective}", avatar_name=avatar.name, objective=new_objective.content),
@@ -149,7 +149,7 @@ async def process_avatar_long_term_objective(avatar: "Avatar") -> Optional[Event
             is_major=False
         )
     else:
-        # 首次设定目标
+        # First-time objective
         event = Event(
             avatar.world.month_stamp,
             t("{avatar_name} determined their long-term objective: {objective}", avatar_name=avatar.name, objective=new_objective.content),
@@ -162,14 +162,14 @@ async def process_avatar_long_term_objective(avatar: "Avatar") -> Optional[Event
 
 def set_user_long_term_objective(avatar: "Avatar", objective_content: str) -> None:
     """
-    玩家设定角色的长期目标
+    Set the avatar's long-term objective by the player
     
-    用户设定后，origin标记为"user"，系统将不再自动调用LLM更新该目标
-    但允许玩家再次调用此函数修改
+    After the user sets it, origin is marked "user" and the system no longer calls the LLM to update it automatically
+    The player may still call this function again to change it
     
     Args:
-        avatar: 要设定目标的角色
-        objective_content: 目标内容
+        avatar: the avatar to set the objective for
+        objective_content: objective content
     """
     current_year = avatar.world.month_stamp.get_year()
     avatar.long_term_objective = LongTermObjective(
@@ -178,21 +178,21 @@ def set_user_long_term_objective(avatar: "Avatar", objective_content: str) -> No
         set_year=current_year
     )
     
-    # 用户手动设定长期目标时，清空短期目标和后续计划，以便AI重新规划
+    # When the user sets a long-term objective manually, clear the short-term objective and pending plans so the AI replans
     avatar.short_term_objective = ""
     avatar.clear_plans()
     
-    logger.info(f"玩家为角色 {avatar.name} 设定长期目标：{objective_content}，并已清空短期目标和后续计划")
+    logger.info(f"Player set long-term objective for avatar {avatar.name}: {objective_content}; short-term objective and pending plans cleared")
 
 
 def clear_user_long_term_objective(avatar: "Avatar") -> bool:
     """
-    清空玩家设定的长期目标
-    如果当前目标是 system/llm 生成的，则不清除并返回 False
-    如果是 user 生成的，清除并返回 True
+    Clear the player-set long-term objective
+    If the current objective was generated by system/llm, don't clear it and return False
+    If it was user-generated, clear it and return True
     """
     if avatar.long_term_objective and avatar.long_term_objective.origin == "user":
         avatar.long_term_objective = None
-        logger.info(f"玩家清空了角色 {avatar.name} 的长期目标")
+        logger.info(f"Player cleared the long-term objective of avatar {avatar.name}")
         return True
     return False

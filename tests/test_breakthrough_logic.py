@@ -3,58 +3,58 @@ from src.systems.cultivation import CultivationProgress, Realm, Stage, REALM_ORD
 
 def test_breakthrough_normal(dummy_avatar):
     """
-    测试正常突破逻辑：从练气圆满突破到筑基前期
+    Normal breakthrough: from peak Qi Refinement to early Foundation Establishment.
     """
-    # 练气圆满是 30 级 (LEVELS_PER_REALM * 1)
+    # Peak Qi Refinement is level 30 (LEVELS_PER_REALM * 1)
     qi_max_level = 30
     
-    # 设置角色状态
+    # Set the avatar state
     cp = CultivationProgress(level=qi_max_level, exp=0)
     dummy_avatar.cultivation_progress = cp
     
-    # 验证当前状态
+    # Verify the current state
     assert cp.realm == Realm.Qi_Refinement
     assert cp.is_in_bottleneck() is True
     assert cp.can_break_through() is True
     
-    # 执行突破
+    # Break through
     cp.break_through()
     
-    # 验证突破后状态
-    # 应该升级到 31 级
+    # Verify the post-breakthrough state
+    # Should advance to level 31
     assert cp.level == 31
-    # 境界应该是 筑基
+    # Realm should be Foundation Establishment
     assert cp.realm == Realm.Foundation_Establishment
-    # 阶段应该是 前期
+    # Stage should be Early Stage
     assert cp.stage == Stage.Early_Stage
-    # 不再处于瓶颈
+    # No longer in a bottleneck
     assert cp.is_in_bottleneck() is False
 
 def test_breakthrough_max_realm_limit(dummy_avatar):
     """
-    测试最高境界限制：元婴圆满（目前最高等级）不能再突破
+    Max realm limit: peak Nascent Soul (currently the highest level) cannot break through.
     """
-    # 计算最高等级
-    # 目前有 4 个境界，每个 30 级，最高 120 级
+    # Compute the maximum level
+    # There are currently 4 realms of 30 levels each, so the max is 120
     max_level = len(REALM_ORDER) * LEVELS_PER_REALM
     
-    # 设置角色状态为最高等级
+    # Put the avatar at the maximum level
     cp = CultivationProgress(level=max_level, exp=0)
     dummy_avatar.cultivation_progress = cp
     
-    # 验证当前状态
+    # Verify the current state
     assert cp.realm == Realm.Nascent_Soul
-    # 理论上它是 30/60/90/120，模 30 为 0，所以 is_in_bottleneck 会返回 True
+    # 30/60/90/120 are all 0 mod 30, so is_in_bottleneck returns True
     assert cp.is_in_bottleneck() is True
     
-    # 关键测试点：can_break_through 应该返回 False，因为已经封顶了
+    # Key check: can_break_through must return False because the cap is reached
     assert cp.can_break_through() is False
 
 def test_not_in_bottleneck(dummy_avatar):
     """
-    测试非瓶颈期不能突破
+    Cannot break through outside a bottleneck.
     """
-    # 随便设一个中间等级，比如 15 级（练气中期）
+    # Pick an intermediate level, e.g. 15 (middle Qi Refinement)
     cp = CultivationProgress(level=15, exp=0)
     dummy_avatar.cultivation_progress = cp
     
@@ -63,9 +63,9 @@ def test_not_in_bottleneck(dummy_avatar):
 
 def test_breakthrough_intermediate_bottleneck(dummy_avatar):
     """
-    测试中间境界的突破：筑基圆满 -> 金丹
+    Intermediate breakthrough: peak Foundation Establishment -> Core Formation.
     """
-    # 筑基圆满是 60 级
+    # Peak Foundation Establishment is level 60
     foundation_max_level = 60
     
     cp = CultivationProgress(level=foundation_max_level, exp=0)

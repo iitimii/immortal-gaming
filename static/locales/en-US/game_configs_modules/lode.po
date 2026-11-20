@@ -12,41 +12,41 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#. lode.csv: 蕴含玄铁的普通矿脉，常见于浅层地表...
+#. lode.csv: A common lode containing black iron, often foun...
 msgid "LODE_1_DESC"
 msgstr ""
 "A common lode containing black iron, often found in shallow surface layers"
 
-#. lode.csv: 玄铁矿脉
+#. lode.csv: Black Iron Lode
 msgid "LODE_1_NAME"
 msgstr "Black Iron Lode"
 
-#. lode.csv: 深埋地下的赤铜矿脉，周围往往伴生火热之气...
+#. lode.csv: A red copper lode buried deep underground, ofte...
 msgid "LODE_2_DESC"
 msgstr ""
 "A red copper lode buried deep underground, often accompanied by fiery heat "
 "qi"
 
-#. lode.csv: 赤铜矿脉
+#. lode.csv: Red Copper Lode
 msgid "LODE_2_NAME"
 msgstr "Red Copper Lode"
 
-#. lode.csv: 极其罕见的秘银富集地，银光闪烁，灵气逼人...
+#. lode.csv: An extremely rare mithril accumulation, shimmer...
 msgid "LODE_3_DESC"
 msgstr ""
 "An extremely rare mithril accumulation, shimmering with silver light and "
 "brimming with spiritual qi"
 
-#. lode.csv: 秘银矿床
+#. lode.csv: Mithril Deposit
 msgid "LODE_3_NAME"
 msgstr "Mithril Deposit"
 
-#. lode.csv: 位于绝壁深处的庚金矿脉，开采极为困难，但...
+#. lode.csv: A Gengjin lode located deep in absolute cliffs,...
 msgid "LODE_4_DESC"
 msgstr ""
 "A Gengjin lode located deep in absolute cliffs, extremely difficult to mine "
 "but worth a fortune"
 
-#. lode.csv: 庚金矿洞
+#. lode.csv: Gengjin Mine
 msgid "LODE_4_NAME"
 msgstr "Gengjin Mine"

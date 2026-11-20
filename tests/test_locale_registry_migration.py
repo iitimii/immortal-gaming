@@ -41,14 +41,14 @@ def test_runtime_code_no_longer_depends_on_tools_locale_registry():
 def test_locale_registry_basic_contract():
     locales = get_locale_codes(enabled_only=False)
 
-    assert get_default_locale() == "zh-CN"
-    assert get_source_locale() in locales
-    assert "vi-VN" in locales
+    assert locales == ["en-US"]
+    assert get_default_locale() == "en-US"
+    assert get_source_locale() == "en-US"
 
 
 def test_locale_registry_fails_fast_when_required_fields_missing(tmp_path, monkeypatch):
     broken_registry = tmp_path / "registry.json"
-    broken_registry.write_text(json.dumps({"locales": [{"code": "zh-CN", "html_lang": "zh-CN", "source_of_truth": True}]}), encoding="utf-8")
+    broken_registry.write_text(json.dumps({"locales": [{"code": "en-US", "html_lang": "en-US", "source_of_truth": True}]}), encoding="utf-8")
 
     monkeypatch.setattr("src.i18n.locale_registry.get_registry_path", lambda: broken_registry)
     load_locale_registry.cache_clear()

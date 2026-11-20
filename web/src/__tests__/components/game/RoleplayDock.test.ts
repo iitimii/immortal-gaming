@@ -64,74 +64,74 @@ vi.mock('@/utils/appError', () => ({
 function createRoleplayI18n() {
   return createI18n({
     legacy: false,
-    locale: 'zh',
+    locale: 'en-US',
     messages: {
-      zh: {
+      'en-US': {
         game: {
           roleplay: {
-            panel: { stop: '退出扮演' },
+            panel: { stop: 'Stop Roleplay' },
             dock: {
-              interaction_title: '交互流',
-              interaction_caption: '本次扮演中的输入与输出',
-              interaction_empty: '当前还没有新的交互记录。',
-              collapse: '折叠扮演面板',
-              expand: '展开扮演面板',
-              collapse_short: '收',
-              expand_short: '展',
+              interaction_title: 'Interaction Log',
+              interaction_caption: 'Input and output during this roleplay session',
+              interaction_empty: 'There are no new interaction records yet.',
+              collapse: 'Collapse roleplay panel',
+              expand: 'Expand roleplay panel',
+              collapse_short: 'Min',
+              expand_short: 'Max',
             },
             status: {
-              awaiting_decision: '等待指令',
-              awaiting_choice: '等待选择',
-              conversing: '对话中',
-              submitting: '提交中',
-              observing: '观察中',
+              awaiting_decision: 'Awaiting Command',
+              awaiting_choice: 'Awaiting Choice',
+              conversing: 'Conversing',
+              submitting: 'Submitting',
+              observing: 'Observing',
             },
             summary: {
-              decision: '需要决定下一步行动',
-              choice: '需要做出回应',
-              conversation: '正在与 {target} 交谈',
-              observing: '当前动作链仍在执行',
+              decision: 'Needs a next action',
+              choice: 'Needs a response',
+              conversation: 'Talking with {target}',
+              observing: 'Current action chain is still running',
             },
             request: {
-              title_decision: '决策',
-              title_choice: '选项',
-              title_conversation: '对话',
-              title_observing: '观察',
-              caption_decision: '输入一句意图，系统会扩展成行动链',
-              caption_choice: '从有限选项里做出一次回应',
-              caption_conversation: '玩家控制 {avatar} 发言，对方由 LLM 回复',
-              caption_observing: '当前没有需要立即处理的请求',
-              decision_default_description: '输入一句意图，系统会把它扩展成该角色的下一步行动链。',
-              choice_default_description: '请选择一个回应。',
-              conversation_default_description: '世界已暂停，等待你继续扮演当前角色发言。',
+              title_decision: 'Decision',
+              title_choice: 'Choice',
+              title_conversation: 'Conversation',
+              title_observing: 'Observe',
+              caption_decision: 'Enter one intent and the system will expand it into an action chain',
+              caption_choice: 'Make one response from limited options',
+              caption_conversation: 'The player speaks as {avatar}, and the other side replies through the LLM',
+              caption_observing: 'There is no request that needs immediate handling right now',
+              decision_default_description: "Enter one intent and the system will expand it into this character's next action chain.",
+              choice_default_description: 'Choose one response.',
+              conversation_default_description: 'The world is paused, waiting for you to continue speaking as the current character.',
             },
             decision: {
-              placeholder: '输入角色的下一步意图，例如：先调息恢复，再去附近探索。',
-              submit: '提交指令',
-              submitting: '处理中...',
+              placeholder: "Enter the character's next intent, for example: recover first, then explore nearby.",
+              submit: 'Submit Command',
+              submitting: 'Processing...',
             },
             choice: {
-              submitting: '正在处理选择，请稍候...',
+              submitting: 'Processing your choice, please wait...',
             },
             conversation: {
-              placeholder: '输入你想说的话。',
-              submit: '发送',
-              sending: '发送中...',
-              awaiting_reply: '等待回复...',
-              end: '结束对话',
-              end_disabled: '等待回复时暂不能结束对话',
+              placeholder: 'Enter what you want to say.',
+              submit: 'Send',
+              sending: 'Sending...',
+              awaiting_reply: 'Waiting for reply...',
+              end: 'End Conversation',
+              end_disabled: 'You cannot end the conversation while waiting for a reply',
             },
             feedback: {
-              decision_submitted: '已提交指令：{text}',
-              choice_submitted: '已选择：{text}',
-              conversation_failed: '发送失败，原文已保留，可修改后重试。',
+              decision_submitted: 'Command submitted: {text}',
+              choice_submitted: 'Choice submitted: {text}',
+              conversation_failed: 'Send failed. Your text was kept so you can edit and retry.',
             },
             idle: {
-              hint: '当前仍在上帝视角观察世界。该角色的动作链结束后，会在这里等待你的下一步操作。',
+              hint: "You are still observing the world in omniscient view. When this character's action chain finishes, the next prompt will wait for you here.",
             },
             fallback: {
-              avatar_name: '角色',
-              counterpart_name: '对方',
+              avatar_name: 'Avatar',
+              counterpart_name: 'Other Side',
             },
           },
         },
@@ -171,40 +171,40 @@ describe('RoleplayDock', () => {
       request_id: 'req-1',
       type: 'decision',
       avatar_id: 'avatar-1',
-      title: '闻人雾 需要新的指令',
-      description: '世界已暂停，正在等待你的扮演指令。',
+      title: 'Wenren Wu needs a new command',
+      description: 'The world is paused, waiting for your roleplay command.',
     }
     roleplayStoreMock.session.last_prompt_context = {
-      avatar_name: '闻人雾',
+      avatar_name: 'Wenren Wu',
     }
     roleplayStoreMock.session.interaction_history = [
-      { type: 'command', created_at: 1, text: '先调息恢复，再去探索。' },
+      { type: 'command', created_at: 1, text: 'Recover first, then explore.' },
       {
         type: 'action_chain',
         created_at: 2,
-        actions: [{ action_name: 'MoveToRegion', tokens: [{ kind: 'verb', text: '移动到' }, { kind: 'arg', text: '青石谷' }] }],
+        actions: [{ action_name: 'MoveToRegion', tokens: [{ kind: 'verb', text: 'Move to' }, { kind: 'arg', text: 'Bluestone Valley' }] }],
       },
     ]
 
     const wrapper = mount(RoleplayDock, { global: { plugins: [createRoleplayI18n()] } })
     await nextTick()
 
-    expect(wrapper.text()).toContain('闻人雾')
-    expect(wrapper.text()).toContain('等待指令')
-    expect(wrapper.text()).toContain('青石谷')
+    expect(wrapper.text()).toContain('Wenren Wu')
+    expect(wrapper.text()).toContain('Awaiting Command')
+    expect(wrapper.text()).toContain('Bluestone Valley')
 
     const textarea = wrapper.find('textarea.roleplay-dock__input')
     expect(textarea.exists()).toBe(true)
-    await textarea.setValue('先调息恢复，再去探索。')
+    await textarea.setValue('Recover first, then explore.')
     await wrapper.find('button.roleplay-dock__submit').trigger('click')
     await nextTick()
 
-    expect(wrapper.text()).toContain('已提交指令：先调息恢复，再去探索。')
+    expect(wrapper.text()).toContain('Command submitted: Recover first, then explore.')
 
     expect(roleplayStoreMock.submitDecision).toHaveBeenCalledWith({
       avatar_id: 'avatar-1',
       request_id: 'req-1',
-      command_text: '先调息恢复，再去探索。',
+      command_text: 'Recover first, then explore.',
     })
   })
 
@@ -215,32 +215,32 @@ describe('RoleplayDock', () => {
       request_id: 'req-choice',
       type: 'choice',
       avatar_id: 'avatar-1',
-      title: '是否赴约',
-      description: '对方正在等待你的回应。',
+      title: 'Accept the invitation?',
+      description: 'The other side is waiting for your response.',
       options: [
-        { key: 'accept', title: '接受', description: '前往会面', variant: 'accept' },
-        { key: 'reject', title: '拒绝', description: '婉拒邀约', variant: 'reject' },
+        { key: 'accept', title: 'Accept', description: 'Go to the meeting', variant: 'accept' },
+        { key: 'reject', title: 'Decline', description: 'Politely decline the invitation', variant: 'reject' },
       ],
     }
     roleplayStoreMock.session.last_prompt_context = {
-      avatar_name: '闻人雾',
+      avatar_name: 'Wenren Wu',
     }
     roleplayStoreMock.session.interaction_history = [
-      { type: 'choice_prompt', created_at: 1, text: '冷清雅邀请你加入浩然书院，成为门下弟子。' },
-      { type: 'choice', created_at: 1, text: '拒绝：婉拒邀约' },
+      { type: 'choice_prompt', created_at: 1, text: 'Leng Qingya invites you to join Haoran Academy as a disciple.' },
+      { type: 'choice', created_at: 1, text: 'Decline: Politely decline the invitation' },
     ]
 
     const wrapper = mount(RoleplayDock, { global: { plugins: [createRoleplayI18n()] } })
     await nextTick()
 
-    expect(wrapper.text()).toContain('冷清雅邀请你加入浩然书院，成为门下弟子。')
-    expect(wrapper.text()).toContain('拒绝：婉拒邀约')
+    expect(wrapper.text()).toContain('Leng Qingya invites you to join Haoran Academy as a disciple.')
+    expect(wrapper.text()).toContain('Decline: Politely decline the invitation')
     const buttons = wrapper.findAll('button.roleplay-dock__choice')
     expect(buttons).toHaveLength(2)
     await buttons[1].trigger('click')
     await nextTick()
 
-    expect(wrapper.text()).toContain('已选择：拒绝')
+    expect(wrapper.text()).toContain('Choice submitted: Decline')
 
     expect(roleplayStoreMock.submitChoice).toHaveBeenCalledWith({
       avatar_id: 'avatar-1',
@@ -253,7 +253,7 @@ describe('RoleplayDock', () => {
     roleplayStoreMock.session.controlled_avatar_id = 'avatar-1'
     roleplayStoreMock.session.status = 'observing'
     roleplayStoreMock.session.last_prompt_context = {
-      avatar_name: '闻人雾',
+      avatar_name: 'Wenren Wu',
     }
 
     const wrapper = mount(RoleplayDock, {
@@ -283,24 +283,24 @@ describe('RoleplayDock', () => {
     roleplayStoreMock.session.controlled_avatar_id = 'avatar-1'
     roleplayStoreMock.session.status = 'observing'
     roleplayStoreMock.session.last_prompt_context = {
-      avatar_name: '闻人雾',
+      avatar_name: 'Wenren Wu',
     }
     roleplayStoreMock.session.interaction_history = [
-      { type: 'command', created_at: 1, text: '先调息恢复，再去探索。' },
+      { type: 'command', created_at: 1, text: 'Recover first, then explore.' },
       {
         type: 'action_chain',
         created_at: 2,
-        actions: [{ action_name: 'MoveToRegion', tokens: [{ kind: 'verb', text: '移动到' }, { kind: 'arg', text: '青石谷' }] }],
+        actions: [{ action_name: 'MoveToRegion', tokens: [{ kind: 'verb', text: 'Move to' }, { kind: 'arg', text: 'Bluestone Valley' }] }],
       },
     ]
 
     const wrapper = mount(RoleplayDock, { global: { plugins: [createRoleplayI18n()] } })
     await nextTick()
 
-    expect(wrapper.text()).toContain('当前仍在上帝视角观察世界')
-    expect(wrapper.text()).toContain('先调息恢复，再去探索。')
-    expect(wrapper.text()).toContain('移动到')
-    expect(wrapper.text()).toContain('青石谷')
+    expect(wrapper.text()).toContain('You are still observing the world in omniscient view')
+    expect(wrapper.text()).toContain('Recover first, then explore.')
+    expect(wrapper.text()).toContain('Move to')
+    expect(wrapper.text()).toContain('Bluestone Valley')
   })
 
   it('renders conversation mode and sends chat messages', async () => {
@@ -311,41 +311,41 @@ describe('RoleplayDock', () => {
       type: 'conversation',
       avatar_id: 'avatar-1',
       target_avatar_id: 'avatar-2',
-      title: '闻人雾 与 阴长生 对话中',
-      description: '世界已暂停，等待你继续发言。',
+      title: 'Wenren Wu is talking with Yin Changsheng',
+      description: 'The world is paused, waiting for you to continue speaking.',
       messages: [
-        { id: 'm1', role: 'assistant', speaker_name: '阴长生', content: '阁下为何前来？', created_at: 1 },
+        { id: 'm1', role: 'assistant', speaker_name: 'Yin Changsheng', content: 'Why have you come?', created_at: 1 },
       ],
     }
     roleplayStoreMock.session.conversation_session = {
       messages: [
-        { id: 'm1', role: 'assistant', speaker_name: '阴长生', content: '阁下为何前来？', created_at: 1 },
+        { id: 'm1', role: 'assistant', speaker_name: 'Yin Changsheng', content: 'Why have you come?', created_at: 1 },
       ],
     }
     roleplayStoreMock.session.last_prompt_context = {
-      avatar_name: '闻人雾',
-      target_avatar_name: '阴长生',
+      avatar_name: 'Wenren Wu',
+      target_avatar_name: 'Yin Changsheng',
     }
     roleplayStoreMock.session.interaction_history = [
-      { type: 'conversation_player', created_at: 1, text: '我来求一条路。' },
-      { type: 'conversation_assistant', created_at: 2, text: '阁下为何前来？' },
+      { type: 'conversation_player', created_at: 1, text: 'I have come seeking a path.' },
+      { type: 'conversation_assistant', created_at: 2, text: 'Why have you come?' },
     ]
 
     const wrapper = mount(RoleplayDock, { global: { plugins: [createRoleplayI18n()] } })
     await nextTick()
 
-    expect(wrapper.text()).toContain('闻人雾 ↔ 阴长生')
-    expect(wrapper.text()).toContain('阁下为何前来？')
-    expect(wrapper.text()).toContain('我来求一条路。')
+    expect(wrapper.text()).toContain('Wenren Wu ↔ Yin Changsheng')
+    expect(wrapper.text()).toContain('Why have you come?')
+    expect(wrapper.text()).toContain('I have come seeking a path.')
 
     const textarea = wrapper.find('.roleplay-dock__input--conversation')
-    await textarea.setValue('我来求一条路。')
+    await textarea.setValue('I have come seeking a path.')
     await wrapper.find('.roleplay-dock__conversation-actions .roleplay-dock__submit').trigger('click')
 
     expect(roleplayStoreMock.sendConversation).toHaveBeenCalledWith({
       avatar_id: 'avatar-1',
       request_id: 'req-conversation',
-      message: '我来求一条路。',
+      message: 'I have come seeking a path.',
     })
   })
 
@@ -365,28 +365,28 @@ describe('RoleplayDock', () => {
       type: 'conversation',
       avatar_id: 'avatar-1',
       target_avatar_id: 'avatar-2',
-      title: '闻人雾 与 阴长生 对话中',
-      description: '世界已暂停，等待你继续发言。',
+      title: 'Wenren Wu is talking with Yin Changsheng',
+      description: 'The world is paused, waiting for you to continue speaking.',
       messages: [],
     }
     roleplayStoreMock.session.conversation_session = {
       messages: [],
     }
     roleplayStoreMock.session.last_prompt_context = {
-      avatar_name: '闻人雾',
-      target_avatar_name: '阴长生',
+      avatar_name: 'Wenren Wu',
+      target_avatar_name: 'Yin Changsheng',
     }
 
     const wrapper = mount(RoleplayDock, { global: { plugins: [createRoleplayI18n()] } })
     await nextTick()
 
     const textarea = wrapper.find('.roleplay-dock__input--conversation')
-    await textarea.setValue('你好')
+    await textarea.setValue('Hello')
     await wrapper.find('.roleplay-dock__conversation-actions .roleplay-dock__submit').trigger('click')
     await nextTick()
 
-    expect(wrapper.text()).toContain('你好')
-    expect(wrapper.text()).toContain('等待回复...')
+    expect(wrapper.text()).toContain('Hello')
+    expect(wrapper.text()).toContain('Waiting for reply...')
 
     resolveSend?.()
     await nextTick()
@@ -412,7 +412,7 @@ describe('RoleplayDock', () => {
     roleplayStoreMock.session.controlled_avatar_id = 'avatar-1'
     roleplayStoreMock.session.status = 'observing'
     roleplayStoreMock.session.last_prompt_context = {
-      avatar_name: '闻人雾',
+      avatar_name: 'Wenren Wu',
     }
 
     const wrapper = mount(RoleplayDock, { global: { plugins: [createRoleplayI18n()] } })

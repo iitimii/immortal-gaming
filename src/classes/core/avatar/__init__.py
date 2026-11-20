@@ -1,7 +1,7 @@
 """
-Avatar 模块
+Avatar module
 
-将原 avatar.py 拆分为多个子模块，通过此 __init__.py 导出以保持向后兼容。
+The original avatar.py is split into several submodules, exported via this __init__.py for backward compatibility.
 """
 from src.classes.core.avatar.core import (
     Avatar,
@@ -16,10 +16,10 @@ from src.classes.core.avatar.info_presenter import (
 )
 
 __all__ = [
-    # 核心类
+    # Core class
     "Avatar",
     "Gender",
-    # 信息展示函数
+    # Info display functions
     "get_avatar_info",
     "get_avatar_structured_info",
     "get_avatar_hover_info",

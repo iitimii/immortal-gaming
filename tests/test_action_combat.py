@@ -5,13 +5,13 @@ from src.classes.event import Event
 from src.systems.cultivation import Realm
 from src.classes.core.avatar import Avatar
 
-# 定义一个简单的 Result Mock
+# A simple resolution-result mock
 class MockResolutionResult:
     def __init__(self, obj):
         self.obj = obj
 
 def test_attack_can_start_success(dummy_avatar):
-    """测试攻击条件检查通过"""
+    """Attack precondition check passes."""
     target = MagicMock(spec=Avatar)
     target.name = "TargetAvatar"
     target.is_dead = False
@@ -26,7 +26,7 @@ def test_attack_can_start_success(dummy_avatar):
         assert reason == ""
 
 def test_attack_can_start_fail_no_target(dummy_avatar):
-    """测试目标不存在"""
+    """Target does not exist."""
     with patch("src.classes.action.attack.resolve_query") as mock_resolve:
         mock_resolve.return_value = MockResolutionResult(None)
         
@@ -34,10 +34,10 @@ def test_attack_can_start_fail_no_target(dummy_avatar):
         can_start, reason = action.can_start("Ghost")
         
         assert can_start is False
-        assert "目标不存在" in reason
+        assert "Target does not exist" in reason
 
 def test_attack_can_start_fail_dead_target(dummy_avatar):
-    """测试目标已死亡"""
+    """Target is already dead."""
     target = MagicMock(spec=Avatar)
     target.is_dead = True
     
@@ -48,10 +48,10 @@ def test_attack_can_start_fail_dead_target(dummy_avatar):
         can_start, reason = action.can_start("Zombie")
         
         assert can_start is False
-        assert "目标已死亡" in reason
+        assert "Target is already dead" in reason
 
 def test_attack_start_event(dummy_avatar):
-    """测试开始攻击生成的事件"""
+    """Event generated when an attack starts."""
     target = MagicMock(spec=Avatar)
     target.name = "Enemy"
     target.id = "enemy-id"
@@ -69,11 +69,11 @@ def test_attack_start_event(dummy_avatar):
         assert isinstance(event, Event)
         assert "TestDummy" in event.content
         assert "Enemy" in event.content
-        assert "100" in event.content # 战斗力显示
+        assert "100" in event.content # combat strength shown
         assert event.is_major is False
 
 def test_attack_execute_logic(dummy_avatar):
-    """测试执行战斗逻辑"""
+    """Combat execution logic."""
     target = MagicMock(spec=Avatar)
     target.name = "Enemy"
     
@@ -91,21 +91,21 @@ def test_attack_execute_logic(dummy_avatar):
         mock_resolve.return_value = MockResolutionResult(target)
         
         # winner, loser, loser_damage, winner_damage
-        # 假设 dummy_avatar 赢了
+        # Assume dummy_avatar wins
         mock_decide.return_value = (dummy_avatar, target, 50, 10)
         
         action = Attack(dummy_avatar, dummy_avatar.world)
         action._execute("Enemy")
         
-        # 验证伤害应用
+        # Verify damage is applied
         # loser (target) takes 50 dmg
         target.hp.reduce.assert_called_with(50)
         # winner (dummy) takes 10 dmg
         dummy_avatar.hp.reduce.assert_called_with(10)
         
-        # 验证熟练度增加
+        # Verify proficiency increases
         assert dummy_avatar.increase_weapon_proficiency.called
         assert target.increase_weapon_proficiency.called
         
-        # 验证结果保存
+        # Verify the result is stored
         assert action._last_result == (dummy_avatar, target, 50, 10)

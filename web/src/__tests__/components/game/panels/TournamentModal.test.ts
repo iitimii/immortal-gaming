@@ -54,17 +54,17 @@ vi.mock('@/composables/useWorldOverviewData', () => ({
 
 const i18n = createI18n({
   legacy: false,
-  locale: 'zh-CN',
+  locale: 'en-US',
   messages: {
-    'zh-CN': {
+    'en-US': {
       game: {
         ranking: {
-          tournament_title: '天下武道会',
-          tournament_next: '{years} 年后',
-          heaven_first: '天榜第一',
-          earth_first: '地榜第一',
-          human_first: '人榜第一',
-          empty: '暂无数据',
+          tournament_title: 'World Martial Tournament',
+          tournament_next: 'In {years} years',
+          heaven_first: 'Heaven Ranking #1',
+          earth_first: 'Earth Ranking #1',
+          human_first: 'Human Ranking #1',
+          empty: 'No data',
         },
       },
     },

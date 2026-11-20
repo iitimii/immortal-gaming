@@ -112,15 +112,15 @@ describe('RelationRow', () => {
       props: {
         name: 'Full Name',
         meta: 'Legacy Meta',
-        metaLines: ['道侣', '友好（12）'],
+        metaLines: ['Dao Companion', 'Friendly (12)'],
       },
       global: globalConfig,
     })
 
     const metaLines = wrapper.findAll('.rel-type')
     expect(metaLines).toHaveLength(2)
-    expect(metaLines[0].text()).toBe('道侣')
-    expect(metaLines[1].text()).toBe('友好（12）')
+    expect(metaLines[0].text()).toBe('Dao Companion')
+    expect(metaLines[1].text()).toBe('Friendly (12)')
     expect(wrapper.text()).not.toContain('Legacy Meta')
   })
 })

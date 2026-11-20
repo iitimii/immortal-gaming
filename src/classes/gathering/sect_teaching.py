@@ -16,7 +16,7 @@ from src.run.log import get_logger
 @register_gathering
 class SectTeachingConference(Gathering):
     """
-    宗门传道大会
+    Sect Teaching Assembly
     """
     STORY_PROMPT_ID = "sect_teaching_story_prompt"
 
@@ -26,10 +26,10 @@ class SectTeachingConference(Gathering):
     def is_start(self, world: "World") -> bool:
         self.target_sect_id = None
         
-        # 1. 筛选有效宗门 (成员数 >= 2)
+        # 1. Filter valid sects (member count >= 2)
         valid_sects = []
         for s in sects_by_id.values():
-            # 过滤死者和不能参与的角色
+            # Exclude the dead and avatars who can't participate
             living_members = [m for m in s.members.values() if not m.is_dead and self._can_avatar_join(m)]
             if len(living_members) >= 2:
                 valid_sects.append(s)
@@ -37,14 +37,14 @@ class SectTeachingConference(Gathering):
         if not valid_sects:
             return False
             
-        # 2. 随机打乱以保证公平
+        # 2. Shuffle randomly for fairness
         random.shuffle(valid_sects)
         
-        # 从配置读取概率，默认 0.01
+        # Read the probability from config, default 0.01
         trigger_prob = CONFIG.world.gathering.sect_teaching_prob
         
-        # 3. 判定是否触发
-        # 每个宗门独立判定，只要有一个中了就停下来。
+        # 3. Decide whether it triggers
+        # Each sect rolls independently; stop as soon as one hits.
         for sect in valid_sects:
             if random.random() < trigger_prob:
                 self.target_sect_id = sect.id
@@ -76,7 +76,7 @@ class SectTeachingConference(Gathering):
             return []
             
         sect = sects_by_id.get(self.target_sect_id)
-        # 清空状态
+        # Reset state
         self.target_sect_id = None
         
         if not sect:
@@ -85,48 +85,48 @@ class SectTeachingConference(Gathering):
         events = []
         base_epiphany_prob = CONFIG.world.gathering.base_epiphany_prob
         
-        # 1. 选定角色 (逻辑复用，但只针对 target_sect)
+        # 1. Select avatars (logic reused, but only for target_sect)
         members = list(sect.members.values())
-        # 过滤掉死者（防御性编程）和不能参与的角色
+        # Exclude the dead (defensive) and avatars who can't participate
         members = [m for m in members if not m.is_dead and self._can_avatar_join(m)]
         
         if len(members) < 2:
-            return [] # 再次检查，防止状态变化
+            return [] # Check again in case state changed
         
-        # 按境界/等级排序，最高的为传道者
-        # 优先按 Realm 排序，其次按 Level 排序
+        # Sort by realm/level; the highest becomes the preacher
+        # Sort by Realm first, then by Level
         members.sort(key=lambda x: (x.cultivation_progress.realm, x.cultivation_progress.level), reverse=True)
         
         teacher = members[0]
         students = members[1:]
         
-        # 2. 结算奖励 & 稀有事件
+        # 2. Settle rewards & rare events
         epiphany_students = []
         exp_gains = []
         
         for student in students:
-            # 听道奖励
+            # Listening reward
             student_exp = self._calc_student_exp(student, teacher)
             if student.cultivation_progress.can_cultivate():
                 student.cultivation_progress.add_exp(student_exp)
                 exp_gains.append((student, student_exp))
             
-            # 判定顿悟（习得功法）
-            # 逻辑：学生没有该功法 + 概率判定
+            # Epiphany check (learn the technique)
+            # Logic: the student doesn't have the technique + probability roll
             if student.technique != teacher.technique and teacher.technique is not None:
-                # 计算概率
+                # Compute the probability
                 extra_prob = student.effects.get(EXTRA_EPIPHANY_PROBABILITY, 0)
                 prob = base_epiphany_prob + extra_prob
                 
                 if random.random() < prob:
                     # old_tech_name = student.technique.name if student.technique else t("None")
                     student.technique = teacher.technique
-                    student.recalc_effects() # 重算属性（因为功法变了，可能有新的被动）
+                    student.recalc_effects() # Recalculate attributes (the technique changed, there may be new passives)
                     epiphany_students.append(student)
 
-        # 3. 生成故事与事件
+        # 3. Generate the story and events
         
-        # 生成摘要事件
+        # Generate the summary event
         student_names = ", ".join([s.name for s in students])
         summary_content = t("sect_teaching_summary", 
                             sect_name=sect.name, 
@@ -161,7 +161,7 @@ class SectTeachingConference(Gathering):
                 )
             )
         
-        # 生成经验获得事件
+        # Generate the exp gain event
         for student, exp in exp_gains:
             exp_content = t("sect_teaching_exp_gain", 
                             student_name=student.name, 
@@ -191,15 +191,15 @@ class SectTeachingConference(Gathering):
         return events
 
     def _calc_student_exp(self, student, teacher) -> int:
-        # 听道奖励
-        # 基础值 30 -> 改为动态，约为当前等级所需经验的一部分
+        # Listening reward
+        # Base value 30 -> now dynamic, roughly a fraction of the exp needed for the current level
         req_exp = student.cultivation_progress.get_exp_required()
-        # 随机浮动 0.1 ~ 0.3
+        # Random fluctuation 0.1 ~ 0.3
         ratio = random.uniform(0.1, 0.3)
         return int(req_exp * ratio)
 
     async def _generate_story(self, sect, teacher, students, exp_gains, epiphany_list, month_stamp):
-        # 1. 构造 Events Text (事件列表)
+        # 1. Build the Events Text (event list)
         events_list = []
         events_list.append(t("sect_teaching_event_desc", teacher_name=teacher.name))
         
@@ -213,18 +213,18 @@ class SectTeachingConference(Gathering):
 
         events_text = "\n".join(events_list)
 
-        # 2. 构造 Details Text (详细信息)
+        # 2. Build the Details Text (detailed info)
         details_list = []
         
-        # 宗门信息：复用 decision context，但只提炼少量与传道大会氛围强相关的背景。
+        # Sect info: reuse the decision context, but only extract a little background closely tied to the assembly's atmosphere.
         details_list.append(self._build_sect_teaching_context_text(sect, teacher))
         
-        # 讲师信息
+        # Lecturer info
         details_list.append(f"{teacher.name}: {str(teacher.get_info(detailed=True))}")
         
-        # 学生信息
+        # Student info
         for s in students:
-            # 使用非 detailed 信息
+            # Use non-detailed info
             details_list.append(f"- {s.name}: {str(s.get_info(detailed=False))}")
             
         details_text = "\n".join(details_list)
@@ -264,38 +264,38 @@ class SectTeachingConference(Gathering):
 
         active_wars = list(getattr(ctx, "active_wars", []) or [])
         if active_wars:
-            war_names = "、".join(
+            war_names = ", ".join(
                 str(item.get("other_sect_name", "") or "")
                 for item in active_wars
                 if item.get("other_sect_name")
-            ) or "未知对手"
-            diplomacy_line = f"当前局势：与 {war_names} 交战中。"
+            ) or "unknown opponents"
+            diplomacy_line = f"Current situation: at war with {war_names}."
         else:
-            diplomacy_line = "当前局势：宗门处于和平状态。"
+            diplomacy_line = "Current situation: the sect is at peace."
 
         treasury_pressure = str(
             getattr(ctx, "economy", {}).get("treasury_pressure", "") or "stable"
         )
         treasury_map = {
-            "ample": "财库充裕",
-            "stable": "财库平稳",
-            "tight": "财库偏紧",
-            "critical": "财库吃紧",
+            "ample": "treasury ample",
+            "stable": "treasury stable",
+            "tight": "treasury tight",
+            "critical": "treasury strained",
         }
         resource_line = (
-            f"宗门气象：{treasury_map.get(treasury_pressure, treasury_pressure)}，"
-            f"备战状态 {str(getattr(ctx, 'self_assessment', {}).get('war_readiness', 'stable') or 'stable')}。"
+            f"Sect state: {treasury_map.get(treasury_pressure, treasury_pressure)}, "
+            f"war readiness {str(getattr(ctx, 'self_assessment', {}).get('war_readiness', 'stable') or 'stable')}."
         )
 
         border_ratio = float(getattr(ctx, "territory", {}).get("border_pressure_ratio", 0.0) or 0.0)
         border_line = (
-            f"边境压力：{int(round(border_ratio * 100))}% 的势力边界与外界接壤，"
-            f"当前势力范围 {int(getattr(ctx, 'territory', {}).get('tile_count', 0) or 0)} 格。"
+            f"Border pressure: {int(round(border_ratio * 100))}% of the territory border touches the outside, "
+            f"current territory {int(getattr(ctx, 'territory', {}).get('tile_count', 0) or 0)} tiles."
         )
 
         members_line = (
-            f"宗门现状：存活门人 {int(getattr(ctx, 'self_assessment', {}).get('alive_member_count', 0) or 0)} 人，"
-            f"宗门总战力约 {int(float(getattr(ctx, 'power', {}).get('total_battle_strength', 0.0) or 0.0))}。"
+            f"Sect status: {int(getattr(ctx, 'self_assessment', {}).get('alive_member_count', 0) or 0)} living members, "
+            f"total sect battle strength about {int(float(getattr(ctx, 'power', {}).get('total_battle_strength', 0.0) or 0.0))}."
         )
 
         return "\n".join(

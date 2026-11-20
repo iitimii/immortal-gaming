@@ -33,10 +33,10 @@ def get_ten_thousand_souls_banner_bonus(souls: int) -> int:
 @dataclass
 class Auxiliary(Item):
     """
-    辅助装备类：提供各种辅助功能的装备
-    字段与 static/game_configs/auxiliary.csv 对应：
-    - realm: 装备等级（练气/筑基/金丹/元婴）
-    - effects: 解析为 dict，用于与 Avatar.effects 合并
+    Auxiliary equipment: equipment providing various support functions
+    Fields correspond to static/game_configs/auxiliary.csv:
+    - realm: equipment grade (Qi Refinement/Foundation Establishment/Core Formation/Nascent Soul)
+    - effects: parsed into a dict, merged with Avatar.effects
     """
     id: int
     name: str
@@ -45,7 +45,7 @@ class Auxiliary(Item):
     name_id: str = ""
     effects: dict[str, object] = field(default_factory=dict)
     effect_desc: str = ""
-    # 特殊属性（用于存储实例特定数据）
+    # Special attributes (stores instance-specific data)
     special_data: dict = field(default_factory=dict)
 
     def __hash__(self):
@@ -57,13 +57,13 @@ class Auxiliary(Item):
         return instance
 
     def get_info(self, detailed: bool = False) -> str:
-        """获取信息"""
+        """Get info."""
         if detailed:
             return self.get_detailed_info()
         return f"{self.name}"
 
     def get_detailed_info(self) -> str:
-        """获取详细信息"""
+        """Get detailed info."""
         from src.i18n import t
         souls = ""
         if is_ten_thousand_souls_banner(self) and self.special_data.get("devoured_souls", 0) > 0:
@@ -72,16 +72,16 @@ class Auxiliary(Item):
             souls = t(" Devoured Souls: {count}, Battle Bonus: +{bonus}", count=soul_count, bonus=battle_bonus)
         
         effect_part = t(" Effect: {effect_desc}", effect_desc=self.effect_desc) if self.effect_desc else ""
-        return f"[{self.id}] {self.name}（{str(self.realm)}，{self.desc}{souls}）{effect_part}"
+        return f"[{self.id}] {self.name} ({str(self.realm)}, {self.desc}{souls}){effect_part}"
     
     def get_colored_info(self) -> str:
-        """获取带颜色标记的信息，供前端渲染使用"""
+        """Get info with color markup for frontend rendering."""
         r, g, b = self.realm.color_rgb
         return f"<color:{r},{g},{b}>{self.get_info()}</color>"
 
     def get_structured_info(self) -> dict:
         full_desc = self.desc
-        # 特殊数据处理
+        # Special data handling
         souls = 0
         if is_ten_thousand_souls_banner(self):
             souls = self.special_data.get("devoured_souls", 0)
@@ -110,8 +110,8 @@ class Auxiliary(Item):
 
 
 def _load_auxiliaries_data() -> tuple[Dict[int, Auxiliary], Dict[str, Auxiliary]]:
-    """从配表加载 auxiliary 数据。
-    返回：新的 (按ID、按名称 的映射)。
+    """Load auxiliary data from the config table.
+    Returns: new (by ID, by name) mappings.
     """
     new_by_id: Dict[int, Auxiliary] = {}
     new_by_name: Dict[str, Auxiliary] = {}
@@ -125,8 +125,8 @@ def _load_auxiliaries_data() -> tuple[Dict[int, Auxiliary], Dict[str, Auxiliary]
         from src.classes.effect import format_effects_to_text
         effect_desc = format_effects_to_text(effects)
         
-        # 解析grade
-        grade_str = get_str(row, "grade", "练气")
+        # Parse grade
+        grade_str = get_str(row, "grade", "QI_REFINEMENT")
         realm = Realm.from_str(grade_str)
 
         a = Auxiliary(
@@ -142,18 +142,18 @@ def _load_auxiliaries_data() -> tuple[Dict[int, Auxiliary], Dict[str, Auxiliary]
         new_by_id[a.id] = a
         new_by_name[a.name] = a
         
-        # 注册到全局注册表
+        # Register in the global registry
         from src.classes.items.registry import ItemRegistry
         ItemRegistry.register(a.id, a)
 
     return new_by_id, new_by_name
 
-# 全局容器
+# Global containers
 auxiliaries_by_id: Dict[int, Auxiliary] = {}
 auxiliaries_by_name: Dict[str, Auxiliary] = {}
 
 def reload():
-    """重新加载数据，保留全局字典引用"""
+    """Reload data while preserving the global dict references."""
     new_id, new_name = _load_auxiliaries_data()
     
     auxiliaries_by_id.clear()
@@ -162,7 +162,7 @@ def reload():
     auxiliaries_by_name.clear()
     auxiliaries_by_name.update(new_name)
 
-# 模块初始化时执行一次
+# Run once at module import
 reload()
 
 
@@ -178,11 +178,11 @@ def is_ten_thousand_souls_banner(auxiliary: Auxiliary | None) -> bool:
     if str(getattr(auxiliary, "name_id", "") or "") == TEN_THOUSAND_SOULS_BANNER_NAME_ID:
         return True
     # Legacy save-data fallback.
-    return str(getattr(auxiliary, "name", "") or "") == "万魂幡"
+    return str(getattr(auxiliary, "name", "") or "") == "Ten Thousand Souls Banner"
 
 
 def get_random_auxiliary_by_realm(realm: Realm) -> Optional[Auxiliary]:
-    """获取指定境界的随机辅助装备"""
+    """Get a random auxiliary of the given realm."""
     import random
     candidates = [a for a in auxiliaries_by_id.values() if a.realm == realm]
     if not candidates:

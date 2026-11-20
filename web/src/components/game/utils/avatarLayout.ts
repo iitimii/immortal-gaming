@@ -10,9 +10,9 @@ interface PositionedObject {
 }
 
 /**
- * 计算角色在格子内的视觉偏移量，避免重叠
- * @param items 包含坐标的对象列表
- * @param radius 偏移半径（相对于格子大小的比例，0.25 表示 1/4 格子宽）
+ * Compute visual offsets for avatars within a tile so they do not overlap
+ * @param items Objects with coordinates
+ * @param radius Offset radius as a fraction of tile size (0.25 = a quarter tile)
  */
 export function calculateVisualOffsets<T extends PositionedObject>(
   items: T[],
@@ -21,7 +21,7 @@ export function calculateVisualOffsets<T extends PositionedObject>(
   const groups = new Map<string, T[]>()
   const offsets = new Map<string, Point>()
 
-  // 1. 按坐标分组
+  // 1. Group by coordinate
   for (const item of items) {
     const key = `${item.x},${item.y}`
     if (!groups.has(key)) {
@@ -30,19 +30,19 @@ export function calculateVisualOffsets<T extends PositionedObject>(
     groups.get(key)!.push(item)
   }
 
-  // 2. 计算每组的偏移
+  // 2. Compute offsets per group
   for (const group of groups.values()) {
     const count = group.length
     
-    // 只有一个人时，不需要偏移，居中显示
+    // A single avatar needs no offset; center it
     if (count <= 1) {
       offsets.set(group[0].id, { x: 0, y: 0 })
       continue
     }
 
-    // 多人时，按圆形分布
-    // 无论多少人，都均匀分布在圆周上
-    // 起始角度 -PI/2 (即正上方)，让排列更符合直觉
+    // Multiple avatars are arranged in a circle
+    // evenly spaced around it regardless of count
+    // starting at -PI/2 (straight up) for a more intuitive layout
     const angleStep = (Math.PI * 2) / count
     
     group.forEach((item, index) => {

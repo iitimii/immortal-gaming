@@ -4,7 +4,7 @@ from src.classes.gender import Gender
 from src.systems.time import MonthStamp
 
 def test_mortal_initialization():
-    """测试Mortal对象的基本初始化"""
+    """Basic initialization of a Mortal object."""
     mortal = Mortal(
         id="test_id",
         name="Test Mortal",
@@ -22,7 +22,7 @@ def test_mortal_initialization():
     assert mortal.born_region_id == 1
 
 def test_mortal_defaults():
-    """测试Mortal对象的默认值"""
+    """Default values of a Mortal object."""
     mortal = Mortal(
         id="test_id_default",
         name="Default Mortal",
@@ -34,7 +34,7 @@ def test_mortal_defaults():
     assert mortal.born_region_id == -1
 
 def test_mortal_to_dict():
-    """测试序列化为字典"""
+    """Serialize to a dict."""
     mortal = Mortal(
         id="dict_id",
         name="Dict Mortal",
@@ -54,7 +54,7 @@ def test_mortal_to_dict():
     assert data["born_region_id"] == 5
 
 def test_mortal_from_dict():
-    """测试从字典反序列化"""
+    """Deserialize from a dict."""
     data = {
         "id": "from_dict_id",
         "name": "From Dict Mortal",
@@ -74,7 +74,7 @@ def test_mortal_from_dict():
     assert mortal.born_region_id == 10
 
 def test_mortal_from_dict_defaults():
-    """测试从不完整的字典反序列化（使用默认值）"""
+    """Deserialize from an incomplete dict (defaults applied)."""
     data = {
         "id": "minimal_id",
         "name": "Minimal Mortal",
@@ -89,7 +89,7 @@ def test_mortal_from_dict_defaults():
     assert mortal.born_region_id == -1
 
 def test_mortal_serialization_cycle():
-    """测试完整的序列化-反序列化循环"""
+    """Full serialize/deserialize round trip."""
     original = Mortal(
         id="cycle_id",
         name="Cycle Mortal",

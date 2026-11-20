@@ -6,7 +6,7 @@ describe('wiki tool page', () => {
   it('exposes the static shell and script entry', () => {
     const html = readFileSync(resolve(process.cwd(), '..', 'tools', 'wiki', 'index.html'), 'utf-8')
 
-    expect(html).toContain('id="localeSelect"')
+    expect(html).not.toContain('id="localeSelect"')
     expect(html).toContain('id="globalSearchInput"')
     expect(html).toContain('id="tabs"')
     expect(html).toContain('src="./src/app.js"')
@@ -72,8 +72,8 @@ describe('wiki tool page', () => {
     expect(js).toContain("'lodes'")
     expect(js).toContain("'hidden_domains'")
     expect(js).toContain("'sect_tasks'")
-    expect(js).toContain("sect_tasks: '宗门任务'")
-    expect(js).toContain("hidden_domains: '秘境'")
+    expect(js).toContain("sect_tasks: 'Sect Tasks'")
+    expect(js).toContain("hidden_domains: 'Hidden Domains'")
   })
 
   it('renders grouped wiki tabs when groups are plain arrays', () => {

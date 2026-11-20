@@ -33,7 +33,7 @@ def build_rewrite_infos(job: RewriteJob, *, previous_error: str = "") -> dict[st
         "instructions": job.instructions,
         "entities_json": to_json_str_with_intent(job.entities),
         "result_field": job.result_field,
-        "previous_error": previous_error or "无",
+        "previous_error": previous_error or "None",
     }
     if job.paired_entities:
         payload["paired_entity_label"] = job.paired_entity_label

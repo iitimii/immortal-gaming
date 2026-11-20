@@ -9,8 +9,8 @@ from src.classes.alignment import Alignment
 
 class PlunderPeople(TimedAction):
     """
-    在城镇对百姓进行搜刮，获取少量灵石。
-    仅邪阵营可执行。
+    Plunder the populace in a town for a few spirit stones.
+    Only the Evil alignment can do this.
     """
 
     ACTION_NAME_ID = "plunder_people_action_name"
@@ -45,7 +45,7 @@ class PlunderPeople(TimedAction):
         content = t("{avatar} begins plundering people in town", avatar=self.avatar.name)
         return Event(self.world.month_stamp, content, related_avatars=[self.avatar.id])
 
-    # TimedAction 已统一 step 逻辑
+    # TimedAction already unifies the step logic
 
     async def finish(self) -> list[Event]:
         region = self.avatar.tile.region

@@ -5,8 +5,8 @@ from src.classes.essence import EssenceType
 
 
 def test_sect_region_essence_all_types_are_five():
-    """宗门总部的等效灵气：五行皆为 5。"""
-    region = SectRegion(id=1, name="测试宗门总部", desc="desc", sect_name="测试宗门", sect_id=1)
+    """Sect headquarters effective essence: every element is 5."""
+    region = SectRegion(id=1, name="Test Sect HQ", desc="desc", sect_name="Test Sect", sect_id=1)
 
     for essence_type in EssenceType:
         assert region.essence.get_density(essence_type) == 5

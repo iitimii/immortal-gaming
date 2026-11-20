@@ -17,8 +17,8 @@ type LocaleMessageTree = Record<string, unknown>
 const localeJsonModules = import.meta.glob('./*/*.json', { eager: true }) as Record<string, LocaleJsonModule>
 
 /**
- * 自动加载指定语言目录下的所有 JSON 模块
- * @param lang 语言标识符 (如 'zh-CN')
+ * Load every JSON module in the given locale directory
+ * @param lang Locale code (e.g. 'en-US')
  */
 const loadLocaleMessages = (lang: AppLocale) => {
   const messages: LocaleMessageTree = {}

@@ -1,36 +1,36 @@
 item_id,name_id,desc_id,name,grade,desc,effects
-,名称ID,描述ID,名称,等级(练气/筑基/金丹/元婴),描述/提示词,JSON形式（支持宽松格式，见effects.py说明）
-2001,AUXILIARY_2001_NAME,AUXILIARY_2001_DESC,木灵甲,筑基,以灵木纤维编织，生机盎然，防御尚可.,{damage_reduction: 0.08}
-2002,AUXILIARY_2002_NAME,AUXILIARY_2002_DESC,血精果,筑基,生于至阳之地，色泽如血，不仅治伤，更能增进功力。,{extra_hp_recovery_rate: 0.3}
-2003,AUXILIARY_2003_NAME,AUXILIARY_2003_DESC,人参果(伪),筑基,虽不及真品，闻一闻也能活三百六十岁.,{extra_max_lifespan: 50}
-2004,AUXILIARY_2004_NAME,AUXILIARY_2004_DESC,万宝令,筑基,千帆城通用的高级商令。,"{extra_item_sell_price_multiplier: 0.1, shop_buy_price_reduction: 0.1}"
-2005,AUXILIARY_2005_NAME,AUXILIARY_2005_DESC,铁精,筑基,提炼百斤凡铁才得一两，提升法器品质的基础材料.,{extra_weapon_upgrade_chance: 0.05}
-2006,AUXILIARY_2006_NAME,AUXILIARY_2006_DESC,通天法眼,筑基,可勘破虚妄，洞察本源，寻觅天地灵机，直视大道。,"{extra_observation_radius: 1, extra_fortune_probability: 0.005, extra_gu_resistance_rate: 0.12}"
-2007,AUXILIARY_2007_NAME,AUXILIARY_2007_DESC,踏云靴,筑基,步履生云，身轻如燕，赶路必备.,"{extra_escape_success_rate: 0.15, extra_move_step: 1}"
-2008,AUXILIARY_2008_NAME,AUXILIARY_2008_DESC,菩提子,筑基,佛门至宝，持之可灵台清明，悟性大增.,"{extra_breakthrough_success_rate: 0.1, extra_retreat_success_rate: 0.15, extra_gu_resistance_rate: 0.12}"
-2009,AUXILIARY_2009_NAME,AUXILIARY_2009_DESC,金丝软甲,筑基,刀枪不入，水火不侵，贴身软甲.,"{extra_max_hp: 100, damage_reduction: 0.05}"
-2010,AUXILIARY_2010_NAME,AUXILIARY_2010_DESC,玄冰玉榻,筑基,极北玄冰所制，在此修炼可镇压心火，事半功倍。,"{respire_duration_reduction: 0.2, extra_retreat_success_rate: 0.15, extra_gu_resistance_rate: 0.08}"
-2011,AUXILIARY_2011_NAME,AUXILIARY_2011_DESC,无相面具,筑基,千人千面，不仅掩盖容貌，更能掩盖气息.,{extra_plunder_multiplier: 0.5}
-2051,AUXILIARY_2051_NAME,AUXILIARY_2051_DESC,神风舟,金丹,飞行法器，速度极快，居家旅行杀人越货必备.,"{extra_move_step: 2, extra_escape_success_rate: 0.15}"
-2052,AUXILIARY_2052_NAME,AUXILIARY_2052_DESC,昆仑镜,金丹,上古神器，拥有穿梭时空之力，此为仿品，仅能窥探远方.,"{extra_observation_radius: 2, extra_gu_resistance_rate: 0.15}"
-2053,AUXILIARY_2053_NAME,AUXILIARY_2053_DESC,造化翠瓶,元婴,夺天地之造化，聚日月之精华，瓶中灵液可催熟万物。,"{extra_respire_exp: 150, respire_duration_reduction: 0.2}"
-2054,AUXILIARY_2054_NAME,AUXILIARY_2054_DESC,龙凤呈祥戒,金丹,龙凤和鸣，心意相通，双修进境一日千里.,{extra_dual_cultivation_exp: 100}
-2055,AUXILIARY_2055_NAME,AUXILIARY_2055_DESC,隐形披风,金丹,披上后身形尽隐，连神识也难以察觉.,"{extra_move_step: 1, extra_escape_success_rate: 0.2}"
-2056,AUXILIARY_2056_NAME,AUXILIARY_2056_DESC,御兽环,金丹,套在妖兽颈上，任其凶焰滔天，也要乖乖听命.,{extra_catch_success_rate: 0.1}
-2057,AUXILIARY_2057_NAME,AUXILIARY_2057_DESC,太虚甲,金丹,太虚幻境所化，万法不沾，防御力惊人.,"{damage_reduction: 0.2, extra_max_hp: 200, extra_gu_resistance_rate: 0.18}"
-2058,AUXILIARY_2058_NAME,AUXILIARY_2058_DESC,八卦炉,金丹,仿太上老君炼丹炉，丹成九转，药效倍增.,"{extra_hp_recovery_rate: 0.5, extra_refine_success_rate: 0.15}"
-2059,AUXILIARY_2059_NAME,AUXILIARY_2059_DESC,聚宝盆,金丹,放入一文，取出万贯，财源滚滚.,"{extra_item_sell_price_multiplier: 0.2, extra_fortune_probability: 0.01, shop_buy_price_reduction: 0.2}"
-2060,AUXILIARY_2060_NAME,AUXILIARY_2060_DESC,天地烘炉,金丹,以天地为炉，造化为工，炼制万物.,"{extra_weapon_upgrade_chance: 0.15, extra_cast_success_rate: 0.1, extra_refine_success_rate: 0.1}"
-2061,AUXILIARY_2061_NAME,AUXILIARY_2061_DESC,六道剑匣,金丹,背负六道，剑出轮回，悟剑良伴.,"{extra_breakthrough_success_rate: 0.2, extra_respire_exp: 100}"
-2062,AUXILIARY_2062_NAME,AUXILIARY_2062_DESC,传国玉玺,元婴,受命于天，既寿永昌。皇威浩荡，震慑宵小.,"{realm_suppression_bonus: 0.15, extra_gu_resistance_rate: 0.20}"
-2063,AUXILIARY_2063_NAME,AUXILIARY_2063_DESC,灵泉之眼,金丹,可移动的灵气之眼，随身携带的修行宝地。,"{respire_duration_reduction: 0.3, extra_respire_exp: 50}"
-2064,AUXILIARY_2064_NAME,AUXILIARY_2064_DESC,万魂幡,元婴,血海不枯，冥河不死。极度邪恶的掠夺法宝.,"{legal_actions: ['DevourPeople'], extra_plunder_multiplier: 1.0, realm_suppression_bonus: 0.15, extra_battle_strength_points: 'get_ten_thousand_souls_banner_bonus(int(avatar.auxiliary.special_data.get(""devoured_souls"", 0)))', _desc: 'effect_ten_thousand_souls_banner_desc'}"
-2065,AUXILIARY_2065_NAME,AUXILIARY_2065_DESC,青木神鼎,元婴,上古神木雕琢而成，不仅可炼丹，更能自成空间催熟灵药。,"{extra_refine_success_rate: 0.25, respire_duration_reduction: 0.15}"
-2071,AUXILIARY_2071_NAME,AUXILIARY_2071_DESC,百虫囊,练气,以粗布与兽皮制成的蛊囊，可收纳寻常灵虫。,{legal_actions: ['InflictGu']}
-2072,AUXILIARY_2072_NAME,AUXILIARY_2072_DESC,五毒蛊盅,筑基,以五毒相生之法炼成的蛊盅，蛊性较为稳定。,"{legal_actions: ['InflictGu'], extra_gu_success_rate: 0.03, extra_gu_duration_months: 3}"
-2073,AUXILIARY_2073_NAME,AUXILIARY_2073_DESC,千机蛊匣,金丹,机关与蛊术结合的蛊匣，便于隐蔽施蛊。,"{legal_actions: ['InflictGu'], extra_gu_success_rate: 0.06, extra_gu_duration_months: 6}"
-2074,AUXILIARY_2074_NAME,AUXILIARY_2074_DESC,万蛊母巢,元婴,母蛊盘踞其中，可统御群蛊。,"{legal_actions: ['InflictGu'], extra_gu_success_rate: 0.10, extra_gu_duration_months: 9}"
-2081,AUXILIARY_2081_NAME,AUXILIARY_2081_DESC,引灵阵盘,练气,刻有基础引灵纹路的阵盘，可牵动当前区域灵机，布置临时阵法。,{legal_actions: ['SetFormation']}
-2082,AUXILIARY_2082_NAME,AUXILIARY_2082_DESC,聚脉阵盘,筑基,盘中阵纹能接续浅层地脉，使布下的阵法更稳，威能与持续时间略有提升。,"{legal_actions: ['SetFormation'], extra_formation_power: 0.08, extra_formation_duration_months: 2}"
-2083,AUXILIARY_2083_NAME,AUXILIARY_2083_DESC,玄枢阵盘,金丹,以玄枢灵纹统摄多重灵路，布阵时能令阵势更盛，并减少部分灵石损耗。,"{legal_actions: ['SetFormation'], extra_formation_power: 0.16, extra_formation_duration_months: 4, formation_cost_reduction: 0.05}"
-2084,AUXILIARY_2084_NAME,AUXILIARY_2084_DESC,太虚阵盘,元婴,灵纹自成周天循环，可借虚空灵机补全阵势，使阵法威能、持续与运转效率大幅提升。,"{legal_actions: ['SetFormation'], extra_formation_power: 0.28, extra_formation_duration_months: 8, formation_cost_reduction: 0.10}"
+,Name ID,Description ID,Name,Grade (QI_REFINEMENT/FOUNDATION_ESTABLISHMENT/CORE_FORMATION/NASCENT_SOUL),Description / prompt text,"JSON (loose format supported, see effects.py)"
+2001,AUXILIARY_2001_NAME,AUXILIARY_2001_DESC,Wood Spirit Armor,FOUNDATION_ESTABLISHMENT,Woven with spiritual wood fibers,{damage_reduction: 0.08}
+2002,AUXILIARY_2002_NAME,AUXILIARY_2002_DESC,Blood Essence Fruit,FOUNDATION_ESTABLISHMENT,"Born in the place of extreme yang, the color is like blood. It not only heals wounds but also improves cultivation.",{extra_hp_recovery_rate: 0.3}
+2003,AUXILIARY_2003_NAME,AUXILIARY_2003_DESC,Ginseng Fruit (Pseudo),FOUNDATION_ESTABLISHMENT,Though not as good as the real thing,{extra_max_lifespan: 50}
+2004,AUXILIARY_2004_NAME,AUXILIARY_2004_DESC,Wanbao Token,FOUNDATION_ESTABLISHMENT,A high-level commercial token commonly used in Thousand Sails City.,"{extra_item_sell_price_multiplier: 0.1, shop_buy_price_reduction: 0.1}"
+2005,AUXILIARY_2005_NAME,AUXILIARY_2005_DESC,Iron Essence,FOUNDATION_ESTABLISHMENT,Refined from a hundred jin of common iron to get one tael,{extra_weapon_upgrade_chance: 0.05}
+2006,AUXILIARY_2006_NAME,AUXILIARY_2006_DESC,Heaven-Reaching Dharma Eye,FOUNDATION_ESTABLISHMENT,"It can see through falsehoods, gain insight into the origin, seek the spiritual opportunities of heaven and earth, and look directly at the Great Dao.","{extra_observation_radius: 1, extra_fortune_probability: 0.005, extra_gu_resistance_rate: 0.12}"
+2007,AUXILIARY_2007_NAME,AUXILIARY_2007_DESC,Cloud Treading Boots,FOUNDATION_ESTABLISHMENT,Steps born on clouds,"{extra_escape_success_rate: 0.15, extra_move_step: 1}"
+2008,AUXILIARY_2008_NAME,AUXILIARY_2008_DESC,Bodhi Seed,FOUNDATION_ESTABLISHMENT,A supreme treasure of Buddhism,"{extra_breakthrough_success_rate: 0.1, extra_retreat_success_rate: 0.15, extra_gu_resistance_rate: 0.12}"
+2009,AUXILIARY_2009_NAME,AUXILIARY_2009_DESC,Golden Thread Soft Armor,FOUNDATION_ESTABLISHMENT,Invulnerable to swords and spears,"{extra_max_hp: 100, damage_reduction: 0.05}"
+2010,AUXILIARY_2010_NAME,AUXILIARY_2010_DESC,Black Ice Jade Couch,FOUNDATION_ESTABLISHMENT,Made of extreme northern black ice. Cultivating on it can suppress the fire of the heart and yield twice the result with half the effort.,"{respire_duration_reduction: 0.2, extra_retreat_success_rate: 0.15, extra_gu_resistance_rate: 0.08}"
+2011,AUXILIARY_2011_NAME,AUXILIARY_2011_DESC,Formless Mask,FOUNDATION_ESTABLISHMENT,A thousand faces for a thousand people,{extra_plunder_multiplier: 0.5}
+2051,AUXILIARY_2051_NAME,AUXILIARY_2051_DESC,Divine Wind Boat,CORE_FORMATION,A flying artifact,"{extra_move_step: 2, extra_escape_success_rate: 0.15}"
+2052,AUXILIARY_2052_NAME,AUXILIARY_2052_DESC,Kunlun Mirror,CORE_FORMATION,An ancient divine artifact with the power to travel through time and space; this is an imitation,"{extra_observation_radius: 2, extra_gu_resistance_rate: 0.15}"
+2053,AUXILIARY_2053_NAME,AUXILIARY_2053_DESC,Creation Emerald Bottle,NASCENT_SOUL,"Seizing the creation of heaven and earth, gathering the essence of the sun and moon. The spiritual liquid in the bottle can ripen all things.","{extra_respire_exp: 150, respire_duration_reduction: 0.2}"
+2054,AUXILIARY_2054_NAME,AUXILIARY_2054_DESC,Dragon and Phoenix Ring,CORE_FORMATION,Dragon and phoenix in harmony,{extra_dual_cultivation_exp: 100}
+2055,AUXILIARY_2055_NAME,AUXILIARY_2055_DESC,Invisibility Cloak,CORE_FORMATION,When worn,"{extra_move_step: 1, extra_escape_success_rate: 0.2}"
+2056,AUXILIARY_2056_NAME,AUXILIARY_2056_DESC,Beast Taming Ring,CORE_FORMATION,Placed on a demonic beast's neck,{extra_catch_success_rate: 0.1}
+2057,AUXILIARY_2057_NAME,AUXILIARY_2057_DESC,Void Armor,CORE_FORMATION,Transformed from the Void Illusion Realm,"{damage_reduction: 0.2, extra_max_hp: 200, extra_gu_resistance_rate: 0.18}"
+2058,AUXILIARY_2058_NAME,AUXILIARY_2058_DESC,Eight Trigrams Furnace,CORE_FORMATION,An imitation of Grand Supreme Elder Lord's alchemy furnace,"{extra_hp_recovery_rate: 0.5, extra_refine_success_rate: 0.15}"
+2059,AUXILIARY_2059_NAME,AUXILIARY_2059_DESC,Treasure Basin,CORE_FORMATION,Put in one coin,"{extra_item_sell_price_multiplier: 0.2, extra_fortune_probability: 0.01, shop_buy_price_reduction: 0.2}"
+2060,AUXILIARY_2060_NAME,AUXILIARY_2060_DESC,Heaven and Earth Furnace,CORE_FORMATION,Using heaven and earth as the furnace and creation as the worker,"{extra_weapon_upgrade_chance: 0.15, extra_cast_success_rate: 0.1, extra_refine_success_rate: 0.1}"
+2061,AUXILIARY_2061_NAME,AUXILIARY_2061_DESC,Six Paths Sword Casket,CORE_FORMATION,Carrying the six paths,"{extra_breakthrough_success_rate: 0.2, extra_respire_exp: 100}"
+2062,AUXILIARY_2062_NAME,AUXILIARY_2062_DESC,Imperial Seal,NASCENT_SOUL,Mandated by Heaven,"{realm_suppression_bonus: 0.15, extra_gu_resistance_rate: 0.20}"
+2063,AUXILIARY_2063_NAME,AUXILIARY_2063_DESC,Spirit Spring Eye,CORE_FORMATION,"A movable source of spiritual energy, a cultivation treasure land carried with you.","{respire_duration_reduction: 0.3, extra_respire_exp: 50}"
+2064,AUXILIARY_2064_NAME,AUXILIARY_2064_DESC,Ten Thousand Souls Banner,NASCENT_SOUL,The sea of blood never dries,"{legal_actions: ['DevourPeople'], extra_plunder_multiplier: 1.0, realm_suppression_bonus: 0.15, extra_battle_strength_points: 'get_ten_thousand_souls_banner_bonus(int(avatar.auxiliary.special_data.get(""devoured_souls"", 0)))', _desc: 'effect_ten_thousand_souls_banner_desc'}"
+2065,AUXILIARY_2065_NAME,AUXILIARY_2065_DESC,Green Wood Divine Cauldron,NASCENT_SOUL,Carved from ancient divine wood. It can not only refine divine pills but also form a space of its own to ripen spirit herbs.,"{extra_refine_success_rate: 0.25, respire_duration_reduction: 0.15}"
+2071,AUXILIARY_2071_NAME,AUXILIARY_2071_DESC,Hundred-Bug Pouch,QI_REFINEMENT,"A Gu pouch made of coarse cloth and beast hide, used to hold common spirit insects.",{legal_actions: ['InflictGu']}
+2072,AUXILIARY_2072_NAME,AUXILIARY_2072_DESC,Five-Venom Gu Vessel,FOUNDATION_ESTABLISHMENT,A Gu vessel refined through the mutual generation method of the five venoms. Its Gu nature is relatively stable.,"{legal_actions: ['InflictGu'], extra_gu_success_rate: 0.03, extra_gu_duration_months: 3}"
+2073,AUXILIARY_2073_NAME,AUXILIARY_2073_DESC,Thousand-Mechanism Gu Box,CORE_FORMATION,"A Gu box combining mechanisms and Gu arts, suitable for concealed Gu infliction.","{legal_actions: ['InflictGu'], extra_gu_success_rate: 0.06, extra_gu_duration_months: 6}"
+2074,AUXILIARY_2074_NAME,AUXILIARY_2074_DESC,Myriad-Gu Brood Nest,NASCENT_SOUL,"A brood nest occupied by mother Gu, able to command many Gu.","{legal_actions: ['InflictGu'], extra_gu_success_rate: 0.10, extra_gu_duration_months: 9}"
+2081,AUXILIARY_2081_NAME,AUXILIARY_2081_DESC,Spirit-Calling Formation Disk,QI_REFINEMENT,"A formation disk engraved with basic spirit-calling patterns, able to draw on local spiritual energy to set a temporary formation.",{legal_actions: ['SetFormation']}
+2082,AUXILIARY_2082_NAME,AUXILIARY_2082_DESC,Leyline-Gathering Formation Disk,FOUNDATION_ESTABLISHMENT,"Its patterns connect to shallow leylines, making formations steadier and slightly improving their power and duration.","{legal_actions: ['SetFormation'], extra_formation_power: 0.08, extra_formation_duration_months: 2}"
+2083,AUXILIARY_2083_NAME,AUXILIARY_2083_DESC,Mystic Pivot Formation Disk,CORE_FORMATION,"Mystic pivot patterns coordinate multiple spirit circuits, empowering formations and reducing part of their spirit stone loss.","{legal_actions: ['SetFormation'], extra_formation_power: 0.16, extra_formation_duration_months: 4, formation_cost_reduction: 0.05}"
+2084,AUXILIARY_2084_NAME,AUXILIARY_2084_DESC,Great Void Formation Disk,NASCENT_SOUL,"Its spirit patterns form a self-contained cycle, drawing void spiritual energy to greatly improve formation power, duration, and efficiency.","{legal_actions: ['SetFormation'], extra_formation_power: 0.28, extra_formation_duration_months: 8, formation_cost_reduction: 0.10}"

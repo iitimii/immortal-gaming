@@ -30,23 +30,23 @@ async def test_autonomous_creation_equips_technique_and_registers_content(base_w
     ):
         mock_generate.return_value = {
             "category": "technique",
-            "name": "九曜焚息诀",
-            "desc": "火行吐纳功法",
+            "name": "Nine Luminaries Flame Breath Art",
+            "desc": "Fire-element respiration technique",
             "effects": {"extra_respire_exp_multiplier": 0.2},
             "attribute": "FIRE",
             "grade": "UPPER",
-            "effect_desc": "额外吐纳经验倍率 +20%",
+            "effect_desc": "Extra respiration exp multiplier +20%",
             "is_custom": True,
         }
 
         events = await AutonomousCustomContentService.try_create_events(dummy_avatar, base_world)
 
     assert len(events) == 1
-    assert "self-created technique" in events[0].content or "自创功法" in events[0].content
+    assert "self-created technique" in events[0].content
     assert dummy_avatar.technique is not None
-    assert dummy_avatar.technique.name == "九曜焚息诀"
+    assert dummy_avatar.technique.name == "Nine Luminaries Flame Breath Art"
     assert int(dummy_avatar.technique.id) in CustomContentRegistry.custom_techniques_by_id
-    assert techniques_by_id[int(dummy_avatar.technique.id)].name == "九曜焚息诀"
+    assert techniques_by_id[int(dummy_avatar.technique.id)].name == "Nine Luminaries Flame Breath Art"
 
 
 @pytest.mark.asyncio
@@ -55,7 +55,7 @@ async def test_autonomous_creation_forced_equips_weapon_and_sells_old(base_world
 
     CustomContentRegistry.reset()
     base_world.avatar_manager.register_avatar(dummy_avatar)
-    old_weapon = create_test_weapon("旧剑", Realm.Qi_Refinement, weapon_id=2501)
+    old_weapon = create_test_weapon("Old Sword", Realm.Qi_Refinement, weapon_id=2501)
     dummy_avatar.change_weapon(old_weapon)
     dummy_avatar.magic_stone = 0
 
@@ -72,11 +72,11 @@ async def test_autonomous_creation_forced_equips_weapon_and_sells_old(base_world
         mock_generate.return_value = {
             "category": "weapon",
             "realm": Realm.Qi_Refinement.value,
-            "name": "新剑",
-            "desc": "新兵器",
+            "name": "New Sword",
+            "desc": "New weapon",
             "effects": {"extra_battle_strength_points": 3},
             "weapon_type": "SWORD",
-            "effect_desc": "额外战斗力 +3",
+            "effect_desc": "Extra battle strength +3",
             "is_custom": True,
         }
 
@@ -84,10 +84,10 @@ async def test_autonomous_creation_forced_equips_weapon_and_sells_old(base_world
 
     assert len(events) == 2
     assert dummy_avatar.weapon is not None
-    assert dummy_avatar.weapon.name == "新剑"
+    assert dummy_avatar.weapon.name == "New Sword"
     assert dummy_avatar.weapon.realm == Realm.Qi_Refinement
     assert dummy_avatar.magic_stone > 0
-    assert "sold old equipment" in events[1].content or "卖出旧装备" in events[1].content
+    assert "sold old equipment" in events[1].content
 
 
 @pytest.mark.asyncio
@@ -110,15 +110,15 @@ async def test_autonomous_creation_story_uses_dedicated_story_kind(base_world, d
     ):
         mock_generate.return_value = {
             "category": "technique",
-            "name": "星火诀",
-            "desc": "自创功法",
+            "name": "Starfire Art",
+            "desc": "Self-created technique",
             "effects": {"extra_respire_exp_multiplier": 0.1},
             "attribute": "FIRE",
             "grade": "MIDDLE",
-            "effect_desc": "额外吐纳经验倍率 +10%",
+            "effect_desc": "Extra respiration exp multiplier +10%",
             "is_custom": True,
         }
-        mock_tell.return_value = "自创故事正文"
+        mock_tell.return_value = "Self-creation story text"
 
         events = await AutonomousCustomContentService.try_create_events(dummy_avatar, base_world)
 

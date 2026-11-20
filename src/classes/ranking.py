@@ -83,14 +83,14 @@ class RankingManager:
 
     def update_rankings_with_world(self, world: "World", living_avatars: List["Avatar"]) -> None:
         """
-        使用 World 上下文更新榜单。
-        - 角色榜单仍基于 living_avatars。
-        - 宗门榜单改为只考虑本局启用且仍存续的宗门（通过 world.sect_context）。
+        Update rankings using the World context.
+        - Avatar rankings are still based on living_avatars.
+        - Sect rankings now only consider sects enabled in this run and still existing (via world.sect_context).
         """
-        # 先更新角色榜单（沿用旧实现）
+        # Update avatar rankings first (keeping the old implementation)
         self.update_rankings(living_avatars)
 
-        # 再基于 SectContext 计算宗门榜
+        # Then compute the sect ranking from SectContext
         sect_context = getattr(world, "sect_context", None)
         if sect_context is None:
             return

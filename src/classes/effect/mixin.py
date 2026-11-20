@@ -1,7 +1,7 @@
 """
-Avatar 效果计算 Mixin
+Avatar effects mixin
 
-负责角色效果的计算和应用。
+Computes and applies avatar effects.
 """
 from __future__ import annotations
 
@@ -17,10 +17,10 @@ from src.classes.hp import HP_MAX_BY_REALM
 
 
 class EffectsMixin:
-    """效果计算相关方法"""
+    """Effect computation methods"""
     
     def get_active_temporary_effects(self: "Avatar") -> list[dict[str, Any]]:
-        """获取当前生效的临时效果列表"""
+        """Return the list of currently active temporary effects"""
         current_month = int(self.world.month_stamp)
         return [
             eff for eff in getattr(self, "temporary_effects", [])
@@ -29,11 +29,11 @@ class EffectsMixin:
 
     def _evaluate_values(self, effects: dict[str, Any]) -> dict[str, Any]:
         """
-        评估效果字典中的动态值（字符串表达式）。
-        支持明确的 'eval(...)' 格式，以及包含 'avatar.' 的隐式表达式。
+        Evaluate dynamic values (string expressions) in an effects dict.
+        Supports explicit 'eval(...)' as well as implicit expressions containing 'avatar.'.
         """
         result = {}
-        # 安全的 eval 上下文
+        # Safe eval context
         context = {
             "__builtins__": {},
             "avatar": self,
@@ -54,17 +54,17 @@ class EffectsMixin:
                 s = v.strip()
                 expr = None
                 
-                # 检查是否为表达式
+                # Check whether this is an expression
                 if s.startswith("eval(") and s.endswith(")"):
                     expr = s[5:-1]
-                elif "avatar." in s: # 启发式：包含 avatar. 则视为表达式
+                elif "avatar." in s: # Heuristic: anything containing avatar. is treated as an expression
                     expr = s
                 
                 if expr:
                     try:
                         result[k] = eval(expr, context)
                     except Exception:
-                        # 评估失败，保留原值（可能是普通字符串，或者表达式有误）
+                        # Evaluation failed: keep the original value (a plain string, or a broken expression)
                         result[k] = v
                 else:
                     result[k] = v
@@ -75,12 +75,12 @@ class EffectsMixin:
     @property
     def effects(self: "Avatar") -> dict[str, object]:
         """
-        合并所有来源的效果：宗门、功法、灵根、特质、兵器、辅助装备、灵兽、天地灵机、丹药
-        直接复用 get_effect_breakdown 的逻辑，确保显示与实际效果一致。
+        Merge effects from every source: sect, technique, spirit root, traits, weapon, auxiliary, spirit animal, heaven-and-earth phenomenon, elixirs.
+        Reuses get_effect_breakdown directly so what is displayed matches what applies.
         """
         merged: dict[str, object] = {}
 
-        # 我们只需要合并结果即可
+        # We only need to merge the results
         for _, effect_dict in self.get_effect_breakdown():
             merged = _merge_effects(merged, effect_dict)
 
@@ -88,16 +88,16 @@ class EffectsMixin:
 
     def _get_raw_effect_breakdown(self: "Avatar") -> list[tuple[str, dict[str, Any]]]:
         """
-        获取未注入气运派生效果前的原始效果明细。
+        Return the raw effect breakdown before luck-derived effects are injected.
         """
         from src.i18n import t
         breakdown = []
         
         def _collect(name: str, source_obj=None, explicit_effects=None):
             """
-            收集效果。
-            source_obj: 包含 .effects 的对象
-            explicit_effects: 直接传入的 effects (dict or list)
+            Collect effects.
+            source_obj: object that has .effects
+            explicit_effects: effects passed in directly (dict or list)
             """
             raw_effects = explicit_effects
             if raw_effects is None and source_obj is not None:
@@ -106,20 +106,20 @@ class EffectsMixin:
             if not raw_effects:
                 return
 
-            # 1. 评估条件 (when)
+            # 1. Evaluate conditions (when)
             evaluated = _evaluate_conditional_effect(raw_effects, self)
-            # 2. 评估动态值 (expressions)
+            # 2. Evaluate dynamic values (expressions)
             evaluated = self._evaluate_values(evaluated)
             
             if evaluated:
                 breakdown.append((name, evaluated))
 
-        # 按照优先级或逻辑顺序收集（使用翻译）
+        # Collect in priority / logical order (translated labels)
         if self.sect:
             label = t("Sect [{name}]", name=self.sect.name)
             _collect(label, source_obj=self.sect)
         else:
-            # 散修应用默认道统效果
+            # Rogue cultivators get the default orthodoxy effects
             from src.classes.core.orthodoxy import get_orthodoxy
             sanxiu_orthodoxy = get_orthodoxy("sanxiu")
             if sanxiu_orthodoxy:
@@ -147,7 +147,7 @@ class EffectsMixin:
             _collect(label, source_obj=p)
 
         if getattr(self, "goldfinger", None):
-            label = f"外挂 [{self.goldfinger.name}]"
+            label = f"Goldfinger [{self.goldfinger.name}]"
             _collect(label, source_obj=self.goldfinger)
             
         if self.weapon:
@@ -170,7 +170,7 @@ class EffectsMixin:
             _collect(t("effect_source_cultivation_realm"), explicit_effects=realm_effects)
 
         for consumed in self.elixirs:
-            # 使用 get_active_effects 获取当前生效的效果
+            # Use get_active_effects to get the currently active effects
             active = consumed.get_active_effects(int(self.world.month_stamp))
             label = t("Elixir [{name}]", name=consumed.elixir.name)
             _collect(label, explicit_effects=active)
@@ -179,9 +179,9 @@ class EffectsMixin:
             label = t(persistent_eff.get("source", "effect_source_persistent_effect"))
             _collect(label, explicit_effects=persistent_eff.get("effects", {}))
 
-        # 处理临时效果（如闭关获得的短期加成）
+        # Temporary effects (e.g. short-term bonuses from secluded cultivation)
         for temp_eff in self.get_active_temporary_effects():
-            # 来源显示，支持翻译
+            # Source label, translatable
             source_key = temp_eff.get("source", "Unknown")
             label = t(source_key)
             _collect(label, explicit_effects=temp_eff.get("effects", {}))
@@ -197,8 +197,8 @@ class EffectsMixin:
 
     def get_effect_breakdown(self: "Avatar") -> list[tuple[str, dict[str, Any]]]:
         """
-        获取最终效果明细，返回 [(来源名称, 生效的效果字典), ...]
-        在原始来源之外，额外插入“气运”派生效果来源。
+        Return the final effect breakdown as [(source name, effective effects dict), ...].
+        In addition to the raw sources, a luck-derived effects source is inserted.
         """
         from src.i18n import t
 
@@ -216,44 +216,44 @@ class EffectsMixin:
 
     def recalc_effects(self: "Avatar") -> None:
         """
-        重新计算所有长期效果
-        在装备更换、突破境界等情况下调用
+        Recalculate all long-term effects.
+        Called on equipment changes, realm breakthroughs, etc.
         
-        当前包括：
-        - HP 最大值
-        - 寿命最大值
+        Currently covers:
+        - max HP
+        - max lifespan
         """
-        # 计算基础最大值（基于境界）
+        # Compute the base maximum (by realm)
         base_max_hp = HP_MAX_BY_REALM.get(self.cultivation_progress.realm, 100)
         
-        # 访问 self.effects 会触发 @property，重新 merge 所有 effects
+        # Accessing self.effects triggers the @property and re-merges all effects
         effects = self.effects
         extra_max_hp = int(effects.get("extra_max_hp", 0))
         extra_max_lifespan = int(effects.get("extra_max_lifespan", 0))
         
-        # 计算新的最大值
+        # Compute the new maximum
         new_max_hp = base_max_hp + extra_max_hp
         
-        # 更新最大值
+        # Update the maximum
         self.hp.max = new_max_hp
         
-        # 更新寿命
+        # Update lifespan
         if self.age:
             self.age.recalculate_max_lifespan(extra_max_lifespan)
         
-        # 调整当前值（不超过新的最大值）
+        # Clamp the current value to the new maximum
         if self.hp.cur > new_max_hp:
             self.hp.cur = new_max_hp
 
     def update_time_effect(self: "Avatar") -> None:
         """
-        随时间更新的被动效果。
-        当前实现：当 HP 未满时，回复最大生命值的 1%（受HP恢复速率加成影响）。
+        Passive effects that update over time.
+        Current behavior: while HP is not full, recover 1% of max HP (scaled by the HP recovery rate bonus).
         """
         if self.hp.cur < self.hp.max:
             base_recover = self.hp.max * 0.01
             
-            # 应用HP恢复速率加成
+            # Apply the HP recovery rate bonus
             recovery_rate_raw = self.effects.get("extra_hp_recovery_rate", 0.0)
             recovery_rate = float(recovery_rate_raw or 0.0)
             from src.systems.formation import get_region_formation_effect_value
@@ -266,5 +266,5 @@ class EffectsMixin:
 
     @property
     def move_step_length(self: "Avatar") -> int:
-        """获取角色的移动步长"""
+        """Return the avatar's move step length"""
         return self.cultivation_progress.get_move_step()

@@ -1,4 +1,5 @@
 import csv
+import re
 import sys
 import time
 from pathlib import Path
@@ -14,6 +15,26 @@ def ensure_dir(path: Path):
     if not path.exists():
         path.mkdir(parents=True)
 
+KEY_COLUMNS = ("name_id", "desc_id")
+KEY_PATTERN = re.compile(r"^[A-Za-z0-9_.\-]+$")
+
+
+def is_description_row(headers: List[str], row: List[str]) -> bool:
+    """Row 2 of most CSVs describes each column (e.g. "Name ID") instead of holding data.
+
+    A real data row carries i18n keys such as ``SECT_1_NAME`` in its key columns,
+    while a description row carries human-readable labels there.
+    """
+    for column in KEY_COLUMNS:
+        if column not in headers:
+            continue
+        idx = headers.index(column)
+        value = row[idx].strip() if idx < len(row) else ""
+        if value and not KEY_PATTERN.match(value):
+            return True
+    return False
+
+
 def read_csv(path: Path) -> List[Dict[str, str]]:
     if not path.exists():
         return []
@@ -28,14 +49,11 @@ def read_csv(path: Path) -> List[Dict[str, str]]:
             headers[0] = headers[0][1:]
             
         data = []
-        # Skip headers and comment row
-        # Heuristic: if row 2 looks like comments (Chinese/Types), skip it
+        # Skip the header row and, when present, the human-readable description row.
         start_idx = 1
-        if len(lines) > 1:
-            # Check if second row is likely a comment row (contains non-ascii or matches known structure)
-            if any(ord(c) > 127 for c in "".join(lines[1])):
-                 start_idx = 2
-        
+        if len(lines) > 1 and is_description_row(headers, lines[1]):
+            start_idx = 2
+
         for row in lines[start_idx:]:
             if not row: continue
             item = {}

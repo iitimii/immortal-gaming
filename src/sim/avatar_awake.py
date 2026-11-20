@@ -22,11 +22,11 @@ from src.i18n import t
 from src.classes.race import Race, roll_avatar_race
 from src.systems.world_secret import sync_avatar_public_world_secret_knowledge
 
-# 常量
+# Constants
 MIN_AWAKENING_AGE = 16
-MAX_AWAKENING_AGE = 60 # 凡人觉醒的最大年龄
-BLOODLINE_AWAKENING_RATE = 0.05 # 每个符合条件的凡人每月的觉醒概率
-WILD_AWAKENING_RATE_BASE = 0.1 # 基础野生觉醒率 (如果没有配置)
+MAX_AWAKENING_AGE = 60 # Maximum age at which a mortal can awaken
+BLOODLINE_AWAKENING_RATE = 0.05 # Monthly awakening probability for each eligible mortal
+WILD_AWAKENING_RATE_BASE = 0.1 # Base wild awakening rate (if not configured)
 
 
 def _register_avatar_and_resolve_lifespan(world: World, avatar: Avatar) -> None:
@@ -42,11 +42,11 @@ def _register_avatar_and_resolve_lifespan(world: World, avatar: Avatar) -> None:
 def process_awakening(world: World) -> List[Event]:
     events = []
     
-    # 1. 血脉觉醒 (Existing Mortals)
+    # 1. Bloodline awakening (existing mortals)
     events.extend(_process_bloodline_awakening(world))
     
-    # 2. 机缘觉醒 (Wild Avatars)
-    # 读取配置中的觉醒率
+    # 2. Fortuitous awakening (wild avatars)
+    # Read the awakening rate from config
     run_config = getattr(world, "run_config_snapshot", {}) or {}
     wild_rate = run_config.get("npc_awakening_rate_per_month", WILD_AWAKENING_RATE_BASE)
     
@@ -59,23 +59,23 @@ def process_awakening(world: World) -> List[Event]:
 
 def _process_bloodline_awakening(world: World) -> List[Event]:
     events = []
-    # 获取候选人
+    # Get candidates
     candidates = world.mortal_manager.get_awakening_candidates(world.month_stamp, min_age=MIN_AWAKENING_AGE)
     
     for mortal in candidates:
-        # 年龄超过上限则不再觉醒（只能等死）
+        # Past the age cap, no more awakening (can only wait to die)
         current_age_years = (int(world.month_stamp) - int(mortal.birth_month_stamp)) // 12
         if current_age_years > MAX_AWAKENING_AGE:
             continue
             
-        # 判定是否觉醒
+        # Roll for awakening
         if random.random() < BLOODLINE_AWAKENING_RATE:
             avatar = _promote_mortal_to_avatar(world, mortal)
             sync_avatar_public_world_secret_knowledge(world, avatar)
 
             _register_avatar_and_resolve_lifespan(world, avatar)
 
-            # 移除 Mortal
+            # Remove the Mortal
             world.mortal_manager.remove_mortal(mortal.id)
 
             if avatar.is_dead:
@@ -88,7 +88,7 @@ def _process_bloodline_awakening(world: World) -> List[Event]:
     return events
 
 def _process_wild_awakening(world: World) -> Optional[Event]:
-    # 随机生成一个新的野生角色
+    # Randomly generate a new wild avatar
     gender = random.choice(list(Gender))
     race = roll_avatar_race()
     from src.utils.name_generator import get_random_name_for_race
@@ -96,7 +96,7 @@ def _process_wild_awakening(world: World) -> Optional[Event]:
     
     age_val = random.randint(MIN_AWAKENING_AGE, 30)
     
-    # 构造 Avatar
+    # Build the Avatar
     born_id = get_born_region_id(world, race=race)
     avatar = _create_simple_avatar(world, name, gender, age_val, parents=[], born_region_id=born_id, race=race)
     sync_avatar_public_world_secret_knowledge(world, avatar)
@@ -111,7 +111,7 @@ def _process_wild_awakening(world: World) -> Optional[Event]:
     return event
 
 def _promote_mortal_to_avatar(world: World, mortal: Mortal) -> Avatar:
-    # 计算当前年龄
+    # Compute current age
     age_years = (int(world.month_stamp) - int(mortal.birth_month_stamp)) // 12
     
     avatar = _create_simple_avatar(
@@ -120,7 +120,7 @@ def _promote_mortal_to_avatar(world: World, mortal: Mortal) -> Avatar:
         mortal.gender, 
         age_years, 
         parents=mortal.parents,
-        mortal_id=mortal.id, # 复用 ID
+        mortal_id=mortal.id, # Reuse the ID
         race=getattr(mortal, "race", None),
         born_region_id=mortal.born_region_id,
     )
@@ -137,7 +137,7 @@ def _create_simple_avatar(
     born_region_id: Optional[int] = None,
     race: Optional[Race] = None,
 ) -> Avatar:
-    # 1. 基础属性
+    # 1. Basic attributes
     level = 1
     cultivation = CultivationProgress(level)
     age = Age(
@@ -146,10 +146,10 @@ def _create_simple_avatar(
         innate_max_lifespan=Age.roll_innate_max_lifespan(),
     )
     
-    # 复用 ID 或生成新 ID
+    # Reuse the ID or generate a new one
     aid = mortal_id if mortal_id else get_avatar_id()
     
-    # 出生位置随机
+    # Random birth location
     x = random.randint(0, world.map.width - 1)
     y = random.randint(0, world.map.height - 1)
     
@@ -169,32 +169,32 @@ def _create_simple_avatar(
         pos_x=x,
         pos_y=y,
         root=random.choice(list(Root)),
-        sect=None, # 刚觉醒默认为散修
+        sect=None, # Newly awakened avatars are rogue cultivators by default
         born_region_id=born_region_id,
         race=avatar_race,
     )
     
     avatar.cultivation_start_month_stamp = world.month_stamp
     
-    avatar.magic_stone = MagicStone(10) # 少量灵石
+    avatar.magic_stone = MagicStone(10) # A few spirit stones
     avatar.tile = world.map.get_tile(x, y)
     
-    # 2. 装备与功法 (简化配置)
-    # 武器：一把练气期武器
+    # 2. Equipment and technique (simplified setup)
+    # Weapon: one Qi Refinement weapon
     avatar.weapon = get_random_weapon_by_realm(avatar.cultivation_progress.realm)
-    # 辅助：无
+    # Auxiliary: none
     avatar.auxiliary = None
     
-    # 功法：暂无
-    # 凡人觉醒初期只有灵根，还未习得功法，或者设定为有一本基础的
+    # Technique: none yet
+    # Newly awakened mortals only have a spirit root and have not learned a technique (or could be given a basic one)
     # avatar.technique = ...
     
-    # 3. 关系绑定
+    # 3. Bind relations
     for pid in parents:
         parent = world.avatar_manager.get_avatar(pid)
         if parent:
-            # 建立关系 (Parent -> Child)
-            # 语义：Parent 认 Avatar 为子
+            # Establish relation (Parent -> Child)
+            # Semantics: Parent recognizes Avatar as its child
             parent.acknowledge_child(avatar)
 
     return avatar

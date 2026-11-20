@@ -5,18 +5,18 @@ from src.i18n import t
 
 def cooldown_action(cls: type) -> type:
     """
-    冷却类装饰器：
-    - 仅当类定义了 ACTION_CD_MONTHS 且 >0 时生效
-    - 在 can_start 前置检查冷却；在 finish 后记录冷却开始月戳
-    - 冷却记录存放于 avatar._action_cd_last_months[ClassName]
-    - 同时在 DESC 中追加“（冷却：X月）”便于 UI 显示
+    Cooldown class decorator:
+    - Only takes effect when the class defines ACTION_CD_MONTHS > 0
+    - Checks the cooldown before can_start; records the cooldown start month stamp after finish
+    - Cooldown records are stored in avatar._action_cd_last_months[ClassName]
+    - Also appends "(Cooldown: X months)" to the DESC for UI display
     """
 
     cd = int(getattr(cls, "ACTION_CD_MONTHS", 0) or 0)
     if cd <= 0:
         return cls
 
-    # 包装 can_start
+    # Wrap can_start
     if hasattr(cls, "can_start"):
         original_can_start = cls.can_start
 
@@ -32,7 +32,7 @@ def cooldown_action(cls: type) -> type:
 
         cls.can_start = can_start  # type: ignore[assignment]
 
-    # 包装 finish：调用原逻辑后记录冷却
+    # Wrap finish: record the cooldown after calling the original logic
     if hasattr(cls, "finish"):
         original_finish = cls.finish
 

@@ -27,7 +27,7 @@ def create_mock_avatar(base_world, name, realm, power):
     )
     av.cultivation_progress.realm = realm
     av.weapon = MagicMock()
-    av.weapon.get_detailed_info.return_value = "测试武器"
+    av.weapon.get_detailed_info.return_value = "Test weapon"
     av.weapon_proficiency = 0.0
     av.personas = []
     av.technique = None

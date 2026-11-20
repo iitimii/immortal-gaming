@@ -222,7 +222,7 @@ def test_docker_compose_persists_settings_after_recreate():
             "http://localhost:8002/api/v1/command/game/start",
             method="POST",
             payload={
-                "content_locale": "zh-CN",
+                "content_locale": "en-US",
                 "init_npc_num": 4,
                 "sect_num": 2,
                 "npc_awakening_rate_per_month": 0.01,

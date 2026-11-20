@@ -12,15 +12,15 @@ from src.classes.items.auxiliary import (
 
 class DevourPeople(TimedAction):
     """
-    吞噬生灵：需持有万魂幡，吞噬魂魄可较多增加战力。
+    Devour People: requires the Ten Thousand Souls Banner; devouring souls significantly increases battle strength.
     """
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "devour_people_action_name"
     DESC_ID = "devour_people_description"
     REQUIREMENTS_ID = "devour_people_requirements"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "🩸"
     PARAMS = {}
     POPULATION_LOSS_RATIO = 0.01

@@ -8,25 +8,25 @@ if TYPE_CHECKING:
 def check_can_start_gather(
     avatar: Avatar,
     resource_attr: str,  # "lodes", "animals", "plants"
-    resource_name_cn: str  # "矿脉", "动物", "植物"
+    resource_name: str  # e.g. "ore veins", "animals", "plants"
 ) -> tuple[bool, str]:
     from src.classes.environment.region import NormalRegion
     
     region = avatar.tile.region
     if not isinstance(region, NormalRegion):
-        return False, "当前不在普通区域"
+        return False, "Not currently in a normal region"
         
     resources = getattr(region, resource_attr, [])
     if not resources:
-        return False, f"当前区域没有{resource_name_cn}"
+        return False, f"The current region has no {resource_name}"
         
-    # 筛选境界符合的资源
+    # Filter resources by realm
     available = [
         r for r in resources
         if avatar.cultivation_progress.realm >= r.realm
     ]
     if not available:
-        return False, f"当前区域的{resource_name_cn}境界过高"
+        return False, f"The {resource_name} in the current region are of too high a realm"
         
     return True, ""
 
@@ -36,19 +36,19 @@ def execute_gather(
     extra_effect_key: str
 ) -> dict[str, int]:
     """
-    执行采集逻辑。
-    返回: {material_name: count}
+    Run the gathering logic.
+    Returns: {material_name: count}
     """
     from src.classes.environment.region import NormalRegion
     region = avatar.tile.region
     
-    # 再次校验类型，防止运行时环境变化
+    # Re-check the type in case the runtime state changed
     if not isinstance(region, NormalRegion):
         return {}
 
     resources = getattr(region, resource_attr, [])
     
-    # 筛选
+    # Filter
     available = [
         r for r in resources
         if avatar.cultivation_progress.realm >= r.realm
@@ -57,10 +57,10 @@ def execute_gather(
     if not available:
         return {}
         
-    # 1. 随机选择资源点 (均匀分布)
+    # 1. Pick a random resource node (uniform)
     target = random.choice(available)
     
-    # 2. 随机选择产出物
+    # 2. Pick a random output material
     if not hasattr(target, "materials") or not target.materials:
         return {}
         

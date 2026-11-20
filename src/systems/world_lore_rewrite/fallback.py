@@ -9,10 +9,13 @@ from .validation import ValidatedJobResult, draft_from_validated_job, validate_j
 def build_fallback_style_guide(lore_text: str) -> dict[str, Any]:
     tone = _tone_prefix(lore_text)
     return {
-        "world_tone": tone or "本局世界观",
-        "naming_rules": ["名称应转译世界观气质，而不是把关键词直接贴到旧名上", "避免重复使用同一词根"],
-        "forbidden_patterns": ["不要写数值加成", "不要写系统机制", "不要机械前缀化"],
-        "description_style": "简洁、具体、有画面感",
+        "world_tone": tone or "this run's world lore",
+        "naming_rules": [
+            "Names should translate the world lore's mood instead of pasting keywords onto old names",
+            "Avoid reusing the same root word",
+        ],
+        "forbidden_patterns": ["Do not write numeric bonuses", "Do not write system mechanics", "Do not add mechanical prefixes"],
+        "description_style": "Concise, concrete, and visual",
     }
 
 
@@ -31,15 +34,15 @@ def fallback_job(job: RewriteJob) -> WorldLoreRewriteDraft:
 
 def _fallback_entity(entity: dict[str, Any], label: str, lore_text: str) -> dict[str, Any]:
     entity_id = int(entity["id"])
-    old_name = str(entity.get("name") or f"{label}{entity_id}").strip()
+    old_name = str(entity.get("name") or f"{label} {entity_id}").strip()
     motif = _fallback_motif(lore_text, entity_id)
     name = _blend_name(old_name, motif)
-    if len(name) > 36:
-        name = name[:36]
+    if len(name) > 60:
+        name = name[:60].rstrip()
 
     desc = (
-        f"{name}仍保留旧日的形貌与用途，却被新的时代秩序悄然改写。"
-        f"当地传闻将它与{motif}相连，使原本熟悉的来历多了一层压抑而具体的气息。"
+        f"{name} still keeps its old form and purpose, yet the order of a new age has quietly rewritten it. "
+        f"Local rumor ties it to the {motif}, lending its familiar history a heavier, more tangible air."
     )
     return {
         "id": entity_id,
@@ -48,27 +51,32 @@ def _fallback_entity(entity: dict[str, Any], label: str, lore_text: str) -> dict
     }
 
 
+# ASCII and full-width (\uff0c \u3002 \uff1b \u3001 \uff01 \uff1f) separators
+_TONE_SEPARATORS = ",.;:!?\uff0c\u3002\uff1b\u3001\uff01\uff1f\n\r\t "
+
+
 def _tone_prefix(lore_text: str) -> str:
     text = str(lore_text or "").strip()
-    for char in "，。；、,.!?！？\n\r\t ":
+    for char in _TONE_SEPARATORS:
         text = text.replace(char, " ")
     for part in text.split(" "):
         part = part.strip()
-        if 2 <= len(part) <= 4:
-            return part
-    return "新世"
+        if part.isalpha() and 3 <= len(part) <= 12:
+            return part.capitalize()
+    return "New Era"
 
 
 def _fallback_motif(lore_text: str, entity_id: int) -> str:
     text = str(lore_text or "")
-    if "加班" in text or "班" in text:
-        motifs = ["更漏", "灯牍", "夜签", "催檄", "疲钟", "案牍"]
+    lowered = text.lower()
+    if any(keyword in lowered for keyword in ("overtime", "office", "shift", "workplace")):
+        motifs = ["Water Clock", "Lamp Ledger", "Night Roster", "Urgent Summons", "Weary Bell", "Paperwork"]
         return motifs[entity_id % len(motifs)]
-    if "末法" in text:
-        motifs = ["残灵", "灰脉", "断霞", "枯潮", "废炉", "冷星"]
+    if any(keyword in lowered for keyword in ("dharma ending", "dharma-ending", "ending age", "end of dharma")):
+        motifs = ["Remnant Spirit", "Ashen Vein", "Broken Glow", "Withered Tide", "Derelict Furnace", "Cold Star"]
         return motifs[entity_id % len(motifs)]
-    if "妖" in text:
-        motifs = ["异纹", "兽月", "灵蜕", "荒血", "百骸", "伏鳞"]
+    if any(keyword in lowered for keyword in ("demon", "yao", "monster", "beast")):
+        motifs = ["Strange Sigil", "Beast Moon", "Spirit Molt", "Wild Blood", "Hundred Bones", "Hidden Scale"]
         return motifs[entity_id % len(motifs)]
     return _tone_prefix(text)
 
@@ -76,7 +84,8 @@ def _fallback_motif(lore_text: str, entity_id: int) -> str:
 def _blend_name(old_name: str, motif: str) -> str:
     if not motif:
         return old_name
-    if len(old_name) <= 2:
-        return f"{motif}{old_name}"
-    midpoint = max(1, len(old_name) // 2)
-    return f"{old_name[:midpoint]}{motif}{old_name[midpoint:]}"
+    words = old_name.split()
+    if len(words) <= 1:
+        return f"{motif} {old_name}"
+    midpoint = max(1, len(words) // 2)
+    return " ".join([*words[:midpoint], motif, *words[midpoint:]])

@@ -1,8 +1,8 @@
 """
-静态配置管理模块。
+Static configuration module.
 
-只读取版本内置的 `static/config.yml`，并负责按语言解析静态资源路径。
-用户设置、敏感信息和本局运行参数不在这里维护。
+Only reads the bundled `static/config.yml` and resolves static resource paths per language.
+User settings, secrets and per-run parameters are not managed here.
 """
 from pathlib import Path
 
@@ -29,14 +29,14 @@ def _resolve_resource_path(value: str | Path, project_root: Path) -> Path:
 
 def load_config():
     """
-    加载配置文件
+    Load the config file.
     
     Returns:
-        DictConfig: 合并后的配置对象
+        DictConfig: the merged config object
     """
     project_root = get_project_root()
     base_config_path = get_static_config_path()
-    # 读取基础配置
+    # Read the base config
     base_config = OmegaConf.create({})
     if base_config_path.exists():
         base_config = OmegaConf.load(base_config_path)
@@ -49,17 +49,17 @@ def load_config():
         for key, value in config.resources.items():
             config.resources[key] = _resolve_resource_path(value, project_root)
 
-    # 运行时用户数据目录由 data_paths 注入，不再写在静态配置里。
+    # The runtime user data directory is injected by data_paths and no longer lives in the static config.
     config.paths = OmegaConf.create({})
     config.paths.saves = get_data_paths().saves_dir
     
     return config
 
-# 导出配置对象
+# Exported config object
 CONFIG = load_config()
 
 def update_paths_for_language(lang_code: str | None = None):
-    """根据显式语言更新静态资源路径。"""
+    """Update static resource paths for the given language."""
     if lang_code is None:
         lang_code = get_default_locale()
 
@@ -84,6 +84,6 @@ def update_paths_for_language(lang_code: str | None = None):
     else:
         print(f"[Config] Switched language context to {lang_code}")
 
-# 模块加载时初始化默认语言下的路径，避免 import 时 KeyError。
+# Initialize paths for the default language at module load to avoid a KeyError on import.
 update_paths_for_language()
 

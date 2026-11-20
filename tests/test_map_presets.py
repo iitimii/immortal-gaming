@@ -218,8 +218,8 @@ def test_map_region_overrides_are_applied_to_region_details():
     game_map = load_cultivation_world_map("classic")
     region = game_map.regions[101]
 
-    assert region.name == "东南平原"
-    assert "河渠与海风" in region.desc
+    assert region.name == "Southeastern Plains"
+    assert "canals, and sea breezes" in region.desc
 
 
 def test_map_presets_are_localized():
@@ -236,20 +236,20 @@ def test_map_presets_are_localized():
         reload_translations()
 
 
-def test_map_presets_can_be_localized_for_specific_locale_without_switching_global_language():
+def test_map_presets_can_be_localized_for_explicit_locale_without_switching_global_language():
     original_language = str(language_manager)
     try:
-        language_manager.set_language("zh-CN")
+        language_manager.set_language("en-US")
         reload_translations()
 
-        presets = {preset.id: preset.to_dict(locale="fr-FR") for preset in list_map_presets()}
+        presets = {preset.id: preset.to_dict(locale="en-US") for preset in list_map_presets()}
 
-        assert str(language_manager) == "zh-CN"
-        assert presets["classic"]["name"] == "Les Neuf Provinces Centrales"
+        assert str(language_manager) == "en-US"
+        assert presets["classic"]["name"] == "Central Nine Provinces"
         assert presets["island_seas"]["desc"] == (
-            "Les mers ouvertes divisent les îles, donnant au monde un sentiment d'espace plus large."
+            "Open seas divide the isles, giving the world a broader sense of space."
         )
-        assert presets["mountain_frontier"]["size_label"] == "Moyen"
+        assert presets["mountain_frontier"]["size_label"] == "Medium"
     finally:
         language_manager.set_language(original_language)
         reload_translations()

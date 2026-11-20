@@ -21,16 +21,16 @@ Current phenomenon:
 Return three fields:
 
 1. trigger_text
-- A concrete mystical moment, 40 to 90 Chinese characters if possible.
+- A concrete mystical moment, 25 to 60 words if possible.
 - It should have place, action, and image.
 - Do not explain the meaning.
 - Do not grant any practical reward.
 
 2. oracle_text
 - The most important field.
-- Write a cryptic Chinese oracle, usually 8 to 32 Chinese characters, never over 40.
+- Write a cryptic English oracle, usually 4 to 12 words, never over 140 characters.
 - It may be terse, poetic, Buddhist-gatha-like, prophecy-like, inscription-like, or a dream fragment.
-- Do not force a "four characters + four characters" structure.
+- Do not force a rigid "half line + half line" structure.
 - Use concrete images such as tide, snow, lamp, bell, moon, bridge, well, gate, stele, sword, boat, deer, flower, ash, mirror, cloud, fire, rain, shadow, stone, wind, sea, mountain.
 - Prefer motion and tension: fall, return, open, shine, cross, hide, sink, ring, break, turn, wax, wane, arise, vanish.
 - Leave mystery. Do not explain what it predicts.
@@ -38,17 +38,17 @@ Return three fields:
 - Avoid modern, system, attribute, probability, and reward language.
 
 Style references, do not copy:
-- "遇潮而圆，见信而寂"
-- "花落非春尽，钟鸣不是归"
-- "千山暮雪倾东海，初日潮头又上来"
-- "一盏孤灯照旧雪，半生新骨葬春潮"
-- "云根断处，旧门重开"
-- "逢桥莫问渡，见鹿且回身"
+- "Full with the tide, still at the letter"
+- "Petals fall, yet spring is not over"
+- "Dusk snow pours into the eastern sea"
+- "One lone lamp on old snow"
+- "Where the cloud roots break, the old gate opens"
+- "At the bridge, ask no ford; see deer, turn back"
 
 3. event_text
-- 80 to 140 Chinese characters if possible.
+- 50 to 100 words if possible.
 - Combine trigger_text and oracle_text naturally.
-- End by showing oracle_text inside 『』.
+- End by quoting oracle_text in double quotes.
 - Do not explain the oracle.
 
 Return strict JSON only:

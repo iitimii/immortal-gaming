@@ -333,7 +333,7 @@ class TestLLMAIEmotionUpdate:
 
     @pytest.mark.asyncio
     async def test_decide_fallback_to_calm_on_missing_emotion(self, mock_world, test_avatar):
-        """Test that missing emotion field falls back to CALM (default '平静')."""
+        """Test that missing emotion field falls back to CALM (default 'calm')."""
         test_avatar.emotion = EmotionType.HAPPY  # Set to non-CALM first
         
         mock_response = {

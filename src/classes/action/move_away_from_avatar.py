@@ -14,24 +14,24 @@ if TYPE_CHECKING:
 
 class MoveAwayFromAvatar(TimedAction):
     """
-    持续远离指定角色，持续6个月。
-    - 规则：每月尝试使与目标的曼哈顿距离增大一步
-    - 任何时候都可以启动
+    Keep moving away from the given avatar, for 6 months.
+    - Rule: each month try to increase the Manhattan distance to the target by one step
+    - Can start at any time
     """
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "move_away_from_avatar_action_name"
     DESC_ID = "move_away_from_avatar_description"
     REQUIREMENTS_ID = "move_away_from_avatar_requirements"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "🏃"
     PARAMS = {"avatar_name": "AvatarName"}
     PARAM_OPTION_SOURCES = {"avatar_name": ParamOptionSource.OBSERVABLE_AVATAR_NAME}
 
     def _find_avatar_by_name(self, name: str) -> "Avatar | None":
         """
-        根据名字或 ID 查找角色；找不到返回 None。
+        Find an avatar by name or ID; return None if not found.
         """
         from src.classes.core.avatar import Avatar
 
@@ -43,7 +43,7 @@ class MoveAwayFromAvatar(TimedAction):
         target = self._find_avatar_by_name(avatar_name)
         if target is None:
             return
-        # 远离方向：以目标到自身的向量取反
+        # Direction away: negate the vector from the target to self
         raw_dx = -(target.pos_x - self.avatar.pos_x)
         raw_dy = -(target.pos_y - self.avatar.pos_y)
         step = getattr(self.avatar, "move_step_length", 1)
@@ -72,7 +72,7 @@ class MoveAwayFromAvatar(TimedAction):
                    avatar=self.avatar.name, target=target_name)
         return Event(self.world.month_stamp, content, related_avatars=rel_ids)
 
-    # TimedAction 已统一 step 逻辑
+    # TimedAction already unifies the step logic
 
     async def finish(self, avatar_name: str) -> list[Event]:
         return []

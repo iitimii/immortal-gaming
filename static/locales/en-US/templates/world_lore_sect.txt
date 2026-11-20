@@ -38,7 +38,7 @@ Requirements:
 2. Modifications should prioritize the worldview setting and then the historical context, and must be logically sound.
 3. If an item has no modifications, return an empty dictionary {{}}.
 4. For items to be modified, only return "name" and "desc", and no other keys.
-5. Each desc should be around 120-180 words in Chinese-length density; keep it concise but sufficiently detailed.
+5. Each desc should be around 120-180 words; keep it concise but sufficiently detailed.
 6. Do not restate sect rules, prohibitions, punishments, or expulsion logic.
 7. Do not include player bonuses, numeric effects, or gameplay/mechanical explanations.
 8. Sect desc and sect region desc must have clear division of labor and should avoid repeating each other.

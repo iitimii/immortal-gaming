@@ -1,4 +1,4 @@
-"""LLM 相关异常定义。"""
+"""LLM-related exception definitions."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from enum import Enum
 
 
 class LLMError(Exception):
-    """LLM 相关错误的基类"""
+    """Base class for LLM-related errors."""
     
     def __init__(self, message: str, *, cause: Exception | None = None, **context):
         super().__init__(message)
@@ -16,7 +16,7 @@ class LLMError(Exception):
 
 
 class ParseError(LLMError):
-    """JSON 解析失败"""
+    """JSON parsing failed."""
     
     def __init__(self, message: str, *, raw_text: str = ""):
         super().__init__(message, raw_text=raw_text)
@@ -24,7 +24,7 @@ class ParseError(LLMError):
 
 
 class ConfigError(LLMError):
-    """配置错误"""
+    """Configuration error."""
     pass
 
 

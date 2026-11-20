@@ -1,13 +1,13 @@
 """
-Avatar读档反序列化Mixin
+Avatar load (deserialization) mixin
 
-将Avatar的反序列化逻辑从avatar.py分离出来。
+Separates Avatar deserialization logic from avatar.py.
 
-读档策略：
-- 两阶段加载：先加载所有Avatar（relations留空），再重建relations网络
-- 引用对象：通过id从全局字典获取（如techniques_by_id）
-- weapon/auxiliary：浅拷贝后恢复special_data（避免deepcopy带来的递归/崩溃风险）
-- 错误容错：缺失的引用对象会跳过而不是崩溃
+Load strategy:
+- Two-phase load: first load all Avatars (relations left empty), then rebuild the relations network
+- Referenced objects: fetched from global dicts by id (e.g. techniques_by_id)
+- weapon/auxiliary: shallow-copied, then special_data restored (avoids recursion/crash risks of deepcopy)
+- Fault tolerance: missing referenced objects are skipped instead of crashing
 """
 from typing import TYPE_CHECKING
 import copy
@@ -17,23 +17,23 @@ if TYPE_CHECKING:
 
 
 class AvatarLoadMixin:
-    """Avatar读档反序列化Mixin
+    """Avatar load (deserialization) mixin
     
-    提供from_save_dict类方法，从字典重建Avatar对象
+    Provides the from_save_dict classmethod to rebuild an Avatar object from a dict
     """
     
     @classmethod
     def from_save_dict(cls, data: dict, world: "World") -> "AvatarLoadMixin":
-        """从字典重建Avatar（用于读档）
+        """Rebuild an Avatar from a dict (used when loading a save)
         
-        注意：relations需要在所有Avatar加载完成后单独重建
+        Note: relations must be rebuilt separately after all Avatars have been loaded
         
         Args:
-            data: 存档数据字典
-            world: 世界对象引用
+            data: save data dict
+            world: world object reference
             
         Returns:
-            重建的Avatar对象（relations为空，需要外部第二阶段填充）
+            The rebuilt Avatar object (relations empty; filled in by an external second phase)
         """
         from src.classes.core.avatar import Gender
         from src.systems.time import MonthStamp
@@ -57,18 +57,18 @@ class AvatarLoadMixin:
         from src.classes.items.elixir import elixirs_by_id, ConsumedElixir
         from src.classes.avatar_metrics import AvatarMetrics
         
-        # 重建基本对象
+        # Rebuild basic objects
         gender = Gender(data["gender"])
         birth_month_stamp = MonthStamp(data["birth_month_stamp"])
         
-        # 重建修炼进度
+        # Rebuild cultivation progress
         cultivation_progress = CultivationProgress.from_dict(data["cultivation_progress"])
         realm = cultivation_progress.realm
         
-        # 重建age
+        # Rebuild age
         age = Age.from_dict(data["age"], realm)
         
-        # 创建Avatar（不完整，需要后续填充）
+        # Create the Avatar (incomplete, filled in below)
         avatar = cls(
             world=world,
             name=data["name"],
@@ -84,22 +84,22 @@ class AvatarLoadMixin:
         stamp_val = data.get("cultivation_start_month_stamp")
         avatar.cultivation_start_month_stamp = MonthStamp(stamp_val) if stamp_val is not None else None
         
-        # 设置灵根
+        # Set spirit root
         avatar.root = Root[data["root"]]
         avatar.race = get_race(data["race_id"])
         
-        # 设置功法
+        # Set technique
         technique_id = data.get("technique_id")
         if technique_id is not None:
             avatar.technique = techniques_by_id.get(technique_id)
         
-        # 设置HP
+        # Set HP
         avatar.hp = HP.from_dict(data["hp"])
         
-        # 设置物品与资源
+        # Set items and resources
         avatar.magic_stone = MagicStone(data.get("magic_stone", 0))
         
-        # 重建materials (兼容旧档 items)
+        # Rebuild materials (compatible with legacy saves' items)
         materials_dict = data.get("materials") or data.get("items") or {}
         avatar.materials = {}
         for mat_id_str, quantity in materials_dict.items():
@@ -107,29 +107,29 @@ class AvatarLoadMixin:
             if mat_id in materials_by_id:
                 avatar.materials[materials_by_id[mat_id]] = quantity
         
-        # 重建weapon
-        # 使用copy而非deepcopy，避免潜在的递归引用导致的崩溃，且性能更好
-        # special_data 是实例特有的，需要单独赋值
+        # Rebuild weapon
+        # Use copy instead of deepcopy to avoid crashes from potential recursive references; it is also faster
+        # special_data is instance-specific and must be assigned separately
         weapon_id = data.get("weapon_id")
         if weapon_id is not None and weapon_id in weapons_by_id:
-            # 浅拷贝：复制引用，但 weapon.special_data 会被共享
-            # 所以需要手动重新赋值 special_data
+            # Shallow copy: copies references, but weapon.special_data would be shared
+            # so special_data must be reassigned manually
             weapon_proto = weapons_by_id[weapon_id]
             avatar.weapon = copy.copy(weapon_proto)
             avatar.weapon.special_data = data.get("weapon_special_data", {})
         
-        # 恢复兵器熟练度
+        # Restore weapon proficiency
         avatar.weapon_proficiency = float(data.get("weapon_proficiency", 0.0))
         
-        # 重建auxiliary
-        # 同上，使用copy
+        # Rebuild auxiliary
+        # Same as above, use copy
         auxiliary_id = data.get("auxiliary_id")
         if auxiliary_id is not None and auxiliary_id in auxiliaries_by_id:
             auxiliary_proto = auxiliaries_by_id[auxiliary_id]
             avatar.auxiliary = copy.copy(auxiliary_proto)
             avatar.auxiliary.special_data = data.get("auxiliary_special_data", {})
         
-        # 重建spirit_animal
+        # Rebuild spirit_animal
         spirit_animal_data = data.get("spirit_animal")
         if spirit_animal_data is not None:
             from src.classes.spirit_animal import SpiritAnimal
@@ -139,7 +139,7 @@ class AvatarLoadMixin:
                 realm=spirit_realm
             )
         
-        # 设置社交与状态
+        # Set social info and status
         sect_id = data.get("sect_id")
         if sect_id is not None:
             avatar.sect = sects_by_id.get(sect_id)
@@ -153,7 +153,7 @@ class AvatarLoadMixin:
         if alignment_name is not None:
             avatar.alignment = Alignment[alignment_name]
         
-        # 重建personas
+        # Rebuild personas
         persona_ids = data.get("persona_ids", [])
         avatar.personas = [personas_by_id[pid] for pid in persona_ids if pid in personas_by_id]
         goldfinger_id = data.get("goldfinger_id")
@@ -164,18 +164,18 @@ class AvatarLoadMixin:
         last_governance_month = data.get("last_governance_month")
         avatar.last_governance_month = int(last_governance_month) if last_governance_month is not None else None
         
-        # 设置外貌（通过level获取完整的Appearance对象）
+        # Set appearance (get the full Appearance object from its level)
         avatar.base_appearance = get_appearance_by_level(data.get("appearance", 5))
 
-        # 恢复绰号
+        # Restore nickname
         from src.classes.nickname_data import Nickname
         avatar.nickname = Nickname.from_dict(data.get("nickname"))
 
-        # 恢复身世
+        # Restore backstory
         avatar.backstory = data.get("backstory")
         avatar.fate_revelation = data.get("fate_revelation")
 
-        # 恢复情绪
+        # Restore emotion
         from src.classes.emotions import EmotionType
         emotion_str = data.get("emotion", "emotion_calm")
         try:
@@ -183,11 +183,11 @@ class AvatarLoadMixin:
         except ValueError:
             avatar.emotion = EmotionType.CALM
 
-        # 恢复死亡状态
+        # Restore death state
         avatar.is_dead = data.get("is_dead", False)
         avatar.death_info = data.get("death_info")
         
-        # 设置行动与AI
+        # Set actions and AI
         avatar.thinking = data.get("thinking", "")
         avatar.short_term_objective = data.get("short_term_objective", "")
         avatar._action_cd_last_months = data.get("_action_cd_last_months", {})
@@ -195,7 +195,7 @@ class AvatarLoadMixin:
         from src.classes.world_secret import deserialize_avatar_world_secret_knowledge
         avatar.world_secret_knowledge = deserialize_avatar_world_secret_knowledge(data.get("world_secret_knowledge"))
         
-        # 加载长期目标
+        # Load long-term objective
         long_term_objective_data = data.get("long_term_objective")
         if long_term_objective_data:
             from src.classes.long_term_objective import LongTermObjective
@@ -207,17 +207,17 @@ class AvatarLoadMixin:
         else:
             avatar.long_term_objective = None
         
-        # 重建planned_actions
+        # Rebuild planned_actions
         planned_actions_data = data.get("planned_actions", [])
         avatar.planned_actions = [ActionPlan.from_dict(plan_data) for plan_data in planned_actions_data]
         
-        # 重建current_action（如果有）
+        # Rebuild current_action (if any)
         current_action_dict = data.get("current_action")
         if current_action_dict is not None:
             try:
                 action = avatar.create_action(current_action_dict["action_name"])
                 
-                # 恢复动作内部状态
+                # Restore the action's internal state
                 if "state" in current_action_dict:
                     action.load_save_data(current_action_dict["state"])
                 
@@ -228,14 +228,14 @@ class AvatarLoadMixin:
                     status=current_action_dict["status"]
                 )
             except Exception:
-                # 如果动作无法重建，跳过（容错）
+                # If the action cannot be rebuilt, skip it (fault tolerance)
                 avatar.current_action = None
         
-        # relations 需要在外部单独重建（因为需要所有 avatar 都加载完成）
+        # relations must be rebuilt externally (all avatars need to be loaded first)
         avatar.relations = {}
         avatar.archived_relations = {}
         
-        # 恢复丹药记录
+        # Restore elixir records
         elixir_list_data = data.get("elixirs", [])
         avatar.elixirs = []
         for elixir_data in elixir_list_data:
@@ -245,11 +245,11 @@ class AvatarLoadMixin:
                 consume_time = elixir_data["time"]
                 avatar.elixirs.append(ConsumedElixir(elixir_obj, consume_time))
 
-        # 恢复临时效果
+        # Restore temporary effects
         avatar.temporary_effects = data.get("temporary_effects", [])
         avatar.persistent_effects = data.get("persistent_effects", [])
 
-        # 重建 metrics_history
+        # Rebuild metrics_history
         metrics_history_data = data.get("metrics_history", [])
         avatar.metrics_history = [
             AvatarMetrics.from_save_dict(metrics_data)
@@ -257,13 +257,13 @@ class AvatarLoadMixin:
         ]
         avatar.enable_metrics_tracking = data.get("enable_metrics_tracking", False)
 
-        # 恢复子女
+        # Restore children
         children_data = data.get("children", [])
         from src.classes.mortal import Mortal
         avatar.children = [Mortal.from_dict(child_data) for child_data in children_data]
         avatar.relation_start_dates = data.get("relation_start_dates", {})
 
-        # 加载完成后重新计算effects（确保数值正确）
+        # Recalculate effects after loading (ensures correct values)
         avatar.recalc_effects()
         
         return avatar

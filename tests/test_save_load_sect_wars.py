@@ -38,8 +38,8 @@ def test_save_and_load_preserves_sect_runtime_state_after_static_reload(base_wor
 
     sect = existed_sects[0]
     sect.magic_stone = 1234
-    sect.periodic_thinking = "我宗当先固守山门，再图远交近攻。"
-    sect.last_decision_summary = "本轮招徕散修 1 人。"
+    sect.periodic_thinking = "Our sect should first hold the mountain gate, then befriend the distant and strike the near."
+    sect.last_decision_summary = "Recruited 1 rogue cultivator this round."
     sect.is_active = False
     sect.set_war_weariness(19)
 
@@ -55,8 +55,8 @@ def test_save_and_load_preserves_sect_runtime_state_after_static_reload(base_wor
     assert len(_new_sects) == 1
     loaded_sect = _new_sects[0]
     assert loaded_sect.magic_stone == 1234
-    assert loaded_sect.periodic_thinking == "我宗当先固守山门，再图远交近攻。"
-    assert loaded_sect.last_decision_summary == "本轮招徕散修 1 人。"
+    assert loaded_sect.periodic_thinking == "Our sect should first hold the mountain gate, then befriend the distant and strike the near."
+    assert loaded_sect.last_decision_summary == "Recruited 1 rogue cultivator this round."
     assert loaded_sect.is_active is False
     assert loaded_sect.war_weariness == 19
     assert int(new_world.existed_sects[0].id) == int(loaded_sect.id)

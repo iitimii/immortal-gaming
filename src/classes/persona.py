@@ -8,14 +8,14 @@ from src.classes.effect import load_effect_from_str
 from src.classes.rarity import Rarity, get_rarity_from_str
 
 if TYPE_CHECKING:
-    # 仅用于类型检查，避免运行时循环导入
+    # Only for type checking, to avoid circular imports at runtime
     from src.classes.core.avatar import Avatar
 
 @dataclass
 class Persona:
     """
-    角色特质
-    包含个性、天赋等角色特征
+    Avatar persona
+    Includes personality, talents and other avatar traits
     """
     id: int
     key: str
@@ -29,7 +29,7 @@ class Persona:
     
     @property
     def weight(self) -> float:
-        """根据稀有度获取采样权重"""
+        """Get the sampling weight by rarity."""
         return self.rarity.weight
 
     def get_info(self) -> str:
@@ -42,7 +42,7 @@ class Persona:
         return f"{self.name}{desc_part}{effect_part}"
     
     def get_colored_info(self) -> str:
-        """获取带颜色标记的信息，供前端渲染使用"""
+        """Get info with color markup for frontend rendering."""
         r, g, b = self.rarity.color_rgb
         return f"<color:{r},{g},{b}>{self.name}</color>"
 
@@ -58,20 +58,20 @@ class Persona:
         }
 
 def _load_personas() -> tuple[dict[int, Persona], dict[str, Persona]]:
-    """从配表加载persona数据"""
+    """Load persona data from the config table."""
     personas_by_id: dict[int, Persona] = {}
     personas_by_name: dict[str, Persona] = {}
     
     persona_df = game_configs["persona"]
     for row in persona_df:
-        # 解析exclusion_keys字符串，转换为字符串列表
+        # Parse the exclusion_keys string into a list of strings
         exclusion_keys = get_list_str(row, "exclusion_keys")
         
-        # 解析稀有度
+        # Parse rarity
         rarity_str = get_str(row, "rarity", "N").upper()
         rarity = get_rarity_from_str(rarity_str)
         
-        # 解析effects
+        # Parse effects
         effects = load_effect_from_str(get_str(row, "effects"))
         from src.classes.effect import format_effects_to_text
         effect_desc = format_effects_to_text(effects)
@@ -92,12 +92,12 @@ def _load_personas() -> tuple[dict[int, Persona], dict[str, Persona]]:
     
     return personas_by_id, personas_by_name
 
-# 从配表加载persona数据
+# Load persona data from the config table
 personas_by_id: dict[int, Persona] = {}
 personas_by_name: dict[str, Persona] = {}
 
 def reload():
-    """重新加载数据，保留全局字典引用"""
+    """Reload data while preserving the global dict references."""
     new_id, new_name = _load_personas()
     
     personas_by_id.clear()
@@ -106,20 +106,20 @@ def reload():
     personas_by_name.clear()
     personas_by_name.update(new_name)
 
-# 模块初始化时执行一次
+# Run once at module import
 reload()
 
 def _is_persona_allowed(persona_id: int, already_selected_ids: set[int], avatar: Optional["Avatar"]) -> bool:
     """
-    统一判断：persona 是否允许被选择（条件 + 互斥）。
+    Unified check: whether a persona may be selected (conditions + exclusions).
     """
     persona = personas_by_id[persona_id]
-    # 条件判定
+    # Condition check
     if avatar is not None and persona.condition:
         allowed = bool(eval(persona.condition, {"__builtins__": {}}, {"avatar": avatar}))
         if not allowed:
             return False
-    # 与已选互斥检查（双向，通过 Key）
+    # Exclusion check against already selected ones (two-way, via Key)
     for sid in already_selected_ids:
         other = personas_by_id[sid]
         if (persona.key in other.exclusion_keys) or (other.key in persona.exclusion_keys):
@@ -128,19 +128,19 @@ def _is_persona_allowed(persona_id: int, already_selected_ids: set[int], avatar:
 
 def get_random_compatible_personas(num_personas: int = 2, avatar: Optional["Avatar"] = None) -> List[Persona]:
     """
-    随机选择指定数量的互相不冲突的persona
+    Randomly select the given number of mutually compatible personas
     
     Args:
-        num_personas: 需要选择的persona数量，默认为2
-        avatar: 可选，若提供则按 persona.condition 过滤
+        num_personas: number of personas to select, default 2
+        avatar: optional; if given, filter by persona.condition
     
     Returns:
-        List[Persona]: 互相不冲突的persona列表
+        List[Persona]: list of mutually compatible personas
         
     Raises:
-        ValueError: 如果无法找到足够数量的兼容persona
+        ValueError: if not enough compatible personas can be found
     """
-    # 初始候选：若提供 avatar，则先按条件过滤；否则全量
+    # Initial candidates: filter by condition if an avatar is given; otherwise all
     initial_ids = set(personas_by_id.keys())
     if avatar is not None:
         initial_ids = {pid for pid in initial_ids if _is_persona_allowed(pid, set(), avatar)}
@@ -149,10 +149,10 @@ def get_random_compatible_personas(num_personas: int = 2, avatar: Optional["Avat
     selected_ids: set[int] = set()
 
     for i in range(num_personas):
-        # 按当前已选进行二次过滤（互斥 + 条件）
+        # Filter again against the current selection (exclusions + conditions)
         available_ids = [pid for pid in initial_ids if pid not in selected_ids and _is_persona_allowed(pid, selected_ids, avatar)]
         if not available_ids:
-            raise ValueError(f"只能找到{i}个兼容的persona，无法满足需要的{num_personas}个")
+            raise ValueError(f"Could only find {i} compatible personas, cannot satisfy the required {num_personas}")
 
         candidates: List[Persona] = [personas_by_id[pid] for pid in available_ids]
         weights: List[float] = [max(0.0, c.weight) for c in candidates]

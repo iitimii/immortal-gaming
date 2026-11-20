@@ -5,12 +5,12 @@ from src.systems.time import MonthStamp
 
 class Age:
     """
-    角色寿元管理。
+    Avatar lifespan management.
 
-    新模型：
-    - 先天寿元 `innate_max_lifespan`：角色出生/创建时随机得到
-    - 实际寿元 `max_lifespan`：先天寿元 + 所有效果中的 extra_max_lifespan
-    - 不再存在“衰老区”或缓慢老死概率；达到/超过寿元时立即死亡
+    New model:
+    - Innate lifespan `innate_max_lifespan`: rolled randomly at birth/creation
+    - Actual lifespan `max_lifespan`: innate lifespan + extra_max_lifespan from all effects
+    - There is no longer an "aging zone" or gradual old-age death probability; death is immediate on reaching/exceeding the lifespan
     """
 
     INITIAL_MAX_LIFESPAN_MIN = 60
@@ -28,7 +28,7 @@ class Age:
             if innate_max_lifespan is not None
             else self.roll_innate_max_lifespan()
         )
-        # 初始实际寿元先等于先天寿元，Avatar.__post_init__/recalc_effects 会重新汇总。
+        # The initial actual lifespan equals the innate lifespan; Avatar.__post_init__/recalc_effects re-aggregates it.
         self.max_lifespan = self.innate_max_lifespan
 
     @classmethod

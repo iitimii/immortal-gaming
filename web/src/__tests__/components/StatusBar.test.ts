@@ -45,7 +45,6 @@ async function settleAsyncPanels() {
 // Mock vue-i18n.
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
-    locale: ref('zh-CN'),
     t: (key: string, params?: any) => {
       if (params) return `${key}:${JSON.stringify(params)}`
       return key
@@ -75,11 +74,11 @@ vi.mock('@/stores/socket', () => ({
 vi.mock('@/stores/dynasty', () => ({
   useDynastyStore: () => ({
     overview: {
-      name: '晋',
-      title: '晋朝',
-      royal_surname: '司马',
-      royal_house_name: '司马氏',
-      desc: '门第森然。',
+      name: 'Jin',
+      title: 'Jin Dynasty',
+      royal_surname: 'Sima',
+      royal_house_name: 'House of Sima',
+      desc: 'A rigid hierarchy of noble houses.',
       effect_desc: '',
       is_low_magic: true,
     },
@@ -217,8 +216,8 @@ describe('StatusBar', () => {
       ok: true,
       text: () => Promise.resolve([
         'title,title_id,name_id,desc_id,desc',
-        '标题,标题ID,名称ID,描述ID,描述',
-        '简介,WORLD_INFO_INTRO_TITLE,WORLD_INFO_INTRO_NAME,WORLD_INFO_INTRO_DESC,这是一个诸多修士竞相修行的修仙世界。',
+        'Title,Title ID,Name ID,Description ID,Description',
+        'Introduction,WORLD_INFO_INTRO_TITLE,WORLD_INFO_INTRO_NAME,WORLD_INFO_INTRO_DESC,A cultivation world where many cultivators compete.',
       ].join('\n')),
     })
   })
@@ -314,7 +313,7 @@ describe('StatusBar', () => {
       const wrapper = mount(StatusBar, globalConfig)
 
       const widgets = wrapper.findAll('.status-widget-stub')
-      expect(widgets[0]?.attributes('data-label')).toBe('100common.year5common.month')
+      expect(widgets[0]?.attributes('data-label')).toBe('100common.year 5common.month')
       expect(widgets[0]?.attributes('data-icon')).toBeTruthy()
       expect(widgets[1]?.attributes('data-label')).toBe('[Test Phenomenon]')
       expect(widgets[10]?.attributes('data-label')).toBe('game.status_bar.world_info.label')

@@ -6,7 +6,7 @@ from flask import Flask, render_template, jsonify, request, send_from_directory
 
 app = Flask(__name__)
 
-# --- 配置路径 ---
+# --- Config paths ---
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 CONFIG_DIR = os.path.join(BASE_DIR, "static", "game_configs")
@@ -15,7 +15,7 @@ DEFAULT_MAP_ID = "classic"
 MAPS_DIR = os.path.join(CONFIG_DIR, "maps")
 REGION_TILE_PATH = os.path.join(CONFIG_DIR, "region_tile.csv")
 
-# 新建地图的兜底尺寸；已有地图保存时必须使用 map.json 或请求里的真实尺寸。
+# Fallback size for new maps; saving an existing map must use the real size from map.json or the request.
 MAP_WIDTH = 84
 MAP_HEIGHT = 60
 
@@ -41,7 +41,8 @@ def load_region_tile_bindings():
         return bindings
     with open(REGION_TILE_PATH, 'r', encoding='utf-8-sig') as f:
         rows = list(csv.DictReader(f))
-    for row in rows[1:] if rows and str(rows[0].get('region_id', '')).startswith('区域') else rows:
+    # Non-numeric rows (e.g. the column description row) are skipped by the int() check below.
+    for row in rows:
         try:
             rid = int(row.get('region_id') or 0)
         except ValueError:
@@ -144,19 +145,19 @@ def build_map_payload(data):
 
 @app.route('/api/init')
 def init_data():
-    """初始化数据：读取Tiles列表和Region配置"""
+    """Initialize data: read the tile list and region configs."""
     try:
         map_id = normalize_map_id(request.args.get("mapId"))
     except ValueError as exc:
         return jsonify({"status": "error", "message": str(exc)}), 400
     
-    # 1. 获取所有 Tile 图片名称
+    # 1. Collect all tile image names
     tile_files = glob.glob(os.path.join(ASSETS_DIR, "tiles", "*.png"))
-    # 过滤切片 (name_0.png)
+    # Filter out slices (name_0.png)
     tiles = [os.path.splitext(os.path.basename(f))[0] for f in tile_files if not os.path.splitext(os.path.basename(f))[0][-2:] in ['_0', '_1', '_2', '_3']]
     tiles.sort()
 
-    # 2. 获取所有 Sect 图片名称 (sect_1, sect_2, ...)
+    # 2. Collect all sect image names (sect_1, sect_2, ...)
     sect_files = glob.glob(os.path.join(ASSETS_DIR, "sects", "*.png"))
     sect_tiles_set = set()
     for f in sect_files:
@@ -170,9 +171,9 @@ def init_data():
                 sect_tiles_set.add(base_name)
     sect_tiles = sorted(list(sect_tiles_set))
 
-    # 3. 获取所有 City 图片名称 (city_301, city_302, ...)
+    # 3. Collect all city image names (city_301, city_302, ...)
     city_files = glob.glob(os.path.join(ASSETS_DIR, "cities", "*.*"))
-    # 过滤非图片
+    # Filter out non-images
     city_files = [f for f in city_files if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
     
     city_tiles_map = {} # base_name -> extension (for first slice)
@@ -194,7 +195,7 @@ def init_data():
     
     city_tiles = sorted(list(city_tiles_set))
 
-    # 4. 读取 sect.csv 建立 sect_id -> sect_name 映射
+    # 4. Read sect.csv to build the sect_id -> sect_name map
     sect_id_to_name = {}
     sect_csv_path = os.path.join(CONFIG_DIR, "sect.csv")
     if os.path.exists(sect_csv_path):
@@ -215,7 +216,7 @@ def init_data():
     saved_map = load_map_data(map_id)
     region_overrides = saved_map["regionOverrides"] or {}
 
-    # 5. 读取 Region 配置
+    # 5. Read region configs
     regions = []
     
     def parse_csv(filename, id_col, name_col, type_tag, sect_id_col=None, sub_type_col=None):
@@ -227,7 +228,7 @@ def init_data():
         with open(path, 'r', encoding='utf-8-sig') as f:
             reader = csv.reader(f)
             rows = list(reader)
-            # 跳过前两行 (header 和 description)
+            # Skip the first two rows (header and description)
             data_rows = rows[2:] if len(rows) > 2 else []
             
             for row in data_rows:
@@ -235,11 +236,11 @@ def init_data():
                 try:
                     r_id = int(row[id_col])
                     name = row[name_col]
-                    # 简单的 hash 颜色生成
+                    # Simple hash-based color
                     color_hash = hash(f"{type_tag}_{r_id}") & 0xFFFFFF
                     color = f"#{color_hash:06x}"
                     
-                    # 获取 sect_id (用于宗门)
+                    # Get sect_id (for sects)
                     sect_id = None
                     if type_tag == 'sect' and sect_id_col is not None and len(row) > sect_id_col:
                         try:
@@ -247,12 +248,12 @@ def init_data():
                         except ValueError:
                             pass
                     
-                    # 获取 sub_type (用于修炼区域)
+                    # Get sub_type (for cultivation regions)
                     sub_type = None
                     if type_tag == 'cultivate' and sub_type_col is not None and len(row) > sub_type_col:
                         sub_type = row[sub_type_col].strip()
                     
-                    # 计算默认绑定 Tile
+                    # Compute the default bound tile
                     bind_info = get_default_tile(r_id, type_tag, sect_id=sect_id, sub_type=sub_type, bindings=region_tile_bindings)
                     override = region_overrides.get(str(r_id), {}) if isinstance(region_overrides, dict) else {}
 
@@ -270,17 +271,17 @@ def init_data():
                     continue
 
 
-    # 读取四种配置
+    # Read the four configs
     # normal_region.csv: id=0, name=1
     parse_csv("normal_region.csv", 0, 1, "normal")
     # sect_region.csv: id=0, name=1, sect_id=3
     parse_csv("sect_region.csv", 0, 1, "sect", sect_id_col=3)
-    # cultivate_region.csv: id=0, name=1, sub_type=3 (在 desc 后面)
+    # cultivate_region.csv: id=0, name=1, sub_type=3 (after desc)
     parse_csv("cultivate_region.csv", 0, 1, "cultivate", sub_type_col=3)
     # city_region.csv: id=0, name=1
     parse_csv("city_region.csv", 0, 1, "city")
     
-    # 排序优先级：normal > sect > cultivate > city > 其他
+    # Sort priority: normal > sect > cultivate > city > others
     def sort_priority(r):
         if r['type'] == 'normal': return 0
         if r['type'] == 'sect': return 1
@@ -320,7 +321,7 @@ def save_map():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 def load_map_data(map_id=DEFAULT_MAP_ID):
-    """读取 region-first map.json 并重建 Grid 状态"""
+    """Read the region-first map.json and rebuild grid state."""
     map_id = normalize_map_id(map_id)
     map_json_path = get_map_json_path(map_id)
     

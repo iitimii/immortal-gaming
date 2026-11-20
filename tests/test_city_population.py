@@ -71,7 +71,7 @@ class TestCityPopulation:
         region = avatar_in_city.tile.region
         initial_population = region.population
 
-        aux = Auxiliary(id=999, name="万魂幡", realm=None, desc="Test")
+        aux = Auxiliary(id=999, name="Ten Thousand Souls Banner", realm=None, desc="Test")
         aux.special_data = {"devoured_souls": 0}
         avatar_in_city.auxiliary = aux
 

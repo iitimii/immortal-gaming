@@ -6,8 +6,8 @@ from src.classes.event import Event
 
 class Temper(TimedAction):
     """
-    锻体动作，武道专属修炼方式。
-    不依赖灵气，消耗时间锤炼肉身。
+    Temper action, a cultivation method exclusive to the martial path.
+    Doesn't depend on qi; spends time tempering the body.
     """
     
     ACTION_NAME_ID = "temper_action_name"
@@ -19,7 +19,7 @@ class Temper(TimedAction):
 
     duration_months = 10
     
-    # 基础经验值
+    # Base exp
     BASE_EXP = 480
 
     def can_possibly_start(self) -> bool:
@@ -32,17 +32,17 @@ class Temper(TimedAction):
         if self.avatar.cultivation_progress.is_in_bottleneck():
             return
             
-        # 基础经验
+        # Base exp
         exp = self.BASE_EXP
         
-        # 结算额外锻体经验倍率 (来自功法/宗门等)
+        # Apply the extra temper exp multiplier (from techniques/sects etc.)
         # extra_temper_exp_multiplier: 0.1 means +10%
         multiplier = float(self.avatar.effects.get("extra_temper_exp_multiplier", 0.0) or 0.0)
         
         if multiplier != 0:
             exp = int(exp * (1 + multiplier))
             
-        # 确保经验至少为 1
+        # Ensure at least 1 exp
         exp = max(1, exp)
             
         self.avatar.cultivation_progress.add_exp(exp)

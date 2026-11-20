@@ -63,7 +63,7 @@ def build_avatar_description_text(avatar: "Avatar", detailed: bool = False) -> s
         if region:
             born_region_name = region.name
 
-    lines = [t("【{name}】 {gender} {age} years old", name=avatar.name, gender=avatar.gender, age=avatar.age)]
+    lines = [t("[{name}] {gender} {age} years old", name=avatar.name, gender=avatar.gender, age=avatar.age)]
     lines.append(t("Origin: {origin}", origin=born_region_name))
     lines.append(t("Race: {race}", race=_get_race_info(avatar).get("name", "")))
     race_behavior_desc = _get_race_behavior_desc(avatar)

@@ -15,15 +15,15 @@ from src.systems.cultivation import Realm
 
 @dataclass
 class ResolutionResult:
-    """解析结果封装"""
-    obj: Any | None              # 解析出的对象实例
-    resolved_type: Type | None   # 对象的类型类
-    is_valid: bool               # 是否成功
-    error_msg: str = ""          # 错误信息
+    """Resolution result wrapper."""
+    obj: Any | None              # resolved object instance
+    resolved_type: Type | None   # type (class) of the object
+    is_valid: bool               # whether resolution succeeded
+    error_msg: str = ""          # error message
     
     @property
     def name(self) -> str:
-        """尝试获取对象的名称"""
+        """Try to get the object's name."""
         if self.obj and hasattr(self.obj, "name"):
             return self.obj.name
         return ""
@@ -34,45 +34,45 @@ def resolve_query(
     expected_types: Optional[list[Type]] = None
 ) -> ResolutionResult:
     """
-    统一解析入口。
+    Unified resolution entry point.
     
     Args:
-        query: 待解析的对象（字符串名 或 直接的对象实例）
-        world: 世界对象上下文（用于查找 Avatar, Region）
-        expected_types: 期望的类型列表。如果提供，将优先或仅尝试这些类型。
-                        支持的类型: Material, Weapon, Elixir, Auxiliary, Region, Avatar, Realm 等类对象
-                        必须直接传入类对象，不再支持字符串名。
+        query: object to resolve (a string name or an object instance)
+        world: world context (used to look up Avatar, Region)
+        expected_types: list of expected types. If given, only these types are tried, in order.
+                        Supported types: Material, Weapon, Elixir, Auxiliary, Region, Avatar, Realm and similar classes.
+                        Class objects must be passed directly; string names are no longer supported.
     """
     if query is None:
-        return ResolutionResult(None, None, False, "查询为空")
+        return ResolutionResult(None, None, False, "Empty query")
 
-    # 0. 快速通道：如果已经是期望的对象实例
+    # 0. Fast path: already an instance of an expected type
     if expected_types:
         for t in expected_types:
             if isinstance(query, t):
                 return _success(query, t)
     
-    # 如果不是字符串，且未命中上面的快速通道，可能输入了错误的对象
-    # 严格模式：既然未命中 expected_types 中的任何类型，也必然无法通过下面的字符串查找逻辑。
-    # 直接返回失败，除非 query 是字符串可以尝试查找。
+    # Not a string and missed the fast path above, so the wrong object was probably passed
+    # Strict mode: it matched none of expected_types and cannot pass the string lookup below either.
+    # Fail right away unless query is a string that can be looked up.
     if not isinstance(query, str):
-        return ResolutionResult(None, None, False, f"输入类型不支持且非字符串: {type(query)}")
+        return ResolutionResult(None, None, False, f"Unsupported non-string input type: {type(query)}")
 
     if not query:
-        return ResolutionResult(None, None, False, "查询字符串为空")
+        return ResolutionResult(None, None, False, "Empty query string")
 
-    # 准备检查列表
+    # Prepare the list of checks
     checks = []
     
-    # 如果没有指定期望类型，则检查所有
+    # If no expected types are given, check all of them
     if not expected_types:
         checks = ["realm", "goods", "region", "avatar"]
     else:
-        # 根据期望类型构建检查顺序
+        # Build the check order from the expected types
         for t in expected_types:
-            # 必须是类对象
+            # must be a class object
             if not isinstance(t, type):
-                 # 这里可以抛出异常，或者忽略。既然是重构，假设调用方已经修正。
+                 # Could raise here or ignore; after the refactor, callers are assumed to be fixed.
                  continue
 
             t_name = t.__name__
@@ -86,14 +86,14 @@ def resolve_query(
             elif t_name == "Realm":
                 if "realm" not in checks: checks.append("realm")
 
-    # 执行检查
+    # Run the checks
     for check in checks:
         if check == "realm":
-            res = _resolve_realm(query) # Realm 通常不需要 normalize 太多，或者在内部处理
+            res = _resolve_realm(query) # Realm rarely needs much normalization; handled internally
             if res: return _success(res, Realm)
             
         elif check == "goods":
-            # 物品解析
+            # Item resolution
             obj = _resolve_goods(query)
             if obj: return _success(obj, type(obj))
             
@@ -105,15 +105,15 @@ def resolve_query(
             obj = _resolve_avatar(query, world)
             if obj: return _success(obj, type(obj))
 
-    return ResolutionResult(None, None, False, f"无法解析: {query}")
+    return ResolutionResult(None, None, False, f"Unable to resolve: {query}")
 
 def _success(obj: Any, type_cls: Type) -> ResolutionResult:
     return ResolutionResult(obj, type_cls, True)
 
-# --- 内部具体的解析逻辑 ---
+# --- Internal resolution logic ---
 
 def _resolve_goods(name: str) -> Any | None:
-    """解析物品/装备/丹药"""
+    """Resolve items / equipment / elixirs."""
     item_id = _parse_int_id(name)
     if item_id is not None:
         if item_id in elixirs_by_id:
@@ -127,40 +127,40 @@ def _resolve_goods(name: str) -> Any | None:
 
     norm = normalize_goods_name(name)
     
-    # 1. 丹药 (返回列表中的第一个)
+    # 1. Elixirs (return the first in the list)
     if norm in elixirs_by_name:
         return elixirs_by_name[norm][0]
         
-    # 2. 兵器
+    # 2. Weapons
     if norm in weapons_by_name:
         return weapons_by_name[norm]
         
-    # 3. 辅助
+    # 3. Auxiliary equipment
     if norm in auxiliaries_by_name:
         return auxiliaries_by_name[norm]
         
-    # 4. 材料
+    # 4. Materials
     if norm in materials_by_name:
         return materials_by_name[norm]
         
     return None
 
 def _resolve_realm(name: str) -> Realm | None:
-    """解析境界"""
+    """Resolve a realm."""
     try:
-        # 尝试直接匹配值
+        # Try matching the value directly
         return Realm(name)
     except ValueError:
         pass
     
-    # 尝试匹配枚举名
+    # Try matching the enum name
     for r in Realm:
         if r.name == name or r.value == name:
             return r
     return None
 
 def _resolve_region(name: str, world: Any) -> Any | None:
-    """解析区域 - 遍历 regions.values() 查找，避免维护额外的 name 索引"""
+    """Resolve a region by scanning regions.values(), avoiding an extra name index."""
     if not hasattr(world, 'map'):
         return None
     
@@ -176,17 +176,17 @@ def _resolve_region(name: str, world: Any) -> Any | None:
     
     norm = normalize_name(name)
     
-    # 1. 精确匹配 / 规范化匹配
+    # 1. Exact / normalized match
     for region in regions.values():
         if region.name == name or region.name == norm:
             return region
     
-    # 2. 包含匹配 (如果有唯一解)
+    # 2. Substring match (if unique)
     candidates = [r for r in regions.values() if (norm in r.name) or (name in r.name)]
     if len(candidates) == 1:
         return candidates[0]
         
-    # 3. 宗门名称匹配 (解析到宗门驻地)
+    # 3. Sect name match (resolves to the sect headquarters)
     from src.classes.core.sect import sects_by_name
     from src.classes.sect_metadata import get_sect_region_by_sect_id
     sect = sects_by_name.get(name) or sects_by_name.get(norm)
@@ -196,7 +196,7 @@ def _resolve_region(name: str, world: Any) -> Any | None:
     return None
 
 def _resolve_avatar(name: str, world: Any) -> Any | None:
-    """解析角色"""
+    """Resolve an avatar."""
     if not hasattr(world, 'avatar_manager'):
         return None
 
@@ -211,8 +211,8 @@ def _resolve_avatar(name: str, world: Any) -> Any | None:
         
     norm = normalize_avatar_name(name)
     
-    # 遍历查找 (性能注意：如果角色极多可能需要优化为字典查找)
-    # 假设 avatar_manager.avatars 是 dict[id, Avatar]
+    # Linear scan (performance note: may need a dict lookup if there are very many avatars)
+    # Assumes avatar_manager.avatars is dict[id, Avatar]
     for avatar in manager.avatars.values():
         if avatar.name == norm:
             return avatar

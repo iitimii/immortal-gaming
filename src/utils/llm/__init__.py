@@ -1,10 +1,10 @@
 """
-LLM 调用模块
+LLM call module.
 
-提供三个核心 API：
-- call_llm: 基础调用，返回原始文本
-- call_llm_json: 调用并解析为 JSON
-- call_llm_with_template: 使用模板调用（最常用）
+Provides three core APIs:
+- call_llm: basic call, returns raw text
+- call_llm_json: call and parse as JSON
+- call_llm_with_template: call with a template (most common)
 """
 
 from .client import (

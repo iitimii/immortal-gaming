@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # 后端服务
+  # Backend service
   backend:
     build:
       context: .
@@ -22,7 +22,7 @@ services:
       start_period: 30s
     volumes:
       - ./docker-data:/data
-  # 前端服务
+  # Frontend service
   frontend:
     build:
       context: .

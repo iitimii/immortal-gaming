@@ -25,16 +25,16 @@ if TYPE_CHECKING:
 
 class Cast(TimedAction):
     """
-    铸造动作：消耗同阶材料，尝试打造同阶宝物（兵器或辅助装备）。
-    持续时间：3个月
+    Cast action: consume same-tier materials to try forging a same-tier treasure (weapon or auxiliary).
+    Duration: 3 months
     """
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "cast_action_name"
     DESC_ID = "cast_description"
     REQUIREMENTS_ID = "cast_requirements"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "🔥"
     PARAMS = {"target_realm": "str"}
     PARAM_OPTION_SOURCES = {"target_realm": ParamOptionSource.MATERIAL_REALM_VALUE}
@@ -60,7 +60,7 @@ class Cast(TimedAction):
 
     def _count_materials(self, realm: Realm) -> int:
         """
-        统计符合条件的材料数量。
+        Count the qualifying materials.
         """
         count = 0
         for material, qty in self.avatar.materials.items():
@@ -94,11 +94,11 @@ class Cast(TimedAction):
 
         cost = self._get_cost()
         
-        # 扣除材料逻辑
+        # Material deduction logic
         to_deduct = cost
         materials_to_modify = []
         
-        # 再次遍历寻找材料进行扣除
+        # Iterate again to find materials to deduct
         for material, qty in self.avatar.materials.items():
             if to_deduct <= 0:
                 break
@@ -121,23 +121,23 @@ class Cast(TimedAction):
         )
 
     def _execute(self) -> None:
-        # 持续过程中无特殊逻辑
+        # No special logic during the action
         pass
 
     async def finish(self) -> list[Event]:
         if self.target_realm is None:
             return []
 
-        # 1. 计算成功率
+        # 1. Compute the success rate
         base_rate = self.SUCCESS_RATES.get(self.target_realm, 0.1)
         extra_rate = float(self.avatar.effects.get("extra_cast_success_rate", 0.0))
         success_rate = base_rate + extra_rate
         
         events = []
         
-        # 2. 判定结果
+        # 2. Determine the result
         if random.random() > success_rate:
-            # 失败
+            # Failure
             content = t("{avatar} failed to cast {realm}-tier treasure, all materials turned to ash",
                        avatar=self.avatar.name, realm=str(self.target_realm))
             fail_event = Event(
@@ -149,8 +149,8 @@ class Cast(TimedAction):
             events.append(fail_event)
             return events
 
-        # 3. 成功：生成物品
-        # 50% 兵器，50% 辅助装备
+        # 3. Success: generate the item
+        # 50% weapon, 50% auxiliary
         is_weapon = random.random() < 0.5
         new_item = None
         item_type = ""
@@ -165,11 +165,11 @@ class Cast(TimedAction):
             item_type = "auxiliary"
             item_label = t("auxiliary")
             
-        # 4. 决策：保留还是卖出
+        # 4. Decide: keep or sell
         base_desc = t("Casting succeeded! Obtained {realm} {label} '{item}'",
                      realm=str(self.target_realm), label=item_label, item=new_item.name)
         
-        # 事件1：铸造成功
+        # Event 1: casting succeeded
         content = t("{avatar} successfully cast {realm}-tier {label} '{item}'",
                    avatar=self.avatar.name, realm=str(self.target_realm), 
                    label=item_label, item=new_item.name)
@@ -191,7 +191,7 @@ class Cast(TimedAction):
             )
         )
 
-        # 事件2：处置结果
+        # Event 2: disposal result
         exchange_event = Event(
             self.world.month_stamp,
             outcome.result_text,

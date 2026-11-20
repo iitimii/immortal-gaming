@@ -1,8 +1,8 @@
 """
-灵根
-五行元素与灵根组合：
-- RootElement：金、木、水、火、土（恒定不变）
-- Root：硬编码定义（单/双/天灵根等），每个成员包含（中文名, 元素列表）
+Spiritual roots
+Five elements and spiritual root combinations:
+- RootElement: Metal, Wood, Water, Fire, Earth (constant)
+- Root: hard-coded definitions (single/dual/heavenly roots etc.); each member holds (name msgid, element list)
 """
 from enum import Enum
 from typing import List, Tuple, Dict
@@ -14,11 +14,11 @@ from src.classes.essence import EssenceType
 
 
 class RootElement(Enum):
-    GOLD = "GOLD"  # 原：金
-    WOOD = "WOOD"  # 原：木
-    WATER = "WATER"  # 原：水
-    FIRE = "FIRE"  # 原：火
-    EARTH = "EARTH"  # 原：土
+    GOLD = "GOLD"  # Metal
+    WOOD = "WOOD"  # Wood
+    WATER = "WATER"  # Water
+    FIRE = "FIRE"  # Fire
+    EARTH = "EARTH"  # Earth
 
     def __str__(self) -> str:
         from src.i18n import t
@@ -36,8 +36,8 @@ root_element_msg_ids = {
 
 class _RootMixin:
     """
-    Root 的基础实现：成员值为 (中文名, 元素元组)。
-    通过功能式 API 动态创建真正的 Root 枚举。
+    Base implementation of Root: member values are (name msgid, element tuple).
+    The real Root enum is created dynamically via the functional API.
     """
 
     def __new__(cls, cn_name: str, elements: Tuple[RootElement, ...]):
@@ -56,18 +56,18 @@ class _RootMixin:
 
 class Root(_RootMixin, Enum):
     """
-    灵根（硬编码）：成员值为 (中文名, 元素元组)。
-    数据来源原为 CSV，现改为内置：
-    - GOLD: 金灵根 -> 金
-    - WOOD: 木灵根 -> 木
-    - WATER: 水灵根 -> 水
-    - FIRE: 火灵根 -> 火
-    - EARTH: 土灵根 -> 土
-    - THUNDER: 雷灵根 -> 水;土
-    - ICE: 冰灵根 -> 金;水
-    - WIND: 风灵根 -> 木;水
-    - DARK: 暗灵根 -> 火;土
-    - HEAVEN: 天灵根 -> 金;木;水;火;土（额外突破+0.1）
+    Spiritual roots (hard-coded): member values are (name msgid, element tuple).
+    The data originally came from CSV and is now built in:
+    - GOLD: Metal Root -> Metal
+    - WOOD: Wood Root -> Wood
+    - WATER: Water Root -> Water
+    - FIRE: Fire Root -> Fire
+    - EARTH: Earth Root -> Earth
+    - THUNDER: Thunder Root -> Water;Earth
+    - ICE: Ice Root -> Metal;Water
+    - WIND: Wind Root -> Wood;Water
+    - DARK: Dark Root -> Fire;Earth
+    - HEAVEN: Heavenly Root -> Metal;Wood;Water;Fire;Earth (extra breakthrough +0.1)
     """
 
     GOLD = ("root_gold", (RootElement.GOLD,))
@@ -99,19 +99,19 @@ class Root(_RootMixin, Enum):
     @property
     def effects(self) -> dict[str, object]:
         """
-        从 CSV 读取的该灵根效果。
+        This root's effects as read from CSV.
         """
         return dict(_root_effects_by_root.get(self, {}))
 
     @property
     def effect_desc(self) -> str:
         """
-        获取灵根效果的文本描述。
+        Get the text description of the root's effects.
         """
         return _root_effect_desc_by_root.get(self, "")
 
 
-# 元素到灵气类型的一一对应
+# One-to-one mapping from elements to qi types
 _essence_by_element = {
     RootElement.GOLD: EssenceType.GOLD,
     RootElement.WOOD: EssenceType.WOOD,
@@ -123,7 +123,7 @@ _essence_by_element = {
 
 def get_essence_types_for_root(root: "Root") -> List[EssenceType]:
     """
-    获取与该灵根匹配的灵气类型列表（任一元素匹配即视为可用）。
+    Get the list of qi types matching this root (a match on any element counts as usable).
     """
     return [_essence_by_element[e] for e in root.elements]
 
@@ -147,30 +147,30 @@ _root_effect_desc_by_root = {
 
 def format_root_cn(root: "Root") -> str:
     """
-    将 Root 显示为中文短名 + 组成，例如：
-    - 天（金、木、水、火、土）
-    - 风（木、水）
-    - 金（金）
-    回退：若无法获取组成则仅显示短名。
+    Display a Root as a short name + composition, e.g.:
+    - Heavenly (Metal, Wood, Water, Fire, Earth)
+    - Wind (Wood, Water)
+    - Metal
+    Fallback: show only the short name if the composition can't be obtained.
     """
     from src.i18n import t
-    # Root 成员的 value 为 msgid (如 "root_wind")
+    # The value of a Root member is a msgid (e.g. "root_wind")
     name_key = getattr(root, "value", str(root))
     translated_name = t(name_key)
     
-    # 尝试获取短名（不带 "Root" 或 "灵根"）
-    # 我们可以在翻译文件中另外定义短名 keys，或者在这里处理字符串
-    # 为了简单优雅，我们可以假设 Root 的翻译不包含 "Root"/"灵根" 后缀，或者我们在 key 上区分
-    # 方案：定义 root_short_wind -> "风" / "Wind"
-    # 但为了兼容现有结构，我们先简单处理翻译后的字符串。
+    # Try to get the short name (without the "Root" suffix)
+    # Short-name keys could be defined separately in the translation files, or the string handled here
+    # For simplicity, strip the "Root" suffix from the translated name
+    # Alternative: define root_short_wind -> "Wind"
+    # To stay compatible with the existing structure, the translated string is handled simply for now.
     
-    short_name = translated_name.replace("灵根", "").replace(" Root", "")
+    short_name = translated_name.replace(" Root", "")
     
     elements = getattr(root, "elements", None)
     if not elements:
         return short_name
     if len(elements) <= 1:
         return short_name
-    # RootElement.__str__ 返回翻译后的值
+    # RootElement.__str__ returns the translated value
     elements_cn = t("element_separator").join(str(e) for e in elements)
     return t("{root_name} ({elements})", root_name=short_name, elements=elements_cn)

@@ -13,23 +13,23 @@ from src.classes.core.avatar.info_presenter import get_avatar_info, get_avatar_s
 
 @pytest.fixture
 def mock_world():
-    """创建一个包含城市和宗门驻地的世界"""
+    """Create a world containing cities and a sect headquarters."""
     game_map = Map(width=10, height=10)
     
-    # 创建几个区域
+    # Create a few regions
     city1 = CityRegion(id=1, name="CityA", desc="City A")
     city2 = CityRegion(id=2, name="CityB", desc="City B")
     sect_region = SectRegion(id=3, name="SectBase", desc="Sect HQ", sect_id=1, sect_name="TestSect")
     wild_region = NormalRegion(id=4, name="Wilds", desc="Wild land")
     
-    # 注入到 Map
+    # Inject into the map
     game_map.regions[1] = city1
     game_map.regions[2] = city2
     game_map.regions[3] = sect_region
     game_map.regions[4] = wild_region
-    game_map.update_sect_regions() # 更新 sect_regions 字典
+    game_map.update_sect_regions() # Refresh the sect_regions dict
     
-    # 设置中心点
+    # Set the center point
     city1.center_loc = (0, 0)
     city2.center_loc = (9, 9)
     sect_region.center_loc = (5, 5)
@@ -40,44 +40,44 @@ def mock_world():
     return world
 
 def test_born_region_priority_sect(mock_world):
-    """测试优先级1：宗门驻地"""
-    # 模拟一个宗门
+    """Priority 1: sect headquarters."""
+    # Mock a sect
     sect = MagicMock(spec=Sect)
     sect.id = 1
     sect.name = "TestSect"
     
-    # 父母属于该宗门
+    # Parent belongs to that sect
     parent = MagicMock(spec=Avatar)
     parent.sect = sect
     
-    # 预期：返回 SectRegion (id=3)
+    # Expected: returns SectRegion (id=3)
     born_id = get_born_region_id(mock_world, parents=[parent])
     assert born_id == 3
 
 def test_born_region_priority_nearest_city(mock_world):
-    """测试优先级2：最近城市"""
-    # 父母无宗门
+    """Priority 2: nearest city."""
+    # Parent has no sect
     parent = MagicMock(spec=Avatar)
     parent.sect = None
     
-    # 父母位于 (1, 1)，靠近 CityA (0,0)
+    # Parent at (1, 1), near CityA (0,0)
     parent.tile = MagicMock(spec=Tile)
     parent.tile.coordinate = (1, 1)
     
-    # 预期：返回 CityA (id=1)
+    # Expected: returns CityA (id=1)
     born_id = get_born_region_id(mock_world, parents=[parent])
     assert born_id == 1
     
-    # 父母位于 (8, 8)，靠近 CityB (9,9)
+    # Parent at (8, 8), near CityB (9,9)
     parent.tile.coordinate = (8, 8)
     born_id = get_born_region_id(mock_world, parents=[parent])
     assert born_id == 2
 
 def test_born_region_priority_random_city(mock_world):
-    """测试优先级3：随机城市"""
-    # 无父母，无宗门
+    """Priority 3: random city."""
+    # No parents, no sect
     born_id = get_born_region_id(mock_world, parents=[], sect=None)
-    assert born_id in [1, 2] # 只能是两个城市之一
+    assert born_id in [1, 2] # must be one of the two cities
 
 
 def test_yao_born_region_prefers_wild_region(mock_world):
@@ -87,8 +87,8 @@ def test_yao_born_region_prefers_wild_region(mock_world):
     assert born_id == 4
 
 def test_info_presenter_integration(mock_world):
-    """测试展示层集成"""
-    # 创建一个具有出身的角色
+    """Presentation-layer integration."""
+    # Create an avatar with an origin
     avatar = MagicMock(spec=Avatar)
     avatar.name = "TestAvatar"
     avatar.gender = Gender.MALE
@@ -101,7 +101,7 @@ def test_info_presenter_integration(mock_world):
     avatar.world.ranking_manager = MagicMock()
     avatar.world.ranking_manager.get_avatar_rank.return_value = None
     
-    # 设置出身为 CityA
+    # Set the origin to CityA
     avatar.born_region_id = 1
     
     # Mock necessary attributes for get_avatar_info
@@ -132,12 +132,10 @@ def test_info_presenter_integration(mock_world):
     avatar.emotion = MagicMock()
     avatar.emotion.value = "calm"
 
-    # 测试 info_dict
+    # Check info_dict
     from src.classes.core.avatar.info_presenter import get_avatar_info
     info = get_avatar_info(avatar, detailed=False)
     
-    # 注意：这里会用到 i18n，因为 conftest 中强制了 zh-CN
-    # 但我们 mock 的 Region.name 是 "CityA"
-    # 期望看到 "出身" 这个 key，且值为 "CityA"
-    assert "出身" in info
-    assert info["出身"] == "CityA"
+    # The key is localized (default locale en-US); the mocked Region.name is "CityA"
+    assert "Origin" in info
+    assert info["Origin"] == "CityA"

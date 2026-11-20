@@ -74,33 +74,48 @@ def configure_test_logging(tmp_path_factory):
 @pytest.fixture(autouse=True)
 def isolate_save_path(monkeypatch, tmp_path):
     """
-    Redirect save path to temp dir for each test to prevent pollution.
-    Uses monkeypatch for safe rollback.
+    Redirect the save path to a temp dir for each test to prevent pollution.
+
+    ``CONFIG.paths`` is an OmegaConf DictConfig. ``monkeypatch.setattr`` on a
+    DictConfig is not reliably undone (pytest 9 deletes the attribute on undo
+    when it cannot observe the original via ``getattr``/``__dict__``), so the
+    original value is saved and restored manually instead.
     """
-    from src.utils.config import CONFIG
     import src.utils.config
-    
-    # Create temp dir for saves
+    from src.utils.config import CONFIG
+
     # Use a unique name to avoid conflict with tests that create "saves" dir manually
     temp_saves = tmp_path / "test_isolation_saves"
     temp_saves.mkdir(parents=True, exist_ok=True)
-    
+
+    paths = CONFIG.paths
+    _missing = object()
+    original_saves = paths.get("saves", _missing) if hasattr(paths, "get") else getattr(paths, "saves", _missing)
+
     # 1. Patch current CONFIG
-    # CONFIG.paths is likely an OmegaConf object or dict-like
-    monkeypatch.setattr(CONFIG.paths, "saves", temp_saves)
-    
-    # 2. Patch load_config to ensure any reloads also use temp dir
+    paths.saves = temp_saves
+
+    # 2. Patch load_config so any reloads also use the temp dir
     original_load_config = src.utils.config.load_config
-    
+
     def safe_load_config():
         config = original_load_config()
         if hasattr(config, "paths"):
             config.paths.saves = temp_saves
         return config
-    
+
     monkeypatch.setattr(src.utils.config, "load_config", safe_load_config)
-    
-    yield temp_saves
+
+    try:
+        yield temp_saves
+    finally:
+        if original_saves is _missing:
+            try:
+                del paths["saves"]
+            except Exception:
+                pass
+        else:
+            paths.saves = original_saves
 
 
 @pytest.fixture(autouse=True)
@@ -113,7 +128,7 @@ def fixed_random_seed():
     yield
 
 @pytest.fixture(autouse=True)
-def force_chinese_language():
+def force_default_language():
     """
     Reset language around each test so global i18n state does not leak across tests.
     """
@@ -195,7 +210,7 @@ from src.classes.environment.region import CityRegion
 
 @pytest.fixture
 def base_map():
-    """创建一个 10x10 的全平原地图"""
+    """Create a 10x10 map made entirely of plains."""
     width, height = 10, 10
     game_map = Map(width=width, height=height)
     for x in range(width):
@@ -205,13 +220,13 @@ def base_map():
 
 @pytest.fixture
 def base_world(base_map):
-    """创建一个基于 base_map 的世界，时间为 Year 1, Jan"""
+    """Create a world on top of base_map at Year 1, January."""
     return World(map=base_map, month_stamp=create_month_stamp(Year(1), Month.JANUARY))
 
 @pytest.fixture
 def dummy_avatar(base_world):
-    """创建一个位于 (0,0) 的标准男性练气期角色"""
-    # 确保ID生成器重置或不冲突 (get_avatar_id 是随机UUID通常没问题)
+    """Create a standard male Qi Refinement avatar at (0, 0)."""
+    # IDs must not collide (get_avatar_id returns a random UUID, which is fine)
     av = Avatar(
         world=base_world,
         name="TestDummy",
@@ -221,19 +236,19 @@ def dummy_avatar(base_world):
         gender=Gender.MALE,
         pos_x=0,
         pos_y=0,
-        root=Root.GOLD, # 固定灵根
-        personas=[],    # 清空特质，避免随机效果
-        alignment=Alignment.RIGHTEOUS # 固定阵营
+        root=Root.GOLD, # fixed spirit root
+        personas=[],    # clear personas to avoid random effects
+        alignment=Alignment.RIGHTEOUS # fixed alignment
     )
     
-    # 赋予一个 Mock 武器，防止 get_avatar_info 报错
+    # Give a mock weapon so get_avatar_info does not fail
     av.weapon = MagicMock()
-    av.weapon.get_detailed_info.return_value = "测试木剑（练气）"
+    av.weapon.get_detailed_info.return_value = "Test Wooden Sword (Qi Refinement)"
     av.weapon_proficiency = 0.0
 
-    # 强制清空特质（因为 __post_init__ 会在 personas 为空时自动随机生成）
+    # Force-clear personas (__post_init__ randomizes them when the list is empty)
     av.personas = []
-    # 强制清空功法，防止随机出的功法带有移动步长加成（如逍遥游）
+    # Force-clear the technique so a random one cannot add movement-step bonuses
     av.technique = None
     av.recalc_effects()
     
@@ -242,9 +257,9 @@ def dummy_avatar(base_world):
 @pytest.fixture(autouse=True)
 def mock_llm_managers():
     """
-    Mock 所有涉及 LLM 调用的管理器和函数，防止测试中意外调用 LLM。
+    Mock every manager/function that calls the LLM so tests never hit a real LLM.
     """
-    # 创建 mock LLM 配置
+    # Build a mock LLM config
     mock_llm_config = MagicMock()
     mock_llm_config.api_key = "test_key"
     mock_llm_config.base_url = "http://test.api/v1"
@@ -267,7 +282,7 @@ def mock_llm_managers():
         mock_rr.return_value = []
         mock_relation_delta.return_value = {"delta_a_to_b": 0, "delta_b_to_a": 0}
         mock_hist.return_value = None
-        mock_call_llm_story.return_value = {"story": "测试故事"}
+        mock_call_llm_story.return_value = {"story": "Test story"}
 
         yield {
             "ai": mock_ai,
@@ -292,7 +307,7 @@ def create_test_elixir(name, realm, price=100, elixir_id=1, effects=None):
         name=name,
         realm=realm,
         type=ElixirType.Breakthrough,
-        desc="测试丹药",
+        desc="Test elixir",
         price=price,
         effects=effects
     )
@@ -301,7 +316,7 @@ def create_test_material(name, realm, material_id=101):
     return Material(
         id=material_id,
         name=name,
-        desc="测试物品",
+        desc="Test item",
         realm=realm
     )
 
@@ -311,7 +326,7 @@ def create_test_weapon(name, realm, weapon_id=201):
         name=name,
         weapon_type=WeaponType.SWORD,
         realm=realm,
-        desc="测试兵器",
+        desc="Test weapon",
         effects={},
         effect_desc=""
     )
@@ -321,7 +336,7 @@ def create_test_auxiliary(name, realm, aux_id=301):
         id=aux_id,
         name=name,
         realm=realm,
-        desc="测试法宝",
+        desc="Test auxiliary",
         effects={},
         effect_desc=""
     )
@@ -329,9 +344,9 @@ def create_test_auxiliary(name, realm, aux_id=301):
 @pytest.fixture
 def avatar_in_city(dummy_avatar):
     """
-    修改 dummy_avatar，使其位于城市中，并给予初始资金
+    Place dummy_avatar in a city and give it starting funds.
     """
-    city_region = CityRegion(id=1, name="TestCity", desc="测试城市")
+    city_region = CityRegion(id=1, name="TestCity", desc="Test city")
     tile = Tile(0, 0, TileType.CITY)
     tile.region = city_region
     
@@ -339,7 +354,7 @@ def avatar_in_city(dummy_avatar):
     dummy_avatar.magic_stone = 1000
     dummy_avatar.cultivation_progress.realm = Realm.Qi_Refinement
     dummy_avatar.elixirs = []
-    dummy_avatar.materials = {} # 确保背包为空
+    dummy_avatar.materials = {} # make sure the inventory is empty
     dummy_avatar.weapon = None
     dummy_avatar.auxiliary = None
     
@@ -348,28 +363,28 @@ def avatar_in_city(dummy_avatar):
 @pytest.fixture
 def mock_item_data():
     """
-    提供标准的一组测试物品，包括材料、丹药、兵器、法宝。
-    返回一个包含这些对象的字典，方便后续 mock 使用。
+    Provide a standard set of test items: material, elixirs, weapon, auxiliary.
+    Returns a dict of these objects for convenient use in mocks.
     """
-    test_elixir = create_test_elixir("聚气丹", Realm.Qi_Refinement, price=100)
-    high_level_elixir = create_test_elixir("筑基丹", Realm.Foundation_Establishment, price=1000, elixir_id=2)
-    test_material = create_test_material("铁矿石", Realm.Qi_Refinement)
-    test_weapon = create_test_weapon("青云剑", Realm.Qi_Refinement)
-    test_auxiliary = create_test_auxiliary("聚灵珠", Realm.Qi_Refinement)
+    test_elixir = create_test_elixir("Qi Gathering Pill", Realm.Qi_Refinement, price=100)
+    high_level_elixir = create_test_elixir("Foundation Pill", Realm.Foundation_Establishment, price=1000, elixir_id=2)
+    test_material = create_test_material("Iron Ore", Realm.Qi_Refinement)
+    test_weapon = create_test_weapon("Azure Cloud Sword", Realm.Qi_Refinement)
+    test_auxiliary = create_test_auxiliary("Spirit Gathering Orb", Realm.Qi_Refinement)
 
     return {
         "elixirs": {
-            "聚气丹": [test_elixir],
-            "筑基丹": [high_level_elixir]
+            "Qi Gathering Pill": [test_elixir],
+            "Foundation Pill": [high_level_elixir]
         },
         "materials": {
-            "铁矿石": test_material
+            "Iron Ore": test_material
         },
         "weapons": {
-            "青云剑": test_weapon
+            "Azure Cloud Sword": test_weapon
         },
         "auxiliaries": {
-            "聚灵珠": test_auxiliary
+            "Spirit Gathering Orb": test_auxiliary
         },
         # Direct access
         "obj_elixir": test_elixir,

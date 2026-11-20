@@ -1,10 +1,9 @@
 import type { RegionSummary } from '@/types/core';
-import { getRegionTextMetrics, usesCompactMapLabels } from '@/utils/mapStyles';
+import { getRegionTextMetrics } from '@/utils/mapStyles';
 
 const TILE_SIZE = 64;
 const LATIN_WRAP_TARGET = 16;
 const AVG_LATIN_GLYPH_WIDTH_RATIO = 0.58;
-const AVG_COMPACT_GLYPH_WIDTH_RATIO = 0.96;
 const LABEL_BOX_PADDING_X = 10;
 const LABEL_BOX_PADDING_Y = 6;
 const LABEL_COLLISION_PADDING = 8;
@@ -65,11 +64,7 @@ function truncateWithEllipsis(text: string, maxChars: number): string {
   return `${text.slice(0, Math.max(1, maxChars - 1)).trimEnd()}…`;
 }
 
-export function formatRegionDisplayName(name: string, locale: string): string {
-  if (usesCompactMapLabels(locale)) {
-    return name;
-  }
-
+export function formatRegionDisplayName(name: string): string {
   const words = splitLatinWords(name);
   if (words.length <= 1) {
     return truncateWithEllipsis(name, LATIN_WRAP_TARGET);
@@ -96,20 +91,13 @@ export function formatRegionDisplayName(name: string, locale: string): string {
   return `${firstLine}\n${secondLine}`;
 }
 
-export function estimateRegionLabelSize(
-  displayName: string,
-  type: string,
-  locale: string
-): RegionLabelSize {
-  const metrics = getRegionTextMetrics(type, locale);
+export function estimateRegionLabelSize(displayName: string, type: string): RegionLabelSize {
+  const metrics = getRegionTextMetrics(type);
   const lines = displayName.split('\n');
   const maxChars = Math.max(...lines.map((line) => line.length), 1);
-  const widthRatio = usesCompactMapLabels(locale)
-    ? AVG_COMPACT_GLYPH_WIDTH_RATIO
-    : AVG_LATIN_GLYPH_WIDTH_RATIO;
 
   return {
-    width: maxChars * metrics.fontSize * widthRatio + LABEL_BOX_PADDING_X * 2,
+    width: maxChars * metrics.fontSize * AVG_LATIN_GLYPH_WIDTH_RATIO + LABEL_BOX_PADDING_X * 2,
     height: lines.length * metrics.lineHeight + LABEL_BOX_PADDING_Y * 2
   };
 }
@@ -117,11 +105,10 @@ export function estimateRegionLabelSize(
 function estimateLabelPlacement(
   region: RegionSummary,
   displayName: string,
-  locale: string,
   offsetX = 0,
   offsetY = 0
 ): LabelPlacement {
-  const { width, height } = estimateRegionLabelSize(displayName, region.type, locale);
+  const { width, height } = estimateRegionLabelSize(displayName, region.type);
   const labelX = region.x * TILE_SIZE + TILE_SIZE / 2 + offsetX;
   const labelY = region.y * TILE_SIZE + TILE_SIZE * 1.5 + offsetY;
 
@@ -191,11 +178,10 @@ function addToSpatialIndex(entry: AcceptedLabel, spatialIndex: Map<string, Accep
   }
 }
 
-function getPlacementOffsets(region: RegionSummary, locale: string): Array<[number, number]> {
-  const metrics = getRegionTextMetrics(region.type, locale);
-  const compact = usesCompactMapLabels(locale);
-  const stepX = compact ? Math.round(metrics.fontSize * 1.9) : Math.round(metrics.fontSize * 2.8);
-  const stepY = compact ? Math.round(metrics.lineHeight * 1.25) : Math.round(metrics.lineHeight * 1.2);
+function getPlacementOffsets(region: RegionSummary): Array<[number, number]> {
+  const metrics = getRegionTextMetrics(region.type);
+  const stepX = Math.round(metrics.fontSize * 2.8);
+  const stepY = Math.round(metrics.lineHeight * 1.2);
 
   return [
     [0, 0],
@@ -230,10 +216,7 @@ function getPlacementOffsets(region: RegionSummary, locale: string): Array<[numb
   ];
 }
 
-export function buildVisibleRegionLabels(
-  regions: RegionSummary[],
-  locale: string
-): MapRegionLabel[] {
+export function buildVisibleRegionLabels(regions: RegionSummary[]): MapRegionLabel[] {
   const sortedRegions = [...regions].sort((a, b) => {
     const priorityDiff = getRegionPriority(b) - getRegionPriority(a);
     if (priorityDiff !== 0) return priorityDiff;
@@ -248,9 +231,9 @@ export function buildVisibleRegionLabels(
   const spatialIndex = new Map<string, AcceptedLabel[]>();
 
   for (const region of sortedRegions) {
-    const displayName = formatRegionDisplayName(region.name, locale);
-    const placements = getPlacementOffsets(region, locale)
-      .map(([offsetX, offsetY]) => estimateLabelPlacement(region, displayName, locale, offsetX, offsetY));
+    const displayName = formatRegionDisplayName(region.name);
+    const placements = getPlacementOffsets(region)
+      .map(([offsetX, offsetY]) => estimateLabelPlacement(region, displayName, offsetX, offsetY));
 
     const chosenPlacement =
       placements.find((placement) => !findCollision(placement.bounds, spatialIndex)) ?? placements[0];

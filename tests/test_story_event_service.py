@@ -83,13 +83,13 @@ async def test_story_service_merges_goldfinger_prompt(dummy_avatar):
             result_text="Result",
             actors=[dummy_avatar],
             related_avatar_ids=[dummy_avatar.id],
-            prompt="原始提示",
+            prompt="Original prompt",
         )
 
     prompt = mock_tell.await_args.kwargs["prompt"]
-    assert "原始提示" in prompt
-    assert "外挂相关重点" in prompt
-    assert "重生者" in prompt
+    assert "Original prompt" in prompt
+    assert "Goldfinger focus" in prompt
+    assert "Reincarnator" in prompt
     assert dummy_avatar.goldfinger.story_prompt in prompt
 
 
@@ -106,11 +106,11 @@ async def test_gathering_story_merges_goldfinger_prompt(dummy_avatar):
             events_text="Event text",
             details_text="Detail text",
             related_avatars=[dummy_avatar],
-            prompt="聚会提示",
+            prompt="Gathering prompt",
         )
 
     prompt = mock_tell.await_args.kwargs["prompt"]
-    assert "聚会提示" in prompt
-    assert "外挂相关重点" in prompt
-    assert "随身老爷爷" in prompt
+    assert "Gathering prompt" in prompt
+    assert "Goldfinger focus" in prompt
+    assert "Old Grandpa in the Ring" in prompt
     assert dummy_avatar.goldfinger.story_prompt in prompt

@@ -1,6 +1,5 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { Container, Graphics, Sprite, Ticker, TilingSprite } from 'pixi.js'
-import { useI18n } from 'vue-i18n'
 import { useTextures } from './useTextures'
 import { useMapStore } from '@/stores/map'
 import { useAudio } from '@/composables/useAudio'
@@ -22,7 +21,6 @@ export function useMapLayerRenderer(emit: {
     getTileTexture,
   } = useTextures()
   const mapStore = useMapStore()
-  const { locale } = useI18n()
   const { play } = useAudio()
 
   let ticker: Ticker | null = null
@@ -30,7 +28,7 @@ export function useMapLayerRenderer(emit: {
   let waterLayer: TilingSprite | null = null
 
   const visibleRegionLabels = computed(() =>
-    buildVisibleRegionLabels(Array.from(mapStore.regions.values()), locale.value),
+    buildVisibleRegionLabels(Array.from(mapStore.regions.values())),
   )
 
   function cleanupTicker() {
@@ -232,7 +230,6 @@ export function useMapLayerRenderer(emit: {
 
   return {
     mapContainer,
-    locale,
     visibleRegionLabels,
     getRegionTextStyle,
     handleRegionSelect,

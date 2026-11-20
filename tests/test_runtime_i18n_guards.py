@@ -121,7 +121,6 @@ async def test_relation_resolver_event_text_is_localized_in_english(dummy_avatar
 
         assert event is not None
         assert event.content == "Because shared hardship, Alpha became Beta's Lovers."
-        assert "因为" not in event.content
     finally:
         language_manager.set_language(original_lang)
 

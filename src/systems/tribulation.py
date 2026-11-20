@@ -1,6 +1,6 @@
 """
-天劫系统
-负责管理突破时的各种劫难类型、描述和选择逻辑
+Heavenly tribulation system.
+Manages the tribulation types, descriptions and selection logic used during breakthroughs.
 """
 from __future__ import annotations
 import random
@@ -15,107 +15,156 @@ from src.classes.relation.relation import NumericRelation, Relation
 from src.classes.relation.relations import get_live_related_avatars, iter_live_relation_items
 
 TRIBULATION_DISPLAY_MSGIDS = {
-    "心魔": "tribulation_inner_demon",
-    "雷劫": "tribulation_lightning_tribulation",
-    "肉身": "tribulation_body_reforging",
-    "寻仇": "tribulation_vengeance",
-    "情劫": "tribulation_love_tribulation",
-    "阳罡": "tribulation_solar_force",
-    "雷火": "tribulation_thunderflame",
-    "风灾": "tribulation_wind_disaster",
-    "阴狱": "tribulation_nether_prison",
-    "魔劫": "tribulation_demonic_tribulation",
+    "inner_demon": "tribulation_inner_demon",
+    "lightning": "tribulation_lightning_tribulation",
+    "body": "tribulation_body_reforging",
+    "vengeance": "tribulation_vengeance",
+    "love": "tribulation_love_tribulation",
+    "solar_force": "tribulation_solar_force",
+    "thunderflame": "tribulation_thunderflame",
+    "windstorm": "tribulation_wind_disaster",
+    "nether_prison": "tribulation_nether_prison",
+    "demonic": "tribulation_demonic_tribulation",
 }
 
 
 @dataclass
 class TribulationType:
-    """天劫类型定义"""
-    name: str  # 劫难名称
-    description: str  # 劫难描述（用于生成故事的提示）
-    requires_other_avatar: bool = False  # 是否需要关联其他角色
-    relation_type: Optional[Relation] = None  # 需要的关系类型
+    """Tribulation type definition."""
+    name: str  # Tribulation id
+    description: str  # Tribulation description (used as a hint for story generation)
+    requires_other_avatar: bool = False  # Whether another avatar must be involved
+    relation_type: Optional[Relation] = None  # Required relation type
 
 
-# 天劫类型定义
+# Tribulation type definitions
 TRIBULATION_TYPES = {
-    "心魔": TribulationType(
-        name="心魔",
-        description="心念起伏，自我否定与执念缠斗，外寂而内喧。道心深处，旧日疑惑与未来迷茫交织，一念之差即可坠入心魔深渊。",
+    "inner_demon": TribulationType(
+        name="inner_demon",
+        description=(
+            "Thoughts surge and ebb; self-doubt wrestles with obsession, silent without yet clamorous within. "
+            "Deep in the Dao heart, old doubts and future uncertainty intertwine, and a single errant thought "
+            "can plunge one into the abyss of the inner demon."
+        ),
         requires_other_avatar=False
     ),
-    "雷劫": TribulationType(
-        name="雷劫",
-        description="天威如潮，电光凝成纹理，压迫骨血与神识。紫霄雷霆自九天垂落，每一道雷光都是天地对修士的考校，稍有不慎便是形神俱灭。",
+    "lightning": TribulationType(
+        name="lightning",
+        description=(
+            "Heaven's might surges like a tide; lightning congeals into patterns that crush bone, blood and "
+            "divine sense. Purple thunder falls from the nine heavens, every bolt a test from heaven and earth, "
+            "and the slightest misstep means destruction of body and spirit."
+        ),
         requires_other_avatar=False
     ),
-    "肉身": TribulationType(
-        name="肉身",
-        description="筋骨皮膜重塑，真气磨砺经脉，疼痛与新生并至。肉身如熔炉，每一寸血肉都在烈火中淬炼，破而后立，痛极方能重生。",
+    "body": TribulationType(
+        name="body",
+        description=(
+            "Sinew, bone, skin and membrane are remade; true qi grinds the meridians, and pain arrives together "
+            "with rebirth. The body is a furnace, every inch of flesh tempered in raging fire; only by breaking "
+            "can one stand anew, only through utmost pain can one be reborn."
+        ),
         requires_other_avatar=False
     ),
-    "寻仇": TribulationType(
-        name="寻仇",
-        description="仇人旧怨不散，刀光在心底回响，一念之差改写因果。因果纠缠，宿怨难消，突破之际正是因果清算之时。",
+    "vengeance": TribulationType(
+        name="vengeance",
+        description=(
+            "Old grudges with an enemy refuse to fade; the gleam of blades echoes in the heart, and a single "
+            "thought can rewrite karma. Karmic threads entangle and old hatreds linger; the moment of breakthrough "
+            "is the moment of karmic reckoning."
+        ),
         requires_other_avatar=True,
         relation_type=None
     ),
-    "情劫": TribulationType(
-        name="情劫",
-        description="柔情即刃，难舍难分，念头被拉回人间烟火。情丝缠绕，斩不断理还乱，一念执着便是万劫不复。",
+    "love": TribulationType(
+        name="love",
+        description=(
+            "Tenderness is a blade; parting is unbearable, and the mind is drawn back to the warmth of the mortal "
+            "world. Threads of affection bind tight, impossible to cut and only more tangled when pulled; a single "
+            "attachment can lead to eternal ruin."
+        ),
         requires_other_avatar=True,
         relation_type=Relation.IS_LOVER_OF
     ),
-    "阳罡": TribulationType(
-        name="阳罡",
-        description="日轮灼烈，天地赤白两色，阳罡刀风如白金烈焰。正气涤秽，刚猛直击，阳盛则裂。午时最烈，光杀心识，经脉燥爆之险时刻相随。",
+    "solar_force": TribulationType(
+        name="solar_force",
+        description=(
+            "The sun blazes; heaven and earth turn red and white, and the solar gale cuts like white-gold flame. "
+            "Righteous force scours impurity with fierce, direct strikes; too much yang and one shatters. It peaks "
+            "at noon, its light searing the mind, and the danger of meridians bursting from dryness is ever present."
+        ),
         requires_other_avatar=False
     ),
-    "雷火": TribulationType(
-        name="雷火",
-        description="云海层叠，紫电潜伏，雷中生火、火中孕雷。外冲与内炼同调，神魂与经络双线考校。雷海覆顶，业劫天火焚因果，一瞬之间便是生死两重天。",
+    "thunderflame": TribulationType(
+        name="thunderflame",
+        description=(
+            "Seas of cloud pile layer upon layer with purple lightning lurking within; fire is born of thunder and "
+            "thunder gestates in fire. External assault and internal refinement must move in step, testing soul and "
+            "meridians at once. A sea of thunder looms overhead and karmic heavenly fire burns away cause and effect; "
+            "in an instant lies the line between life and death."
+        ),
         requires_other_avatar=False
     ),
-    "风灾": TribulationType(
-        name="风灾",
-        description="无风之地先起丝音，罡风断骨，真空撕扯，噬灵风蚀。风洞共鸣如锯切，位移与姿态稍有不慎便是肉身裂口、护体法相被剥。",
+    "windstorm": TribulationType(
+        name="windstorm",
+        description=(
+            "In a windless place a faint hum rises first; then gale winds snap bone, the void tears, and "
+            "spirit-devouring winds erode. The wind tunnels resonate like a saw, and the slightest slip in footing "
+            "or posture tears the flesh open and strips away the protective dharma form."
+        ),
         requires_other_avatar=False
     ),
-    "阴狱": TribulationType(
-        name="阴狱",
-        description="温度突降，黑霜上爬，冤魂压境，寒狱锁身。六道幻刑，阴火烛骨，以业、怖、悔、执为四柱。善恶因果入场，心神判定重于肉身。",
+    "nether_prison": TribulationType(
+        name="nether_prison",
+        description=(
+            "The temperature plunges, black frost creeps upward, wronged souls press in, and a frozen hell shackles "
+            "the body. Six paths of illusory punishment and yin fire that lights the bones, resting on four pillars: "
+            "karma, dread, regret and attachment. Good and evil karma take the stage, and the judgment of the heart "
+            "outweighs that of the body."
+        ),
         requires_other_avatar=False
     ),
-    "魔劫": TribulationType(
-        name="魔劫",
-        description="心跳与灵识节奏错位，旧欲旧恨自启，识海生魔胎影。心魔境中，欲、嗔、痴、慢、疑轮番试探，道心完整度与自洽度为核，一念之差即可走火入魔。",
+    "demonic": TribulationType(
+        name="demonic",
+        description=(
+            "Heartbeat and spiritual sense fall out of rhythm; old desires and old hatreds awaken on their own, and "
+            "the shadow of a demonic embryo forms in the sea of consciousness. Within the demon realm, desire, wrath, "
+            "delusion, pride and doubt take turns probing; the integrity and coherence of the Dao heart are the core, "
+            "and a single errant thought leads to qi deviation."
+        ),
         requires_other_avatar=False
     ),
 }
 
 
-# 故事生成的基础提示词
-STORY_PROMPT_BASE = "以古风、凝练、不炫技的笔触，描绘修士历经{calamity}劫时的心境与取舍，篇幅100~150字。"
+# Base prompt for story generation
+STORY_PROMPT_BASE = (
+    "In a classical, concise and unshowy style, depict the cultivator's state of mind and the choices they make "
+    "while enduring the {calamity} tribulation, in 60-100 words."
+)
 
 
 class TribulationSelector:
-    """天劫选择器，负责根据修士状态选择合适的劫难"""
+    """Tribulation selector: picks a suitable tribulation based on the cultivator's state."""
     
     @staticmethod
     def choose_tribulation(avatar: Avatar) -> str:
         """
-        根据修士的境界、关系等选择劫难类型
+        Choose a tribulation type based on the cultivator's realm, relations, etc.
         
         Args:
-            avatar: 渡劫的修士
+            avatar: The cultivator undergoing the tribulation
             
         Returns:
-            劫难名称
+            Tribulation id
         """
-        # 基础劫难池（不需要其他角色）
-        base_tribulations = ["心魔", "雷劫", "肉身", "阳罡", "雷火", "风灾", "阴狱", "魔劫"]
+        # Base tribulation pool (no other avatar required)
+        base_tribulations = [
+            "inner_demon", "lightning", "body", "solar_force",
+            "thunderflame", "windstorm", "nether_prison", "demonic",
+        ]
         
-        # 检查是否有特殊关系，可以触发关系型劫难
+        # Check for special relations that can trigger relation-based tribulations
         available_tribulations = base_tribulations.copy()
         
         rels = dict(iter_live_relation_items(avatar))
@@ -123,29 +172,29 @@ class TribulationSelector:
         has_lover = any(Relation.IS_LOVER_OF in state.identity_relations for state in rels.values())
         
         if has_enemy:
-            available_tribulations.append("寻仇")
+            available_tribulations.append("vengeance")
         if has_lover:
-            available_tribulations.append("情劫")
+            available_tribulations.append("love")
         
         return random.choice(available_tribulations)
     
     @staticmethod
     def choose_related_avatar(avatar: Avatar, tribulation_name: str) -> Optional[Avatar]:
         """
-        根据劫难类型选择相关的角色（如果需要）
+        Choose a related avatar for the tribulation type (if one is needed).
         
         Args:
-            avatar: 渡劫的修士
-            tribulation_name: 劫难名称
+            avatar: The cultivator undergoing the tribulation
+            tribulation_name: Tribulation id
             
         Returns:
-            相关角色，如果不需要则返回 None
+            The related avatar, or None if not needed
         """
         tribulation = TRIBULATION_TYPES.get(tribulation_name)
         if not tribulation or not tribulation.requires_other_avatar:
             return None
         
-        if tribulation_name == "寻仇":
+        if tribulation_name == "vengeance":
             candidates = get_live_related_avatars(
                 avatar,
                 numeric_relation=NumericRelation.ARCHENEMY,
@@ -166,13 +215,13 @@ class TribulationSelector:
     @staticmethod
     def get_description(tribulation_name: str) -> str:
         """
-        获取劫难的描述文本
+        Get the description text of a tribulation.
         
         Args:
-            tribulation_name: 劫难名称
+            tribulation_name: Tribulation id
             
         Returns:
-            劫难描述
+            Tribulation description
         """
         tribulation = TRIBULATION_TYPES.get(tribulation_name)
         return tribulation.description if tribulation else ""
@@ -180,9 +229,10 @@ class TribulationSelector:
     @staticmethod
     def get_display_name(tribulation_name: str) -> str:
         """
-        获取用于 UI/Event 展示的本地化劫难名称。
+        Get the localized tribulation name for UI/event display.
 
-        内部仍使用中文键作为规则与选择逻辑的真源，展示层再做翻译。
+        Internally the stable ids remain the source of truth for rules and selection;
+        the display layer translates them.
         """
         tribulation = TRIBULATION_TYPES.get(tribulation_name)
         raw_name = tribulation.name if tribulation else tribulation_name
@@ -193,15 +243,15 @@ class TribulationSelector:
     @staticmethod
     def get_story_prompt(tribulation_name: str) -> str:
         """
-        获取生成故事的提示词
+        Get the story generation prompt.
         
         Args:
-            tribulation_name: 劫难名称
+            tribulation_name: Tribulation id
             
         Returns:
-            完整的故事生成提示词
+            The full story generation prompt
         """
         desc = TribulationSelector.get_description(tribulation_name)
-        prompt = STORY_PROMPT_BASE.format(calamity=tribulation_name)
+        calamity = TribulationSelector.get_display_name(tribulation_name)
+        prompt = STORY_PROMPT_BASE.format(calamity=calamity)
         return (prompt + (" " + desc if desc else "")).strip()
-

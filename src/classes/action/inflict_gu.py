@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
 
 class InflictGu(InstantAction, TargetingMixin):
-    """下蛊：持有蛊具时，对目标施加一种按月结算的蛊。"""
+    """Inflict Gu: while holding a Gu vessel, inflict a Gu on the target that settles monthly."""
 
     ACTION_NAME_ID = "inflict_gu_action_name"
     DESC_ID = "inflict_gu_description"

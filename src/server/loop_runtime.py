@@ -55,7 +55,7 @@ def build_avatar_updates(
                 "id": str(avatar.id),
                 "name": avatar.name,
                 "is_dead": True,
-                "action": "已故",
+                "action": "Deceased",
             }
         )
 

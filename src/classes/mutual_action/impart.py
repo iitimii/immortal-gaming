@@ -18,52 +18,52 @@ if TYPE_CHECKING:
 
 @cooldown_action
 class Impart(InvitationAction):
-    """传道：向指定关系的目标传授修炼经验。
+    """Impart: pass cultivation experience to a target with a qualifying relation.
 
-    - 仅限发起方的徒弟、徒孙、同门、子女、孙辈或朋友
-    - 发起方等级必须大于目标等级20级以上
-    - 目标在交互范围内
-    - 目标可以选择 接受 或 拒绝
-    - 若接受：目标获得大量修为（相当于在灵气密度5的地方修炼的4倍，即2000经验）
+    - Only the initiator's disciples, grand-disciples, martial siblings, children, grandchildren or friends
+    - The initiator's level must exceed the target's by more than 20
+    - The target is within interaction range
+    - The target can choose to accept or refuse
+    - If accepted: the target gains a lot of cultivation exp (4x cultivating at qi density 5, i.e. 2000 exp)
     """
 
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "impart_action_name"
     DESC_ID = "impart_description"
     REQUIREMENTS_ID = "impart_requirements"
 
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "📖"
     PARAMS = {"target_avatar": "AvatarName"}
     RESPONSE_ACTIONS = ["Accept", "Reject"]
-    # 传道冷却：6个月
+    # Impart cooldown: 6 months
     ACTION_CD_MONTHS: int = 6
 
     def _get_template_path(self) -> Path:
         return CONFIG.paths.templates / "mutual_action.txt"
 
     def _can_start(self, target: "Avatar") -> tuple[bool, str]:
-        """检查传道特有的启动条件"""
+        """Check the impart-specific start conditions."""
         from src.classes.observe import is_within_observation
 
         if not is_within_observation(self.avatar, target):
             return False, t("Target not within interaction range")
 
-        # 检查是否满足传道关系
+        # Check whether the impart relation requirement is met
         rel = self.avatar.get_relation(target) or getattr(self.avatar, "computed_relations", {}).get(target)
         is_friend_or_better = RelationDeltaService.is_friend_or_better(self.avatar, target)
         allowed_relations = {
-            Relation.IS_DISCIPLE_OF,             # 徒弟
-            Relation.IS_MARTIAL_GRANDCHILD_OF,   # 徒孙
-            Relation.IS_MARTIAL_SIBLING_OF,      # 同门
-            Relation.IS_CHILD_OF,                # 儿子/女儿
-            Relation.IS_GRAND_CHILD_OF,          # 孙子/孙女
+            Relation.IS_DISCIPLE_OF,             # disciple
+            Relation.IS_MARTIAL_GRANDCHILD_OF,   # grand-disciple
+            Relation.IS_MARTIAL_SIBLING_OF,      # martial sibling
+            Relation.IS_CHILD_OF,                # son/daughter
+            Relation.IS_GRAND_CHILD_OF,          # grandson/granddaughter
         }
 
         if rel not in allowed_relations and not is_friend_or_better:
             return False, t("Target is not your disciple, martial grandchild, martial sibling, child, grandchild, or friend")
 
-        # 检查等级差
+        # Check the level gap
         level_diff = self.avatar.cultivation_progress.level - target.cultivation_progress.level
         if level_diff < 20:
             return False, t(
@@ -92,7 +92,7 @@ class Impart(InvitationAction):
         )
         self._start_event_content = event.content
 
-        # 初始化内部标记
+        # Initialize internal flags
         self._impart_success = False
         self._impart_exp_gain = 0
         return event
@@ -100,17 +100,17 @@ class Impart(InvitationAction):
     def _settle_response(self, target_avatar: "Avatar", response_name: str) -> None:
         fb = str(response_name).strip()
         if fb == "Accept":
-            # 接受则当场结算修为收益（接收者获得）
+            # If accepted, settle the cultivation gain on the spot (the receiver gains)
             self._apply_impart_gain(target_avatar)
             self._impart_success = True
         else:
-            # 拒绝
+            # Refused
             self._impart_success = False
 
     def _apply_impart_gain(self, target: "Avatar") -> None:
-        # 传道经验：相当于在灵气密度5的地方修炼的4倍
-        # base_exp = 100, density = 5, 倍数 = 4
-        # 总经验 = 100 * 5 * 4 = 2000
+        # Impart exp: equivalent to 4x cultivating at qi density 5
+        # base_exp = 100, density = 5, multiplier = 4
+        # total exp = 100 * 5 * 4 = 2000
         exp_gain = 100 * 5 * 4
         target.cultivation_progress.add_exp(exp_gain)
         self._impart_exp_gain = exp_gain

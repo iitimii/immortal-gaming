@@ -19,8 +19,8 @@ def test_save_and_load_custom_technique_round_trip(base_world, tmp_path):
         "technique",
         {
             "category": "technique",
-            "name": "九曜焚息诀",
-            "desc": "火行吐纳功法",
+            "name": "Nine Luminaries Flame Breath Art",
+            "desc": "A fire-element respiration technique",
             "effects": {
                 "extra_respire_exp_multiplier": 0.2,
                 "extra_breakthrough_success_rate": 0.1,
@@ -58,7 +58,7 @@ def test_save_and_load_custom_technique_round_trip(base_world, tmp_path):
 
     assert loaded_avatar is not None
     assert loaded_avatar.technique is not None
-    assert loaded_avatar.technique.name == "九曜焚息诀"
+    assert loaded_avatar.technique.name == "Nine Luminaries Flame Breath Art"
     assert loaded_avatar.technique.id == int(created["id"])
     assert int(created["id"]) in CustomContentRegistry.custom_techniques_by_id
 
@@ -76,9 +76,9 @@ def test_save_and_load_custom_goldfinger_round_trip(base_world, tmp_path):
     created = create_custom_goldfinger_from_draft(
         {
             "category": "goldfinger",
-            "name": "逆命骰子",
-            "desc": "你的命数总会在关键时刻再掷一次。",
-            "story_prompt": "请强调命运被重新掷骰的感觉。",
+            "name": "Fate-Defying Dice",
+            "desc": "Your fate always gets one more roll at the critical moment.",
+            "story_prompt": "Emphasize the feeling of fate being rolled again.",
             "effects": {
                 "extra_luck": 11,
                 "extra_breakthrough_success_rate": 0.08,
@@ -115,7 +115,7 @@ def test_save_and_load_custom_goldfinger_round_trip(base_world, tmp_path):
 
     assert loaded_avatar is not None
     assert loaded_avatar.goldfinger is not None
-    assert loaded_avatar.goldfinger.name == "逆命骰子"
+    assert loaded_avatar.goldfinger.name == "Fate-Defying Dice"
     assert loaded_avatar.goldfinger.id == int(created["id"])
     assert loaded_avatar.goldfinger_state == {"trigger_count": 2}
     assert int(created["id"]) in CustomContentRegistry.custom_goldfingers_by_id
@@ -142,10 +142,10 @@ def test_save_and_load_fate_revelation_round_trip(base_world, tmp_path):
     )
     avatar.personas = []
     avatar.fate_revelation = {
-        "trigger_text": "青溪渡口忽有逆流成圆，几片残叶贴着水面缓缓不散。",
-        "oracle_text": "千山暮雪倾东海，初日潮头又上来",
+        "trigger_text": "At Clear Creek Ferry the current suddenly circled backward, and a few fallen leaves lingered on the water.",
+        "oracle_text": "Dusk snow on a thousand peaks pours into the eastern sea; with the first sun the tide rises again",
         "revealed_month": int(base_world.month_stamp),
-        "location": "青溪渡口",
+        "location": "Clear Creek Ferry",
     }
     base_world.avatar_manager.register_avatar(avatar)
 

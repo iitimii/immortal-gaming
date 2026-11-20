@@ -21,10 +21,6 @@ export function getRealmAssetSlug(realm: string | null | undefined): string {
     core_formation: 'golden_core',
     golden_core: 'golden_core',
     nascent_soul: 'nascent_soul',
-    '练气': 'qi_refining',
-    '筑基': 'foundation',
-    '金丹': 'golden_core',
-    '元婴': 'nascent_soul',
   }
   return mapping[normalizedCompact] || 'qi_refining'
 }
@@ -45,7 +41,7 @@ export function getAvatarPortraitUrl(
 ): string {
   if (!picId) return ''
   const normalizedGender = String(gender || '').toLowerCase()
-  const dir = normalizedGender === 'female' || normalizedGender === '女' ? 'female' : 'male'
+  const dir = normalizedGender === 'female' ? 'female' : 'male'
   const normalizedRace = String(race || 'human').trim().toLowerCase() || 'human'
   const root = normalizedRace === 'human' ? 'avatars' : `yao/${normalizedRace}`
   const indexSlug = normalizedRace === 'human' ? getAvatarIndexSlug(picId) : getYaoAvatarIndexSlug(picId)

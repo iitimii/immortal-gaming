@@ -6,7 +6,7 @@ from src.classes.environment.region import NormalRegion
 
 @pytest.fixture
 def mock_region(dummy_avatar):
-    """设置一个 Mock 的 NormalRegion 到 avatar 所在 tile"""
+    """Attach a mock NormalRegion to the avatar's tile."""
     real_region = NormalRegion(id=999, name="TestRegion", desc="Testing")
     # Bypass post_init loading from global dicts by manually setting fields
     real_region.lodes = []
@@ -25,52 +25,52 @@ def mock_resource_material():
 
 @pytest.fixture
 def mock_resource(mock_resource_material):
-    """创建一个通用的资源对象 (Lode/Animal/Plant)"""
+    """Create a generic resource object (Lode/Animal/Plant)."""
     res = MagicMock()
     res.realm = Realm.Qi_Refinement
     res.materials = [mock_resource_material]
     return res
 
 def test_check_can_start_gather_success(dummy_avatar, mock_region, mock_resource):
-    """测试采集检查通过的情况"""
+    """Gather check passes."""
     mock_region.lodes = [mock_resource]
     
-    can, msg = check_can_start_gather(dummy_avatar, "lodes", "矿脉")
+    can, msg = check_can_start_gather(dummy_avatar, "lodes", "ore veins")
     assert can is True
     assert msg == ""
 
 def test_check_can_start_gather_not_normal_region(dummy_avatar):
-    """测试不在普通区域的情况"""
+    """Avatar is not in a normal region."""
     dummy_avatar.tile.region = "NotARegion" 
     
-    can, msg = check_can_start_gather(dummy_avatar, "lodes", "矿脉")
+    can, msg = check_can_start_gather(dummy_avatar, "lodes", "ore veins")
     assert can is False
-    assert "当前不在普通区域" in msg
+    assert "Not currently in a normal region" in msg
 
 def test_check_can_start_gather_no_resources(dummy_avatar, mock_region):
-    """测试区域没有资源的情况"""
+    """Region has no resources."""
     mock_region.lodes = []
     
-    can, msg = check_can_start_gather(dummy_avatar, "lodes", "矿脉")
+    can, msg = check_can_start_gather(dummy_avatar, "lodes", "ore veins")
     assert can is False
-    assert "当前区域没有矿脉" in msg
+    assert "The current region has no ore veins" in msg
 
 def test_check_can_start_gather_realm_too_low(dummy_avatar, mock_region, mock_resource):
-    """测试境界不足的情况"""
-    # 提升资源境界到筑基
+    """Avatar realm is too low."""
+    # Raise the resource realm to Foundation Establishment
     mock_resource.realm = Realm.Foundation_Establishment
     mock_region.lodes = [mock_resource]
-    # avatar 默认为练气
+    # the avatar defaults to Qi Refinement
     
-    can, msg = check_can_start_gather(dummy_avatar, "lodes", "矿脉")
+    can, msg = check_can_start_gather(dummy_avatar, "lodes", "ore veins")
     assert can is False
-    assert "当前区域的矿脉境界过高" in msg
+    assert "The ore veins in the current region are of too high a realm" in msg
 
 def test_execute_gather_success(dummy_avatar, mock_region, mock_resource, mock_resource_material):
-    """测试执行采集逻辑成功"""
+    """Gather execution succeeds."""
     mock_region.lodes = [mock_resource]
     
-    # 模拟 add_material
+    # Mock add_material
     dummy_avatar.add_material = MagicMock()
     
     result = execute_gather(dummy_avatar, "lodes", "extra_mine_materials")
@@ -79,27 +79,27 @@ def test_execute_gather_success(dummy_avatar, mock_region, mock_resource, mock_r
     assert result["TestMaterial"] >= 1
     dummy_avatar.add_material.assert_called_once()
     
-    # 验证获得的材料是正确的
+    # Verify the gathered material is correct
     args, _ = dummy_avatar.add_material.call_args
     assert args[0] == mock_resource_material
     assert args[1] >= 1
 
 def test_execute_gather_with_extra_effect(dummy_avatar, mock_region, mock_resource):
-    """测试带有加成效果的采集"""
+    """Gather with a bonus effect."""
     mock_region.lodes = [mock_resource]
     
-    # effects 是只读属性，它通过合并各个组件的 effects 来计算。
-    # 为了测试，我们 Mock 掉 effects 属性。
+    # effects is a read-only property computed by merging component effects.
+    # Mock the effects property for this test.
     with patch.object(type(dummy_avatar), 'effects', new_callable=lambda: {"extra_mine_materials": 2}):
         dummy_avatar.add_material = MagicMock()
         
         result = execute_gather(dummy_avatar, "lodes", "extra_mine_materials")
         
-        # 基础1 + 加成2 = 3
+        # base 1 + bonus 2 = 3
         assert result["TestMaterial"] == 3
     
 def test_execute_gather_random_selection(dummy_avatar, mock_region):
-    """测试从多个资源中随机选择"""
+    """Randomly pick among multiple resources."""
     res1 = MagicMock()
     res1.realm = Realm.Qi_Refinement
     res1.materials = [MagicMock(name="Material1")]

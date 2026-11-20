@@ -20,27 +20,27 @@ if TYPE_CHECKING:
 
 @cooldown_action
 class SwearBrotherhood(InvitationAction):
-    """结拜：向交互范围内的修士发起结拜，若对方接受则结为义结金兰。
+    """Swear brotherhood: propose sworn kinship to a cultivator within interaction range; if accepted, they become sworn siblings.
     """
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "swear_brotherhood_action_name"
     DESC_ID = "swear_brotherhood_description"
     REQUIREMENTS_ID = "swear_brotherhood_requirements"
     STORY_PROMPT_ID = "swear_brotherhood_story_prompt"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "🤝"
     PARAMS = {"target_avatar": "AvatarName"}
     RESPONSE_ACTIONS = ["Accept", "Reject"]
     
-    # 结拜的社交冷却：避免频繁请求
+    # Social cooldown for sworn brotherhood: avoid frequent requests
     ACTION_CD_MONTHS: int = 6
-    # 结拜是大事（长期记忆）
+    # Sworn brotherhood is a major event (long-term memory)
     IS_MAJOR: bool = True
 
     def _can_start(self, target: "Avatar") -> tuple[bool, str]:
-        """检查结拜特有的启动条件"""
+        """Check the sworn-brotherhood-specific start conditions."""
         from src.classes.observe import is_within_observation
         if not is_within_observation(self.avatar, target):
             return False, t("Target not within interaction range")
@@ -61,20 +61,20 @@ class SwearBrotherhood(InvitationAction):
                    initiator=self.avatar.name, target=target_name)
         event = Event(self.world.month_stamp, content, related_avatars=rel_ids, is_major=False)
         
-        # 记录开始文本用于故事生成
+        # Record the start text for story generation
         self._start_event_content = event.content
-        # 初始化内部标记
+        # Initialize internal flags
         self._swear_success = False
         return event
 
     def _settle_response(self, target_avatar: "Avatar", response_name: str) -> None:
         fb = str(response_name).strip()
         if fb == "Accept":
-            # 接受则结拜
+            # If accepted, become sworn siblings
             self.avatar.become_sworn_sibling_with(target_avatar)
             self._swear_success = True
         else:
-            # 拒绝
+            # Refused
             self._swear_success = False
 
     async def finish(self, target_avatar: "Avatar|str", **kwargs) -> list[Event]:
@@ -109,7 +109,7 @@ class SwearBrotherhood(InvitationAction):
         
         events.append(result_event)
 
-        # 生成结拜小故事
+        # Generate the sworn brotherhood story
         start_text = getattr(self, "_start_event_content", "") or result_event.content
         story_event = await StoryEventService.maybe_create_story(
             kind=StoryEventKind.RELATIONSHIP_MAJOR,

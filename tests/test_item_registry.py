@@ -90,7 +90,7 @@ def test_store_init_with_ids(mock_item_data):
         
         # Test store info
         info = shop.get_store_info()
-        assert "出售：" in info
+        assert "Sell:" in info
         assert weapon.name in info
         assert elixir.name in info
         
@@ -157,7 +157,7 @@ def test_item_instantiation():
 def test_gu_auxiliaries_loaded_with_expected_effects():
     from src.classes.items.auxiliary import auxiliaries_by_id
 
-    assert auxiliaries_by_id[2071].name == "百虫囊"
+    assert auxiliaries_by_id[2071].name == "Hundred-Bug Pouch"
     assert auxiliaries_by_id[2071].effects["legal_actions"] == ["InflictGu"]
     assert auxiliaries_by_id[2074].effects["extra_gu_success_rate"] == 0.10
     assert auxiliaries_by_id[2074].effects["extra_gu_duration_months"] == 9
@@ -167,8 +167,8 @@ def test_gu_auxiliaries_loaded_with_expected_effects():
 def test_gu_personas_loaded_with_expected_effects():
     from src.classes.persona import personas_by_name
 
-    assert personas_by_name["蛊师"].effects["extra_gu_success_rate"] == 0.10
-    assert personas_by_name["蛊师"].effects["extra_gu_duration_months"] == 6
-    assert personas_by_name["蛊仙"].effects["extra_gu_success_rate"] == 0.18
-    assert personas_by_name["蛊仙"].effects["extra_gu_duration_months"] == 12
+    assert personas_by_name["Gu Master"].effects["extra_gu_success_rate"] == 0.10
+    assert personas_by_name["Gu Master"].effects["extra_gu_duration_months"] == 6
+    assert personas_by_name["Gu Immortal"].effects["extra_gu_success_rate"] == 0.18
+    assert personas_by_name["Gu Immortal"].effects["extra_gu_duration_months"] == 12
 

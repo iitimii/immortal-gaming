@@ -49,5 +49,5 @@ class LanguageManager:
         return self._current
 
 
-# 全局单例
+# Global singleton
 language_manager = LanguageManager()

@@ -47,16 +47,16 @@ def test_inflict_gu_can_start_validates_target_and_gu_type(avatar_in_city, base_
 
     ok, reason = action.can_start(target.name, GU_QIANXIN)
     assert ok is False
-    assert "蛊具" in reason
+    assert "Gu tool" in reason
 
     _equip_gu_tool(avatar_in_city)
     ok, reason = action.can_start(target.name, "unknown")
     assert ok is False
-    assert "蛊类型" in reason
+    assert "Gu type" in reason
 
     ok, reason = action.can_start(avatar_in_city.name, GU_QIANXIN)
     assert ok is False
-    assert "自己" in reason
+    assert "self" in reason
 
     ok, reason = action.can_start(target.name, GU_QIANXIN)
     assert ok is True
@@ -94,7 +94,7 @@ def test_inflict_gu_failure_detected_reduces_target_friendliness(avatar_in_city,
 def test_gu_success_rate_uses_tool_persona_and_resistance_not_realm_or_luck(avatar_in_city, base_world):
     target = _target(base_world, avatar_in_city)
     _equip_gu_tool(avatar_in_city, 2073)
-    avatar_in_city.personas = [personas_by_name["蛊师"]]
+    avatar_in_city.personas = [personas_by_name["Gu Master"]]
     target.temporary_effects.append({
         "source": "test_resistance",
         "effects": {"extra_gu_resistance_rate": 0.12},
@@ -126,4 +126,4 @@ def test_inflict_gu_finish_uses_objective_event_text(avatar_in_city, base_world)
     import asyncio
 
     events = asyncio.run(action.finish(target.name, GU_LUANXIN))
-    assert events[0].content == f"{avatar_in_city.name}成功对{target.name}下了乱心蛊。"
+    assert events[0].content == f"{avatar_in_city.name} successfully inflicted Mind-Disorder Gu on {target.name}."

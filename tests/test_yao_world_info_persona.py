@@ -5,13 +5,13 @@ from src.sim.avatar_init import _roll_social_initial_friendliness_pair
 
 def test_world_info_contains_race_concept(base_world):
     info = base_world.static_info
-    assert "种族" in info
-    assert "狐、狼、鸟、蛇、龟" in info["种族"]
+    assert "Race" in info
+    assert "fox, wolf, bird, snake, turtle" in info["Race"]
 
 
 def test_cross_race_personas_loaded():
-    kin = personas_by_name["亲近异类"]
-    hate = personas_by_name["痛恨异类"]
+    kin = personas_by_name["Kin to Outsiders"]
+    hate = personas_by_name["Hates Outsiders"]
 
     assert kin.effects["extra_cross_race_friendliness"] == 20
     assert hate.effects["extra_cross_race_friendliness"] == -25
@@ -40,9 +40,9 @@ def test_cross_race_friendliness_effect_changes_initial_bias(dummy_avatar, base_
         personas=[],
     )
     dummy_avatar.race = get_race("human")
-    dummy_avatar.personas = [personas_by_name["亲近异类"]]
+    dummy_avatar.personas = [personas_by_name["Kin to Outsiders"]]
     dummy_avatar.recalc_effects()
-    other.personas = [personas_by_name["痛恨异类"]]
+    other.personas = [personas_by_name["Hates Outsiders"]]
     other.recalc_effects()
 
     monkeypatch.setattr("src.sim.avatar_init._roll_social_initial_friendliness_pair_without_cross_race", lambda *_args: (0, 0))

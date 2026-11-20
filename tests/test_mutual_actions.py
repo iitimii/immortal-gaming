@@ -81,7 +81,7 @@ class TestTalk:
             can_start, reason = action.can_start(target_avatar)
         
         assert can_start is False
-        assert "不在交互范围内" in reason
+        assert "not within interaction range" in reason
 
     def test_talk_cannot_start_self_target(self, dummy_avatar):
         """Test that Talk cannot target self."""
@@ -89,7 +89,7 @@ class TestTalk:
         can_start, reason = action.can_start(dummy_avatar)
         
         assert can_start is False
-        assert "自己" in reason
+        assert "self" in reason
 
     def test_talk_cannot_start_target_not_exist(self, dummy_avatar):
         """Test that Talk cannot start with non-existent target."""
@@ -97,7 +97,7 @@ class TestTalk:
         can_start, reason = action.can_start("NonExistentAvatar")
         
         assert can_start is False
-        assert "不存在" in reason
+        assert "does not exist" in reason
 
     def test_talk_start_returns_event(self, dummy_avatar, target_avatar):
         """Test that Talk.start() returns proper event."""
@@ -107,7 +107,7 @@ class TestTalk:
         assert event is not None
         assert dummy_avatar.name in event.content
         assert target_avatar.name in event.content
-        assert "攀谈" in event.content
+        assert "Talk" in event.content
         assert dummy_avatar.id in event.related_avatars
         assert target_avatar.id in event.related_avatars
 
@@ -163,7 +163,7 @@ class TestTalk:
                 
                 assert res2.status == ActionStatus.COMPLETED
                 assert len(res2.events) >= 1
-                assert "拒绝" in res2.events[0].content
+                assert "rejected" in res2.events[0].content
 
     @pytest.mark.asyncio
     async def test_talk_step_uses_player_roleplay_choice_when_target_controlled(self, dummy_avatar, target_avatar):
@@ -277,7 +277,7 @@ class TestSpar:
         assert event is not None
         assert dummy_avatar.name in event.content
         assert target_avatar.name in event.content
-        assert "切磋" in event.content
+        assert "Spar" in event.content
 
     def test_spar_settle_response_accept(self, dummy_avatar, target_avatar):
         """Test that accepting spar increases weapon proficiency."""
@@ -448,7 +448,7 @@ class TestImpart:
             can_start, reason = action.can_start(target_avatar=disciple_avatar)
         
         assert can_start is False
-        assert "目标不是你的徒弟" in reason
+        assert "Target is not your disciple" in reason
 
     def test_impart_cannot_start_level_diff_too_small(self, master_avatar, disciple_avatar):
         """Test Impart cannot start when level difference < 20."""
@@ -465,7 +465,7 @@ class TestImpart:
             can_start, reason = action.can_start(target_avatar=disciple_avatar)
         
         assert can_start is False
-        assert "等级差不足20级" in reason
+        assert "need 20 levels" in reason
 
     def test_impart_cannot_start_target_not_in_range(self, master_avatar, disciple_avatar):
         """Test Impart cannot start when target out of range."""
@@ -477,7 +477,7 @@ class TestImpart:
             can_start, reason = action.can_start(target_avatar=disciple_avatar)
         
         assert can_start is False
-        assert "不在交互范围内" in reason
+        assert "not within interaction range" in reason
 
     def test_impart_start_returns_event(self, master_avatar, disciple_avatar):
         """Test that Impart.start() returns proper event."""
@@ -487,7 +487,7 @@ class TestImpart:
         assert event is not None
         assert master_avatar.name in event.content
         assert disciple_avatar.name in event.content
-        assert "传道" in event.content
+        assert "imparts" in event.content
         assert hasattr(action, '_impart_success')
         assert action._impart_success is False
 
@@ -824,7 +824,7 @@ class TestMutualActionBase:
         can_start, reason = action.can_start(target_avatar)
         
         assert can_start is False
-        assert "死亡" in reason
+        assert "dead" in reason
 
     def test_get_target_avatar_by_name(self, dummy_avatar, target_avatar):
         """Test _get_target_avatar with string name."""
@@ -915,8 +915,8 @@ class TestMutualActionBase:
         action = DriveAway(dummy_avatar, dummy_avatar.world)
         content = action._build_response_event_content(target_avatar, "MoveAwayFromRegion")
 
-        assert "回应" in content
-        assert "离开此地" in content
+        assert "response" in content
+        assert "Leave this place" in content
 
     def test_set_target_immediate_action_can_suppress_start_event(self, dummy_avatar, target_avatar):
         """Immediate follow-up actions can skip their start event to avoid duplicate narration."""
@@ -945,11 +945,11 @@ class TestOccupy:
     def test_can_start_unclaimed_cultivate_region(self, dummy_avatar, base_world):
         from src.classes.environment.region import CultivateRegion
 
-        cave = CultivateRegion(id=901, name="无主洞府", desc="灵气充盈", cors=[(1, 1)])
+        cave = CultivateRegion(id=901, name="Ownerless Cave Abode", desc="Rich spiritual qi", cors=[(1, 1)])
         base_world.map.regions[cave.id] = cave
         action = Occupy(dummy_avatar, base_world)
 
-        can_start, reason = action.can_start(region_name="无主洞府")
+        can_start, reason = action.can_start(region_name="Ownerless Cave Abode")
 
         assert can_start is True
         assert reason == ""
@@ -957,24 +957,24 @@ class TestOccupy:
     def test_start_unclaimed_cultivate_region_does_not_require_host(self, dummy_avatar, base_world):
         from src.classes.environment.region import CultivateRegion
 
-        cave = CultivateRegion(id=902, name="清风洞府", desc="无主", cors=[(1, 1)])
+        cave = CultivateRegion(id=902, name="Clear Breeze Cave Abode", desc="Unowned", cors=[(1, 1)])
         base_world.map.regions[cave.id] = cave
         action = Occupy(dummy_avatar, base_world)
 
-        event = action.start(region_name="清风洞府")
+        event = action.start(region_name="Clear Breeze Cave Abode")
 
-        assert "清风洞府" in event.content
+        assert "Clear Breeze Cave Abode" in event.content
         assert event.related_avatars == [dummy_avatar.id]
 
     def test_step_unclaimed_cultivate_region_occupies_directly(self, dummy_avatar, base_world):
         from src.classes.environment.region import CultivateRegion
 
-        cave = CultivateRegion(id=903, name="明月洞府", desc="无主", cors=[(1, 1)])
+        cave = CultivateRegion(id=903, name="Bright Moon Cave Abode", desc="Unowned", cors=[(1, 1)])
         base_world.map.regions[cave.id] = cave
         action = Occupy(dummy_avatar, base_world)
-        action.start(region_name="明月洞府")
+        action.start(region_name="Bright Moon Cave Abode")
 
-        result = action.step(region_name="明月洞府")
+        result = action.step(region_name="Bright Moon Cave Abode")
 
         assert result.status == ActionStatus.COMPLETED
         assert cave.host_avatar is dummy_avatar
@@ -986,12 +986,12 @@ class TestOccupy:
     def test_cannot_start_owned_cultivate_region(self, dummy_avatar, base_world):
         from src.classes.environment.region import CultivateRegion
 
-        cave = CultivateRegion(id=904, name="自家洞府", desc="已占据", cors=[(1, 1)])
+        cave = CultivateRegion(id=904, name="Own Cave Abode", desc="Occupied", cors=[(1, 1)])
         base_world.map.regions[cave.id] = cave
         dummy_avatar.occupy_region(cave)
         action = Occupy(dummy_avatar, base_world)
 
-        can_start, reason = action.can_start(region_name="自家洞府")
+        can_start, reason = action.can_start(region_name="Own Cave Abode")
 
         assert can_start is False
         assert reason

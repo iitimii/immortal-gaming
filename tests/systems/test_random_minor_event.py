@@ -85,17 +85,17 @@ async def test_try_trigger_random_minor_event_single_returns_single_event(dummy_
         patch("src.systems.random_minor_event_service.call_llm_with_task_name", new_callable=AsyncMock) as mock_call,
         patch("src.systems.random_minor_event_service.RelationDeltaService.resolve_event_text_delta", new_callable=AsyncMock) as mock_delta,
     ):
-        mock_call.return_value = {"event_text": "TestDummy拂去袖上尘土，又默默运转了一周天。"}
+        mock_call.return_value = {"event_text": "TestDummy brushed the dust from a sleeve and quietly ran another cycle of qi."}
         events = await try_trigger_random_minor_event(dummy_avatar, dummy_avatar.world)
 
     assert len(events) == 1
     event = events[0]
-    assert event.content == "TestDummy拂去袖上尘土，又默默运转了一周天。"
+    assert event.content == "TestDummy brushed the dust from a sleeve and quietly ran another cycle of qi."
     assert event.is_story is False
     assert event.is_major is False
     assert event.related_avatars == [dummy_avatar.id]
     infos = mock_call.await_args.kwargs["infos"]
-    assert "随身老爷爷" in infos["world_info"]
+    assert "Old Grandpa in the Ring" in infos["world_info"]
     assert dummy_avatar.goldfinger.story_prompt in infos["world_info"]
     mock_delta.assert_not_called()
 
@@ -128,7 +128,7 @@ async def test_try_trigger_random_minor_event_pair_applies_friendliness_delta(
             new_callable=AsyncMock,
         ) as mock_delta,
     ):
-        mock_call.return_value = {"event_text": "TestDummy顺手替Other拨开路边乱枝，两人点头而过。"}
+        mock_call.return_value = {"event_text": "TestDummy pushed aside some stray branches for Other, and the two nodded as they passed."}
         mock_delta.return_value = (3, 1)
         events = await try_trigger_random_minor_event(dummy_avatar, base_world)
 
@@ -139,8 +139,8 @@ async def test_try_trigger_random_minor_event_pair_applies_friendliness_delta(
     assert other_avatar.get_friendliness(dummy_avatar) == before_b + 1
     assert "[event_key=small_mutual_help]" in mock_delta.await_args.kwargs["event_text"]
     infos = mock_call.await_args.kwargs["infos"]
-    assert "穿越者" in infos["world_info"]
-    assert "随身老爷爷" in infos["world_info"]
+    assert "Transmigrator" in infos["world_info"]
+    assert "Old Grandpa in the Ring" in infos["world_info"]
 
 
 @pytest.mark.asyncio
@@ -160,7 +160,7 @@ async def test_pair_event_without_target_falls_back_to_solo(dummy_avatar: Avatar
         patch("src.systems.random_minor_event_service.call_llm_with_task_name", new_callable=AsyncMock) as mock_call,
         patch("src.systems.random_minor_event_service.RelationDeltaService.resolve_event_text_delta", new_callable=AsyncMock) as mock_delta,
     ):
-        mock_call.return_value = {"event_text": "TestDummy抬手掸落肩头枯叶，自己都觉得有些好笑。"}
+        mock_call.return_value = {"event_text": "TestDummy flicked a dry leaf off a shoulder and found it a little funny."}
         events = await try_trigger_random_minor_event(dummy_avatar, dummy_avatar.world)
 
     assert len(events) == 1
@@ -193,7 +193,7 @@ def test_load_minor_event_types_parses_new_schema():
                 "tone": "neutral",
                 "relation_hint": "mixed",
                 "weight": "1.2",
-                "desc_id": "路过时短暂发生的一次照面互动",
+                "desc_id": "A brief face-to-face encounter while passing by",
             }
         ]
 
@@ -213,8 +213,8 @@ def test_load_minor_event_types_parses_new_schema():
 async def test_phase_random_minor_events_flattens_event_lists(base_world, dummy_avatar: Avatar):
     base_world.avatar_manager.register_avatar(dummy_avatar)
     events_to_return = [
-        Event(base_world.month_stamp, "甲的小事", related_avatars=[dummy_avatar.id]),
-        Event(base_world.month_stamp, "乙的小事", related_avatars=[dummy_avatar.id]),
+        Event(base_world.month_stamp, "A's minor event", related_avatars=[dummy_avatar.id]),
+        Event(base_world.month_stamp, "B's minor event", related_avatars=[dummy_avatar.id]),
     ]
     with patch(
         "src.sim.simulator_engine.phases.world.try_trigger_random_minor_event",
@@ -225,4 +225,4 @@ async def test_phase_random_minor_events_flattens_event_lists(base_world, dummy_
 
         events = await phase_random_minor_events(base_world, [dummy_avatar])
 
-    assert [event.content for event in events] == ["甲的小事", "乙的小事"]
+    assert [event.content for event in events] == ["A's minor event", "B's minor event"]

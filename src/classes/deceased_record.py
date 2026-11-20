@@ -4,7 +4,7 @@ from typing import Optional
 
 @dataclass
 class DeceasedRecord:
-    """已故角色轻量档案，独立于 Avatar 对象，不受 cleanup_long_dead_avatars 影响。"""
+    """Lightweight archive of a deceased avatar, independent of the Avatar object and unaffected by cleanup_long_dead_avatars."""
 
     id: str
     name: str
@@ -13,7 +13,7 @@ class DeceasedRecord:
     realm_at_death: str       # cultivation_progress.realm.value
     stage_at_death: str       # cultivation_progress.stage.value
     death_reason: str
-    death_time: int            # MonthStamp int, 与 death_info["time"] 同语义
+    death_time: int            # MonthStamp int, same semantics as death_info["time"]
     sect_name_at_death: str    # avatar.sect.name if avatar.sect else ""
     alignment_at_death: str    # avatar.alignment.value if avatar.alignment else ""
     backstory: Optional[str] = None

@@ -4,8 +4,8 @@ export interface SelectOptionLike<TValue extends string | number = string | numb
 }
 
 /**
- * 为下拉选项列表前置一个“全部”选项。
- * 当 i18n key 未命中时，回退到显式提供的 fallback，避免界面直接显示 key。
+ * Prepend an "All" option to a select option list.
+ * If the i18n key is missing, use the explicit fallback so the raw key is never shown.
  */
 export function prependAllOption<TValue extends string | number>(
   options: SelectOptionLike<TValue>[],

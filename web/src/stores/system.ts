@@ -7,11 +7,11 @@ import { logError } from '../utils/appError';
 export const useSystemStore = defineStore('system', () => {
   // --- State ---
   const initStatus = ref<InitStatusDTO | null>(null);
-  const isInitialized = ref(false); // 前端是否完成初始化 (world store loaded, socket connected)
-  const isManualPaused = ref(true); // 用户手动暂停
-  const isGameRunning = ref(false); // 游戏是否处于 Running 阶段 (Init Status ready)
+  const isInitialized = ref(false); // Frontend initialized (world store loaded, socket connected)
+  const isManualPaused = ref(true); // Paused manually by the user
+  const isGameRunning = ref(false); // Game is in the Running phase (init status ready)
 
-  // 请求计数器，用于处理竞态条件。
+  // Request counter to handle race conditions.
   let fetchStatusRequestId = 0;
   
   // --- Getters ---
@@ -33,7 +33,7 @@ export const useSystemStore = defineStore('system', () => {
     try {
       const res = await systemApi.fetchInitStatus();
       
-      // 只接受最新请求的响应。
+      // Only accept the latest response.
       if (currentRequestId !== fetchStatusRequestId) {
         return null;
       }
@@ -58,7 +58,7 @@ export const useSystemStore = defineStore('system', () => {
     isInitialized.value = val;
   }
 
-  // 切换手动暂停状态（用户点击暂停按钮时调用）
+  // Toggle manual pause (called from the pause button)
   async function togglePause() {
     const newState = !isManualPaused.value;
     isManualPaused.value = newState;
@@ -69,13 +69,13 @@ export const useSystemStore = defineStore('system', () => {
         await systemApi.resumeGame();
       }
     } catch (e) {
-      // API 失败时回滚状态
+      // Roll back on API failure
       isManualPaused.value = !newState;
       logError('SystemStore toggle pause', e);
     }
   }
 
-  // 仅调用后端 API，不修改 isManualPaused（用于菜单打开/关闭等系统行为）
+  // Only calls the backend; leaves isManualPaused alone (for system actions like opening/closing the menu)
   async function pause() {
     try {
       await systemApi.pauseGame();

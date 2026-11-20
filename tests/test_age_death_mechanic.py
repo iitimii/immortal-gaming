@@ -2,7 +2,7 @@ from src.classes.age import Age
 
 
 class TestAgeDeathMechanic:
-    """测试新的寿元与即时死亡机制。"""
+    """Tests for the lifespan and immediate-death mechanic."""
 
     def test_alive_before_lifespan_limit(self):
         age = Age(50, innate_max_lifespan=80)

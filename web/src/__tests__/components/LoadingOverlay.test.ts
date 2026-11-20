@@ -12,9 +12,9 @@ describe('LoadingOverlay', () => {
   it('should render successfully', () => {
     const i18n = createI18n({
       legacy: false,
-      locale: 'zh-CN',
+      locale: 'en-US',
       messages: {
-        'zh-CN': {
+        'en-US': {
           loading: {
             title: 'Loading',
             subtitle: 'Subtitle',

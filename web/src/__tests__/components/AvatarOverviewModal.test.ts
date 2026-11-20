@@ -16,7 +16,7 @@ let mockOverview: any = {
     sectMemberCount: 7,
     rogueCount: 2,
   },
-  realmDistribution: [{ realm: '练气', count: 6 }],
+  realmDistribution: [{ realm: 'QI_REFINEMENT', count: 6 }],
 }
 let mockOverviewLoading = false
 
@@ -123,28 +123,28 @@ describe('AvatarOverviewModal', () => {
         sectMemberCount: 7,
         rogueCount: 2,
       },
-      realmDistribution: [{ realm: '练气', count: 6 }],
+      realmDistribution: [{ realm: 'QI_REFINEMENT', count: 6 }],
     }
     mockOverviewLoading = false
     mocks.fetchDeceasedListMock.mockResolvedValue([
       {
         id: 'dead-1',
-        name: '陨落者',
-        gender: '男',
+        name: 'The Fallen',
+        gender: 'male',
         age_at_death: 88,
-        realm_at_death: '金丹',
-        stage_at_death: '前期',
-        death_reason: '战死',
+        realm_at_death: 'CORE_FORMATION',
+        stage_at_death: 'early',
+        death_reason: 'Killed in battle',
         death_time: 35,
-        sect_name_at_death: '青云宗',
-        alignment_at_death: '正道',
-        backstory: '往事',
+        sect_name_at_death: 'Qingyun Sect',
+        alignment_at_death: 'Righteous',
+        backstory: 'Past events',
         custom_pic_id: null,
       },
     ])
     mocks.fetchEventsMock.mockResolvedValue({
       events: [
-        { id: 'evt-1', year: 3, month: 4, content: '陨落之战' },
+        { id: 'evt-1', year: 3, month: 4, content: 'The fatal battle' },
       ],
     })
   })

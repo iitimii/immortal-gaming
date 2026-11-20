@@ -20,9 +20,9 @@ if TYPE_CHECKING:
     from src.classes.weapon_type import WeaponType
 
 """
-宗门、宗门总部基础数据。
-驻地名称与描述已迁移到 sect_region.csv，供地图区域系统使用。
-此处仅保留宗门本体信息与头像编辑所需的静态字段。
+Base data for sects and sect headquarters.
+Headquarters names and descriptions have moved to sect_region.csv for use by the map region system.
+Only the sect's own info and the static fields needed by the avatar editor are kept here.
 """
 
 
@@ -31,11 +31,11 @@ class SectRuleId(str, Enum):
     EVIL_SECT_LOYALTY = "evil_sect_loyalty"
     NEUTRAL_SECRECY = "neutral_secrecy"
 
-# 宗门驻地（基础展示数据，具体地图位置在 sect_region.csv 中定义）
+# Sect headquarters (basic display data; the concrete map location is defined in sect_region.csv)
 @dataclass
 class SectHeadQuarter:
     """
-    宗门总部
+    Sect headquarters
     """
     name: str
     desc: str
@@ -44,7 +44,7 @@ class SectHeadQuarter:
 @dataclass
 class Sect(SectEffectsMixin):
     """
-    宗门
+    Sect
     """
     id: int
     name: str
@@ -52,43 +52,43 @@ class Sect(SectEffectsMixin):
     member_act_style: str
     alignment: Alignment
     headquarter: SectHeadQuarter
-    # 本宗关联的功法名称（来自 technique.csv 的 sect 列）
+    # Names of techniques associated with this sect (from the sect column of technique.csv)
     technique_names: list[str]
     name_id: str = ""
-    # 随机选择宗门时使用的权重（默认1）
+    # Weight used when randomly choosing a sect (default 1)
     weight: float = 1.0
-    # 宗门倾向的兵器类型
+    # The sect's preferred weapon type
     preferred_weapon: Optional["WeaponType"] = None
-    # 影响角色或系统的效果
+    # Effects applied to avatars or systems
     effects: dict[str, object] = field(default_factory=dict)
     effect_desc: str = ""
     sect_effects: dict[str, object] = field(default_factory=dict)
     temporary_sect_effects: list[dict] = field(default_factory=list)
-    # 宗门自定义职位名称（可选）：SectRank -> 名称
+    # Custom sect rank names (optional): SectRank -> name
     rank_names: dict[str, str] = field(default_factory=dict)
-    # 道统ID
+    # Orthodoxy ID
     orthodoxy_id: str = "dao"
-    # 门规
+    # Sect rules
     rule_id: str = ""
     rule_desc: str = ""
-    # 是否接纳妖族弟子
+    # Whether yao disciples are accepted
     accept_yao: bool = True
     
-    # 势力相关
+    # Power-related
     magic_stone: int = 0
     war_weariness: int = 0
     is_active: bool = True
     total_battle_strength: float = 0.0
     influence_radius: int = 0
     color: str = "#FFFFFF"
-    # 宗门周期思考（仅展示用途，不写入事件流）
+    # Periodic sect thinking (display only, not written to the event stream)
     periodic_thinking: str = ""
-    # 最近一次宗门决策摘要（运行时）
+    # Summary of the most recent sect decision (runtime)
     last_decision_summary: str = ""
 
-    # 运行时成员列表：Avatar ID -> Avatar
+    # Runtime member list: Avatar ID -> Avatar
     members: dict[str, "Avatar"] = field(default_factory=dict, init=False)
-    # 功法对象列表：Technique
+    # List of technique objects: Technique
     techniques: list["Technique"] = field(default_factory=list, init=False)
 
     def __post_init__(self):
@@ -113,12 +113,12 @@ class Sect(SectEffectsMixin):
         self.set_war_weariness(int(self.war_weariness) + int(delta))
 
     def add_member(self, avatar: "Avatar") -> None:
-        """添加成员到宗门"""
+        """Add a member to the sect."""
         if avatar.id not in self.members:
             self.members[avatar.id] = avatar
     
     def remove_member(self, avatar: "Avatar") -> None:
-        """从宗门移除成员"""
+        """Remove a member from the sect."""
         if avatar.id in self.members:
             del self.members[avatar.id]
 
@@ -139,7 +139,7 @@ class Sect(SectEffectsMixin):
                 sect_name=self.name, orthodoxy=orthodoxy_name, alignment=str(self.alignment), hq_name=hq.name)
 
     def get_detailed_info(self) -> str:
-        # 详细描述：风格、阵营、驻地
+        # Detailed description: style, alignment, headquarters
         from src.i18n import t
         hq = self.headquarter
         effect_part = t(" Effect: {effect_desc}", effect_desc=self.effect_desc) if self.effect_desc else ""
@@ -153,17 +153,17 @@ class Sect(SectEffectsMixin):
     
     def get_rank_name(self, rank: "SectRank") -> str:
         """
-        获取宗门的职位名称（支持自定义）
+        Get the sect's rank name (custom names supported).
         
         Args:
-            rank: 宗门职位枚举
+            rank: sect rank enum
             
         Returns:
-            职位名称字符串
+            The rank name string
         """
         from src.classes.sect_ranks import SectRank, DEFAULT_RANK_NAMES
         from src.i18n import t
-        # 优先使用自定义名称，否则使用默认名称
+        # Prefer the custom name, otherwise use the default name
         val = self.rank_names.get(rank.value, DEFAULT_RANK_NAMES.get(rank, t("Disciple")))
         return t(val)
 
@@ -174,7 +174,7 @@ class Sect(SectEffectsMixin):
         from src.classes.technique import techniques_by_name
         status_snapshot_by_avatar = self._build_member_status_snapshot_map()
         
-        # 成员列表：直接从 self.members 获取
+        # Member list: taken directly from self.members
         members_list = []
         for a in self.members.values():
             rank_enum = getattr(a, "sect_rank", None)
@@ -186,7 +186,7 @@ class Sect(SectEffectsMixin):
             members_list.append({
                 "id": str(a.id),
                 "name": a.name,
-                # 这里仅提供一个占位头像 ID，前端会有自己的 fallback 逻辑
+                # Only a placeholder avatar ID is provided here; the frontend has its own fallback logic
                 "pic_id": getattr(a, "custom_pic_id", 0) or 0,
                 "gender": a.gender.value if hasattr(a.gender, "value") else "male",
                 "rank": a.get_sect_rank_name(),
@@ -196,14 +196,14 @@ class Sect(SectEffectsMixin):
                 "status_score": float(member_status.get("status_score", 0.0) or 0.0),
                 "_sort_val": sort_val,
             })
-        # 按职位排序
+        # Sort by rank
         members_list.sort(key=lambda x: (x["_sort_val"], -x["contribution"], -x["status_score"], x["name"]))
-        # 清理排序字段
+        # Clean up the sort field
         for m in members_list:
             del m["_sort_val"]
 
-        # 填充 techniques
-        # 使用 technique_names 从全局字典中查找对应的 Technique 对象并序列化
+        # Fill in techniques
+        # Look up the Technique objects in the global dict by technique_names and serialize them
         techniques_data = []
         for t_name in self.technique_names:
             t_obj = techniques_by_name.get(t_name)
@@ -226,13 +226,13 @@ class Sect(SectEffectsMixin):
             "id": self.id,
             "name": self.name,
             "desc": self.desc,
-            "alignment": str(self.alignment), # 直接返回中文
+            "alignment": str(self.alignment), # Return the localized string directly
             "style": t(self.member_act_style),
             "hq_name": hq.name,
             "hq_desc": hq.desc,
             "effect_desc": self.effect_desc,
             "techniques": techniques_data,
-            # 领域模型仍以 technique_names 维护配置来源，API 同时提供结构化 techniques。
+            # The domain model still tracks config sources via technique_names; the API also provides structured techniques.
             "technique_names": self.technique_names,
             "preferred_weapon": str(self.preferred_weapon) if self.preferred_weapon else "",
             "members": members_list,
@@ -247,7 +247,7 @@ class Sect(SectEffectsMixin):
             "rule_desc": self.rule_desc,
             "accept_yao": self.accept_yao,
             "periodic_thinking": self.periodic_thinking,
-            # 前端仍标记为 deprecated 的别名，语义等同 periodic_thinking。
+            # Alias still marked deprecated on the frontend; same semantics as periodic_thinking.
             "yearly_thinking": self.periodic_thinking,
         }
 
@@ -262,8 +262,8 @@ class Sect(SectEffectsMixin):
 
     def is_member_rule_breaker(self, avatar: "Avatar") -> bool:
         """
-        当前版本只处理“极端到足以驱逐”的明显门规冲突。
-        更细的门规行为判断后续可以在这里继续扩展。
+        The current version only handles obvious rule conflicts that are "extreme enough to warrant expulsion".
+        Finer-grained rule behavior checks can be added here later.
         """
         alignment = getattr(avatar, "alignment", None)
         if alignment is None:
@@ -433,7 +433,7 @@ def _split_names(value: object) -> list[str]:
     return parts
 
 def _merge_effects_dict(base: dict[str, object], addition: dict[str, object]) -> dict[str, object]:
-    """合并两个 effects 字典（简单合并逻辑）"""
+    """Merge two effects dicts (simple merge logic)."""
     if not base and not addition:
         return {}
     merged: dict[str, object] = dict(base) if base else {}
@@ -441,7 +441,7 @@ def _merge_effects_dict(base: dict[str, object], addition: dict[str, object]) ->
         if key in merged:
             old = merged[key]
             if isinstance(old, list) and isinstance(val, list):
-                # 去重并集
+                # Deduplicated union
                 seen = set(old)
                 result = list(old)
                 for x in val:
@@ -452,21 +452,21 @@ def _merge_effects_dict(base: dict[str, object], addition: dict[str, object]) ->
             elif isinstance(old, (int, float)) and isinstance(val, (int, float)):
                 merged[key] = old + val
             else:
-                # 默认覆盖
+                # Overwrite by default
                 merged[key] = val
         else:
             merged[key] = val
     return merged
 
 def _load_sects_data() -> tuple[dict[int, Sect], dict[str, Sect]]:
-    """从配表加载 sect 数据
-    返回：新的 (sects_by_id, sects_by_name)
+    """Load sect data from the config table.
+    Returns: new (sects_by_id, sects_by_name)
     """
     new_by_id: dict[int, Sect] = {}
     new_by_name: dict[str, Sect] = {}
 
     df = game_configs["sect"]
-    # 读取宗门驻地映射（优先从 sect_region.csv 获取驻地地名/描述）
+    # Read the headquarters mapping (prefer headquarters name/description from sect_region.csv)
     sect_region_df = game_configs.get("sect_region")
     hq_by_sect_id: dict[int, tuple[str, str]] = {}
     if sect_region_df is not None:
@@ -478,7 +478,7 @@ def _load_sects_data() -> tuple[dict[int, Sect], dict[str, Sect]]:
             hq_desc = get_str(sr, "desc")
             hq_by_sect_id[sid] = (hq_name, hq_desc)
     
-    # 可能不存在 technique 配表或未添加 sect 列，做容错
+    # The technique table may not exist or may lack the sect column; be tolerant
     tech_df = game_configs.get("technique")
     assets_base = Path("assets/sects")
     
@@ -486,12 +486,12 @@ def _load_sects_data() -> tuple[dict[int, Sect], dict[str, Sect]]:
         name = get_str(row, "name")
         image_path = assets_base / f"{name}.png"
         
-        # 先读取当前宗门 ID，供后续使用
+        # Read the current sect ID first for later use
         sid = get_int(row, "id")
 
-        # 收集该宗门下配置的功法名称
+        # Collect the technique names configured under this sect
         technique_names: list[str] = []
-        # 检查 tech_df 是否存在以及是否有数据
+        # Check whether tech_df exists and has data
         if tech_df:
             technique_names = [
                 get_str(t, "name")
@@ -501,32 +501,32 @@ def _load_sects_data() -> tuple[dict[int, Sect], dict[str, Sect]]:
 
         weight = get_float(row, "weight", 1.0)
 
-        # 读取 effects
+        # Read effects
         base_effects = load_effect_from_str(get_str(row, "effects"))
         
-        # 道统处理
+        # Orthodoxy handling
         orthodoxy_id = get_str(row, "orthodoxy_id") or "dao"
         orthodoxy = get_orthodoxy(orthodoxy_id)
         
-        # 合并道统 Effects 到宗门 Effects
+        # Merge orthodoxy effects into sect effects
         final_effects = base_effects
         if orthodoxy and orthodoxy.effects:
-             # 以道统为基础，宗门效果叠加/覆盖之
+             # Use the orthodoxy as the base; sect effects stack on/override it
              final_effects = _merge_effects_dict(orthodoxy.effects, base_effects)
         
         from src.classes.effect import format_effects_to_text
         effect_desc = format_effects_to_text(final_effects)
 
-        # 读取倾向兵器类型
+        # Read the preferred weapon type
         from src.classes.weapon_type import WeaponType
         preferred_weapon_str = get_str(row, "preferred_weapon")
         preferred_weapon = WeaponType.from_str(preferred_weapon_str) if preferred_weapon_str else None
 
-        # 解析自定义职位
+        # Parse custom ranks
         raw_ranks = get_str(row, "rank_names")
         rank_names_map = {}
         if raw_ranks:
-            # 格式：掌门;长老;内门;外门
+            # Format: patriarch;elder;inner;outer
             parts = [x.strip() for x in raw_ranks.split(";") if x.strip()]
             if len(parts) == 4:
                 from src.classes.sect_ranks import SectRank
@@ -537,7 +537,7 @@ def _load_sects_data() -> tuple[dict[int, Sect], dict[str, Sect]]:
                     SectRank.OuterDisciple.value: parts[3],
                 }
 
-        # 从 sect_region.csv 中优先取驻地名称/描述；否则使用行内驻地列或退回宗门名
+        # Prefer the headquarters name/description from sect_region.csv; otherwise use the inline headquarters column or fall back to the sect name
         csv_hq = hq_by_sect_id.get(sid)
         hq_name_from_csv = (csv_hq[0] if csv_hq else "").strip() if csv_hq else ""
         hq_desc_from_csv = (csv_hq[1] if csv_hq else "").strip() if csv_hq else ""
@@ -582,12 +582,12 @@ def _load_sects_data() -> tuple[dict[int, Sect], dict[str, Sect]]:
 
     return new_by_id, new_by_name
 
-# 全局容器（保持引用不变）
+# Global containers (keep references stable)
 sects_by_id: dict[int, Sect] = {}
 sects_by_name: dict[str, Sect] = {}
 
 def reload():
-    """重新加载数据，保留全局字典引用"""
+    """Reload data while preserving the global dict references."""
     new_id, new_name = _load_sects_data()
     
     sects_by_id.clear()
@@ -596,45 +596,45 @@ def reload():
     sects_by_name.clear()
     sects_by_name.update(new_name)
 
-# 模块初始化时执行一次
+# Run once at module import
 reload()
 
 
 def get_sect_info_with_rank(avatar: "Avatar", detailed: bool = False) -> str:
     """
-    获取包含职位的宗门信息字符串
+    Get the sect info string including the rank.
     
     Args:
-        avatar: 角色对象
-        detailed: 是否包含宗门详细信息（阵营、风格、驻地等）
+        avatar: the avatar object
+        detailed: whether to include detailed sect info (alignment, style, headquarters, etc.)
         
     Returns:
-        - 散修：返回"散修"
-        - detailed=False：返回"明心剑宗长老"
-        - detailed=True：返回"明心剑宗长老（阵营：正，风格：...，驻地：...）"
+        - Rogue cultivator: returns "Rogue Cultivator"
+        - detailed=False: returns e.g. "Mingxin Sword Sect Elder"
+        - detailed=True: returns e.g. "Mingxin Sword Sect Elder (Alignment: Righteous, Style: ..., Headquarters: ...)"
     """
     from typing import TYPE_CHECKING
     if TYPE_CHECKING:
         from src.classes.core.avatar import Avatar
     
-    # 散修直接返回
+    # Rogue cultivators return directly
     from src.i18n import t
     if avatar.sect is None:
         return t("Rogue Cultivator")
     
-    # 获取职位+宗门名（如"明心剑宗长老"）
+    # Get rank + sect name (e.g. "Mingxin Sword Sect Elder")
     sect_rank_str = avatar.get_sect_str()
     
-    # 如果不需要详细信息，直接返回职位字符串
+    # If details are not needed, return the rank string directly
     if not detailed:
         return sect_rank_str
     
-    # 需要详细信息：拼接宗门的详细描述
-    # 不解析字符串，而是重新构造
+    # Details needed: append the sect's detailed description
+    # Rebuild it instead of parsing the string
     hq = avatar.sect.headquarter
     effect_part = t(" Effect: {effect_desc}", effect_desc=avatar.sect.effect_desc) if avatar.sect.effect_desc else ""
     
-    # 构造详细信息，使用标准空格和括号
+    # Build the details using standard spaces and parentheses
     orthodoxy = get_orthodoxy(avatar.sect.orthodoxy_id)
     orthodoxy_name = t(orthodoxy.name) if orthodoxy else avatar.sect.orthodoxy_id
     
@@ -656,9 +656,9 @@ def get_sect_decision_context(
     history_limit: int = 50,
 ):
     """
-    便捷入口：获取宗门决策上下文。
+    Convenience entry point: get the sect decision context.
 
-    为避免领域层直接依赖具体系统实现，仅在此做一次转调。
+    Forwards the call once here so the domain layer does not depend directly on a concrete system implementation.
     """
     from src.systems.sect_decision_context import build_sect_decision_context
 

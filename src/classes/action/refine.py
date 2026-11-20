@@ -23,16 +23,16 @@ if TYPE_CHECKING:
 
 class Refine(TimedAction):
     """
-    炼丹动作：消耗同阶材料，尝试炼制同阶丹药。
-    持续时间：3个月
+    Refine action: consume same-tier materials to try refining a same-tier elixir.
+    Duration: 3 months
     """
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "refine_action_name"
     DESC_ID = "refine_description"
     REQUIREMENTS_ID = "refine_requirements"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "💊"
     PARAMS = {"target_realm": "str"}
     PARAM_OPTION_SOURCES = {"target_realm": ParamOptionSource.MATERIAL_REALM_VALUE}
@@ -58,8 +58,8 @@ class Refine(TimedAction):
 
     def _count_materials(self, realm: Realm) -> int:
         """
-        统计符合条件的材料数量。
-        注意：统计所有材料，不限于矿石。
+        Count the qualifying materials.
+        Note: counts all materials, not just ores.
         """
         count = 0
         for material, qty in self.avatar.materials.items():
@@ -93,11 +93,11 @@ class Refine(TimedAction):
 
         cost = self._get_cost()
         
-        # 扣除材料逻辑
+        # Material deduction logic
         to_deduct = cost
         materials_to_modify = []
         
-        # 再次遍历寻找材料进行扣除
+        # Iterate again to find materials to deduct
         for material, qty in self.avatar.materials.items():
             if to_deduct <= 0:
                 break
@@ -120,24 +120,24 @@ class Refine(TimedAction):
         )
 
     def _execute(self) -> None:
-        # 持续过程中无特殊逻辑
+        # No special logic during the action
         pass
 
     async def finish(self) -> list[Event]:
         if self.target_realm is None:
             return []
 
-        # 1. 计算成功率
+        # 1. Compute the success rate
         base_rate = self.SUCCESS_RATES.get(self.target_realm, 0.1)
-        # 获取额外成功率（例如来自特质或功法）
+        # Get extra success rate (e.g. from personas or techniques)
         extra_rate = float(self.avatar.effects.get("extra_refine_success_rate", 0.0))
         success_rate = base_rate + extra_rate
         
         events = []
         
-        # 2. 判定结果
+        # 2. Determine the result
         if random.random() > success_rate:
-            # 失败
+            # Failure
             content = t("{avatar} failed to refine {realm}-tier elixir, all materials turned to ash",
                        avatar=self.avatar.name, realm=str(self.target_realm))
             fail_event = Event(
@@ -149,14 +149,14 @@ class Refine(TimedAction):
             events.append(fail_event)
             return events
 
-        # 3. 成功：生成物品
+        # 3. Success: generate the item
         new_item = get_random_elixir_by_realm(self.target_realm)
 
-        # 4. 决策：保留（服用）还是卖出
+        # 4. Decide: keep (consume) or sell
         base_desc = t("Refining succeeded! Obtained {realm} elixir '{item}'",
                      realm=str(self.target_realm), item=new_item.name)
         
-        # 事件1：炼丹成功
+        # Event 1: refining succeeded
         content = t("{avatar} successfully refined {realm}-tier elixir '{item}'",
                    avatar=self.avatar.name, realm=str(self.target_realm), item=new_item.name)
         events.append(Event(
@@ -177,7 +177,7 @@ class Refine(TimedAction):
             )
         )
 
-        # 事件2：处置结果
+        # Event 2: disposal result
         exchange_event = Event(
             self.world.month_stamp,
             outcome.result_text,

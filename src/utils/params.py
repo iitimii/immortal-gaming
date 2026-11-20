@@ -6,12 +6,12 @@ from typing import Callable, Mapping, Any
 
 def filter_kwargs_for_callable(func: Callable[..., Any], kwargs: Mapping[str, Any]) -> dict[str, Any]:
     """
-    依据可调用对象的签名过滤 kwargs，只保留目标函数可接收的关键字参数。
+    Filter kwargs by the callable's signature, keeping only keyword arguments the target accepts.
 
-    - 若目标函数含有 **kwargs（VAR_KEYWORD），直接原样返回（无需过滤）。
-    - 仅保留 POSITIONAL_OR_KEYWORD 与 KEYWORD_ONLY 两类参数名。
-    - 自动忽略 "self"。
-    - 在签名不可获取时（如内建或 C 扩展），原样返回。
+    - If the target accepts **kwargs (VAR_KEYWORD), return them unchanged (no filtering needed).
+    - Only POSITIONAL_OR_KEYWORD and KEYWORD_ONLY parameter names are kept.
+    - "self" is ignored automatically.
+    - If the signature is unavailable (e.g. builtins or C extensions), return them unchanged.
     """
     try:
         sig = signature(func)

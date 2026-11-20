@@ -208,60 +208,60 @@ describe('eventHelper', () => {
 
     it('should match longer names first to avoid partial matches', () => {
       const colorMap = new Map<string, AvatarColorInfo>([
-        ['张三', { id: 'zhangsan', color: 'hsl(100, 70%, 65%)' }],
-        ['张三丰', { id: 'zhangsanfeng', color: 'hsl(200, 70%, 65%)' }],
+        ['Zhang San', { id: 'zhangsan', color: 'hsl(100, 70%, 65%)' }],
+        ['Zhang Sanfeng', { id: 'zhangsanfeng', color: 'hsl(200, 70%, 65%)' }],
       ])
-      const text = '张三丰是一位大师'
+      const text = 'Zhang Sanfeng is a master'
 
       const result = highlightAvatarNames(text, colorMap)
 
-      // Should match 张三丰, not 张三.
+      // Should match Zhang Sanfeng, not Zhang San.
       expect(result).toContain('hsl(200, 70%, 65%)')
-      // 张三 should not be separately highlighted within 张三丰.
+      // Zhang San should not be separately highlighted within Zhang Sanfeng.
       const matches = result.match(/hsl\(100/g)
       expect(matches).toBeNull()
     })
 
     it('should highlight multiple occurrences of the same name', () => {
       const colorMap = new Map<string, AvatarColorInfo>([
-        ['张三丰', { id: 'zhangsanfeng', color: 'hsl(200, 70%, 65%)' }],
-        ['李白', { id: 'libai', color: 'hsl(300, 70%, 65%)' }],
+        ['Zhang Sanfeng', { id: 'zhangsanfeng', color: 'hsl(200, 70%, 65%)' }],
+        ['Li Bai', { id: 'libai', color: 'hsl(300, 70%, 65%)' }],
       ])
-      const text = '张三丰和李白聊天，张三丰说了个笑话，李白笑了'
+      const text = 'Zhang Sanfeng chats with Li Bai; Zhang Sanfeng tells a joke and Li Bai laughs'
 
       const result = highlightAvatarNames(text, colorMap)
 
-      // 张三丰 appears twice.
+      // Zhang Sanfeng appears twice.
       const zhangMatches = result.match(/hsl\(200/g)
       expect(zhangMatches).toHaveLength(2)
-      // 李白 appears twice.
+      // Li Bai appears twice.
       const liMatches = result.match(/hsl\(300/g)
       expect(liMatches).toHaveLength(2)
     })
 
     it('should handle both overlapping names appearing in text', () => {
       const colorMap = new Map<string, AvatarColorInfo>([
-        ['张三', { id: 'zhangsan', color: 'hsl(100, 70%, 65%)' }],
-        ['张三丰', { id: 'zhangsanfeng', color: 'hsl(200, 70%, 65%)' }],
+        ['Zhang San', { id: 'zhangsan', color: 'hsl(100, 70%, 65%)' }],
+        ['Zhang Sanfeng', { id: 'zhangsanfeng', color: 'hsl(200, 70%, 65%)' }],
       ])
-      const text = '张三丰和张三是朋友'
+      const text = 'Zhang Sanfeng and Zhang San are friends'
 
       const result = highlightAvatarNames(text, colorMap)
 
-      // 张三丰 should be highlighted with hsl(200).
+      // Zhang Sanfeng should be highlighted with hsl(200).
       const zhangfengMatches = result.match(/hsl\(200/g)
       expect(zhangfengMatches).toHaveLength(1)
-      // 张三 should be highlighted with hsl(100) exactly once (not inside 张三丰).
+      // Zhang San should be highlighted with hsl(100) exactly once (not inside Zhang Sanfeng).
       const zhangsanMatches = result.match(/hsl\(100/g)
       expect(zhangsanMatches).toHaveLength(1)
     })
 
     it('should escape regex special characters in names', () => {
       const colorMap = new Map<string, AvatarColorInfo>([
-        ['张三(test)', { id: 'zhangsan', color: 'hsl(100, 70%, 65%)' }],
-        ['李白[1]', { id: 'libai', color: 'hsl(200, 70%, 65%)' }],
+        ['Zhang San(test)', { id: 'zhangsan', color: 'hsl(100, 70%, 65%)' }],
+        ['Li Bai[1]', { id: 'libai', color: 'hsl(200, 70%, 65%)' }],
       ])
-      const text = '张三(test)和李白[1]见面了'
+      const text = 'Zhang San(test) meets Li Bai[1]'
 
       const result = highlightAvatarNames(text, colorMap)
 
@@ -275,7 +275,7 @@ describe('eventHelper', () => {
 
   describe('tokenizeEventContent', () => {
     it('should preserve plain text when no avatar names match', () => {
-      const text = '无人提及角色名'
+      const text = 'No character is mentioned'
       const tokens = tokenizeEventContent(
         text,
         new Map<string, AvatarColorInfo>([['Alice', { id: '1', color: 'hsl(1, 70%, 65%)' }]])
@@ -286,16 +286,16 @@ describe('eventHelper', () => {
 
     it('should split mixed text and avatar names into structured tokens', () => {
       const colorMap = new Map<string, AvatarColorInfo>([
-        ['张三丰', { id: 'zhangsanfeng', color: 'hsl(200, 70%, 65%)' }],
-        ['李白', { id: 'libai', color: 'hsl(300, 70%, 65%)' }],
+        ['Zhang Sanfeng', { id: 'zhangsanfeng', color: 'hsl(200, 70%, 65%)' }],
+        ['Li Bai', { id: 'libai', color: 'hsl(300, 70%, 65%)' }],
       ])
-      const tokens = tokenizeEventContent('张三丰与李白论道', colorMap)
+      const tokens = tokenizeEventContent('Zhang Sanfeng and Li Bai discuss the Dao', colorMap)
 
       expect(tokens).toEqual([
-        { type: 'avatar', text: '张三丰', avatarId: 'zhangsanfeng', color: 'hsl(200, 70%, 65%)' },
-        { type: 'text', text: '与' },
-        { type: 'avatar', text: '李白', avatarId: 'libai', color: 'hsl(300, 70%, 65%)' },
-        { type: 'text', text: '论道' },
+        { type: 'avatar', text: 'Zhang Sanfeng', avatarId: 'zhangsanfeng', color: 'hsl(200, 70%, 65%)' },
+        { type: 'text', text: ' and ' },
+        { type: 'avatar', text: 'Li Bai', avatarId: 'libai', color: 'hsl(300, 70%, 65%)' },
+        { type: 'text', text: ' discuss the Dao' },
       ])
     })
 

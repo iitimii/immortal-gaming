@@ -60,7 +60,11 @@ def _join_realm_stage(realm_name: str, stage_name: str) -> str:
         return stage_name
     if not stage_name:
         return realm_name
-    return f"{realm_name}{stage_name}"
+    # Alias stage names may carry their own leading separator (" Middle Stage",
+    # ", Initial Attainment"); otherwise separate the words with a space.
+    if stage_name[0] in " ,":
+        return f"{realm_name}{stage_name}"
+    return f"{realm_name} {stage_name}"
 
 
 def resolve_cultivation_alias_profile(avatar: Any) -> str:

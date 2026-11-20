@@ -6,12 +6,6 @@ import { useMapStore } from '@/stores/map'
 
 const mockTexture = vi.hoisted(() => ({ valid: true }))
 
-vi.mock('vue-i18n', () => ({
-  useI18n: () => ({
-    locale: ref('zh-CN'),
-  }),
-}))
-
 vi.mock('@/composables/useAudio', () => ({
   useAudio: () => ({
     play: vi.fn(),

@@ -12,7 +12,7 @@ class EmotionType(Enum):
     CONFUSED = "emotion_confused"
     TIRED = "emotion_tired"
 
-# 情绪对应的 Emoji 配置
+# Emoji config for each emotion
 EMOTION_EMOJIS = {
     EmotionType.CALM: "😌",
     EmotionType.HAPPY: "😄",

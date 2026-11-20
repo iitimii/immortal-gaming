@@ -58,7 +58,7 @@ vi.mock('@/utils/discreteApi', () => ({
 
 // Mock i18n with mutable module-level variables.
 let mockI18nMode = 'composition'
-let mockI18nLocale: any = { value: 'zh-CN' }
+let mockI18nLocale: any = { value: 'en-US' }
 
 vi.mock('@/locales', () => ({
   default: {
@@ -98,7 +98,7 @@ describe('useSocketStore', () => {
 
     // Reset i18n mock.
     mockI18nMode = 'composition'
-    mockI18nLocale = { value: 'zh-CN' }
+    mockI18nLocale = { value: 'en-US' }
   })
 
   afterEach(() => {

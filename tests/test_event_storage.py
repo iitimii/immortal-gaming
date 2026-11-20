@@ -197,17 +197,17 @@ class TestEventStorageQueries:
 
     def test_get_events_by_sect(self, event_storage):
         """Test filtering events by sect_id."""
-        # 事件1：仅关联宗门1
+        # Event 1: linked to sect 1 only
         e1 = make_event(100, 1, "Sect 1 only")
         e1.related_sects = [1]
         event_storage.add_event(e1)
 
-        # 事件2：仅关联宗门2
+        # Event 2: linked to sect 2 only
         e2 = make_event(100, 2, "Sect 2 only")
         e2.related_sects = [2]
         event_storage.add_event(e2)
 
-        # 事件3：无宗门关联
+        # Event 3: no sect link
         e3 = make_event(100, 3, "No sect")
         e3.related_sects = None
         event_storage.add_event(e3)
@@ -855,7 +855,7 @@ class TestEdgeCases:
 
     def test_special_characters_in_content(self, event_storage):
         """Test event with special characters in content."""
-        content = "测试中文 & 'quotes' \"double\" <tag> END"
+        content = "Test unicode é ü & 'quotes' \"double\" <tag> END"
         event = make_event(100, 1, content, ["a1"])
 
         event_storage.add_event(event)

@@ -1,7 +1,6 @@
 const state = {
   registry: null,
   data: null,
-  locale: '',
   tab: '',
   query: '',
   globalQuery: '',
@@ -31,341 +30,74 @@ const tabOrder = [
 ]
 
 const messages = {
-  'zh-CN': {
-    appTitle: '修仙世界 Wiki',
-    loading: '正在加载资料...',
-    language: '语言 / Language',
-    tabSearch: '当前页搜索',
-    tabSearchPlaceholder: '搜索当前 tab',
-    globalSearch: '全局搜索',
-    globalSearchPlaceholder: '搜索所有 tab',
-    noMatchingRecords: '没有匹配的资料。',
-    noTabSelected: '未选择 tab。',
-    failedToLoad: 'Wiki 资料加载失败：{message}',
-    dataWarnings: '资料警告',
-    details: '详情',
-    incomplete: '资料不完整',
-    missing: '缺失',
-    records: '条资料',
-    yes: '是',
-    no: '否',
-    untitled: '未命名',
-    fieldId: 'ID',
-    fieldType: '类型',
-    fieldDesc: '描述',
-    fieldEffect: '效果',
-    fieldRequirements: '要求',
-    rarityFilter: '稀有度',
-    allRarities: '全部稀有度',
-    realmFilter: '境界',
-    allRealms: '全部境界',
-    tabs: {
-      world: '世界信息',
-      actions: '动作',
-      personas: '特质',
-      sects: '宗门',
-      sect_tasks: '宗门任务',
-      orthodoxies: '道统',
-      races: '种族',
-      techniques: '功法',
-      weapons: '武器',
-      auxiliaries: '法宝',
-      elixirs: '丹药',
-      materials: '材料',
-      animals: '动物',
-      plants: '植物',
-      lodes: '矿脉',
-      hidden_domains: '秘境',
-      regions: '区域',
-    },
-    themes: {
-      'rarity-n': '普通',
-      'rarity-r': '稀有',
-      'rarity-sr': '超稀有',
-      'rarity-ssr': '传说',
-      'grade-lower': '下品',
-      'grade-middle': '中品',
-      'grade-upper': '上品',
-      'grade-qi': '练气',
-      'grade-foundation': '筑基',
-      'grade-core': '金丹',
-      'grade-nascent': '元婴',
-      'race-human': '人族',
-      'race-yao': '妖族',
-      domain: '秘境',
-      'sect-task': '宗门任务',
-    },
+  appTitle: 'Cultivation World Wiki',
+  loading: 'Loading data...',
+  tabSearch: 'Tab Search',
+  tabSearchPlaceholder: 'Search current tab',
+  globalSearch: 'Global Search',
+  globalSearchPlaceholder: 'Search all tabs',
+  noMatchingRecords: 'No matching records.',
+  noTabSelected: 'No tab selected.',
+  failedToLoad: 'Failed to load wiki data: {message}',
+  dataWarnings: 'Data warnings',
+  details: 'Details',
+  incomplete: 'Incomplete',
+  missing: 'Missing',
+  records: 'records',
+  yes: 'Yes',
+  no: 'No',
+  untitled: 'Untitled',
+  fieldId: 'ID',
+  fieldType: 'Type',
+  fieldDesc: 'Description',
+  fieldEffect: 'Effect',
+  fieldRequirements: 'Requirements',
+  rarityFilter: 'Rarity',
+  allRarities: 'All rarities',
+  realmFilter: 'Realm',
+  allRealms: 'All realms',
+  tabs: {
+    world: 'World Info',
+    actions: 'Actions',
+    personas: 'Persona',
+    sects: 'Sects',
+    sect_tasks: 'Sect Tasks',
+    orthodoxies: 'Orthodoxies',
+    races: 'Races',
+    techniques: 'Techniques',
+    weapons: 'Weapons',
+    auxiliaries: 'Auxiliaries',
+    elixirs: 'Elixirs',
+    materials: 'Materials',
+    animals: 'Animals',
+    plants: 'Plants',
+    lodes: 'Lodes',
+    hidden_domains: 'Hidden Domains',
+    regions: 'Regions',
   },
-  'zh-TW': {
-    appTitle: '修仙世界 Wiki',
-    loading: '正在載入資料...',
-    language: '語言 / Language',
-    tabSearch: '目前頁搜尋',
-    tabSearchPlaceholder: '搜尋目前 tab',
-    globalSearch: '全域搜尋',
-    globalSearchPlaceholder: '搜尋所有 tab',
-    noMatchingRecords: '沒有符合的資料。',
-    noTabSelected: '未選擇 tab。',
-    failedToLoad: 'Wiki 資料載入失敗：{message}',
-    dataWarnings: '資料警告',
-    details: '詳情',
-    incomplete: '資料不完整',
-    missing: '缺失',
-    records: '筆資料',
-    yes: '是',
-    no: '否',
-    untitled: '未命名',
-    fieldId: 'ID',
-    fieldType: '類型',
-    fieldDesc: '描述',
-    fieldEffect: '效果',
-    fieldRequirements: '要求',
-    rarityFilter: '稀有度',
-    allRarities: '全部稀有度',
-    realmFilter: '境界',
-    allRealms: '全部境界',
-    tabs: {
-      world: '世界資訊',
-      actions: '動作',
-      personas: '特質',
-      sects: '宗門',
-      sect_tasks: '宗門任務',
-      orthodoxies: '道統',
-      races: '種族',
-      techniques: '功法',
-      weapons: '武器',
-      auxiliaries: '法寶',
-      elixirs: '丹藥',
-      materials: '材料',
-      animals: '動物',
-      plants: '植物',
-      lodes: '礦脈',
-      hidden_domains: '秘境',
-      regions: '區域',
-    },
-    themes: {
-      'rarity-n': '普通',
-      'rarity-r': '稀有',
-      'rarity-sr': '超稀有',
-      'rarity-ssr': '傳說',
-      'grade-lower': '下品',
-      'grade-middle': '中品',
-      'grade-upper': '上品',
-      'grade-qi': '練氣',
-      'grade-foundation': '築基',
-      'grade-core': '金丹',
-      'grade-nascent': '元嬰',
-      'race-human': '人族',
-      'race-yao': '妖族',
-      domain: '秘境',
-      'sect-task': '宗門任務',
-    },
-  },
-  'en-US': {
-    appTitle: 'Cultivation World Wiki',
-    loading: 'Loading data...',
-    language: 'Language',
-    tabSearch: 'Tab Search',
-    tabSearchPlaceholder: 'Search current tab',
-    globalSearch: 'Global Search',
-    globalSearchPlaceholder: 'Search all tabs',
-    noMatchingRecords: 'No matching records.',
-    noTabSelected: 'No tab selected.',
-    failedToLoad: 'Failed to load wiki data: {message}',
-    dataWarnings: 'Data warnings',
-    details: 'Details',
-    incomplete: 'Incomplete',
-    missing: 'Missing',
-    records: 'records',
-    yes: 'Yes',
-    no: 'No',
-    untitled: 'Untitled',
-    fieldId: 'ID',
-    fieldType: 'Type',
-    fieldDesc: 'Description',
-    fieldEffect: 'Effect',
-    fieldRequirements: 'Requirements',
-    rarityFilter: 'Rarity',
-    allRarities: 'All rarities',
-    realmFilter: 'Realm',
-    allRealms: 'All realms',
-    tabs: {
-      world: 'World Info',
-      actions: 'Actions',
-      personas: 'Persona',
-      sects: 'Sects',
-      sect_tasks: 'Sect Tasks',
-      orthodoxies: 'Orthodoxies',
-      races: 'Races',
-      techniques: 'Techniques',
-      weapons: 'Weapons',
-      auxiliaries: 'Auxiliaries',
-      elixirs: 'Elixirs',
-      materials: 'Materials',
-      animals: 'Animals',
-      plants: 'Plants',
-      lodes: 'Lodes',
-      hidden_domains: 'Hidden Domains',
-      regions: 'Regions',
-    },
-    themes: {
-      'rarity-n': 'Common',
-      'rarity-r': 'Rare',
-      'rarity-sr': 'Super Rare',
-      'rarity-ssr': 'Legendary',
-      'grade-lower': 'Lower Grade',
-      'grade-middle': 'Middle Grade',
-      'grade-upper': 'Upper Grade',
-      'grade-qi': 'Qi Refining',
-      'grade-foundation': 'Foundation',
-      'grade-core': 'Golden Core',
-      'grade-nascent': 'Nascent Soul',
-      'race-human': 'Human',
-      'race-yao': 'Yao',
-      domain: 'Hidden Domain',
-      'sect-task': 'Sect Task',
-    },
-  },
-  'vi-VN': {
-    appTitle: 'Wiki Thế Giới Tu Tiên',
-    loading: 'Đang tải dữ liệu...',
-    language: 'Ngôn ngữ / Language',
-    tabSearch: 'Tìm trong tab',
-    tabSearchPlaceholder: 'Tìm trong tab hiện tại',
-    globalSearch: 'Tìm toàn cục',
-    globalSearchPlaceholder: 'Tìm trong mọi tab',
-    noMatchingRecords: 'Không có dữ liệu phù hợp.',
-    noTabSelected: 'Chưa chọn tab.',
-    failedToLoad: 'Không tải được dữ liệu wiki: {message}',
-    dataWarnings: 'Cảnh báo dữ liệu',
-    details: 'Chi tiết',
-    incomplete: 'Chưa đầy đủ',
-    missing: 'Thiếu',
-    records: 'bản ghi',
-    yes: 'Có',
-    no: 'Không',
-    untitled: 'Chưa đặt tên',
-    fieldId: 'ID',
-    fieldType: 'Loại',
-    fieldDesc: 'Mô tả',
-    fieldEffect: 'Hiệu ứng',
-    fieldRequirements: 'Yêu cầu',
-    rarityFilter: 'Độ hiếm',
-    allRarities: 'Tất cả độ hiếm',
-    realmFilter: 'Cảnh giới',
-    allRealms: 'Tất cả cảnh giới',
-    tabs: {
-      world: 'Thông tin thế giới',
-      actions: 'Hành động',
-      personas: 'Đặc chất',
-      sects: 'Tông môn',
-      sect_tasks: 'Nhiệm vụ tông môn',
-      orthodoxies: 'Đạo thống',
-      races: 'Chủng tộc',
-      techniques: 'Công pháp',
-      weapons: 'Vũ khí',
-      auxiliaries: 'Pháp bảo',
-      elixirs: 'Đan dược',
-      materials: 'Vật liệu',
-      animals: 'Linh thú',
-      plants: 'Linh thực',
-      lodes: 'Mạch khoáng',
-      hidden_domains: 'Bí cảnh',
-      regions: 'Khu vực',
-    },
-    themes: {
-      'rarity-n': 'Thường',
-      'rarity-r': 'Hiếm',
-      'rarity-sr': 'Siêu hiếm',
-      'rarity-ssr': 'Truyền thuyết',
-      'grade-lower': 'Hạ phẩm',
-      'grade-middle': 'Trung phẩm',
-      'grade-upper': 'Thượng phẩm',
-      'grade-qi': 'Luyện Khí',
-      'grade-foundation': 'Trúc Cơ',
-      'grade-core': 'Kim Đan',
-      'grade-nascent': 'Nguyên Anh',
-      'race-human': 'Nhân tộc',
-      'race-yao': 'Yêu tộc',
-      domain: 'Bí cảnh',
-      'sect-task': 'Nhiệm vụ tông môn',
-    },
-  },
-  'ja-JP': {
-    appTitle: '修仙世界 Wiki',
-    loading: 'データを読み込み中...',
-    language: '言語 / Language',
-    tabSearch: 'タブ内検索',
-    tabSearchPlaceholder: '現在のタブを検索',
-    globalSearch: '全体検索',
-    globalSearchPlaceholder: 'すべてのタブを検索',
-    noMatchingRecords: '一致する資料がありません。',
-    noTabSelected: 'タブが選択されていません。',
-    failedToLoad: 'Wiki データの読み込みに失敗しました: {message}',
-    dataWarnings: 'データ警告',
-    details: '詳細',
-    incomplete: '未完成',
-    missing: '不足',
-    records: '件',
-    yes: 'はい',
-    no: 'いいえ',
-    untitled: '無題',
-    fieldId: 'ID',
-    fieldType: '種類',
-    fieldDesc: '説明',
-    fieldEffect: '効果',
-    fieldRequirements: '要件',
-    rarityFilter: 'レア度',
-    allRarities: 'すべてのレア度',
-    realmFilter: '境界',
-    allRealms: 'すべての境界',
-    tabs: {
-      world: '世界情報',
-      actions: '行動',
-      personas: '特質',
-      sects: '宗門',
-      sect_tasks: '宗門任務',
-      orthodoxies: '道統',
-      races: '種族',
-      techniques: '功法',
-      weapons: '武器',
-      auxiliaries: '法宝',
-      elixirs: '丹薬',
-      materials: '素材',
-      animals: '霊獣',
-      plants: '霊植',
-      lodes: '鉱脈',
-      hidden_domains: '秘境',
-      regions: '地域',
-    },
-    themes: {
-      'rarity-n': '通常',
-      'rarity-r': 'レア',
-      'rarity-sr': 'スーパーレア',
-      'rarity-ssr': '伝説',
-      'grade-lower': '下品',
-      'grade-middle': '中品',
-      'grade-upper': '上品',
-      'grade-qi': '練気',
-      'grade-foundation': '築基',
-      'grade-core': '金丹',
-      'grade-nascent': '元嬰',
-      'race-human': '人族',
-      'race-yao': '妖族',
-      domain: '秘境',
-      'sect-task': '宗門任務',
-    },
+  themes: {
+    'rarity-n': 'Common',
+    'rarity-r': 'Rare',
+    'rarity-sr': 'Super Rare',
+    'rarity-ssr': 'Legendary',
+    'grade-lower': 'Lower Grade',
+    'grade-middle': 'Middle Grade',
+    'grade-upper': 'Upper Grade',
+    'grade-qi': 'Qi Refinement',
+    'grade-foundation': 'Foundation',
+    'grade-core': 'Golden Core',
+    'grade-nascent': 'Nascent Soul',
+    'race-human': 'Human',
+    'race-yao': 'Yao',
+    domain: 'Hidden Domain',
+    'sect-task': 'Sect Task',
   },
 }
 
 const $ = (selector) => document.querySelector(selector)
 
-function localeMessages() {
-  return messages[state.locale] || messages['en-US']
-}
-
 function msg(key, replacements = {}) {
-  const value = localeMessages()[key] ?? messages['en-US'][key] ?? key
+  const value = messages[key] ?? key
   return Object.entries(replacements).reduce(
     (text, [name, replacement]) => text.replace(`{${name}}`, String(replacement)),
     value,
@@ -373,11 +105,11 @@ function msg(key, replacements = {}) {
 }
 
 function tabLabel(key) {
-  return localeMessages().tabs?.[key] || messages['en-US'].tabs[key] || key
+  return messages.tabs[key] || key
 }
 
 function themeLabel(key) {
-  return localeMessages().themes?.[key] || messages['en-US'].themes[key] || key
+  return messages.themes[key] || key
 }
 
 function applyShellMessages() {
@@ -400,7 +132,6 @@ async function fetchJson(path) {
 function readHash() {
   const params = new URLSearchParams(location.hash.replace(/^#/, ''))
   return {
-    locale: params.get('lang') || '',
     tab: params.get('tab') || '',
     query: params.get('q') || '',
     globalQuery: params.get('gq') || '',
@@ -411,7 +142,6 @@ function readHash() {
 
 function writeHash() {
   const params = new URLSearchParams()
-  if (state.locale) params.set('lang', state.locale)
   if (state.tab) params.set('tab', state.tab)
   if (state.query) params.set('q', state.query)
   if (state.globalQuery) params.set('gq', state.globalQuery)
@@ -718,7 +448,7 @@ function availableRarityLevels(tab) {
 }
 
 function availableRealms(tab) {
-  const order = ['练气', '築基', '筑基', '金丹', '元嬰', '元婴', 'Qi Refinement', 'Foundation Establishment', 'Core Formation', 'Nascent Soul']
+  const order = ['Qi Refinement', 'Foundation Establishment', 'Core Formation', 'Nascent Soul']
   const levels = new Set(allTabItems(tab).flatMap(itemRealmValues).filter(Boolean))
   return order.filter((level) => levels.has(level)).concat([...levels].filter((level) => !order.includes(level)).sort())
 }
@@ -869,7 +599,7 @@ function render() {
     ? `<section class="global-warning"><strong>${escapeHtml(msg('dataWarnings'))}</strong><ul>${warnings.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul></section>`
     : ''
 
-  $('#metaLine').textContent = `${state.locale} · ${tabLabel(state.tab)} · ${count} ${msg('records')}`
+  $('#metaLine').textContent = `${tabLabel(state.tab)} · ${count} ${msg('records')}`
   content.innerHTML = `
     <div class="section-heading">
       <h2>${tabLabel(state.tab) || tab.title}</h2>
@@ -931,23 +661,9 @@ function bindJumpButtons() {
   })
 }
 
-function renderLocales() {
-  const select = $('#localeSelect')
-  select.innerHTML = state.registry.locales
-    .map((locale) => `<option value="${escapeHtml(locale.code)}">${escapeHtml(locale.label)} (${escapeHtml(locale.code)})</option>`)
-    .join('')
-  select.value = state.locale
-  select.addEventListener('change', async () => {
-    state.locale = select.value
-    await loadLocale(state.locale)
-    writeHash()
-    render()
-  })
-}
-
-async function loadLocale(locale) {
+async function loadData() {
+  const locale = state.registry.default_locale || state.registry.locales[0].code
   state.data = await fetchJson(`./data/${locale}.json`)
-  document.documentElement.lang = state.registry.locales.find((item) => item.code === locale)?.html_lang || 'en'
   if (!state.tab || !state.data.tabs[state.tab]) {
     state.tab = 'world'
   }
@@ -966,7 +682,6 @@ function attachSearchHandlers() {
 async function init() {
   const hash = readHash()
   state.registry = await fetchJson('./data/registry.json')
-  state.locale = hash.locale || state.registry.default_locale || state.registry.locales[0].code
   state.tab = hash.tab || 'world'
   state.query = hash.query || ''
   state.globalQuery = hash.globalQuery || ''
@@ -974,8 +689,7 @@ async function init() {
   state.realmFilter = hash.realmFilter || ''
 
   attachSearchHandlers()
-  await loadLocale(state.locale)
-  renderLocales()
+  await loadData()
   writeHash()
   render()
 }

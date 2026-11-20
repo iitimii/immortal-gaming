@@ -10,7 +10,7 @@ import { logError } from '../utils/appError';
 export const useEventStore = defineStore('event', () => {
   const events = shallowRef<GameEvent[]>([]);
 
-  // 分页状态
+  // Pagination state
   const eventsCursor = ref<string | null>(null);
   const eventsHasMore = ref(false);
   const eventsLoading = ref(false);
@@ -18,7 +18,7 @@ export const useEventStore = defineStore('event', () => {
   const lastMergeDurationMs = ref(0);
   const lastLoadDurationMs = ref(0);
 
-  // 请求计数器
+  // Request counter
   let eventsRequestId = 0;
 
   function matchesMajorScope(event: GameEvent, majorScope: FetchEventsParams['major_scope']) {
@@ -33,7 +33,7 @@ export const useEventStore = defineStore('event', () => {
 
     let newEvents = processNewEvents(rawEvents, currentYear, currentMonth);
 
-    // 根据当前筛选条件过滤（数据在 SQLite 中不会丢失）
+    // Filter by the current filter (data stays in SQLite)
     const filter = eventsFilter.value;
     if (filter.avatar_id) {
       newEvents = newEvents.filter(e =>
@@ -54,7 +54,7 @@ export const useEventStore = defineStore('event', () => {
 
     if (newEvents.length === 0) return;
 
-    // 使用通用合并排序函数，确保顺序正确（基于 createdAt 或时间戳）
+    // Use the shared merge-and-sort helper for correct ordering (createdAt or timestamp)
     events.value = mergeAndSortEvents(events.value, newEvents);
     lastMergeDurationMs.value = performance.now() - mergeStart;
   }
@@ -62,7 +62,7 @@ export const useEventStore = defineStore('event', () => {
   async function loadEvents(filter: FetchEventsParams = {}, append = false) {
     if (eventsLoading.value) return;
     
-    // 每次请求增加计数器，只接受最新请求的响应。
+    // Bump the counter per request; only accept the latest response.
     const currentRequestId = ++eventsRequestId;
     eventsLoading.value = true;
     const loadStart = performance.now();
@@ -75,7 +75,7 @@ export const useEventStore = defineStore('event', () => {
 
       const res = await eventApi.fetchEvents(params);
 
-      // 如果不是最新请求，丢弃响应。
+      // Drop the response if it is not the latest request.
       if (currentRequestId !== eventsRequestId) {
         return;
       }
@@ -83,10 +83,10 @@ export const useEventStore = defineStore('event', () => {
       const sortedNewEvents: GameEvent[] = mapEventDtosToTimeline(res.events);
 
       if (append) {
-        // 加载更旧的事件，添加到顶部。
+        // Older events go on top.
         events.value = [...sortedNewEvents, ...events.value];
       } else {
-        // 切换筛选条件：直接用 API 数据替换。
+        // Filter changed: replace with API data.
         events.value = sortedNewEvents;
         eventsFilter.value = filter;
       }
@@ -95,13 +95,13 @@ export const useEventStore = defineStore('event', () => {
       eventsHasMore.value = res.hasMore;
       lastLoadDurationMs.value = performance.now() - loadStart;
     } catch (e) {
-      // 如果不是最新请求，不处理错误。
+      // Ignore errors from stale requests.
       if (currentRequestId !== eventsRequestId) {
         return;
       }
       logError('EventStore load events', e);
     } finally {
-      // 只有最新请求才更新 loading 状态。
+      // Only the latest request updates loading state.
       if (currentRequestId === eventsRequestId) {
         eventsLoading.value = false;
       }
@@ -114,13 +114,13 @@ export const useEventStore = defineStore('event', () => {
   }
 
   async function resetEvents(filter: FetchEventsParams = {}) {
-    // 使旧请求失效，允许新请求。
+    // Invalidate old requests so a new one can start.
     eventsRequestId++;
     eventsLoading.value = false;
     eventsCursor.value = null;
     eventsHasMore.value = false;
-    events.value = [];  // 清空旧数据，避免筛选切换时显示残留。
-    eventsFilter.value = filter;  // 立即更新筛选条件，让 addEvents 也能正确过滤。
+    events.value = [];  // Clear old data so stale events do not show after a filter change.
+    eventsFilter.value = filter;  // Update the filter now so addEvents filters correctly too.
     await loadEvents(filter, false);
   }
 

@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>修仙世界地图编辑器</title>
+    <title>Cultivation World Map Editor</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -90,31 +90,31 @@
 <div id="app">
     <!-- Loading Overlay -->
     <div v-if="loading" class="loader">
-        <div class="text-white text-xl">正在加载资源...</div>
+        <div class="text-white text-xl">Loading assets...</div>
     </div>
 
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="p-4 border-b border-gray-600 flex justify-between items-center">
-            <h1 class="font-bold text-lg">地图编辑器</h1>
+            <h1 class="font-bold text-lg">Map Editor</h1>
             <button @click="saveMap" class="bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded text-sm">
-                保存
+                Save
             </button>
         </div>
 
-        <!-- Tabs: 交换顺序，Region 在前 -->
+        <!-- Tabs: Region first -->
         <div class="flex border-b border-gray-600">
             <div 
                 class="flex-1 text-center py-2 cursor-pointer hover:bg-gray-700"
                 :class="{ 'bg-gray-600': mode === 'region' }"
                 @click="mode = 'region'">
-                区域 (Region)
+                Region
             </div>
             <div 
                 class="flex-1 text-center py-2 cursor-pointer hover:bg-gray-700"
                 :class="{ 'bg-gray-600': mode === 'tile' }"
                 @click="mode = 'tile'">
-                地形 (Tile)
+                Tile
             </div>
         </div>
 
@@ -125,7 +125,7 @@
                     class="w-full border border-red-400 text-red-400 py-1 rounded hover:bg-red-900"
                     :class="{ 'bg-red-900': currentRegion === null }"
                     @click="currentRegion = null">
-                    橡皮擦 (清除区域)
+                    Eraser (clear region)
                 </button>
             </div>
             <div 
@@ -134,10 +134,10 @@
                 class="item-btn"
                 :class="{ active: currentRegion === region.id }"
                 @click="currentRegion = region.id">
-                <!-- 颜色条 -->
+                <!-- Color bar -->
                 <div class="color-bar" :style="{ backgroundColor: region.color }"></div>
                 
-                <!-- 绑定地形预览图 (主展示) -->
+                <!-- Bound tile preview (main display) -->
                 <img 
                     v-if="region.bindTile"
                     :src="getRegionPreviewSrc(region)" 
@@ -154,7 +154,7 @@
 
         <!-- Tile List -->
         <div v-if="mode === 'tile'" class="scroll-area">
-            <div class="section-title">基础地形</div>
+            <div class="section-title">Base Terrain</div>
             <div 
                 v-for="tile in tiles" 
                 :key="tile"
@@ -167,10 +167,10 @@
         </div>
         
         <div class="p-2 text-xs text-gray-500 border-t border-gray-600">
-            左键绘制 | 按住Shift框选<br>
-            滚轮缩放 | 右键拖动<br>
-            当前坐标: {{ hoverX }}, {{ hoverY }}<br>
-            <span v-if="isShiftDown" class="text-yellow-400">矩形工具已激活</span>
+            Left-click to paint | Hold Shift for box select<br>
+            Scroll to zoom | Right-drag to pan<br>
+            Position: {{ hoverX }}, {{ hoverY }}<br>
+            <span v-if="isShiftDown" class="text-yellow-400">Rectangle tool active</span>
         </div>
     </div>
 
@@ -187,7 +187,7 @@ createApp({
     setup() {
         // --- State ---
         const loading = ref(true);
-        const mode = ref('region'); // 默认 Region 模式
+        const mode = ref('region'); // Default to Region mode
         const tiles = ref([]);
         const sectTiles = ref([]);
         const cityTiles = ref([]);
@@ -311,7 +311,7 @@ createApp({
                 await Promise.all(promises);
             } catch (e) {
                 console.error("Failed to init", e);
-                alert("初始化失败，请查看控制台");
+                alert("Initialization failed, see the console");
             }
         }
 
@@ -659,12 +659,12 @@ createApp({
                 });
                 const json = await res.json();
                 if (json.status === 'success') {
-                    alert('保存成功！');
+                    alert('Saved!');
                 } else {
-                    alert('保存失败: ' + json.message);
+                    alert('Save failed: ' + json.message);
                 }
             } catch (e) {
-                alert('保存出错');
+                alert('Save error');
             }
         }
 

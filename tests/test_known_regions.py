@@ -1,9 +1,9 @@
 """
-测试 Avatar._init_known_regions 的行为。
+Tests for the behavior of Avatar._init_known_regions.
 
-验证：
-1. 无宗门的 avatar：known_regions 只包含当前位置的区域（如果有）
-2. 有宗门的 avatar：known_regions 包含宗门驻地
+Verifies:
+1. Avatar without a sect: known_regions only contains the region at the current position (if any)
+2. Avatar with a sect: known_regions contains the sect headquarters
 """
 import pytest
 from unittest.mock import MagicMock
@@ -25,34 +25,34 @@ from src.utils.id_generator import get_avatar_id
 
 @pytest.fixture
 def world_with_sect_region():
-    """创建一个带有宗门驻地的世界"""
+    """Create a world with a sect headquarters."""
     width, height = 10, 10
     game_map = Map(width=width, height=height)
     
-    # 创建 tiles
+    # Create tiles
     for x in range(width):
         for y in range(height):
             game_map.create_tile(x, y, TileType.PLAIN)
     
-    # 获取一个真实的宗门（明心剑宗，id=1）
+    # Get a real sect (High Heaven Sword Sect, id=1)
     sect = sects_by_id.get(1)
-    assert sect is not None, "宗门 ID=1 应该存在"
+    assert sect is not None, "Sect ID=1 should exist"
     
-    # 创建对应的 SectRegion
+    # Create the matching SectRegion
     sect_region = SectRegion(
         id=401,
-        name="连霞山",
-        desc="测试宗门驻地",
+        name="Rosy Cloud Mountain",
+        desc="Test sect headquarters",
         cors=[(5, 5)],
         sect_name=sect.name,
         sect_id=sect.id
     )
     
-    # 注册到 map
+    # Register on the map
     game_map.regions[sect_region.id] = sect_region
     game_map.sect_regions[sect_region.id] = sect_region
     
-    # 将区域绑定到 tile
+    # Bind the region to the tile
     tile = game_map.get_tile(5, 5)
     tile.region = sect_region
     
@@ -62,7 +62,7 @@ def world_with_sect_region():
 
 @pytest.fixture
 def world_with_normal_region():
-    """创建一个带有普通区域的世界"""
+    """Create a world with a normal region."""
     width, height = 10, 10
     game_map = Map(width=width, height=height)
     
@@ -70,17 +70,17 @@ def world_with_normal_region():
         for y in range(height):
             game_map.create_tile(x, y, TileType.PLAIN)
     
-    # 创建普通区域
+    # Create a normal region
     normal_region = NormalRegion(
         id=101,
-        name="测试区域",
-        desc="一片普通的区域",
+        name="Test Region",
+        desc="An ordinary region",
         cors=[(0, 0)]
     )
     
     game_map.regions[normal_region.id] = normal_region
     
-    # 绑定到 tile
+    # Bind to the tile
     tile = game_map.get_tile(0, 0)
     tile.region = normal_region
     
@@ -89,15 +89,15 @@ def world_with_normal_region():
 
 
 class TestInitKnownRegions:
-    """测试 Avatar._init_known_regions"""
+    """Tests for Avatar._init_known_regions."""
 
     def test_avatar_without_sect_knows_current_region(self, world_with_normal_region):
-        """无宗门的 avatar 应该知道当前位置的区域"""
+        """An avatar without a sect should know the region at its current position."""
         world, normal_region = world_with_normal_region
         
         avatar = Avatar(
             world=world,
-            name="散修测试",
+            name="Rogue Test",
             id=get_avatar_id(),
             birth_month_stamp=create_month_stamp(Year(2000), Month.JANUARY),
             age=Age(20, Realm.Qi_Refinement),
@@ -106,47 +106,47 @@ class TestInitKnownRegions:
             pos_y=0,
             root=Root.GOLD,
             alignment=Alignment.RIGHTEOUS,
-            sect=None  # 散修
+            sect=None  # rogue cultivator
         )
         
-        # 设置 tile（模拟正常初始化流程）
+        # Set the tile (simulating the normal init flow)
         avatar.tile = world.map.get_tile(0, 0)
         avatar._init_known_regions()
         
         assert normal_region.id in avatar.known_regions, (
-            f"散修应该知道当前位置的区域，但 known_regions={avatar.known_regions}"
+            f"A rogue cultivator should know the current region, but known_regions={avatar.known_regions}"
         )
 
     def test_avatar_with_sect_knows_headquarters(self, world_with_sect_region):
-        """有宗门的 avatar 应该知道宗门驻地位置"""
+        """An avatar with a sect should know the sect headquarters."""
         world, sect, sect_region = world_with_sect_region
         
         avatar = Avatar(
             world=world,
-            name="宗门弟子测试",
+            name="Sect Disciple Test",
             id=get_avatar_id(),
             birth_month_stamp=create_month_stamp(Year(2000), Month.JANUARY),
             age=Age(20, Realm.Qi_Refinement),
             gender=Gender.MALE,
             pos_x=0,
-            pos_y=0,  # 不在宗门驻地
+            pos_y=0,  # not at the sect headquarters
             root=Root.GOLD,
             alignment=Alignment.RIGHTEOUS,
-            sect=sect  # 有宗门
+            sect=sect  # has a sect
         )
         
-        # _init_known_regions 在 __post_init__ 中自动调用
+        # _init_known_regions is called automatically in __post_init__
         assert sect_region.id in avatar.known_regions, (
-            f"宗门弟子应该知道宗门驻地位置，但 known_regions={avatar.known_regions}"
+            f"A sect disciple should know the sect headquarters, but known_regions={avatar.known_regions}"
         )
 
     def test_avatar_without_sect_does_not_know_sect_region(self, world_with_sect_region):
-        """无宗门的 avatar 不应该自动知道宗门驻地"""
+        """An avatar without a sect should not automatically know the sect headquarters."""
         world, sect, sect_region = world_with_sect_region
         
         avatar = Avatar(
             world=world,
-            name="散修测试",
+            name="Rogue Test",
             id=get_avatar_id(),
             birth_month_stamp=create_month_stamp(Year(2000), Month.JANUARY),
             age=Age(20, Realm.Qi_Refinement),
@@ -155,26 +155,26 @@ class TestInitKnownRegions:
             pos_y=0,
             root=Root.GOLD,
             alignment=Alignment.RIGHTEOUS,
-            sect=None  # 散修
+            sect=None  # rogue cultivator
         )
         
-        # 散修不应该知道宗门驻地（除非在那个位置）
+        # A rogue cultivator should not know the sect HQ (unless standing there)
         assert sect_region.id not in avatar.known_regions, (
-            f"散修不应该自动知道宗门驻地，但 known_regions={avatar.known_regions}"
+            f"A rogue cultivator should not automatically know the sect HQ, but known_regions={avatar.known_regions}"
         )
 
     def test_avatar_knows_only_their_sect_headquarters(self, world_with_sect_region):
-        """avatar 只应该知道自己宗门的驻地，不知道其他宗门"""
+        """An avatar should only know its own sect's headquarters, not other sects'."""
         world, sect, sect_region = world_with_sect_region
         
-        # 添加另一个宗门的驻地
-        other_sect = sects_by_id.get(2)  # 百兽宗
+        # Add another sect's headquarters
+        other_sect = sects_by_id.get(2)  # Ten Thousand Beasts Mountain
         assert other_sect is not None
         
         other_sect_region = SectRegion(
             id=402,
-            name="玄灵洞",
-            desc="另一个宗门驻地",
+            name="Mystic Spirit Cave",
+            desc="Another sect headquarters",
             cors=[(7, 7)],
             sect_name=other_sect.name,
             sect_id=other_sect.id
@@ -182,10 +182,10 @@ class TestInitKnownRegions:
         world.map.regions[other_sect_region.id] = other_sect_region
         world.map.sect_regions[other_sect_region.id] = other_sect_region
         
-        # 创建明心剑宗弟子
+        # Create a High Heaven Sword Sect disciple
         avatar = Avatar(
             world=world,
-            name="明心剑宗弟子",
+            name="High Heaven Sword Disciple",
             id=get_avatar_id(),
             birth_month_stamp=create_month_stamp(Year(2000), Month.JANUARY),
             age=Age(20, Realm.Qi_Refinement),
@@ -194,16 +194,16 @@ class TestInitKnownRegions:
             pos_y=0,
             root=Root.GOLD,
             alignment=Alignment.RIGHTEOUS,
-            sect=sect  # 明心剑宗
+            sect=sect  # High Heaven Sword Sect
         )
         
-        # 应该知道自己宗门的驻地
+        # Should know its own sect headquarters
         assert sect_region.id in avatar.known_regions, (
-            "应该知道自己宗门的驻地"
+            "Should know its own sect headquarters"
         )
-        # 不应该知道其他宗门的驻地
+        # Should not know other sects' headquarters
         assert other_sect_region.id not in avatar.known_regions, (
-            "不应该知道其他宗门的驻地"
+            "Should not know other sects' headquarters"
         )
 
 

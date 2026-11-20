@@ -15,16 +15,16 @@ REALM_PLANT_INCOME = {
 
 class Plant(TimedAction):
     """
-    种植动作，在普通区域进行种植，持续6个月
-    可以直接获得灵石
+    Plant action: plant in a normal region, lasting 6 months
+    Yields spirit stones directly
     """
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "plant_action_name"
     DESC_ID = "plant_description"
     REQUIREMENTS_ID = "plant_requirements"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "🌱"
     PARAMS = {}
 
@@ -36,7 +36,7 @@ class Plant(TimedAction):
 
     def _execute(self) -> None:
         """
-        执行种植动作
+        Perform the plant action
         """
         base_income = REALM_PLANT_INCOME.get(self.avatar.cultivation_progress.realm, 100)
         extra_income = int(self.avatar.effects.get("extra_plant_income", 0) or 0)

@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import SplashLayer from '@/components/SplashLayer.vue'
 import { createI18n } from 'vue-i18n'
 
@@ -10,16 +10,12 @@ vi.mock('@/composables/useBgm', () => ({
 }))
 
 describe('SplashLayer', () => {
-  beforeEach(() => {
-    window.sessionStorage.clear()
-  })
-
   it('should render successfully', () => {
     const i18n = createI18n({
       legacy: false,
-      locale: 'zh-CN',
+      locale: 'en-US',
       messages: {
-        'zh-CN': {
+        'en-US': {
           splash: {
             title: 'Title',
             tagline_en: 'Subtitle',
@@ -38,8 +34,6 @@ describe('SplashLayer', () => {
             settings: 'Settings',
             about: 'About',
             exit: 'Exit',
-            language_switcher_button: 'Language',
-            language_switcher_hint: 'Choose your display language',
           }
         }
       }
@@ -56,17 +50,17 @@ describe('SplashLayer', () => {
 
     expect(wrapper.exists()).toBe(true)
     expect(wrapper.find('.splash-container').exists()).toBe(true)
-    expect(wrapper.find('.locale-trigger--splash').exists()).toBe(true)
+    expect(wrapper.find('.locale-trigger--splash').exists()).toBe(false)
   })
 
-  it('keeps splash subtitle and button sublabels in English for zh-CN', () => {
+  it('renders splash tagline and button sublabels', () => {
     const i18n = createI18n({
       legacy: false,
-      locale: 'zh-CN',
+      locale: 'en-US',
       messages: {
-        'zh-CN': {
+        'en-US': {
           splash: {
-            title: 'AI修仙世界模拟器',
+            title: 'AI Cultivation World Simulator',
             tagline_en: 'AI Cultivation World Simulator',
             subtitle_start_en: 'Start Game',
             subtitle_load_en: 'Load Game',
@@ -76,14 +70,12 @@ describe('SplashLayer', () => {
             subtitle_exit_en: 'Exit',
           },
           ui: {
-            start_game: '开始游戏',
-            load_game: '加载游戏',
-            achievements: '成就',
-            settings: '设置',
-            about: '关于',
-            exit: '离开',
-            language_switcher_button: 'Language',
-            language_switcher_hint: '选择界面语言',
+            start_game: 'Start Game',
+            load_game: 'Load Game',
+            achievements: 'Achievements',
+            settings: 'Settings',
+            about: 'About',
+            exit: 'Exit',
           }
         }
       }

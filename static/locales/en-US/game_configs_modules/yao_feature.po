@@ -3,18 +3,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Language: en-US\n"
 
-msgid "PERSONA_1015_NAME"
-msgstr "Kindred to Other Kinds"
-
-msgid "PERSONA_1015_DESC"
-msgstr "You feel natural curiosity and warmth toward cultivators of other races, and are willing to build ties across differences of origin."
-
-msgid "PERSONA_1016_NAME"
-msgstr "Hates Other Kinds"
-
-msgid "PERSONA_1016_DESC"
-msgstr "You instinctively reject cultivators of other races and find it hard to truly trust outsiders."
-
 msgid "WORLD_INFO_RACE_TITLE"
 msgstr "Race"
 

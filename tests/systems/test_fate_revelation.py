@@ -12,45 +12,65 @@ from src.systems.fate_revelation import (
 )
 
 
+@pytest.fixture
+def set_fate_probability():
+    """
+    Set CONFIG.world.fate_revelation_probability for one test and restore it.
+
+    monkeypatch.setattr on an OmegaConf DictConfig is not reliably undone
+    (pytest 9 deletes the key on undo), so restore the value manually.
+    """
+    from src.systems import fate_revelation
+
+    world_cfg = fate_revelation.CONFIG.world
+    original = world_cfg.fate_revelation_probability
+
+    def _set(value: float) -> None:
+        world_cfg.fate_revelation_probability = value
+
+    yield _set
+    world_cfg.fate_revelation_probability = original
+
+
 def test_oracle_text_validation_allows_poetic_forms():
-    assert is_valid_oracle_text("遇潮而圆，见信而寂")
-    assert is_valid_oracle_text("千山暮雪倾东海，初日潮头又上来")
-    assert is_valid_oracle_text("花落非春尽，钟鸣不是归")
+    assert is_valid_oracle_text("Round with the tide, silent with the letter")
+    assert is_valid_oracle_text("Dusk snow of a thousand peaks pours into the eastern sea; at first light the tide climbs again")
+    assert is_valid_oracle_text("Falling blossoms are not spring's end; a tolling bell is no homecoming")
 
 
 def test_oracle_text_validation_rejects_explanations():
-    assert not is_valid_oracle_text("这预示着他将会飞升")
-    assert not is_valid_oracle_text("命格：贵人相助")
-    assert not is_valid_oracle_text("系统显示属性奖励")
+    assert not is_valid_oracle_text("This foretells that he will ascend")
+    assert not is_valid_oracle_text("Fate: a noble benefactor helps")
+    assert not is_valid_oracle_text("The system grants an attribute reward")
 
 
 def test_should_not_trigger_when_avatar_already_has_fate(dummy_avatar, monkeypatch):
     dummy_avatar.fate_revelation = {
-        "trigger_text": "旧雨落在石阶上。",
-        "oracle_text": "旧雨照灯，潮回无岸",
+        "trigger_text": "Old rain falls on the stone steps.",
+        "oracle_text": "Old rain lights the lamp; the tide returns without a shore",
     }
     monkeypatch.setattr("src.systems.fate_revelation.random.random", lambda: 0.0)
 
     assert should_trigger_fate_revelation(dummy_avatar) is False
 
 
-def test_should_not_trigger_when_probability_zero(dummy_avatar, monkeypatch):
-    monkeypatch.setattr("src.systems.fate_revelation.CONFIG.world.fate_revelation_probability", 0.0)
+def test_should_not_trigger_when_probability_zero(dummy_avatar, monkeypatch, set_fate_probability):
+    set_fate_probability(0.0)
     monkeypatch.setattr("src.systems.fate_revelation.random.random", lambda: 0.0)
 
     assert should_trigger_fate_revelation(dummy_avatar) is False
 
 
 @pytest.mark.asyncio
-async def test_try_trigger_fate_revelation_writes_avatar_and_event(dummy_avatar, monkeypatch):
+async def test_try_trigger_fate_revelation_writes_avatar_and_event(dummy_avatar, monkeypatch, set_fate_probability):
     dummy_avatar.fate_revelation = None
-    monkeypatch.setattr("src.systems.fate_revelation.CONFIG.world.fate_revelation_probability", 1.0)
+    set_fate_probability(1.0)
     monkeypatch.setattr("src.systems.fate_revelation.random.random", lambda: 0.0)
 
     llm_result = {
-        "trigger_text": "青溪渡口忽有逆流成圆，几片残叶贴着水面缓缓不散。",
-        "oracle_text": "千山暮雪倾东海，初日潮头又上来",
-        "event_text": "青溪渡口忽有逆流成圆，几片残叶贴着水面缓缓不散。TestDummy凝神看去，心中浮起一句命格：『千山暮雪倾东海，初日潮头又上来』",
+        "trigger_text": "At the Azure Creek ferry a backflow suddenly curls into a circle, a few withered leaves clinging to the surface without drifting apart.",
+        "oracle_text": "Dusk snow of a thousand peaks pours into the eastern sea; at first light the tide climbs again",
+        "event_text": "At the Azure Creek ferry a backflow suddenly curls into a circle, a few withered leaves clinging to the surface without drifting apart. TestDummy gazed intently, and a line of fate rose in his heart: \"Dusk snow of a thousand peaks pours into the eastern sea; at first light the tide climbs again\"",
     }
     with patch(
         "src.systems.fate_revelation.call_llm_with_task_name",
@@ -65,7 +85,7 @@ async def test_try_trigger_fate_revelation_writes_avatar_and_event(dummy_avatar,
     assert event.is_story is False
     assert event.event_type == FATE_REVELATION_EVENT_TYPE
     assert event.related_avatars == [dummy_avatar.id]
-    assert "千山暮雪倾东海" in event.content
+    assert "Dusk snow of a thousand peaks" in event.content
     assert dummy_avatar.fate_revelation is not None
     assert dummy_avatar.fate_revelation["oracle_text"] == llm_result["oracle_text"]
     assert dummy_avatar.fate_revelation["trigger_text"] == llm_result["trigger_text"]
@@ -74,15 +94,15 @@ async def test_try_trigger_fate_revelation_writes_avatar_and_event(dummy_avatar,
 
 
 @pytest.mark.asyncio
-async def test_try_trigger_fate_revelation_rejects_bad_oracle(dummy_avatar, monkeypatch):
+async def test_try_trigger_fate_revelation_rejects_bad_oracle(dummy_avatar, monkeypatch, set_fate_probability):
     dummy_avatar.fate_revelation = None
-    monkeypatch.setattr("src.systems.fate_revelation.CONFIG.world.fate_revelation_probability", 1.0)
+    set_fate_probability(1.0)
     monkeypatch.setattr("src.systems.fate_revelation.random.random", lambda: 0.0)
 
     llm_result = {
-        "trigger_text": "夜雨打在废碑上，石缝里有微光一闪而灭。",
-        "oracle_text": "这预示着他将会飞升",
-        "event_text": "坏输出",
+        "trigger_text": "Night rain beats on a ruined stele; a faint glimmer flickers in a crack and dies.",
+        "oracle_text": "This foretells that he will ascend",
+        "event_text": "bad output",
     }
     with patch(
         "src.systems.fate_revelation.call_llm_with_task_name",

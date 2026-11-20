@@ -26,7 +26,7 @@ def create_llm_runtime_handlers(
             test_connectivity=test_connectivity,
         )
         if success:
-            return {"status": "ok", "message": "连接成功"}
+            return {"status": "ok", "message": "Connection successful"}
         return {"status": "error", "message": error_msg}
 
     handle_llm_updated = create_llm_updated_handler(

@@ -60,17 +60,17 @@ def build_default_style_guide(lore_text: str) -> dict[str, Any]:
     text = str(lore_text or "").strip()
     keywords = _extract_keywords(text)
     return {
-        "world_tone": "、".join(keywords[:6]) if keywords else "仙侠、历史感、地域感",
+        "world_tone": ", ".join(keywords[:6]) if keywords else "xianxia, sense of history, regional flavor",
         "naming_rules": [
-            "名称应明显贴合世界观，但避免所有名称重复同一关键词",
-            "描述应具体、可视化，不解释游戏机制",
+            "Names should clearly fit the world lore, but avoid repeating the same keyword in every name",
+            "Descriptions should be concrete and visual, without explaining game mechanics",
         ],
         "forbidden_patterns": [
-            "不要写数值加成",
-            "不要写玩家、系统、游戏机制",
-            "不要输出详细思考过程",
+            "Do not write numeric bonuses",
+            "Do not mention players, systems, or game mechanics",
+            "Do not output detailed reasoning",
         ],
-        "description_style": "简洁、有画面感，保留实体原本玩法定位",
+        "description_style": "Concise and visual, preserving each entity's original gameplay role",
     }
 
 
@@ -117,10 +117,11 @@ def _build_region_jobs(context: WorldLoreRewriteContext) -> list[RewriteJob]:
             kind="regions",
             task_name="world_lore_region_rewrite",
             entities=chunk,
-            entity_label="地点",
+            entity_label="location",
             instructions=(
-                "重写地点 name/desc。desc 应描述地貌、建筑、环境异象、生活或修行氛围，"
-                "必须匹配当前地图语义，不要写玩家加成、数值效果或系统机制。"
+                "Rewrite location name/desc. desc should describe terrain, architecture, environmental anomalies, "
+                "and the atmosphere of daily life or cultivation; it must match the current map semantics. "
+                "Do not write player bonuses, numeric effects, or system mechanics."
             ),
             result_field="entities",
             map_summary=context.map_summary,
@@ -156,11 +157,13 @@ def _build_sect_group_jobs(context: WorldLoreRewriteContext) -> list[RewriteJob]
                 kind="sect_group",
                 task_name="world_lore_sect_group_rewrite",
                 entities=sect_chunk,
-                entity_label="宗门",
+                entity_label="sect",
                 instructions=(
-                    "同时重写宗门本体和对应宗门驻地。宗门 desc 侧重宗门定位、修行方式、组织气质、"
-                    "内部结构与潜在矛盾；驻地 desc 侧重地貌、建筑、空间层次和环境异象。"
-                    "两者应互相配合但不要重复，不要写门规惩罚、玩家加成、数值效果或系统机制。"
+                    "Rewrite both the sect itself and its headquarters. The sect desc focuses on the sect's role, "
+                    "cultivation style, organizational temperament, internal structure, and latent conflicts; the "
+                    "headquarters desc focuses on terrain, architecture, spatial layering, and environmental anomalies. "
+                    "The two should complement each other without repetition. Do not write sect-rule punishments, "
+                    "player bonuses, numeric effects, or system mechanics."
                 ),
                 result_field="sects",
                 map_summary=context.map_summary,
@@ -168,7 +171,7 @@ def _build_sect_group_jobs(context: WorldLoreRewriteContext) -> list[RewriteJob]
                 lore_text=context.lore_text,
                 paired_entities=paired_chunk,
                 paired_result_field="sect_regions",
-                paired_entity_label="宗门驻地",
+                paired_entity_label="sect headquarters",
             )
         )
     return jobs
@@ -182,12 +185,12 @@ def _build_item_jobs(context: WorldLoreRewriteContext) -> list[RewriteJob]:
             kind="techniques",
             task_name="world_lore_technique_rewrite",
             job_prefix="techniques",
-            label="功法",
+            label="technique",
             entities=[_serialize_technique(item) for _, item in sorted(techniques_by_id.items())],
             chunk_size=context.config.chunk_size_techniques,
             instructions=(
-                "重写功法 name/desc。保持原本属性、品阶、境界和玩法定位。"
-                "desc 应描述修行路径、气息、风险和意象，不要写具体伤害、加成或游戏机制。"
+                "Rewrite technique name/desc. Keep the original element, grade, realm, and gameplay role. "
+                "desc should describe the cultivation path, aura, risks, and imagery; do not write specific damage, bonuses, or game mechanics."
             ),
         )
     )
@@ -197,12 +200,12 @@ def _build_item_jobs(context: WorldLoreRewriteContext) -> list[RewriteJob]:
             kind="weapons",
             task_name="world_lore_weapon_rewrite",
             job_prefix="weapons",
-            label="兵器",
+            label="weapon",
             entities=[_serialize_weapon(item) for _, item in sorted(weapons_by_id.items())],
             chunk_size=context.config.chunk_size_weapons,
             instructions=(
-                "重写兵器 name/desc。保持原本武器类型、境界和玩法定位。"
-                "desc 应描述材质、形制、来历和使用气质，不要写数值加成或游戏机制。"
+                "Rewrite weapon name/desc. Keep the original weapon type, realm, and gameplay role. "
+                "desc should describe material, form, origin, and how it feels to wield; do not write numeric bonuses or game mechanics."
             ),
         )
     )
@@ -212,12 +215,13 @@ def _build_item_jobs(context: WorldLoreRewriteContext) -> list[RewriteJob]:
             kind="auxiliaries",
             task_name="world_lore_auxiliary_rewrite",
             job_prefix="auxiliaries",
-            label="辅助装备",
+            label="auxiliary equipment",
             entities=[_serialize_auxiliary(item) for _, item in sorted(auxiliaries_by_id.items())],
             chunk_size=context.config.chunk_size_auxiliaries,
             instructions=(
-                "重写辅助装备 name/desc。保持原本境界和辅助定位。"
-                "desc 应描述佩戴方式、法器性质、护持或辅助意象，不要写数值加成或不存在的机制。"
+                "Rewrite auxiliary equipment name/desc. Keep the original realm and supporting role. "
+                "desc should describe how it is worn, the nature of the artifact, and its protective or supporting imagery; "
+                "do not write numeric bonuses or nonexistent mechanics."
             ),
         )
     )
@@ -324,14 +328,14 @@ def _chunks(items: list[dict[str, Any]], size: int) -> Iterable[list[dict[str, A
 
 
 def _extract_keywords(text: str) -> list[str]:
-    separators = "，。；、,.!?！？\n\r\t "
+    separators = ",.;!?\uff0c\u3002\uff1b\u3001\uff01\uff1f\n\r\t "
     normalized = str(text or "")
     for sep in separators:
         normalized = normalized.replace(sep, " ")
     seen: list[str] = []
     for part in normalized.split(" "):
         part = part.strip()
-        if 2 <= len(part) <= 8 and part not in seen:
+        if 3 <= len(part) <= 16 and part not in seen:
             seen.append(part)
         if len(seen) >= 8:
             break

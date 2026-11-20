@@ -29,17 +29,17 @@ vi.mock('@/stores/dynasty', () => ({
   useDynastyStore: () => ({
     detail: {
       overview: {
-        name: '晋',
-        title: '晋朝',
-        royal_surname: '司马',
-        royal_house_name: '司马氏',
-        desc: '门第森然，士族清谈，朝野重礼而尚名教。',
+        name: 'Jin',
+        title: 'Jin Dynasty',
+        royal_surname: 'Sima',
+        royal_house_name: 'House of Sima',
+        desc: 'Rigid lineages, gentry given to pure conversation; the court prizes ritual and Confucian propriety.',
         effect_desc: '',
         is_low_magic: true,
         current_emperor: {
-          name: '司马承安',
-          surname: '司马',
-          given_name: '承安',
+          name: 'Sima Chengan',
+          surname: 'Sima',
+          given_name: 'Chengan',
           age: 34,
           max_age: 67,
           is_mortal: true,
@@ -47,23 +47,23 @@ vi.mock('@/stores/dynasty', () => ({
       },
       summary: {
         officialCount: 2,
-        topOfficialRankName: '州牧',
+        topOfficialRankName: 'Provincial Governor',
       },
       officials: [
         {
           id: 'a-1',
-          name: '王玄策',
-          realm: '金丹',
-          officialRankName: '州牧',
+          name: 'Wang Xuance',
+          realm: 'Core Formation',
+          officialRankName: 'Provincial Governor',
           officialRankKey: 'PROVINCE',
           courtReputation: 520,
-          sectName: '太一门',
+          sectName: 'Taiyi Sect',
         },
         {
           id: 'a-2',
-          name: '李观澜',
-          realm: '筑基',
-          officialRankName: '县令',
+          name: 'Li Guanlan',
+          realm: 'Foundation Establishment',
+          officialRankName: 'County Magistrate',
           officialRankKey: 'COUNTY',
           courtReputation: 120,
           sectName: '',
@@ -71,17 +71,17 @@ vi.mock('@/stores/dynasty', () => ({
       ],
     },
     overview: {
-      name: '晋',
-      title: '晋朝',
-      royal_surname: '司马',
-      royal_house_name: '司马氏',
-      desc: '门第森然，士族清谈，朝野重礼而尚名教。',
+      name: 'Jin',
+      title: 'Jin Dynasty',
+      royal_surname: 'Sima',
+      royal_house_name: 'House of Sima',
+      desc: 'Rigid lineages, gentry given to pure conversation; the court prizes ritual and Confucian propriety.',
       effect_desc: '',
       is_low_magic: true,
       current_emperor: {
-        name: '司马承安',
-        surname: '司马',
-        given_name: '承安',
+        name: 'Sima Chengan',
+        surname: 'Sima',
+        given_name: 'Chengan',
         age: 34,
         max_age: 67,
         is_mortal: true,
@@ -90,18 +90,18 @@ vi.mock('@/stores/dynasty', () => ({
     officials: [
       {
         id: 'a-1',
-        name: '王玄策',
-        realm: '金丹',
-        officialRankName: '州牧',
+        name: 'Wang Xuance',
+        realm: 'Core Formation',
+        officialRankName: 'Provincial Governor',
         officialRankKey: 'PROVINCE',
         courtReputation: 520,
-        sectName: '太一门',
+        sectName: 'Taiyi Sect',
       },
       {
         id: 'a-2',
-        name: '李观澜',
-        realm: '筑基',
-        officialRankName: '县令',
+        name: 'Li Guanlan',
+        realm: 'Foundation Establishment',
+        officialRankName: 'County Magistrate',
         officialRankKey: 'COUNTY',
         courtReputation: 120,
         sectName: '',
@@ -109,7 +109,7 @@ vi.mock('@/stores/dynasty', () => ({
     ],
     summary: {
       officialCount: 2,
-      topOfficialRankName: '州牧',
+      topOfficialRankName: 'Provincial Governor',
     },
     isLoading: false,
     isLoaded: true,
@@ -133,49 +133,49 @@ describe('DynastyOverviewModal', () => {
   function createWrapper(show = true) {
     const i18n = createI18n({
       legacy: false,
-      locale: 'zh-CN',
+      locale: 'en-US',
       messages: {
-        'zh-CN': {
+        'en-US': {
           game: {
             dynasty: {
-              title: '王朝',
-              name: '王朝名',
-              royal_house: '皇族',
-              style_tag: '王朝风气',
-              official_preference: '仕途偏好',
-              effect: '王朝效果',
-              effect_empty: '当前暂无王朝效果。待官职系统与后续逻辑接入后补充。',
-              low_magic: '凡人王朝',
-              empty: '暂无王朝数据',
+              title: 'Dynasty',
+              name: 'Dynasty Name',
+              royal_house: 'Royal House',
+              style_tag: 'Dynasty Style',
+              official_preference: 'Official Preference',
+              effect: 'Dynasty Effect',
+              effect_empty: 'No dynasty effect yet. This will be filled in after the official system and later logic are added.',
+              low_magic: 'Mortal Dynasty',
+              empty: 'No dynasty data',
               emperor: {
-                title: '当朝皇帝',
-                name: '姓名',
-                age: '年龄',
-                lifespan: '寿元',
-                identity: '身份',
-                mortal: '凡人',
-                empty: '暂无皇帝数据',
+                title: 'Current Emperor',
+                name: 'Name',
+                age: 'Age',
+                lifespan: 'Lifespan',
+                identity: 'Identity',
+                mortal: 'Mortal',
+                empty: 'No emperor data',
               },
               summary: {
-                title: '王朝概览',
+                title: 'Dynasty Overview',
               },
               officials: {
-                title: '在朝修士',
-                count: '共 {count} 人',
-                empty: '当前暂无有品阶修士',
-                realm: '境界',
-                court_reputation: '朝廷威望',
-                sect: '所属',
-                rogue: '散修',
+                title: 'Court Officials',
+                count: '{count} total',
+                empty: 'No court cultivators yet',
+                realm: 'Realm',
+                court_reputation: 'Court Reputation',
+                sect: 'Affiliation',
+                rogue: 'Rogue Cultivator',
               },
             },
           },
           common: {
-            none: '无',
+            none: 'None',
           },
           realms: {
-            FOUNDATION_ESTABLISHMENT: '筑基',
-            CORE_FORMATION: '金丹',
+            FOUNDATION_ESTABLISHMENT: 'Foundation Establishment',
+            CORE_FORMATION: 'Core Formation',
           },
         },
       },
@@ -203,19 +203,19 @@ describe('DynastyOverviewModal', () => {
   it('renders dynasty summary', () => {
     const wrapper = createWrapper(true)
     const text = wrapper.text()
-    expect(text).toContain('晋朝')
-    expect(text).toContain('司马氏')
-    expect(text).toContain('司马承安')
+    expect(text).toContain('Jin Dynasty')
+    expect(text).toContain('House of Sima')
+    expect(text).toContain('Sima Chengan')
     expect(text).toContain('34')
     expect(text).toContain('67')
-    expect(text).toContain('门第森然')
-    expect(text).toContain('凡人王朝')
-    expect(text).toContain('当前暂无王朝效果')
-    expect(text).toContain('在朝修士')
-    expect(text).toContain('王玄策')
-    expect(text).toContain('李观澜')
-    expect(text).toContain('太一门')
-    expect(text).toContain('散修')
+    expect(text).toContain('Rigid lineages')
+    expect(text).toContain('Mortal Dynasty')
+    expect(text).toContain('No dynasty effect yet')
+    expect(text).toContain('Court Officials')
+    expect(text).toContain('Wang Xuance')
+    expect(text).toContain('Li Guanlan')
+    expect(text).toContain('Taiyi Sect')
+    expect(text).toContain('Rogue Cultivator')
   })
 
   it('jumps to avatar detail when clicking an official row', async () => {
