@@ -14,6 +14,7 @@ from src.classes.action.help_people import HelpPeople
 from src.classes.action.catch import Catch
 from src.classes.action.sect_mission import SectMission
 from src.classes.action.breakthrough import Breakthrough
+from src.classes.action.wander import Wander
 from src.classes.actions import get_action_infos
 from src.classes.alignment import Alignment
 from src.classes.core.avatar import Avatar
@@ -216,3 +217,13 @@ def test_action_infos_filters_breakthrough_when_avatar_cannot_break_through(dumm
 
     dummy_avatar.cultivation_progress = CultivationProgress(level=30, exp=0)
     assert "Breakthrough" in get_action_infos(dummy_avatar)
+
+
+def test_wander_can_possibly_start(dummy_avatar, base_world):
+    action = Wander(dummy_avatar, base_world)
+    assert action.can_possibly_start() is True
+    assert "Wander" in get_action_infos(dummy_avatar)
+
+    dummy_avatar.is_dead = True
+    assert action.can_possibly_start() is False
+    assert "Wander" not in get_action_infos(dummy_avatar)
