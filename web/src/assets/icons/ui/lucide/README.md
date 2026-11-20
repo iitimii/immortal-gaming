@@ -72,3 +72,4 @@ Suggested mapping:
 - `flag.svg`: sect, faction, or force marker
 - `chart-bar.svg`: world statistics
 - `milestone.svg`: world chronicle of firsts
+- `download.svg`: export or download data (event chronicle export)

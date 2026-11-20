@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Callable, Any
 
 from fastapi import APIRouter, Query
+from fastapi.responses import Response
 
 from src.server.services.public_api_contract import ok_response
 
@@ -16,6 +17,7 @@ def create_public_query_router(
     build_map_presets: Callable[..., dict] | None = None,
     build_current_run: Callable[[], dict] | None = None,
     build_events_page: Callable[..., dict] | None = None,
+    build_events_export: Callable[..., Any] | None = None,
     build_rankings: Callable[[], dict] | None = None,
     build_sect_relations: Callable[[], dict] | None = None,
     build_game_data: Callable[[], dict] | None = None,
@@ -99,6 +101,33 @@ def create_public_query_router(
                 cursor=cursor,
                 limit=limit,
             )
+        )
+
+    @router.get("/api/v1/query/events/export")
+    def export_events_v1(
+        format: str = "markdown",
+        avatar_id: str | None = None,
+        major_only: str | None = None,
+        from_year: str | None = None,
+        to_year: str | None = None,
+    ):
+        # Year/flag params are parsed by the service so invalid values return
+        # the standard public error body instead of FastAPI's 422 shape.
+        builder = query_service.get_events_export if query_service is not None else build_events_export
+        export = builder(
+            format=format,
+            avatar_id=avatar_id,
+            major_only=major_only,
+            from_year=from_year,
+            to_year=to_year,
+        )
+        return Response(
+            content=export.content.encode("utf-8"),
+            media_type=export.media_type,
+            headers={
+                "Content-Disposition": f'attachment; filename="{export.filename}"',
+                "Cache-Control": "no-store",
+            },
         )
 
     @router.get("/api/v1/query/rankings")

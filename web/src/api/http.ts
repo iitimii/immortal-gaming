@@ -25,12 +25,60 @@ export class ApiError extends Error {
   }
 }
 
+export interface DownloadedFile {
+  blob: Blob;
+  filename: string | null;
+}
+
+/** Resolve an API path against the configured API base (relative when unset). */
+export function buildApiUrl(path: string): string {
+  return `${API_BASE}${path}`;
+}
+
+/** Extract the filename from a Content-Disposition header, if present. */
+export function parseContentDispositionFilename(header: string | null): string | null {
+  if (!header) return null;
+  const encoded = /filename\*\s*=\s*(?:UTF-8'')?([^;]+)/i.exec(header);
+  if (encoded) {
+    try {
+      return decodeURIComponent(encoded[1].trim().replace(/^"|"$/g, ''));
+    } catch {
+      // Fall through to the plain filename parameter
+    }
+  }
+  const plain = /filename\s*=\s*("([^"]*)"|[^;]+)/i.exec(header);
+  if (!plain) return null;
+  const value = (plain[2] ?? plain[1]).trim();
+  return value || null;
+}
+
 async function request<T>(
   path: string,
   options: RequestInit = {},
   requestOptions: HttpRequestOptions = {},
 ): Promise<T> {
-  const url = `${API_BASE}${path}`;
+  const response = await send(path, options, requestOptions);
+
+  // Assume the backend always returns JSON
+  const data: unknown = await response.json();
+  if (
+    data &&
+    typeof data === 'object' &&
+    'ok' in data &&
+    data.ok === true &&
+    'data' in data
+  ) {
+    return (data as { data: T }).data;
+  }
+  return data as T;
+}
+
+async function send(
+  path: string,
+  options: RequestInit = {},
+  requestOptions: HttpRequestOptions = {},
+): Promise<Response> {
+  const url = buildApiUrl(path);
   const controller = new AbortController();
   const timeoutMs = requestOptions.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   let didTimeout = false;
@@ -95,18 +143,7 @@ async function request<T>(
     throw new ApiError(response.status, errorMessage, errorData);
   }
 
-  // Assume the backend always returns JSON
-  const data: unknown = await response.json();
-  if (
-    data &&
-    typeof data === 'object' &&
-    'ok' in data &&
-    data.ok === true &&
-    'data' in data
-  ) {
-    return (data as { data: T }).data;
-  }
-  return data as T;
+  return response;
 }
 
 export const httpClient = {
@@ -146,6 +183,15 @@ export const httpClient = {
 
   delete<T>(path: string) {
     return request<T>(path, { method: 'DELETE' });
+  },
+
+  /** GET a file response (non-JSON body), keeping the server-provided filename. */
+  async download(path: string, options?: HttpRequestOptions): Promise<DownloadedFile> {
+    const response = await send(path, { method: 'GET' }, options);
+    return {
+      blob: await response.blob(),
+      filename: parseContentDispositionFilename(response.headers.get('Content-Disposition')),
+    };
   }
 };
 
