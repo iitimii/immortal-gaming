@@ -47,6 +47,9 @@
     },
     "world_secret": {
       "label": "[World Secret]"
+    },
+    "world_statistics": {
+      "label": "[Statistics]"
     }
   },
   "world_info": {
@@ -635,5 +638,32 @@
     "decision_keep": "Kept secret",
     "decision_none": "No choice",
     "empty": "No world secret data"
+  },
+  "world_statistics": {
+    "title": "World Statistics",
+    "empty": "No data",
+    "percent_value": "{value}%",
+    "summary": {
+      "title": "World Overview",
+      "living": "Living Cultivators",
+      "deceased": "Deceased",
+      "average_age": "Average Age",
+      "oldest": "Oldest",
+      "total_wealth": "Total Spirit Stones",
+      "average_wealth": "Average Spirit Stones",
+      "richest": "Richest",
+      "age_value": "{value} yrs",
+      "stones_value": "{value} stones",
+      "none": "None"
+    },
+    "sections": {
+      "realm": "By Realm",
+      "sect": "By Sect",
+      "race": "By Race",
+      "orthodoxy": "By Orthodoxy",
+      "alignment": "By Alignment",
+      "gender": "By Gender",
+      "death_reasons": "Top Causes of Death"
+    }
   }
 }

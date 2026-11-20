@@ -5115,6 +5115,13 @@ msgstr ""
 "{avatar} chose silence after learning the truth, pressing this secret deep "
 "into the heart."
 
+# World statistics death reason categories
+msgid "Killed in battle"
+msgstr "Killed in battle"
+
+msgid "Other causes"
+msgstr "Other causes"
+
 msgid "rest_action_name"
 msgstr "Rest"
 

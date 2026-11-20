@@ -9,6 +9,7 @@ export const STATUS_BAR_COLORS = {
   dynasty: '#b8793b',
   hiddenDomain: '#b78a52',
   worldSecret: '#ba8ad4',
+  worldStatistics: '#5fb8c2',
 } as const
 
 export const PHENOMENON_RARITY_COLORS: Record<string, string> = {
@@ -104,5 +105,15 @@ export const SYSTEM_PANEL_THEMES = {
     title: '#e2c4ef',
     empty: '#9885a0',
     border: '#3d2d46',
+  },
+  worldStatistics: {
+    accent: STATUS_BAR_COLORS.worldStatistics,
+    accentStrong: '#93d6dd',
+    accentSoft: 'rgba(95, 184, 194, 0.14)',
+    link: '#7fc0ff',
+    linkHover: '#abd4ff',
+    title: '#bfe6ea',
+    empty: '#7f9699',
+    border: '#27403f',
   },
 } as const
