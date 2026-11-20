@@ -100,6 +100,24 @@ describe('public api module migration', () => {
     expect(result.speed).toBe(2)
   })
 
+  it('systemApi steps one month through /api/v1 command endpoint', async () => {
+    const { systemApi } = await import('@/api/modules/system')
+    postMock.mockResolvedValue({
+      status: 'ok',
+      year: 12,
+      month: 4,
+      event_count: 3,
+      auto_saved: false,
+      world_revision: 9,
+    })
+
+    const result = await systemApi.stepOnce()
+
+    expect(postMock).toHaveBeenCalledWith('/api/v1/command/game/step', {})
+    expect(result.month).toBe(4)
+    expect(result.event_count).toBe(3)
+  })
+
   it('systemApi startNewGame and shutdown use /api/v1 endpoints', async () => {
     const { systemApi } = await import('@/api/modules/system')
     postMock.mockResolvedValue({ status: 'ok' })

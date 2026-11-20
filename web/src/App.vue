@@ -11,6 +11,7 @@ import SplashLayer from './components/SplashLayer.vue'
 import GameCanvas from './components/game/GameCanvas.vue'
 import RoleplayDock from './components/game/RoleplayDock.vue'
 import SpeedControl from './components/game/SpeedControl.vue'
+import StepOnceButton from './components/game/StepOnceButton.vue'
 import InfoPanelContainer from './components/game/panels/info/InfoPanelContainer.vue'
 import StatusBar from './components/layout/StatusBar.vue'
 import EventPanel from './components/game/panels/EventPanel.vue'
@@ -91,6 +92,9 @@ const {
   handleKeydown: controlHandleKeydown,
   toggleManualPause,
   setSimulationSpeed,
+  isStepping,
+  canStepOnce,
+  stepOnce,
 } = useGameControl({
   gameInitialized,
   showMenu,
@@ -235,6 +239,13 @@ watch(sidebarWidth, width => {
                       aria-hidden="true"
                     ></span>
                   </button>
+
+                  <!-- Advance exactly one month while paused -->
+                  <StepOnceButton
+                    :enabled="canStepOnce"
+                    :busy="isStepping"
+                    @step="stepOnce"
+                  />
 
                   <!-- Simulation speed -->
                   <SpeedControl

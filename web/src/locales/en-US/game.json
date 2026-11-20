@@ -141,7 +141,10 @@
     "closed_msg": "Game closed. You can safely close this tab.",
     "speed_label": "Simulation speed",
     "speed_option": "{speed}x",
-    "speed_set": "Set simulation speed to {speed}x"
+    "speed_set": "Set simulation speed to {speed}x",
+    "step_once": "Step one month",
+    "step_once_busy": "Advancing one month...",
+    "step_once_unavailable": "Pause the game to step one month at a time"
   },
   "event_panel": {
     "title": "Events",
