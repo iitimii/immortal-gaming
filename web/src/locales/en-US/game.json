@@ -50,6 +50,9 @@
     },
     "world_statistics": {
       "label": "[Statistics]"
+    },
+    "chronicle": {
+      "label": "[Chronicle]"
     }
   },
   "world_info": {
@@ -665,5 +668,14 @@
       "gender": "By Gender",
       "death_reasons": "Top Causes of Death"
     }
+  },
+  "chronicle": {
+    "title": "Chronicle of Firsts",
+    "caption": "World history's firsts, recorded as they happen.",
+    "progress": "{achieved} / {total} recorded",
+    "opened_since": "Chronicle kept since {date}",
+    "achieved": "Recorded firsts",
+    "pending": "Yet to happen",
+    "empty": "No firsts have been recorded yet."
   }
 }

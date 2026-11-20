@@ -183,6 +183,7 @@ describe('StatusBar', () => {
         AvatarOverviewModal: true,
         WorldSecretModal: true,
         WorldStatisticsModal: true,
+        ChronicleModal: true,
       },
     },
   }
@@ -305,9 +306,9 @@ describe('StatusBar', () => {
 
       const wrapper = mount(StatusBar, globalConfig)
 
-      // time + domain/sect-relations/dynasty/mortal/ranking/tournament/avatar-overview/world-statistics/world-secret/world-info
+      // time + domain/sect-relations/dynasty/mortal/ranking/tournament/avatar-overview/world-statistics/world-secret/chronicle/world-info
       const widgets = wrapper.findAll('.status-widget-stub')
-      expect(widgets.length).toBe(11)
+      expect(widgets.length).toBe(12)
     })
 
     it('should place time widget before phenomenon widget and world info widget last', () => {
@@ -317,7 +318,7 @@ describe('StatusBar', () => {
       expect(widgets[0]?.attributes('data-label')).toBe('100common.year 5common.month')
       expect(widgets[0]?.attributes('data-icon')).toBeTruthy()
       expect(widgets[1]?.attributes('data-label')).toBe('[Test Phenomenon]')
-      expect(widgets[11]?.attributes('data-label')).toBe('game.status_bar.world_info.label')
+      expect(widgets[12]?.attributes('data-label')).toBe('game.status_bar.world_info.label')
     })
   })
 
@@ -459,8 +460,8 @@ describe('StatusBar', () => {
     const wrapper = mount(StatusBar, globalConfig)
 
     const widgets = wrapper.findAll('.status-widget-stub')
-    // time + currentPhenomenon + domain + sect_relations + dynasty + mortal + ranking + tournament + avatar-overview + world-statistics + world-secret + world-info
-    expect(widgets.length).toBe(12)
+    // time + currentPhenomenon + domain + sect_relations + dynasty + mortal + ranking + tournament + avatar-overview + world-statistics + world-secret + chronicle + world-info
+    expect(widgets.length).toBe(13)
     const sectRelationsWidget = widgets[3]
     expect(sectRelationsWidget.attributes('data-label')).toBe('game.sect_relations.title_short')
   })
@@ -480,6 +481,16 @@ describe('StatusBar', () => {
     const deceasedWidget = widgets[8]
     expect(deceasedWidget.attributes('data-label')).toBe('game.status_bar.avatar_overview.label')
     expect(deceasedWidget.attributes('data-color')).toBe('#8c8c8c')
+  })
+
+  it('should render chronicle StatusWidget before world info', () => {
+    const wrapper = mount(StatusBar, globalConfig)
+
+    const widgets = wrapper.findAll('.status-widget-stub')
+    const chronicleWidget = widgets[11]
+    expect(chronicleWidget.attributes('data-label')).toBe('game.status_bar.chronicle.label')
+    expect(chronicleWidget.attributes('data-color')).toBe('#5fb7b0')
+    expect(chronicleWidget.attributes('data-icon')).toBeTruthy()
   })
 
   it('should keep avatar overview label fixed when loaded', () => {

@@ -1,0 +1,70 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: cultivation-world-simulator 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-11 00:00+0000\n"
+"PO-Revision-Date: 2026-07-11 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: en-US\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "First to Reach {realm}"
+msgstr "First to Reach {realm}"
+
+msgid "First to Live {age} Years"
+msgstr "First to Live {age} Years"
+
+msgid "First Sworn Siblings"
+msgstr "First Sworn Siblings"
+
+msgid "First Dao Companions"
+msgstr "First Dao Companions"
+
+msgid "First Master and Disciple"
+msgstr "First Master and Disciple"
+
+msgid "First Sect War"
+msgstr "First Sect War"
+
+msgid "The first cultivator to break through to {realm} since the chronicle began."
+msgstr "The first cultivator to break through to {realm} since the chronicle began."
+
+msgid "The first cultivator to reach the age of {age} since the chronicle began."
+msgstr "The first cultivator to reach the age of {age} since the chronicle began."
+
+msgid "The first pair of cultivators to swear an oath of sworn siblinghood since the chronicle began."
+msgstr "The first pair of cultivators to swear an oath of sworn siblinghood since the chronicle began."
+
+msgid "The first pair of cultivators to become Dao companions since the chronicle began."
+msgstr "The first pair of cultivators to become Dao companions since the chronicle began."
+
+msgid "The first master to take a disciple since the chronicle began."
+msgstr "The first master to take a disciple since the chronicle began."
+
+msgid "The first war declared between two sects since the chronicle began."
+msgstr "The first war declared between two sects since the chronicle began."
+
+msgid "{avatar} became the first cultivator in recorded history to break through to {realm}."
+msgstr "{avatar} became the first cultivator in recorded history to break through to {realm}."
+
+msgid "{avatar} became the first cultivator in recorded history to reach the age of {age}."
+msgstr "{avatar} became the first cultivator in recorded history to reach the age of {age}."
+
+msgid "{avatar_a} and {avatar_b} swore the first oath of sworn siblinghood in recorded history."
+msgstr "{avatar_a} and {avatar_b} swore the first oath of sworn siblinghood in recorded history."
+
+msgid "{avatar_a} and {avatar_b} became the first Dao companions in recorded history."
+msgstr "{avatar_a} and {avatar_b} became the first Dao companions in recorded history."
+
+msgid "{master} took {disciple} as a disciple, forging the first master-disciple bond in recorded history."
+msgstr "{master} took {disciple} as a disciple, forging the first master-disciple bond in recorded history."
+
+msgid "{sect_a} and {sect_b} went to war, the first sect war in recorded history."
+msgstr "{sect_a} and {sect_b} went to war, the first sect war in recorded history."
+
+msgid "[Chronicle of Firsts] {summary}"
+msgstr "[Chronicle of Firsts] {summary}"

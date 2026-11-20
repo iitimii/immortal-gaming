@@ -12,6 +12,7 @@ from src.systems.autonomous_custom_content_service import try_trigger_autonomous
 from src.systems.fortune import try_trigger_fortune, try_trigger_misfortune
 from src.systems.opportunity import phase_check_opportunities, phase_generate_opportunities
 from src.systems.world_secret import phase_world_secret_discovery
+from src.systems.world_milestones import detect_world_milestones
 from src.systems.fate_revelation import try_trigger_fate_revelation
 from src.systems.random_minor_event import try_trigger_random_minor_event
 from src.systems.background_npc import try_trigger_background_npc_events
@@ -194,6 +195,11 @@ def phase_update_celestial_phenomenon(world) -> list[Event]:
 
     events.append(Event(world.month_stamp, desc, related_avatars=None))
     return events
+
+
+def phase_detect_world_milestones(world, living_avatars: list[Avatar]) -> list[Event]:
+    # Runs after all state-changing phases of the month so every transition is visible.
+    return detect_world_milestones(world, living_avatars)
 
 
 def phase_update_city_population(world) -> None:

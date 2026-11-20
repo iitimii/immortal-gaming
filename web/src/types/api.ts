@@ -372,6 +372,46 @@ export interface WorldSecretOverviewResponseDTO {
   avatars: WorldSecretAvatarOverviewDTO[];
 }
 
+export interface WorldMilestoneAvatarRefDTO {
+  id: string;
+  name: string;
+  available: boolean;
+  is_dead: boolean;
+}
+
+export interface WorldMilestoneSectRefDTO {
+  id: number;
+  name: string;
+}
+
+export interface WorldMilestoneAchievedDTO {
+  key: string;
+  kind: string;
+  title: string;
+  description: string;
+  month_stamp: number;
+  year: number;
+  month: number;
+  date_text: string;
+  avatars: WorldMilestoneAvatarRefDTO[];
+  sects: WorldMilestoneSectRefDTO[];
+}
+
+export interface WorldMilestonePendingDTO {
+  key: string;
+  kind: string;
+  title: string;
+  description: string;
+}
+
+export interface WorldMilestonesResponseDTO {
+  achieved: WorldMilestoneAchievedDTO[];
+  pending: WorldMilestonePendingDTO[];
+  total: number;
+  opened_month_stamp: number | null;
+  opened_date_text: string;
+}
+
 export interface MapPresetDTO {
   id: string;
   name: string;
