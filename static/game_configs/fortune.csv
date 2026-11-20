@@ -1,4 +1,5 @@
 id,kind,min_realm,max_realm,weight,title_id,title
+,Fortune kind,Minimum realm,Maximum realm,Weight,Title ID,Title
 1,weapon,QI_REFINEMENT,NASCENT_SOUL,10,fortune_title_weapon,Divine Weapon Descends
 2,auxiliary,QI_REFINEMENT,NASCENT_SOUL,10,fortune_title_auxiliary,Rare Treasure Appears
 3,technique,QI_REFINEMENT,NASCENT_SOUL,10,fortune_title_technique,Technique Enlightenment
