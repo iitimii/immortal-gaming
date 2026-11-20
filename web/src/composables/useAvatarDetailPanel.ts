@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type { ComposerTranslation } from 'vue-i18n'
 import type { AvatarDetail, EffectEntity, RelationInfo } from '@/types/core'
 import { BloodRelationType } from '@/constants/relations'
@@ -95,7 +95,13 @@ export function useAvatarDetailPanel(
   const adjustCategory = ref<AvatarAdjustCategory | null>(null)
   const showPortraitPanel = ref(false)
   const showObjectiveModal = ref(false)
+  const showCompareModal = ref(false)
   const objectiveContent = ref('')
+
+  // A comparison belongs to the avatar it was opened from.
+  watch(() => data().id, () => {
+    showCompareModal.value = false
+  })
 
   const currentEffectsText = computed(() => data().current_effects)
   const currentEffectsLines = computed(() => {
@@ -285,6 +291,7 @@ export function useAvatarDetailPanel(
     adjustCategory,
     showPortraitPanel,
     showObjectiveModal,
+    showCompareModal,
     objectiveContent,
     parsedCurrentEffects,
     portraitUrl,

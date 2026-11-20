@@ -30,6 +30,7 @@ def create_public_query_router(
     build_dynasty_overview: Callable[[], dict] | None = None,
     build_dynasty_detail: Callable[[], dict] | None = None,
     build_avatar_overview: Callable[[], dict] | None = None,
+    build_avatar_comparison: Callable[..., dict] | None = None,
     build_saves: Callable[[], dict] | None = None,
     build_detail: Callable[..., dict] | None = None,
     build_deceased_list: Callable[[], dict] | None = None,
@@ -201,6 +202,12 @@ def create_public_query_router(
         if query_service is not None:
             return ok_response(query_service.get_avatar_overview())
         return ok_response(build_avatar_overview())
+
+    @router.get("/api/v1/query/avatars/compare")
+    def get_avatar_comparison_v1(a: str | None = None, b: str | None = None):
+        if query_service is not None:
+            return ok_response(query_service.get_avatar_comparison(a_id=a, b_id=b))
+        return ok_response(build_avatar_comparison(a_id=a, b_id=b))
 
     @router.get("/api/v1/query/saves")
     def get_saves_v1():

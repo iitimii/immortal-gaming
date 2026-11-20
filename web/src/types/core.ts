@@ -500,6 +500,64 @@ export interface AvatarOverview {
   realmDistribution: AvatarRealmDistributionItem[];
 }
 
+export interface AvatarCompareLabel {
+  id: string;
+  label: string;
+}
+
+export interface AvatarCompareItem {
+  id: string;
+  name: string;
+  grade: string;
+  gradeRank: number;
+  attribute: string;
+}
+
+export interface AvatarCompareSide {
+  id: string;
+  name: string;
+  nickname: string | null;
+  realm: AvatarCompareLabel;
+  stage: AvatarCompareLabel;
+  cultivationDisplay: string;
+  level: number;
+  age: number;
+  lifespan: number;
+  hp: { cur: number; max: number };
+  battleStrength: number;
+  root: AvatarCompareLabel;
+  orthodoxy: AvatarCompareLabel | null;
+  alignment: AvatarCompareLabel | null;
+  sect: { id: string; name: string; rank: string } | null;
+  technique: AvatarCompareItem | null;
+  weapon: AvatarCompareItem | null;
+  auxiliary: AvatarCompareItem | null;
+  spiritStones: number;
+  relationCount: number;
+}
+
+export interface AvatarCompareRelation {
+  labels: string[];
+  numericRelation: string;
+  friendliness: number;
+}
+
+export interface AvatarComparison {
+  a: AvatarCompareSide;
+  b: AvatarCompareSide;
+  relation: {
+    aToB: AvatarCompareRelation;
+    bToA: AvatarCompareRelation;
+  };
+  battle: {
+    aStrength: number;
+    bStrength: number;
+    aWinProbability: number;
+    bWinProbability: number;
+    method: string;
+  };
+}
+
 export interface WorldStatisticsBucket {
   id: string;
   label: string;
