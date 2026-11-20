@@ -1,91 +1,90 @@
-# `single_choice` 通用有限决策框架重构草案
+# `single_choice` Unified Finite Decision Framework Refactor Draft
 
-本文档描述如何将当前仓库中的 `single_choice` 体系重构为一个“统一有限决策框架”，使其既能服务现有 LLM 自动选择，也能服务角色扮演模式下的玩家按钮选择。
+This document describes how to refactor the `single_choice` system in the current repository into a "unified finite decision framework", so that it can serve both the existing LLM automatic selection and the player's button selection in roleplay mode.
 
-本文档是 [avatar-roleplay-mode.md](</e:/projects/cultivation-world-simulator/docs/specs/avatar-roleplay-mode.md>) 的技术拆分文档，重点关注：
+This document is a technical breakdown of [avatar-roleplay-mode.md](</e:/projects/cultivation-world-simulator/docs/specs/avatar-roleplay-mode.md>), focusing on:
 
-- `single_choice` 现状分析
-- 通用决策模型设计
-- 决策来源抽象
-- continuation / resume 机制
-- 与 roleplay runtime 的衔接
-- 逐步迁移策略
+- Analysis of the current `single_choice` state
+- General decision model design
+- Decision source abstraction
+- continuation / resume mechanism
+- Integration with the roleplay runtime
+- Incremental migration strategy
 
-## 1. 背景
+## 1. Background
 
-当前仓库中的 `single_choice` 已经具备较好的基础抽象：
+The `single_choice` in the current repository already has a fairly good foundational abstraction:
 
 - `SingleChoiceRequest`
 - `SingleChoiceDecision`
 - `SingleChoiceScenario`
 - `resolve_single_choice(scenario)`
 
-典型调用路径为：
+The typical call path is:
 
-1. 业务场景构造 scenario
-2. scenario 生成 request
-3. 引擎调用 LLM 得到 decision
-4. scenario 应用 decision，返回 outcome
+1. The business scenario constructs a scenario
+2. The scenario generates a request
+3. The engine calls the LLM to get a decision
+4. The scenario applies the decision and returns an outcome
 
-这套结构已经明显优于“每个业务文件内手写一套 LLM prompt + parse + fallback”的旧写法。
+This structure is already clearly better than the old approach of "hand-writing an LLM prompt + parse + fallback in every business file".
 
-但在引入角色扮演模式后，现有结构暴露出一个关键限制：
+However, after introducing roleplay mode, the existing structure exposes a key limitation:
 
-- 它默认“决策必须立即得到结果”
+- It assumes by default that "a decision must produce a result immediately"
 
-而玩家扮演下的有限选择并非立即返回，而是：
+A finite choice under player roleplay does not return immediately; instead it:
 
-1. 创建一个 request
-2. 挂起当前流程
-3. 世界暂停
-4. 等待玩家按钮点击
-5. 再恢复原流程
+1. Creates a request
+2. Suspends the current flow
+3. Pauses the world
+4. Waits for the player to click a button
+5. Then resumes the original flow
 
-也就是说，二期需要解决的问题不是“把选项渲染成按钮”，而是把 `single_choice` 从“同步拿到 decision 的调用风格”升级为“支持挂起与恢复的统一决策框架”。
+In other words, the problem Phase 2 needs to solve is not "render the options as buttons", but upgrading `single_choice` from "a call style that gets a decision synchronously" to "a unified decision framework that supports suspend and resume".
 
-## 2. 重构目标
+## 2. Refactor Goals
 
-本次重构的核心目标：
+The core goals of this refactor:
 
-1. 保留现有 `request / decision / scenario` 基础模型。
-2. 将“决策来源”从业务逻辑中抽离。
-3. 让同一个 choice 场景可以由：
-   - LLM 决策
-   - 玩家扮演决策
-   - fallback 决策
-   统一完成。
-4. 引入统一 continuation 机制，支持等待玩家后恢复原流程。
-5. 让具体业务场景只负责：
-   - 定义场景
-   - 构造 request
-   - 应用 decision
-6. 不让业务场景负责：
-   - 是否弹按钮
-   - 是否暂停世界
-   - 是否走 LLM
-   - 如何恢复中断的流程
+1. Keep the existing `request / decision / scenario` foundational model.
+2. Extract the "decision source" out of business logic.
+3. Allow the same choice scenario to be completed uniformly by:
+   - LLM decision
+   - Player roleplay decision
+   - fallback decision
+4. Introduce a unified continuation mechanism that supports resuming the original flow after waiting for the player.
+5. Make concrete business scenarios responsible only for:
+   - Defining the scenario
+   - Constructing the request
+   - Applying the decision
+6. Do not make business scenarios responsible for:
+   - Whether to show buttons
+   - Whether to pause the world
+   - Whether to go through the LLM
+   - How to resume an interrupted flow
 
-## 3. 非目标
+## 3. Non-Goals
 
-本次重构明确不追求：
+This refactor explicitly does not aim to:
 
-1. 不推翻重写 `single_choice` 的全部数据结构。
-2. 不在本轮直接迁移所有现有 choice 场景。
-3. 不把自由对话混入该框架。
-4. 不做“任意复杂多步树状分支剧情编辑器”。
-5. 不让前端直接承载业务逻辑判断。
+1. Tear down and rewrite all of `single_choice`'s data structures.
+2. Migrate all existing choice scenarios directly in this round.
+3. Mix free-form dialogue into this framework.
+4. Build an "arbitrarily complex multi-step tree-branching story editor".
+5. Let the frontend directly carry business logic decisions.
 
-## 4. 现状分析
+## 4. Current State Analysis
 
-## 4.1 当前模型
+## 4.1 Current Model
 
-当前核心模型位于：
+The current core model lives in:
 
 - `src/systems/single_choice/models.py`
 - `src/systems/single_choice/scenario.py`
 - `src/systems/single_choice/engine.py`
 
-现有关键对象：
+Existing key objects:
 
 - `SingleChoiceOption`
 - `SingleChoiceRequest`
@@ -93,143 +92,143 @@
 - `SingleChoiceOutcome`
 - `SingleChoiceScenario`
 
-当前核心入口：
+Current core entry points:
 
 - `decide_single_choice(request)`
 - `resolve_single_choice(scenario)`
 
-## 4.2 当前优点
+## 4.2 Current Strengths
 
-当前结构已经有几个明显优点：
+The current structure already has several clear strengths:
 
-1. 业务场景和引擎是分离的。
-2. `build_request()` 与 `apply_decision()` 天然形成两段式结构。
-3. fallback policy 已经被标准化。
-4. 各业务场景的 request 内容相对清晰。
+1. Business scenarios and the engine are separated.
+2. `build_request()` and `apply_decision()` naturally form a two-stage structure.
+3. The fallback policy has already been standardized.
+4. The request content of each business scenario is relatively clear.
 
-## 4.3 当前限制
+## 4.3 Current Limitations
 
-当前最大限制有三点：
+There are three major current limitations:
 
-### 限制一：决策来源固定为 LLM/fallback
+### Limitation 1: The decision source is fixed to LLM/fallback
 
-`resolve_single_choice()` 当前默认：
+`resolve_single_choice()` currently defaults to:
 
 1. build request
 2. call LLM
 3. fallback
 4. apply
 
-没有把“玩家扮演”视为一类合法来源。
+It does not treat "player roleplay" as a valid source.
 
-### 限制二：调用语义是“立刻返回”
+### Limitation 2: The call semantics are "return immediately"
 
-当前所有调用点都默认：
+All current call sites assume:
 
-- `await resolve_xxx(...)` 后立刻得到 outcome
+- An outcome is obtained immediately after `await resolve_xxx(...)`
 
-但玩家决策不是立刻返回，而是会跨多个请求周期。
+But a player decision does not return immediately; it spans multiple request cycles.
 
-### 限制三：没有 continuation
+### Limitation 3: No continuation
 
-当前没有统一机制来表示：
+There is currently no unified mechanism to represent:
 
-- 某个 choice 场景已经创建 request
-- 当前流程已经挂起
-- 玩家选择后应该恢复到哪里
+- A choice scenario has already created a request
+- The current flow has been suspended
+- Where to resume after the player chooses
 
-这意味着如果不重构，业务层就会被迫各自手写挂起逻辑。
+This means that without a refactor, the business layer would be forced to hand-write its own suspend logic.
 
-## 5. 设计原则
+## 5. Design Principles
 
-## 5.1 业务层只声明“这里有个有限决策”
+## 5.1 The business layer only declares "there is a finite decision here"
 
-业务侧只负责：
+The business side is only responsible for:
 
-- 定义这个选择是什么；
-- 给出选项；
-- 在最终选定某个 key 后如何落地。
+- Defining what this choice is;
+- Providing the options;
+- How to apply the result once a key is finally selected.
 
-业务侧不负责：
+The business side is not responsible for:
 
-- 由谁做这个选择；
-- 什么时候暂停；
-- 怎么恢复。
+- Who makes this choice;
+- When to pause;
+- How to resume.
 
-## 5.2 决策来源是框架层概念
+## 5.2 The decision source is a framework-level concept
 
-“由谁做决策”应是框架层概念，而不是散落在业务层的 `if roleplay ... else ...`。
+"Who makes the decision" should be a framework-level concept, not an `if roleplay ... else ...` scattered across the business layer.
 
-## 5.3 continuation 是二期核心基础设施
+## 5.3 continuation is core Phase 2 infrastructure
 
-如果没有 continuation，就只能一个个场景硬编码暂停/恢复逻辑。  
-那样做最终会破坏 `single_choice` 的抽象边界。
+Without continuation, pause/resume logic can only be hardcoded scenario by scenario.  
+Doing that would ultimately break the abstraction boundary of `single_choice`.
 
-## 5.4 允许渐进迁移
+## 5.4 Allow incremental migration
 
-本次重构不能要求所有旧场景一起迁移。  
-新框架必须允许：
+This refactor cannot require all old scenarios to migrate together.  
+The new framework must allow:
 
-- 旧逻辑继续运行；
-- 新逻辑逐个切换；
-- 两种调用方式在过渡期共存。
+- Old logic to keep running;
+- New logic to switch over one by one;
+- Both call styles to coexist during the transition period.
 
-## 6. 目标架构
+## 6. Target Architecture
 
-建议将重构后的 `single_choice` 抽象为四层：
+It is recommended to abstract the refactored `single_choice` into four layers:
 
-### A. Scenario 层
+### A. Scenario Layer
 
-职责：
+Responsibilities:
 
-- 描述一个具体有限决策场景；
-- 产出 request；
-- 应用 decision。
+- Describe a concrete finite decision scenario;
+- Produce a request;
+- Apply a decision.
 
-典型接口：
+Typical interface:
 
 - `build_request()`
 - `apply_decision(decision)`
 
-这一层尽量保留现有 `SingleChoiceScenario` 习惯。
+This layer keeps the existing `SingleChoiceScenario` conventions as much as possible.
 
-### B. Resolver 层
+### B. Resolver Layer
 
-职责：
+Responsibilities:
 
-- 统一决定此次 choice 的决策来源。
+- Uniformly decide the decision source for this choice.
 
-候选来源：
+Candidate sources:
 
 - `llm`
 - `player_roleplay`
 - `fallback`
 
-这一层是新的核心变化。
+This layer is the new core change.
 
-### C. Continuation 层
+### C. Continuation Layer
 
-职责：
+Responsibilities:
 
-- 当 resolver 决定将本次 choice 交给玩家时，负责：
-  - 创建 runtime pending request
-  - 注册 continuation
-  - 挂起当前流程
-  - 在玩家提交后恢复流程
+- When the resolver decides to hand this choice to the player, it is responsible for:
+  - Creating the runtime pending request
+  - Registering the continuation
+  - Suspending the current flow
+  - Resuming the flow after the player submits
 
-### D. Runtime / Roleplay Integration 层
+### D. Runtime / Roleplay Integration Layer
 
-职责：
+Responsibilities:
 
-- 管理当前活跃的 roleplay session
-- 管理当前挂起中的 choice continuation
-- 暴露 query / command API
+- Manage the currently active roleplay session
+- Manage the currently suspended choice continuation
+- Expose query / command APIs
 
-## 7. 建议的数据模型
+## 7. Proposed Data Model
 
 ## 7.1 ChoiceRequest
 
-建议新增统一 request 模型：
+It is proposed to add a unified request model:
 
 ```python
 @dataclass(slots=True)
@@ -245,11 +244,11 @@ class ChoiceRequest:
     decision_mode: str = "auto"
 ```
 
-说明：
+Notes:
 
-- 它可以由当前 `SingleChoiceRequest` 平滑演进而来；
-- `avatar_id` 与 `request_id` 建议显式化，不只依赖 runtime 包装；
-- `decision_mode` 用于标识当前模式，例如：
+- It can evolve smoothly from the current `SingleChoiceRequest`;
+- It is recommended to make `avatar_id` and `request_id` explicit, rather than relying only on runtime wrapping;
+- `decision_mode` identifies the current mode, for example:
   - `auto`
   - `llm_only`
   - `roleplay_preferred`
@@ -257,7 +256,7 @@ class ChoiceRequest:
 
 ## 7.2 ChoiceDecision
 
-建议将当前 `SingleChoiceDecision` 保留并扩展来源语义：
+It is proposed to keep the current `SingleChoiceDecision` and extend it with source semantics:
 
 ```python
 class DecisionSource(Enum):
@@ -266,7 +265,7 @@ class DecisionSource(Enum):
     FALLBACK = "fallback"
 ```
 
-建议字段：
+Proposed fields:
 
 - `selected_key`
 - `thinking`
@@ -277,7 +276,7 @@ class DecisionSource(Enum):
 
 ## 7.3 ChoiceContinuation
 
-建议新增 continuation 模型：
+It is proposed to add a continuation model:
 
 ```python
 @dataclass(slots=True)
@@ -290,14 +289,14 @@ class ChoiceContinuation:
     resume_handler: Callable[[ChoiceDecision], Awaitable[Any] | Any]
 ```
 
-注意：
+Note:
 
-- `resume_handler` 不一定要直接存可执行闭包，最终实现可以换成 registry + token；
-- 但从设计语义上，必须存在一个“拿到 decision 后恢复原流程”的唯一入口。
+- `resume_handler` does not necessarily have to store an executable closure directly; the final implementation can switch to registry + token;
+- But in terms of design semantics, there must be a single entry point that "resumes the original flow once a decision is obtained".
 
 ## 7.4 Runtime Pending Choice
 
-建议 runtime 中的挂起数据至少包括：
+It is recommended that the suspended data in the runtime include at least:
 
 - `request_id`
 - `avatar_id`
@@ -307,14 +306,14 @@ class ChoiceContinuation:
 - `options`
 - `continuation_token`
 
-其中：
+Of these:
 
-- 前端只需要 `request_id/type/title/description/options`
-- continuation token 可以不直接暴露给前端，但 runtime 需要保留它来恢复流程
+- The frontend only needs `request_id/type/title/description/options`
+- The continuation token need not be exposed directly to the frontend, but the runtime must keep it to resume the flow
 
-## 8. 统一调用链
+## 8. Unified Call Chain
 
-## 8.1 当前调用链
+## 8.1 Current Call Chain
 
 ```text
 business scenario
@@ -324,7 +323,7 @@ business scenario
 -> outcome
 ```
 
-## 8.2 目标调用链
+## 8.2 Target Call Chain
 
 ```text
 business scenario
@@ -338,7 +337,7 @@ business scenario
 -> outcome
 ```
 
-## 8.3 在玩家模式下的展开
+## 8.3 Expansion in Player Mode
 
 ```text
 business scenario
@@ -358,26 +357,26 @@ player submits selected_key
 -> continue original flow
 ```
 
-## 9. 推荐的模块拆分
+## 9. Recommended Module Split
 
-建议新增或调整如下模块：
+It is recommended to add or adjust the following modules:
 
 - `src/systems/single_choice/models.py`
-  - 扩展 request / decision 模型
+  - Extend the request / decision models
 - `src/systems/single_choice/resolver.py`
-  - 新增 `resolve_choice(...)`
+  - Add `resolve_choice(...)`
 - `src/systems/single_choice/continuation.py`
-  - 管理 continuation 注册与恢复
+  - Manage continuation registration and resumption
 - `src/systems/single_choice/engine.py`
-  - 保留 LLM/fallback 决策逻辑
+  - Keep the LLM/fallback decision logic
 - `src/server/services/roleplay_service.py`
-  - 与 runtime / API 对接
+  - Interface with the runtime / API
 
-## 10. Resolver 设计
+## 10. Resolver Design
 
 ## 10.1 `resolve_choice(...)`
 
-建议入口：
+Proposed entry point:
 
 ```python
 async def resolve_choice(
@@ -388,204 +387,204 @@ async def resolve_choice(
     ...
 ```
 
-职责：
+Responsibilities:
 
-1. 构建 request
-2. 选择决策来源
-3. 在必要时挂起并等待恢复
-4. 最终统一调用 `scenario.apply_decision(...)`
+1. Build the request
+2. Choose the decision source
+3. Suspend and wait for resumption when necessary
+4. Finally call `scenario.apply_decision(...)` uniformly
 
-## 10.2 来源判定规则
+## 10.2 Source Determination Rules
 
-建议规则：
+Proposed rules:
 
-1. 若 request avatar 不是当前玩家扮演角色：
-   - 走现有 LLM/fallback 流程
-2. 若 request avatar 是当前玩家扮演角色，且当前 roleplay session 允许 choice：
-   - 创建 player choice request
-   - 注册 continuation
-   - 挂起
-3. 若 roleplay session 不可用或 continuation 注册失败：
-   - 回退为明确错误或 fallback，具体由策略控制
+1. If the request avatar is not the avatar currently being roleplayed by the player:
+   - Go through the existing LLM/fallback flow
+2. If the request avatar is the avatar currently being roleplayed by the player, and the current roleplay session allows choices:
+   - Create a player choice request
+   - Register the continuation
+   - Suspend
+3. If the roleplay session is unavailable or continuation registration fails:
+   - Fall back to an explicit error or fallback, as controlled by the policy
 
-## 10.3 Auto Accept 场景
+## 10.3 Auto Accept Scenarios
 
-像 `item_exchange.should_auto_accept()` 这种可直接自动接受的场景，不应强行进入 continuation。
+Scenarios like `item_exchange.should_auto_accept()` that can be accepted automatically should not be forced into a continuation.
 
-建议规则：
+Proposed rules:
 
-- 如果业务场景明确可自动确定结果，则直接构造 `ChoiceDecision` 并 apply；
-- 不创建 roleplay request。
+- If the business scenario can clearly determine the result automatically, construct a `ChoiceDecision` directly and apply it;
+- Do not create a roleplay request.
 
-## 11. Continuation 设计
+## 11. Continuation Design
 
-## 11.1 为什么必须有 continuation
+## 11.1 Why continuation is required
 
-因为很多业务逻辑在调用 choice 后还会继续执行，比如：
+Because a lot of business logic continues executing after calling a choice, for example:
 
-- 生成结果事件
-- 追加故事事件
-- 更新角色状态
+- Generating result events
+- Appending story events
+- Updating avatar state
 
-若玩家选择不是即时返回，原调用链就需要“恢复点”。
+If the player's choice does not return immediately, the original call chain needs a "resume point".
 
-## 11.2 不建议直接存 Python 闭包到持久层
+## 11.2 Storing Python closures directly in the persistence layer is not recommended
 
-continuation 是纯运行时对象，不进存档。
+A continuation is a purely runtime object and does not go into the save file.
 
-建议：
+Recommendations:
 
-- 只在内存中维护；
-- 用 token + registry 管理；
-- 在 load/reset/reinit 时统一清空。
+- Maintain it only in memory;
+- Manage it with token + registry;
+- Clear it uniformly on load/reset/reinit.
 
-## 11.3 两种实现路径
+## 11.3 Two Implementation Paths
 
-### 路线 A：In-Memory Continuation Registry
+### Path A: In-Memory Continuation Registry
 
-形式：
+Form:
 
 - `continuation_token -> resume handler`
 
-优点：
+Pros:
 
-- 最直观
-- 最适合当前阶段快速落地
+- Most intuitive
+- Best suited for fast delivery at the current stage
 
-缺点：
+Cons:
 
-- 生命周期完全依赖进程内存
-- 必须严格在 reset/load 时清理
+- Lifecycle depends entirely on process memory
+- Must be strictly cleaned up on reset/load
 
-### 路线 B：Scenario Resume Descriptor
+### Path B: Scenario Resume Descriptor
 
-形式：
+Form:
 
-- continuation 只存“场景类型 + 最小必要状态”
-- 恢复时重新构建 scenario，再 apply
+- The continuation stores only "scenario type + minimal necessary state"
+- On resume, rebuild the scenario and then apply
 
-优点：
+Pros:
 
-- 更可控
-- 更少直接依赖闭包
+- More controllable
+- Less direct dependency on closures
 
-缺点：
+Cons:
 
-- 需要设计每个场景的 resume payload
+- Requires designing a resume payload for each scenario
 
-### 建议
+### Recommendation
 
-先用路线 B 作为目标方向，允许实现上暂时以 A 过渡。  
-原因是：
+Use Path B as the target direction, while allowing the implementation to transition temporarily through A.  
+The reasons are:
 
-- 仓库正在做结构收口；
-- 长期看，descriptor 比闭包更利于维护和测试。
+- The repository is in the middle of structural consolidation;
+- In the long run, descriptors are better for maintenance and testing than closures.
 
-## 12. 与 roleplay runtime 的对接
+## 12. Integration with the Roleplay Runtime
 
-## 12.1 Runtime 中需要的最小能力
+## 12.1 Minimal Capabilities Needed in the Runtime
 
-runtime 应至少支持：
+The runtime should support at least:
 
-- 保存当前 `RoleplayPromptRequest(type=choice)`
-- 保存当前活跃 continuation token
-- 查询当前扮演 avatar
-- 在玩家提交 choice 后取回 pending request
+- Storing the current `RoleplayPromptRequest(type=choice)`
+- Storing the currently active continuation token
+- Querying the currently roleplayed avatar
+- Retrieving the pending request after the player submits a choice
 
-## 12.2 提交接口的职责
+## 12.2 Responsibilities of the Submit Interface
 
-`submit_roleplay_choice` 不应该直接承载业务逻辑。
+`submit_roleplay_choice` should not carry business logic directly.
 
-它只应负责：
+It should only be responsible for:
 
-1. 校验 request_id
-2. 校验 avatar_id
-3. 取回 continuation
-4. 生成 `ChoiceDecision(source=PLAYER_ROLEPLAY)`
-5. 调 continuation 恢复原流程
+1. Validating request_id
+2. Validating avatar_id
+3. Retrieving the continuation
+4. Generating `ChoiceDecision(source=PLAYER_ROLEPLAY)`
+5. Calling the continuation to resume the original flow
 
-也就是说：
+In other words:
 
-- API 层不负责“选择 ACCEPT 后到底卖不卖旧武器”
-- 这些语义仍属于 scenario.apply_decision()
+- The API layer is not responsible for "whether to actually sell the old weapon after ACCEPT is chosen"
+- Those semantics still belong to scenario.apply_decision()
 
-## 13. 对现有场景的影响
+## 13. Impact on Existing Scenarios
 
 ## 13.1 `item_exchange`
 
-这是最适合第一批迁移的场景。
+This is the scenario best suited for the first migration batch.
 
-原因：
+Reasons:
 
-- 已有清晰的 `ItemExchangeScenario`
-- 已有 `should_auto_accept()`
-- 业务边界清晰
-- 按钮选项稳定
+- It already has a clear `ItemExchangeScenario`
+- It already has `should_auto_accept()`
+- Clear business boundaries
+- Stable button options
 
-目标迁移方式：
+Target migration approach:
 
-- 让 `resolve_item_exchange()` 内部改用 `resolve_choice(...)`
-- 保持 `ItemExchangeScenario` 基本不变
+- Have `resolve_item_exchange()` switch internally to `resolve_choice(...)`
+- Keep `ItemExchangeScenario` basically unchanged
 
 ## 13.2 `sect_recruitment`
 
-也是较适合的第二批迁移场景。
+Also a fairly suitable scenario for the second migration batch.
 
-原因：
+Reasons:
 
-- 选项语义简单
-- 没有复杂多层后续逻辑
+- Simple option semantics
+- No complex multi-layer follow-up logic
 
-## 13.3 mutual action 响应
+## 13.3 Mutual Action Responses
 
-迁移时应优先包装成统一 scenario，而不是在每个 mutual action 子类里直接塞 roleplay 分支。
+When migrating, these should preferably be wrapped into a unified scenario, rather than stuffing roleplay branches directly into each mutual action subclass.
 
-建议方向：
+Proposed direction:
 
-- 将 `RESPONSE_ACTIONS` 转换为 `ChoiceRequest.options`
-- 统一交给 resolver
+- Convert `RESPONSE_ACTIONS` into `ChoiceRequest.options`
+- Hand them uniformly to the resolver
 
-## 14. 迁移策略
+## 14. Migration Strategy
 
-建议分三步迁移：
+A three-step migration is recommended:
 
-### 第一步：框架接入但不改旧业务
+### Step 1: Integrate the framework without changing old business logic
 
-- 新增 `resolve_choice(...)`
-- 新增 continuation registry / descriptor
-- 旧 `resolve_single_choice(...)` 暂时保留
+- Add `resolve_choice(...)`
+- Add the continuation registry / descriptor
+- Temporarily keep the old `resolve_single_choice(...)`
 
-### 第二步：迁移一个验证场景
+### Step 2: Migrate one validation scenario
 
-- 先迁移 `item_exchange`
-- 跑通 player choice -> continuation -> apply -> outcome
+- Migrate `item_exchange` first
+- Get player choice -> continuation -> apply -> outcome working end to end
 
-### 第三步：逐步替换旧入口
+### Step 3: Gradually replace old entry points
 
 - `sect_recruitment`
-- mutual action 响应
-- 其他有限决策场景
+- Mutual action responses
+- Other finite decision scenarios
 
-## 15. 测试建议
+## 15. Testing Recommendations
 
-建议新增以下测试：
+It is recommended to add the following tests:
 
-1. `resolve_choice()` 在非 roleplay 模式下与旧行为一致。
-2. roleplay 模式下会创建 pending choice request，而不是立即调用 LLM。
-3. continuation 恢复后会调用原 scenario 的 `apply_decision(...)`。
-4. `item_exchange` 迁移后自动接受逻辑仍正常。
-5. load/reset/reinit 后 continuation registry 被清空。
-6. 旧 request_id 提交会返回稳定错误。
-7. simultaneous pending choice 不允许覆盖。
+1. `resolve_choice()` behaves the same as the old behavior in non-roleplay mode.
+2. In roleplay mode, a pending choice request is created instead of calling the LLM immediately.
+3. After the continuation resumes, the original scenario's `apply_decision(...)` is called.
+4. After `item_exchange` is migrated, the auto-accept logic still works.
+5. The continuation registry is cleared after load/reset/reinit.
+6. Submitting an old request_id returns a stable error.
+7. Simultaneous pending choices are not allowed to overwrite each other.
 
-## 16. 结论
+## 16. Conclusion
 
-二期若想避免“每个业务点手写一套玩家按钮逻辑”的碎片化实现，就必须把 `single_choice` 提升为统一有限决策框架。
+If Phase 2 wants to avoid the fragmented implementation of "hand-writing a set of player button logic at every business point", `single_choice` must be elevated into a unified finite decision framework.
 
-这次重构的关键不是按钮，也不是前端，而是：
+The key to this refactor is neither the buttons nor the frontend, but:
 
-- 决策来源统一抽象
-- continuation / resume 机制
-- 业务层只负责场景定义和 decision 应用
+- A unified abstraction of the decision source
+- The continuation / resume mechanism
+- The business layer being responsible only for scenario definition and decision application
 
-按这条路线推进，后续的一次性选择、邀约响应、有限对话都会有统一底盘，而不会演变成越来越难维护的分支地狱。
+Following this route, future one-off choices, invitation responses, and finite dialogues will all share a unified foundation, instead of devolving into an increasingly unmaintainable branching hell.

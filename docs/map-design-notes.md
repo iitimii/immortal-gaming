@@ -1,99 +1,99 @@
-# 地图设计思路
+# Map Design Notes
 
-本文是官方地图扩展的简版设计说明，用来记录“为什么这样做”和“当前维护应守住什么边界”。具体实现细节见：
+A short design note for the official map expansion, recording *why* things are done this way and which boundaries current maintenance should respect. For implementation details see:
 
 - `docs/specs/region-first-map-system.md`
 
-## 核心判断
+## Core Decision
 
-地图第一版不做动态生成，也不做复杂地理沙盒。
+The first version of the map system does no procedural generation and no complex geographic sandbox.
 
-当前更适合做成“官方地图预设 + 地图快照”：
+It is currently better served by "official map presets + map snapshots":
 
-1. 官方提供少数几张质量可控的地图。
-2. 玩家开局选择地图。
-3. 存档保存本局地图快照。
-4. 后续如果角色行动改变地图，可以直接写入快照。
+1. A small number of quality-controlled official maps are provided.
+2. Players choose a map when starting a game.
+3. Saves store a snapshot of the run's map.
+4. If avatar actions later change the map, the change can be written straight into the snapshot.
 
-这样既能让世界有不同空间气质，又不会过早把系统拖进随机生成、地理模拟、经济网络和文化推导的大工程。
+This gives worlds distinct spatial character without dragging the system prematurely into procedural generation, geographic simulation, economic networks, and cultural derivation.
 
-## 当前地图目标
+## Current Map Goals
 
-当前官方地图只扩展地图形状和位置关系：
+The official maps currently vary only map shape and spatial relationships:
 
-1. 从一张地图扩展到三张官方地图。
-2. 三张地图统一尺寸。
-3. 不新增 region。
-4. 不新增地块类型。
-5. 不新增风土文化字段。
-6. 只改变 region 的形状、面积和位置。
+1. Expand from one map to three official maps.
+2. All three maps share the same dimensions.
+3. No new regions.
+4. No new tile types.
+5. No new local-culture fields.
+6. Only region shape, area, and position change.
 
-也就是说，同一个 region id 在不同官方地图里仍然代表同一个区域，但它可以出现在不同位置，也可以有不同大小和边界形状。
+In other words, the same region id still represents the same region in every official map, but it may appear in a different place with a different size and boundary shape.
 
-## 三张官方地图
+## The Three Official Maps
 
-### 九州中土
+### Central Nine Provinces (`classic`)
 
-默认均衡大陆。
+The default, balanced continent.
 
-适合新手和普通开局，地貌分布相对平均，城市、宗门、洞府和荒野不过度偏向某一种风格。
+Suited for new players and ordinary starts. Terrain is fairly evenly distributed; cities, sects, cave dwellings, and wilderness don't lean too heavily toward any one style.
 
-### 万山边境
+### Ten Thousand Mountains (`mountain_frontier`)
 
-山地、森林、险地更多。
+More mountains, forests, and perilous terrain.
 
-它应该有更强的边境感和修行险境感：城市集中在谷地或山口，宗门和洞府更靠近山脉、密林、雪峰等位置。
+It should feel more like a frontier with dangerous cultivation grounds: cities cluster in valleys or mountain passes, while sects and cave dwellings sit closer to ranges, dense forests, snowy peaks, and similar places.
 
-### 沧海诸洲
+### Azure Isles (`island_seas`)
 
-水域、海岸、岛屿更多。
+More water, coastline, and islands.
 
-它应该让世界看起来更分散：region 分布在几个岛屿、半岛或海岸带上，城市多靠近海岸、内湾或河口。
+It should make the world feel more scattered: regions are spread across several islands, peninsulas, or coastal belts, and cities mostly sit near coasts, inner bays, or river mouths.
 
-## 地图预设与地图快照
+## Map Presets vs. Map Snapshots
 
-`map_id` 表示本局开局选择了哪张官方地图。
+`map_id` identifies which official map the run started from.
 
-`map_snapshot` 表示本局当前真实地图。
+`map_snapshot` is the run's current, actual map.
 
-这两个概念要分开：
+The two concepts must stay separate:
 
-1. 新开局时，用 `map_id` 读取官方地图。
-2. 游戏进行中，地图可能被未来系统改变。
-3. 保存时，写入完整 `map_snapshot`。
-4. 读档时，优先恢复 `map_snapshot`，而不是重新读取官方地图。
+1. On a new game, the official map is read via `map_id`.
+2. During play, the map may be changed by future systems.
+3. On save, the full `map_snapshot` is written.
+4. On load, `map_snapshot` is restored first, rather than re-reading the official map.
 
-这样未来即使官方地图文件更新，旧存档也能保持当时的地图状态。
+That way, even if official map files are updated later, old saves keep the map state they had at the time.
 
-## 为什么保存全量地图
+## Why Save the Full Map
 
-当前地图尺寸不大，全量保存 region 归属矩阵成本很低。
+Maps are currently small, so saving the full region-ownership matrix is cheap.
 
-当前不做压缩，也不只保存差异。这样实现更直观，测试更简单，未来地图变化也更容易接入。
+There is no compression and no diff-only saving for now. This keeps the implementation straightforward, the tests simpler, and future map changes easier to integrate.
 
-## 维护方式
+## Maintenance
 
-地图不应该恢复旧的 `tile_map.csv` / `region_map.csv` 双矩阵主路径。
+Do not bring back the old `tile_map.csv` / `region_map.csv` dual-matrix main path.
 
-维护流程应该是：
+The maintenance workflow is:
 
-1. 编辑或生成 `static/game_configs/maps/<id>/map.json`，必要时同步 `static/game_configs/region_tile.csv`。
-2. 运行地图校验工具。
-3. 生成预览图。
-4. 查看预览图修正空间结构。
-5. 在前端实机验证地图渲染、标签、宗门层和角色位置。
+1. Edit or generate `static/game_configs/maps/<id>/map.json`, updating `static/game_configs/region_tile.csv` if needed.
+2. Run the map validation tool.
+3. Generate preview images.
+4. Review the previews and fix the spatial structure.
+5. Verify in the real frontend: map rendering, labels, the sect layer, and avatar positions.
 
-地图是视觉资产，必须能看图调整。
+Maps are visual assets; they must be adjusted by looking at them.
 
-## 后续方向
+## Future Directions
 
-本次只做官方地图预设。后续可以继续扩展：
+This round only adds official map presets. Later extensions could include:
 
-1. region 风土文化。
-2. 角色出生地与地区气质。
-3. 宗门所在地影响宗门风格。
-4. 事件发生地影响故事文本。
-5. 灾害、战争、宗门行动改变地图。
-6. 外接控制 API 查询或修改地图状态。
+1. Regional local culture.
+2. Avatar birthplaces and regional character.
+3. Sect locations influencing sect style.
+4. Event locations influencing story text.
+5. Disasters, wars, and sect actions changing the map.
+6. The external control API querying or modifying map state.
 
-这些都建立在第一版的 `map_id + map_snapshot` 基础上。
+All of these build on the first version's `map_id + map_snapshot` foundation.

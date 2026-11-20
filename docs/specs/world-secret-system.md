@@ -1,94 +1,94 @@
-# 世界秘密系统设计说明
+# World Secret System Design Notes
 
-本文档描述“世界秘密”系统的一期设计。世界秘密是一局游戏中独立于地图预设的隐藏主线：开局选择一个秘密，系统把该秘密拆成若干碎片并在本局随机绑定触发来源；不同角色各自发现碎片，若某角色集齐全部碎片，则知晓完整秘密，并在一次性选择中决定是否公开。
+This document describes the phase-one design of the "world secret" system. A world secret is a hidden main storyline of a run that is independent of the map preset: one secret is chosen at the start of the run, the system splits it into several fragments and randomly binds trigger sources for the current run; different avatars discover fragments independently, and if an avatar collects all fragments, it learns the complete secret and decides in a one-time choice whether to reveal it.
 
-当前设计目标是先把核心体验做稳：一局只启用一个世界秘密；碎片由被动事件发现；角色知识彼此独立；玩家通过 TopBar 以默认上帝视角查看全貌；角色 AI 只知道自己实际掌握的信息。
+The current design goal is to make the core experience solid first: only one world secret is enabled per run; fragments are discovered through passive events; avatar knowledge is independent; the player views the full picture through the TopBar from the default god's-eye view; avatar AI only knows the information it actually holds.
 
-## 1. 目标
+## 1. Goals
 
-世界秘密系统希望表达一种长期主线感：
+The world secret system aims to convey a sense of a long-term main storyline:
 
-1. 世界背后存在一个预设真相。
-2. 真相不是直接通过任务发布，而是由多个碎片从不同角度逐渐还原。
-3. 碎片不绑定具体地图预设；静态内容独立于地图。
-4. 每局开局时，系统把碎片随机落到当前地图的地点、城市或低概率感悟触发中。
-5. 每个角色维护自己的秘密知识，不共享。
-6. 角色集齐全部碎片后获得完整秘密。
-7. 集齐者立刻通过有限选择决定是否公开；非扮演角色由 LLM 决策，扮演角色交给玩家选择。
-8. 公开后完整秘密成为天下共识；所有当前和后续新觉醒/新出生修士默认知道完整秘密。
+1. There is a preset truth behind the world.
+2. The truth is not published directly through a quest, but gradually reconstructed from several fragments seen from different angles.
+3. Fragments are not bound to a specific map preset; the static content is independent of the map.
+4. At the start of each run, the system randomly places fragments into locations, cities or low-probability insight triggers on the current map.
+5. Each avatar maintains its own secret knowledge, which is not shared.
+6. An avatar obtains the complete secret after collecting all fragments.
+7. The collector immediately decides through a finite choice whether to reveal it; non-roleplayed avatars decide via the LLM, and the roleplayed avatar hands the choice to the player.
+8. Once revealed, the complete secret becomes common knowledge under heaven; all current and later newly awakened / newly born cultivators know the complete secret by default.
 
-## 2. 与现有系统的边界
+## 2. Boundaries with Existing Systems
 
-### 2.1 与 world_lore 的区别
+### 2.1 Difference from world_lore
 
-`world_lore` 是开局世界观塑形输入，主要用于改写地图、宗门、物品等静态对象。它是“开局塑形”系统。
+`world_lore` is the start-of-run world-setting shaping input, mainly used to rewrite static objects such as the map, sects and items. It is a "start-of-run shaping" system.
 
-世界秘密是运行中的主线线索进度系统，保存角色个人知识、碎片发现、完整秘密知晓与公开状态。它是“本局进度”系统。
+The world secret is a runtime main-storyline clue progress system that stores avatars' personal knowledge, fragment discoveries, complete-secret awareness and reveal state. It is a "current run progress" system.
 
-因此世界秘密不应塞进 `src/classes/world_lore.py` 或 `world_lore_snapshot`。两者可在同一局并行存在，但一期彼此独立。
+Therefore the world secret should not be stuffed into `src/classes/world_lore.py` or `world_lore_snapshot`. The two can coexist in the same run, but are independent of each other in phase one.
 
-### 2.2 与 random_minor_event 的区别
+### 2.2 Difference from random_minor_event
 
-随机小事件是一次性日常叙事，事件发生后没有长期主线进度。
+Random minor events are one-off everyday narratives with no long-term main-storyline progress after the event happens.
 
-世界秘密有长期状态：
+The world secret has long-term state:
 
-- 本局 active secret；
-- 碎片触发绑定；
-- 每个角色已知碎片；
-- 每个角色是否知晓完整秘密；
-- 是否已公开天下。
+- the active secret of the current run;
+- fragment trigger bindings;
+- the fragments known to each avatar;
+- whether each avatar knows the complete secret;
+- whether it has been revealed to all under heaven.
 
-因此事件只记录发现事实，不是真源；真源必须保存在 `World` 与 `Avatar` 状态中。
+Therefore events only record the fact of discovery and are not the source of truth; the source of truth must be stored in `World` and `Avatar` state.
 
-### 2.3 与 opportunity 的区别
+### 2.3 Difference from opportunity
 
-机缘是单角色限时感应，角色可通过移动接近目标后结算。
+An opportunity is a time-limited sensing for a single avatar, settled after the avatar moves close to the target.
 
-世界秘密不是任务、机缘或行动目标：
+The world secret is not a quest, opportunity or action target:
 
-- 不新增主动探听 action。
-- 城市探听是被动事件。
-- 地点知悉是被动事件。
-- 神秘感悟是低概率被动事件。
-- 角色是否因已知碎片而改变行动，交给 AI 决策。
+- No new active inquiry action is added.
+- City inquiry is a passive event.
+- Location awareness is a passive event.
+- Mysterious insight is a low-probability passive event.
+- Whether an avatar changes its behavior because of known fragments is left to AI decision-making.
 
-## 3. 非目标
+## 3. Non-Goals
 
-一期明确不做以下内容：
+Phase one explicitly does not do the following:
 
-1. 不做多世界秘密同时启用。
-2. 不新增主动探听、调查、追寻秘密 action。
-3. 不做点对点主动告知他人。
-4. 不公开碎片绑定的具体地点或城市给前端玩家。
-5. 不让世界秘密产生数值或世界规则后果。
-6. 不把完整秘密注入所有角色 AI 上下文。
-7. 不做正式多语言补全；一期只维护中文内容。
-8. 不把世界秘密作为 `world_lore` 的一部分参与地图或宗门改写。
+1. No enabling of multiple world secrets at the same time.
+2. No new active inquiry, investigation or secret-pursuing actions.
+3. No point-to-point active telling of others.
+4. No revealing of the specific location or city a fragment is bound to the frontend player.
+5. No numeric or world-rule consequences from the world secret.
+6. No injecting of the complete secret into every avatar's AI context.
+7. No multi-language content; only English (`en-US`) content is maintained.
+8. No including the world secret as part of `world_lore` for map or sect rewriting.
 
-## 4. 开局选择
+## 4. Start-of-Run Selection
 
-开局配置新增 `world_secret_id`，属于 `RunConfig` / `NewGameDefaults`。
+The start-of-run configuration adds `world_secret_id`, which belongs to `RunConfig` / `NewGameDefaults`.
 
-可选值：
+Allowed values:
 
-- `none`：无世界秘密。
-- `random`：从非 `none` 预设中按权重随机选择一个。
-- 具体秘密 ID：启用对应世界秘密。
+- `none`: no world secret.
+- `random`: randomly choose one from the non-`none` presets by weight.
+- A specific secret ID: enable the corresponding world secret.
 
-前端开局下拉框显示具体标题，选项包含：
+The start-of-run frontend dropdown displays the concrete titles; the options include:
 
-- 无
-- 随机
-- 所有预设秘密标题
+- None
+- Random
+- All preset secret titles
 
-`none` 应作为真实配置项存在，而不是仅靠特殊逻辑。这样前后端选择列表、存档与查询都能统一处���。
+`none` should exist as a real configuration entry, not rely only on special-case logic. This way the frontend and backend selection lists, save files and queries can all handle it uniformly.
 
-一局只允许一个 active world secret。后续若要扩展多秘密，应另起版本设计。
+Only one active world secret is allowed per run. If multiple secrets are to be supported later, a new version of the design should be started.
 
-## 5. 静态配置
+## 5. Static Configuration
 
-建议新增两张 CSV：
+It is recommended to add two CSVs:
 
 ```text
 static/game_configs/world_secret.csv
@@ -97,77 +97,77 @@ static/game_configs/world_secret_fragment.csv
 
 ### 5.1 `world_secret.csv`
 
-推荐字段：
+Recommended fields:
 
 ```csv
 id,title,secret,weight
-ID,标题,完整秘密,随机权重
-none,无,,0
-fake_sky,本世界的天空是虚假的,天空并非自然天穹，而是一层巨大伪装屏障；日月星辰只是投影，真正的世界被封闭在某个容器或牢笼之中。,10
+ID,Title,Complete secret,Random weight
+none,None,,0
+fake_sky,This World's Sky Is False,"The sky is not a natural firmament, but a vast masking barrier; the sun, moon, and stars are projections, and the true world is sealed inside some vessel or prison.",10
 ```
 
-说明：
+Notes:
 
-- `id` 使用英文 snake_case，作为稳定 ID。
-- `title` 面向玩家上帝视角展示。
-- `secret` 是完整秘密正文。
-- `weight` 用于 `random` 开局选择。
-- `none` 的 `secret` 为空，碎片数为 0，权重为 0。
+- `id` uses English snake_case as a stable ID.
+- `title` is displayed to the player in the god's-eye view.
+- `secret` is the complete secret body text.
+- `weight` is used for `random` start-of-run selection.
+- For `none`, `secret` is empty, the fragment count is 0 and the weight is 0.
 
 ### 5.2 `world_secret_fragment.csv`
 
-推荐字段：
+Recommended fields:
 
 ```csv
 id,secret_id,order,angle,text,trigger_kind
-ID,秘密ID,顺序,碎片角度,碎片文本,触发类型
-fake_sky_1,fake_sky,1,天象异常,天空有时会在极短瞬间闪烁，星辰的位置会出现不合天象规律的错位。,region
-fake_sky_2,fake_sky,2,飞升边界,高阶修士冲击飞升时，并非无法抵达天外，而是在某个高度撞上一层不可见壁障。,insight
+ID,Secret ID,Order,Fragment angle,Fragment text,Trigger type
+fake_sky_1,fake_sky,1,Celestial Anomaly,"The sky sometimes flickers for the briefest instant, and the positions of the stars slip into arrangements that violate celestial patterns.",region
+fake_sky_2,fake_sky,2,Ascension Boundary,"When high-realm cultivators attempt ascension, it is not that they cannot reach beyond the sky; at a certain height, they strike an unseen wall.",insight
 ```
 
-说明：
+Notes:
 
-- 碎片数量不固定。
-- 当前预设可大多保持 6 个碎片，但系统不写死 6。
-- `angle` 用来保证碎片从不同角度组织真相，不退化成随机怪谈。
-- `trigger_kind` 一期只允许：
+- The number of fragments is not fixed.
+- Most current presets can keep 6 fragments, but the system does not hard-code 6.
+- `angle` ensures that fragments organize the truth from different angles, rather than degenerating into random ghost stories.
+- In phase one, `trigger_kind` only allows:
   - `region`
   - `city`
   - `insight`
 
-## 6. 预设内容
+## 6. Preset Content
 
-一期直接使用需求中给出的这批预设。标题基本保留原文，ID 使用英文 snake_case。
+Phase one directly uses the batch of presets given in the requirements. Titles are kept essentially as in the original, and IDs use English snake_case.
 
-建议 ID：
+Suggested IDs:
 
-- `upper_world_feeds_on_ascenders`：上界大能以飞升修士为血食
-- `fake_sky`：本世界的天空是虚假的
-- `mad_heavenly_dao`：天道意志疯了
-- `simulated_world_code`：世界是计算机中的一组模拟代码
-- `spiritual_qi_is_dead_memories`：灵气其实是死者的记忆
-- `sects_on_colossal_corpses`：所有宗门都建在巨兽尸体上
-- `reincarnation_is_copying`：轮回并不存在，转世只是复制
-- `yao_are_previous_humans`：妖族其实是上一纪元的人族
-- `realms_are_artificial_shackles`：修炼境界是人为设置的枷锁
-- `moon_is_an_eye`：月亮是一颗注视此界的眼睛
-- `secret_realms_are_tumors`：秘境是世界长出的肿瘤
-- `dead_gods_answer_prayers`：诸天神佛早已死亡，回应祈祷的是它们的尸体
+- `upper_world_feeds_on_ascenders`: Upper-Realm Powers Feed on Ascended Cultivators
+- `fake_sky`: This World's Sky Is False
+- `mad_heavenly_dao`: The Will of Heaven Has Gone Mad
+- `simulated_world_code`: The World Is Simulated Code
+- `spiritual_qi_is_dead_memories`: Spiritual Qi Is the Memory of the Dead
+- `sects_on_colossal_corpses`: All Sects Are Built on Colossal Corpses
+- `reincarnation_is_copying`: Reincarnation Does Not Exist; Rebirth Is Copying
+- `yao_are_previous_humans`: The Yao Were Humans from the Previous Era
+- `realms_are_artificial_shackles`: Cultivation Realms Are Artificial Shackles
+- `moon_is_an_eye`: The Moon Is an Eye Watching This World
+- `secret_realms_are_tumors`: Secret Realms Are Tumors Grown by the World
+- `dead_gods_answer_prayers`: The Gods and Buddhas Are Dead; Their Corpses Answer Prayers
 
-文案可为配置落表做轻微结构整理，但不改变核���含义。
+The copy may be lightly restructured for the configuration tables, but its core meaning must not change.
 
-## 7. 运行时模型
+## 7. Runtime Model
 
-建议新增：
+Suggested additions:
 
 ```text
 src/classes/world_secret.py
 src/systems/world_secret.py
 ```
 
-### 7.1 静态定义模型
+### 7.1 Static definition model
 
-建议领域模型：
+Suggested domain model:
 
 ```python
 @dataclass
@@ -189,17 +189,17 @@ class WorldSecretDefinition:
     fragments: list[WorldSecretFragment]
 ```
 
-这些对象由 CSV loader 生成，不直接保存到存档。
+These objects are produced by the CSV loader and are not saved directly into the save file.
 
-### 7.2 世界运行时状态
+### 7.2 World runtime state
 
-建议挂在 `World` 上：
+Suggested to hang on `World`:
 
 ```python
 world_secret: WorldSecretRuntime = field(default_factory=WorldSecretRuntime)
 ```
 
-建议模型：
+Suggested model:
 
 ```python
 @dataclass
@@ -221,23 +221,23 @@ class WorldSecretRuntime:
     public_revealed_by_avatar_id: str | None = None
 ```
 
-说明：
+Notes:
 
-- `selected_secret_id = "none"` 表示无秘密。
-- `trigger_bindings` 是本局随机绑定结果，必须存档。
-- `resolved_by_avatar_ids` 记录历史上集齐过秘密的角色。
-- `disclosure_decisions` 记录集齐者的一次性公开/沉默选择。
-- `public_revealed` 为真后，所有角色默认知道完整秘密。
+- `selected_secret_id = "none"` means there is no secret.
+- `trigger_bindings` is the random binding result of the current run and must be saved.
+- `resolved_by_avatar_ids` records the avatars that have ever collected the secret.
+- `disclosure_decisions` records each collector's one-time reveal/silence choice.
+- Once `public_revealed` is true, all avatars know the complete secret by default.
 
-### 7.3 角色个人知识
+### 7.3 Avatar personal knowledge
 
-建议挂在 `Avatar` 上：
+Suggested to hang on `Avatar`:
 
 ```python
 world_secret_knowledge: dict[str, AvatarWorldSecretKnowledge]
 ```
 
-建议模型：
+Suggested model:
 
 ```python
 @dataclass
@@ -248,234 +248,234 @@ class AvatarWorldSecretKnowledge:
     full_secret_month: int | None = None
 ```
 
-如果一期只启用一个秘密，也仍建议按 `secret_id` 映射保存，避免后续扩展返工。
+Even if phase one only enables one secret, it is still recommended to store it as a mapping keyed by `secret_id`, to avoid rework when extending later.
 
-## 8. 本局初始化
+## 8. Current Run Initialization
 
-开局初始化时机：地图已加载、`World` 已创建后，NPC 初始化前后均可；若要让初始角色立刻受到公开状态影响，建议在角色创建后统一调用一次知识同步。
+Start-of-run initialization timing: after the map is loaded and `World` is created, either before or after NPC initialization; if the initial avatars should be immediately affected by the reveal state, it is recommended to call a knowledge sync once uniformly after avatar creation.
 
-推荐流程：
+Recommended flow:
 
-1. 读取 `run_config.world_secret_id`。
-2. 若为 `none`：
-   - `world.world_secret.selected_secret_id = "none"`；
-   - `trigger_bindings = {}`；
-   - 不触发后续逻辑。
-3. 若为 `random`：
-   - 从非 `none` 秘密中按 `weight` 随机选择。
-4. 若为具体 ID：
-   - 启用对应秘密。
-5. 为每个 fragment 建立 trigger binding：
-   - `region`：随机绑定一个非荒野、非城市 region。
-   - `city`：随机绑定一个城市 region。
-   - `insight`：不绑定地点。
-6. 绑定结果进入 `world.world_secret.trigger_bindings`。
+1. Read `run_config.world_secret_id`.
+2. If it is `none`:
+   - `world.world_secret.selected_secret_id = "none"`;
+   - `trigger_bindings = {}`;
+   - Do not trigger any subsequent logic.
+3. If it is `random`:
+   - Randomly choose from the non-`none` secrets by `weight`.
+4. If it is a specific ID:
+   - Enable the corresponding secret.
+5. Create a trigger binding for each fragment:
+   - `region`: randomly bind a non-wilderness, non-city region.
+   - `city`: randomly bind a city region.
+   - `insight`: no location binding.
+6. The binding results go into `world.world_secret.trigger_bindings`.
 
-`region` 允许绑定普通区域、洞府/遗迹、宗门驻地等非城市 region。宗门驻地可能让某些线索被宗门成员更容易接触，这是允许的叙事效果。
+`region` may bind to ordinary regions, cave dwellings/ruins, sect headquarters and other non-city regions. Sect headquarters may make certain clues easier for sect members to come across, which is an allowed narrative effect.
 
-## 9. 被动触发
+## 9. Passive Triggers
 
-世界秘密发现是被动事件，不新增主动 action。
+World secret discovery is a passive event; no active action is added.
 
-建议新增 phase：
+Suggested new phase:
 
 ```python
 phase_world_secret_discovery(world, living_avatars)
 ```
 
-接入位置建议在动作执行后、普通世界事件/机缘检测附近，使角色当月移动到目标区域后即可触发。
+It is suggested to hook it in after action execution, near the ordinary world event / opportunity checks, so that an avatar can trigger it in the same month it moves into the target region.
 
-### 9.1 地点知悉
+### 9.1 Location awareness
 
-条件：
+Conditions:
 
-1. 本局 active secret 不是 `none`。
-2. fragment 的 `trigger_kind == "region"`。
-3. 角色当前 `avatar.tile.region.id == binding.region_id`。
-4. 角色尚未知道该 fragment。
-5. 概率命中。
+1. The active secret of the current run is not `none`.
+2. The fragment's `trigger_kind == "region"`.
+3. The avatar's current `avatar.tile.region.id == binding.region_id`.
+4. The avatar does not yet know the fragment.
+5. The probability roll hits.
 
-事件：
+Event:
 
-- 生成普通事件。
-- 事件文本可包含碎片文本。
-- `related_avatars=[avatar.id]`。
-- `is_major=False`。
-- `is_story=False`。
+- Generate an ordinary event.
+- The event text may include the fragment text.
+- `related_avatars=[avatar.id]`.
+- `is_major=False`.
+- `is_story=False`.
 
-### 9.2 城市探听
+### 9.2 City inquiry
 
-城市探听是被动事件，不存在主动探听 action。
+City inquiry is a passive event; there is no active inquiry action.
 
-条件：
+Conditions:
 
-1. fragment 的 `trigger_kind == "city"`。
-2. 角色当前位于绑定城市内，即 `avatar.tile.region.id == binding.city_region_id`。
-3. 角色尚未知道该 fragment。
-4. 概率命中。
+1. The fragment's `trigger_kind == "city"`.
+2. The avatar is currently inside the bound city, i.e. `avatar.tile.region.id == binding.city_region_id`.
+3. The avatar does not yet know the fragment.
+4. The probability roll hits.
 
-事件可写：
-
-```text
-某某在某城的坊市流言中听闻一段隐秘线索：……
-```
-
-### 9.3 神秘感悟
-
-条件：
-
-1. fragment 的 `trigger_kind == "insight"`。
-2. 角色可以触发世界事件。
-3. 角色尚未知道该 fragment。
-4. 低概率命中。
-
-事件可写：
+The event can read:
 
 ```text
-某某于冥冥感悟中窥见一角真相：……
+So-and-so heard a hidden clue in the market rumors of a certain city: ...
 ```
 
-### 9.4 概率节奏
+### 9.3 Mysterious insight
 
-需求目标为“中速”。具体概率由实现时定，建议量级：
+Conditions:
 
-- 地点知悉：每角色每月约 `0.04`。
-- 城市探听：每角色每月约 `0.05`。
-- 神秘感悟：每角色每月约 `0.003`。
+1. The fragment's `trigger_kind == "insight"`.
+2. The avatar can trigger world events.
+3. The avatar does not yet know the fragment.
+4. A low-probability roll hits.
 
-这些值可先作为静态平衡配置，后续按体验调参。
-
-同一角色同月允许获得多个碎片。若多个触发同时命中，按命中结果全部记录和产出事件。
-
-## 10. 集齐与完整秘密
-
-当某角色已知 fragment 覆盖 active secret 的所有 fragment 时：
-
-1. 设置该角色 `knows_full_secret=True`。
-2. 设置 `full_secret_month=int(world.month_stamp)`。
-3. 记录 `world.world_secret.resolved_by_avatar_ids.add(avatar.id)`。
-4. 生成重大事件，表示该角色知晓了某个世界秘密。
-5. 立刻触发公开/沉默选择。
-
-集齐事件不写完整秘密正文，避免与“是否公开”语义冲突。
-
-推荐事件：
+The event can read:
 
 ```text
-某某将零散线索连成一线，终于知晓了一桩足以动摇此界根基的世界秘密。
+So-and-so glimpsed a corner of the truth through a mysterious insight: ...
 ```
 
-注意：事件不包含 title，也不包含完整 secret。TopBar 上帝视角可以展示完整信息，但世界事件流仍按角色视角保留悬念。
+### 9.4 Probability pacing
 
-## 11. 公开/沉默选择
+The requirement target is "medium pace". Specific probabilities are decided at implementation time; suggested magnitudes:
 
-每个集齐者只有一次选择：
+- Location awareness: about `0.04` per avatar per month.
+- City inquiry: about `0.05` per avatar per month.
+- Mysterious insight: about `0.003` per avatar per month.
+
+These values can start as static balance configuration and be tuned later based on experience.
+
+The same avatar may obtain multiple fragments in the same month. If multiple triggers hit at the same time, all hits are recorded and produce events.
+
+## 10. Collection and the Complete Secret
+
+When the fragments known to an avatar cover all fragments of the active secret:
+
+1. Set the avatar's `knows_full_secret=True`.
+2. Set `full_secret_month=int(world.month_stamp)`.
+3. Record `world.world_secret.resolved_by_avatar_ids.add(avatar.id)`.
+4. Generate a major event indicating that the avatar has learned a world secret.
+5. Immediately trigger the reveal/silence choice.
+
+The collection event does not include the complete secret body text, to avoid conflicting with the "whether to reveal" semantics.
+
+Recommended event:
+
+```text
+So-and-so connected scattered clues and finally learned a world secret capable of shaking this realm's foundations.
+```
+
+Note: the event contains neither the title nor the complete secret. The TopBar god's-eye view can display the full information, but the world event feed still preserves suspense from the avatar's perspective.
+
+## 11. Reveal/Silence Choice
+
+Each collector has only one choice:
 
 - `share_all`
 - `keep_secret`
 
-### 11.1 决策来源
+### 11.1 Decision source
 
-默认由 avatar 走 LLM 决策。
+By default, the avatar decides via the LLM.
 
-若集齐者正是当前扮演模式中的受控角色，则走现有 `single_choice` / roleplay choice，由玩家选择。
+If the collector is exactly the avatar currently controlled in roleplay mode, it goes through the existing `single_choice` / roleplay choice and the player chooses.
 
-若玩家正在扮演 A，但 B 集齐秘密，则 B 仍由 LLM 自动决策。
+If the player is roleplaying A but B collects the secret, B still decides automatically via the LLM.
 
-### 11.2 LLM 失败 fallback
+### 11.2 LLM failure fallback
 
-若 LLM 决策失败或返回无效选项，fallback 默认为 `keep_secret`。
+If the LLM decision fails or returns an invalid option, the fallback defaults to `keep_secret`.
 
-理由：
+Rationale:
 
-- 避免由于模型失败无意间把秘密公开天下；
-- 沉默是副作用更小的默认选择。
+- Avoids accidentally revealing the secret to the world because of a model failure;
+- Silence is the default choice with fewer side effects.
 
-### 11.3 公开
+### 11.3 Reveal
 
-若选择 `share_all`：
+If `share_all` is chosen:
 
-1. `world.world_secret.public_revealed=True`。
-2. 记录公开时间与公开者。
-3. 所有当前在世角色默认知道完整秘密。
-4. 后续新出生 / 新觉醒修士默认知道完整秘密。
-5. 不需要给所有角色补齐碎片。
+1. `world.world_secret.public_revealed=True`.
+2. Record the reveal time and the revealer.
+3. All currently living avatars know the complete secret by default.
+4. Later newly born / newly awakened cultivators know the complete secret by default.
+5. There is no need to fill in all fragments for every avatar.
 
-公开后事件可写完整秘密标题，但是否写完整正文仍应谨慎。推荐事件只写标题和公开事实，不写长正文：
-
-```text
-某某将一桩世界秘密公之于众：「本世界的天空是虚假的」。此后天下修士皆知此界真相。
-```
-
-完整秘密正文仍主要通过 TopBar 世界秘密面板展示。
-
-### 11.4 沉默
-
-若选择 `keep_secret`：
-
-1. 只记录 `disclosure_decisions[avatar.id] = "keep_secret"`。
-2. 不传播给其他角色。
-3. 生成普通或重大事件均可；建议普通事件。
-
-推荐事件：
+The event after a reveal may include the complete secret title, but whether to include the full body text should still be handled with care. The recommended event only includes the title and the fact of the reveal, not the long body text:
 
 ```text
-某某知晓真相后选择沉默，只将这桩秘密压在心底。
+So-and-so revealed a world secret to all: 'This World's Sky Is False'. From now on, cultivators under heaven know this realm's truth.
 ```
 
-## 12. 信息边界
+The complete secret body text is still mainly displayed through the TopBar world secret panel.
 
-本系统必须严格区分三类视角。
+### 11.4 Silence
 
-### 12.1 玩家 TopBar 上帝视角
+If `keep_secret` is chosen:
 
-玩家默认上帝视角全公开。
+1. Only record `disclosure_decisions[avatar.id] = "keep_secret"`.
+2. Do not propagate it to other avatars.
+3. Either an ordinary or a major event is acceptable; an ordinary event is recommended.
 
-TopBar 世界秘密面板从开局起可展示：
+Recommended event:
 
-- 当前秘密 title；
-- 完整 secret；
-- 所有 fragment；
-- 每个 fragment 被哪些角色知道；
-- 每个角色已知碎片数；
-- 哪些角色已知完整秘密；
-- 是否已公开；
-- 公开者与公开时间。
+```text
+So-and-so chose silence after learning the truth, pressing this secret deep into the heart.
+```
 
-但 TopBar 不公开 fragment 绑定的具体地点或城市。
+## 12. Information Boundaries
 
-### 12.2 事件流
+This system must strictly distinguish three kinds of perspective.
 
-事件流可出现碎片文本。
+### 12.1 Player TopBar god's-eye view
 
-事件流不应在角色集齐前直接写完整秘密正文。集齐事件也不写完整 secret。
+The player sees everything by default from the god's-eye view.
 
-若公开天下，事件可写 title 和公开事实；完整正文仍不必写入普通事件，以免事件栏过长。
+From the start of the run, the TopBar world secret panel can display:
 
-### 12.3 Avatar AI / 决策上下文
+- the current secret title;
+- the complete secret;
+- all fragments;
+- which avatars know each fragment;
+- the number of fragments known to each avatar;
+- which avatars know the complete secret;
+- whether it has been revealed;
+- the revealer and the reveal time.
 
-这是最关键的边界。
+But the TopBar does not reveal the specific location or city a fragment is bound to.
 
-角色 AI 只能看到自己实际知道的信息：
+### 12.2 Event feed
 
-- 已知 fragment 文本；
-- 若自己已知完整秘密，看到完整 secret；
-- 若世界已公开，看到完整 secret；
-- 不知道完整秘密时，不能看到 title；
-- 不知道完整秘密时，不能看到 secret；
-- 不知道完整秘密时，不能看到未发现 fragment；
-- 不能看到 fragment 绑定地点或城市。
+Fragment text may appear in the event feed.
 
-原因：title 本身常常就是答案，例如“本世界的天空是虚假的”。如果在角色只知道碎片时把 title 放进 avatar info，就等于直接透题，破坏碎片推理语义。
+The event feed should not write the complete secret body text before an avatar has collected everything. The collection event also does not include the complete secret.
 
-因此 avatar info 中的字段不应叫 `active_secret_title`。推荐结构：
+If revealed to the world, the event may include the title and the fact of the reveal; the full body text still need not be written into ordinary events, to keep the event panel from getting too long.
+
+### 12.3 Avatar AI / decision context
+
+This is the most critical boundary.
+
+Avatar AI can only see the information it actually knows:
+
+- the text of known fragments;
+- the complete secret, if it knows the complete secret itself;
+- the complete secret, if the world has had it revealed;
+- not the title, when it does not know the complete secret;
+- not the secret, when it does not know the complete secret;
+- not undiscovered fragments, when it does not know the complete secret;
+- never the locations or cities fragments are bound to.
+
+Reason: the title itself is often the answer, e.g. "This World's Sky Is False". Putting the title into avatar info while the avatar only knows fragments would amount to giving away the answer directly, breaking the fragment-deduction semantics.
+
+Therefore the field in avatar info should not be called `active_secret_title`. Recommended structure:
 
 ```json
 "world_secret_knowledge": {
   "known_fragments": [
     {
-      "angle": "天象异常",
-      "text": "天空有时会在极短瞬间闪烁，星辰的位置会��现不合天象规律的错位。"
+      "angle": "Celestial Anomaly",
+      "text": "The sky sometimes flickers for the briefest instant, and the positions of the stars slip into arrangements that violate celestial patterns."
     }
   ],
   "knows_full_secret": false,
@@ -483,42 +483,42 @@ TopBar 世界秘密面板从开局起可展示：
 }
 ```
 
-若角色已知完整秘密或世界已公开：
+If the avatar knows the complete secret or the world has had it revealed:
 
 ```json
 "world_secret_knowledge": {
   "known_fragments": [
     {
-      "angle": "天象异常",
-      "text": "天空有时会在极短瞬间闪烁，星辰的位置会出现不合天象规律的错位。"
+      "angle": "Celestial Anomaly",
+      "text": "The sky sometimes flickers for the briefest instant, and the positions of the stars slip into arrangements that violate celestial patterns."
     }
   ],
   "knows_full_secret": true,
-  "secret_title": "本世界的天空是虚假的",
-  "full_secret": "天空并非自然天穹，而是一层巨大伪装屏障；日月星辰只是投影，真正的世界被封闭在某个容器或牢笼之中。"
+  "secret_title": "This World's Sky Is False",
+  "full_secret": "The sky is not a natural firmament, but a vast masking barrier; the sun, moon, and stars are projections, and the true world is sealed inside some vessel or prison."
 }
 ```
 
-公开后不需要给角色补齐所有碎片；AI 上下文只需要完整 secret 和其实际发现过的 fragment。
+After a reveal there is no need to fill in all fragments for the avatar; the AI context only needs the complete secret and the fragments it has actually discovered.
 
-## 13. AI 决策接入
+## 13. AI Decision Integration
 
-角色已知碎片应进入 avatar info，并在决策时可见。
+An avatar's known fragments should go into avatar info and be visible during decision-making.
 
-推荐只在详细信息中加入，例如：
+It is recommended to add them only to the detailed info, for example:
 
 - `avatar.get_expanded_info(detailed=True)`
-- 或 AI 决策上下文组装层
+- or the AI decision context assembly layer
 
-不建议在轻量 `get_info()` 中塞入大量碎片文本，以免列表、详情和 prompt 体积失控。
+It is not recommended to stuff large amounts of fragment text into the lightweight `get_info()`, to keep the size of lists, details and prompts under control.
 
-不知道完整秘密时，AI 只能基于碎片自行联想和决策；系统不硬编码具体行为。
+When it does not know the complete secret, the AI can only associate and decide on its own based on the fragments; the system does not hard-code specific behavior.
 
-知道完整秘密后，AI 可在思考、目标、行动选择中自行反应。系统一期不提供数值后果。
+After it knows the complete secret, the AI may react on its own in thinking, goals and action choices. In phase one the system provides no numeric consequences.
 
-## 14. 查询 API
+## 14. Query API
 
-建议新增只读接口：
+Suggested new read-only endpoints:
 
 ```text
 GET /api/v1/query/meta/world-secrets
@@ -527,32 +527,32 @@ GET /api/v1/query/world-secrets/overview
 
 ### 14.1 `meta/world-secrets`
 
-用于开局下拉框。
+Used for the start-of-run dropdown.
 
-返回示例：
+Example response:
 
 ```json
 {
   "secrets": [
-    {"id": "none", "title": "无"},
-    {"id": "random", "title": "随机"},
-    {"id": "fake_sky", "title": "本世界的天空是虚假的"}
+    {"id": "none", "title": "None"},
+    {"id": "random", "title": "Random"},
+    {"id": "fake_sky", "title": "This World's Sky Is False"}
   ]
 }
 ```
 
 ### 14.2 `world-secrets/overview`
 
-用于 TopBar 面板，上帝视角全公开，但不公开触发地点。
+Used for the TopBar panel; everything is visible from the god's-eye view, but trigger locations are not revealed.
 
-返回示例：
+Example response:
 
 ```json
 {
   "active_secret": {
     "id": "fake_sky",
-    "title": "本世界的天空是虚假的",
-    "secret": "天空并非自然天穹，而是一层巨大伪装屏障；日月星辰只是投影，真正的世界被封闭在某个容器或牢笼之中。",
+    "title": "This World's Sky Is False",
+    "secret": "The sky is not a natural firmament, but a vast masking barrier; the sun, moon, and stars are projections, and the true world is sealed inside some vessel or prison.",
     "fragment_count": 6
   },
   "public_revealed": false,
@@ -561,17 +561,17 @@ GET /api/v1/query/world-secrets/overview
     {
       "id": "fake_sky_1",
       "order": 1,
-      "angle": "天象异常",
-      "text": "天空有时会在极短瞬间闪烁，星辰的位置会出现不合天象规律的错位。",
+      "angle": "Celestial Anomaly",
+      "text": "The sky sometimes flickers for the briefest instant, and the positions of the stars slip into arrangements that violate celestial patterns.",
       "known_by": [
-        {"id": "avatar_1", "name": "李青", "is_dead": false}
+        {"id": "avatar_1", "name": "Li Qing", "is_dead": false}
       ]
     }
   ],
   "avatars": [
     {
       "id": "avatar_1",
-      "name": "李青",
+      "name": "Li Qing",
       "known_fragment_count": 1,
       "fragment_count": 6,
       "knows_full_secret": false,
@@ -582,13 +582,13 @@ GET /api/v1/query/world-secrets/overview
 }
 ```
 
-`none` 返回可为：
+The `none` response can be:
 
 ```json
 {
   "active_secret": {
     "id": "none",
-    "title": "无",
+    "title": "None",
     "secret": "",
     "fragment_count": 0
   },
@@ -598,13 +598,13 @@ GET /api/v1/query/world-secrets/overview
 }
 ```
 
-## 15. 前端
+## 15. Frontend
 
-TopBar 始终显示世界秘密栏位。
+The TopBar always displays the world secret slot.
 
-若当前为 `none`，标签可显示“世界秘密：无”或点击后面板显示“本局未启用世界秘密”。
+If the current value is `none`, the label can show "World Secret: None", or the panel can show "No world secret is enabled in this run" after clicking.
 
-建议新增：
+Suggested additions:
 
 ```text
 web/src/stores/worldSecret.ts
@@ -612,25 +612,25 @@ web/src/components/game/panels/WorldSecretModal.vue
 web/src/composables/useWorldSecretModal.ts
 ```
 
-接入位置：
+Integration points:
 
 - `web/src/components/layout/StatusBar.vue`
 - `web/src/components/layout/StatusBarPanels.vue`
 - `web/src/api/modules/world.ts`
-- `web/src/api/mappers/worldSecret.ts` 或并入现有 world mapper
+- `web/src/api/mappers/worldSecret.ts` or merged into the existing world mapper
 - `web/src/types/api.ts`
 
-弹窗展示建议：
+Suggested modal layout:
 
-1. 摘要区：当前秘密标题、完整秘密、公开状态。
-2. 碎片区：按 `order` 展示 `angle` 与 `text`，列出���知角色。
-3. 角色区：每个角色已知进度、是否知晓完整秘密、是否已做公开/沉默选择。
+1. Summary section: current secret title, complete secret, reveal status.
+2. Fragment section: display `angle` and `text` in `order`, listing the avatars who know each one.
+3. Avatar section: each avatar's known progress, whether it knows the complete secret, and whether it has made the reveal/silence choice.
 
-不要在面板中显示碎片绑定的 region/city。
+Do not display the region/city a fragment is bound to in the panel.
 
-## 16. 存档结构
+## 16. Save Structure
 
-世界级状态进入 `world_data`：
+World-level state goes into `world_data`:
 
 ```json
 "world_secret": {
@@ -653,7 +653,7 @@ web/src/composables/useWorldSecretModal.ts
 }
 ```
 
-角色级知识进入 avatar save dict：
+Avatar-level knowledge goes into the avatar save dict:
 
 ```json
 "world_secret_knowledge": {
@@ -665,151 +665,151 @@ web/src/composables/useWorldSecretModal.ts
 }
 ```
 
-开发阶段不要求为旧存档付出复杂兼容成本；读档时用 `.get` 零成本兜底即可。
+During the development phase there is no requirement to pay complex compatibility costs for old save files; a zero-cost `.get` fallback on load is enough.
 
-## 17. 新角色同步
+## 17. New Avatar Sync
 
-当 `world.world_secret.public_revealed=True` 时：
+When `world.world_secret.public_revealed=True`:
 
-1. 当前所有在世角色默认知道完整秘密。
-2. 后续新出生 / 新觉醒修士创建后也默认知道完整秘密。
-3. 不需要补齐碎片。
+1. All currently living avatars know the complete secret by default.
+2. Later newly born / newly awakened cultivators also know the complete secret by default after creation.
+3. There is no need to fill in fragments.
 
-建议提供统一 helper：
+Suggested unified helper:
 
 ```python
 sync_avatar_public_world_secret_knowledge(world, avatar)
 ```
 
-在新角色创建、读档后重建、公开天下后批量调用。
+Call it on new avatar creation, on rebuild after loading, and in batch after a reveal to the world.
 
-## 18. 事件语义
+## 18. Event Semantics
 
-### 18.1 碎片发现事件
+### 18.1 Fragment discovery event
 
 - `is_major=False`
 - `is_story=False`
 - `related_avatars=[avatar.id]`
-- 可包含碎片文本
+- May include the fragment text
 
-### 18.2 集齐事件
-
-- `is_major=True`
-- `is_story=False`
-- `related_avatars=[avatar.id]`
-- 不包含 title
-- 不包含完整 secret
-
-### 18.3 公开事件
+### 18.2 Collection event
 
 - `is_major=True`
 - `is_story=False`
 - `related_avatars=[avatar.id]`
-- 可包含 title
-- 推荐不包含完整 secret 正文
+- Does not include the title
+- Does not include the complete secret
 
-### 18.4 沉默事件
+### 18.3 Reveal event
 
-- 可为 `is_major=False`
+- `is_major=True`
 - `is_story=False`
 - `related_avatars=[avatar.id]`
-- 不包含完整 secret
+- May include the title
+- Recommended not to include the complete secret body text
+
+### 18.4 Silence event
+
+- May be `is_major=False`
+- `is_story=False`
+- `related_avatars=[avatar.id]`
+- Does not include the complete secret
 
 ## 19. i18n
 
-一期只维护中文。
+The game is English-only; `en-US` is the sole and source locale.
 
-由于世界秘密正文和碎片是大量中文叙事内容，第一版可直接放入共享 CSV，前端中文文案补 `zh-CN`。不做正式多语言补全。
+The world secret body text and fragments are large amounts of narrative content; the first version can place them directly in the CSVs, with frontend copy added to `en-US`.
 
-若未来进入 Phase 2：
+Rules to follow:
 
-1. 语言列表以 `static/locales/registry.json` 为准。
-2. 配置文本迁移到 `game_configs_modules` 或本地化 CSV。
-3. `.po` 中 `msgid` 不得直接写中文。
-4. 不直接改 `LC_MESSAGES/*.po` 合并产物。
-5. 改完源文件后运行 `python tools/i18n/build_mo.py`。
+1. The language list is defined by `static/locales/registry.json`.
+2. Configuration text may migrate to `game_configs_modules` or the localized CSV under `static/locales/en-US/game_configs/`.
+3. `msgid` in `.po` files uses English source text or stable keys.
+4. The split source files under `modules/` and `game_configs_modules/` are the source of truth; do not edit the merged `LC_MESSAGES/*.po` artifacts directly.
+5. Run `python tools/i18n/build_mo.py` after editing source files.
 
-## 20. 推荐实现位置
+## 20. Recommended Implementation Locations
 
-建议后续实现时新增独立模块，避免把逻辑堆入 `main.py`、`world_lore` 或随机事件系统。
+When implementing later, it is recommended to add independent modules, to avoid piling logic into `main.py`, `world_lore` or the random event system.
 
-可能位置：
+Possible locations:
 
 - `src/classes/world_secret.py`
 - `src/systems/world_secret.py`
 - `src/systems/world_secret_loader.py`
 - `src/systems/world_secret_service.py`
 
-接入点：
+Integration points:
 
-- `src/config/settings_schema.py`：新增 `world_secret_id`
-- `src/server/init_flow.py`：初始化本局 secret 与 bindings
-- `src/classes/core/world.py`：挂载 runtime
-- `src/classes/core/avatar/core.py`：挂载个人知识
-- `src/sim/save/save_game.py`：保存 world secret
-- `src/sim/load/load_game.py`：恢复 world secret
-- `src/sim/save/avatar_save_mixin.py`：保存 avatar secret knowledge
-- `src/sim/load/avatar_load_mixin.py`：恢复 avatar secret knowledge
-- `src/sim/simulator_engine/phases/world.py`：新增被动发现 phase
-- `src/sim/simulator_engine/simulator.py`：接入 phase
-- `src/server/services/game_query_service.py`：新增查询组装
-- `src/server/api/public_v1/query.py`：新增 v1 query 路由
+- `src/config/settings_schema.py`: add `world_secret_id`
+- `src/server/init_flow.py`: initialize the current run's secret and bindings
+- `src/classes/core/world.py`: mount the runtime
+- `src/classes/core/avatar/core.py`: mount personal knowledge
+- `src/sim/save/save_game.py`: save the world secret
+- `src/sim/load/load_game.py`: restore the world secret
+- `src/sim/save/avatar_save_mixin.py`: save avatar secret knowledge
+- `src/sim/load/avatar_load_mixin.py`: restore avatar secret knowledge
+- `src/sim/simulator_engine/phases/world.py`: add the passive discovery phase
+- `src/sim/simulator_engine/simulator.py`: hook in the phase
+- `src/server/services/game_query_service.py`: add query assembly
+- `src/server/api/public_v1/query.py`: add the v1 query routes
 
-## 21. 测试建议
+## 21. Testing Suggestions
 
-至少覆盖：
+Cover at least:
 
-1. CSV loader 能加载 `none` 与所有预设。
-2. 每个非 `none` 秘密有至少一个碎片。
-3. 每个 fragment 的 `secret_id` 都存在。
-4. 同一秘密下 fragment `order` 不重复。
-5. `trigger_kind` 只允许 `region/city/insight`。
-6. `random` 不会选中 `none`。
-7. `none` 初始化时不生成 trigger bindings。
-8. 具体 secret 初始化后，每个非 insight fragment 有合法绑定。
-9. `region` 绑定不选择城市，不选择荒野。
-10. `city` 绑定只选择城市。
-11. 角色在绑定 region 内概率命中时获得 fragment。
-12. 角色在绑定 city 内概率命中时获得 fragment。
-13. insight 概率命中时获得 fragment。
-14. 已知 fragment 不重复获得。
-15. 同一角色同月可获得多个命中的 fragment。
-16. 集齐全部 fragment 后 `knows_full_secret=True`。
-17. 集齐事件不包含 title 和完整 secret。
-18. LLM 选择 `share_all` 后 world public revealed，并让当前所有在世角色知道完整 secret。
-19. LLM 失败 fallback 为 `keep_secret`。
-20. 扮演角色集齐时走 roleplay choice；非扮演角色仍走 LLM。
-21. 公开后新觉醒角色默认知道完整 secret。
-22. 公开后不强制补齐所有 fragment。
-23. avatar AI context 未知完整秘密时只含 known fragments，不含 title/secret/未发现 fragments/绑定地点。
-24. avatar AI context 已知完整秘密时可含 title 与 full secret。
-25. TopBar overview 全公开 title/secret/fragments，但不公开绑定地点。
-26. world secret 与 avatar knowledge 可保存和读档恢复。
-27. `/api/v1/query/meta/world-secrets` 返回 `none/random/具体秘密`。
-28. `/api/v1/query/world-secrets/overview` 在 `none` 时返回稳定空态。
-29. 前端 lazy modal 初始 `show=true` 时会请求数据，watcher 使用 `{ immediate: true }`。
+1. The CSV loader can load `none` and all presets.
+2. Every non-`none` secret has at least one fragment.
+3. Every fragment's `secret_id` exists.
+4. Fragment `order` is not duplicated within the same secret.
+5. `trigger_kind` only allows `region/city/insight`.
+6. `random` never selects `none`.
+7. `none` initialization does not generate trigger bindings.
+8. After initializing a specific secret, every non-insight fragment has a valid binding.
+9. `region` bindings do not choose cities or wilderness.
+10. `city` bindings only choose cities.
+11. An avatar obtains a fragment when inside the bound region and the probability roll hits.
+12. An avatar obtains a fragment when inside the bound city and the probability roll hits.
+13. A fragment is obtained when the insight probability roll hits.
+14. Known fragments are not obtained again.
+15. The same avatar can obtain multiple hit fragments in the same month.
+16. `knows_full_secret=True` after collecting all fragments.
+17. The collection event contains neither the title nor the complete secret.
+18. After the LLM chooses `share_all`, the world is publicly revealed and all currently living avatars know the complete secret.
+19. LLM failure falls back to `keep_secret`.
+20. When the roleplayed avatar collects everything, it goes through the roleplay choice; non-roleplayed avatars still go through the LLM.
+21. After a reveal, newly awakened avatars know the complete secret by default.
+22. After a reveal, filling in all fragments is not forced.
+23. When the avatar AI context does not know the complete secret, it only contains known fragments, without title/secret/undiscovered fragments/bound locations.
+24. When the avatar AI context knows the complete secret, it may contain the title and the full secret.
+25. The TopBar overview fully reveals title/secret/fragments, but not bound locations.
+26. The world secret and avatar knowledge can be saved and restored on load.
+27. `/api/v1/query/meta/world-secrets` returns `none/random/specific secrets`.
+28. `/api/v1/query/world-secrets/overview` returns a stable empty state for `none`.
+29. The frontend lazy modal requests data when initially mounted with `show=true`, and the watcher uses `{ immediate: true }`.
 
-## 22. 当前拍板结论
+## 22. Current Decisions
 
-本轮需求确认后的最终结论：
+Final conclusions after this round of requirement confirmation:
 
-1. 玩家 TopBar 是默认上帝视角，全公开完整秘密和碎片。
-2. 开局下拉框显示具体标题。
-3. `none` 是真实配置项。
-4. 一局只允许一个世界秘密。
-5. 碎片数量不固定。
-6. 每个碎片配置 `trigger_kind`。
-7. `region` 绑定非城市 region，允许宗门驻地。
-8. 城市探听必须位于对应城市内，且是被动事件。
-9. 触发节奏为中速，具体概率由实现调参。
-10. 同一角色同月可以获得多个碎片。
-11. 碎片进入 avatar 决策信息，但未知完整秘密时不提供 title，避免透题。
-12. 碎片文本可以出现在事件流。
-13. 集齐后立刻选择公开/沉默。
-14. 非扮演角色由 LLM 选择；只有集齐者正被玩家扮演时才交给玩家。
-15. 公开只给完整秘密，不补齐碎片。
-16. 公开后后续新觉醒/新出生修士默认知道完整秘密。
-17. 世界秘密无数值后果。
-18. 一期只中文。
-19. 世界秘密独立于 `world_lore`。
-20. 预设内容使用需求中给出的原始批次，标题基本保留原文。
+1. The player TopBar is the default god's-eye view and fully reveals the complete secret and fragments.
+2. The start-of-run dropdown displays concrete titles.
+3. `none` is a real configuration entry.
+4. Only one world secret is allowed per run.
+5. The number of fragments is not fixed.
+6. Each fragment configures a `trigger_kind`.
+7. `region` binds to non-city regions; sect headquarters are allowed.
+8. City inquiry requires being inside the corresponding city, and is a passive event.
+9. The trigger pace is medium; specific probabilities are tuned at implementation.
+10. The same avatar can obtain multiple fragments in the same month.
+11. Fragments go into avatar decision info, but the title is not provided while the complete secret is unknown, to avoid giving away the answer.
+12. Fragment text may appear in the event feed.
+13. Immediately after collecting everything, the reveal/silence choice is made.
+14. Non-roleplayed avatars choose via the LLM; the choice goes to the player only when the collector is being roleplayed by the player.
+15. A reveal only grants the complete secret and does not fill in fragments.
+16. After a reveal, later newly awakened / newly born cultivators know the complete secret by default.
+17. The world secret has no numeric consequences.
+18. Phase one is English-only (`en-US`).
+19. The world secret is independent of `world_lore`.
+20. Preset content uses the original batch given in the requirements, with titles kept essentially as in the original.

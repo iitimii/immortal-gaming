@@ -1,15 +1,9 @@
-<!-- 语言 / Language -->
-<h3 align="center">
-  <a href="README.md">简体中文</a> · <a href="docs/readme/ZH-TW_README.md">繁體中文</a> · <a href="docs/readme/EN_README.md">English</a> · <a href="docs/readme/VI-VN_README.md">Tiếng Việt</a> · <a href="docs/readme/JA-JP_README.md">日本語</a> · <a href="docs/readme/FR-FR_README.md">Français</a>
-</h3>
-<p align="center">— ✦ —</p>
-
-# 修仙世界模拟器 (Cultivation World Simulator)
+# Cultivation World Simulator
 
 ![GitHub stars](https://img.shields.io/github/stars/4thfever/cultivation-world-simulator?style=social)
-[![LINUX DO](https://img.shields.io/badge/LINUX.DO-%E7%A4%BE%E5%8C%BA-2EA44F)](https://linux.do/t/topic/2439437)
-[![Bilibili](https://img.shields.io/badge/Bilibili-%E6%9F%A5%E7%9C%8B%E8%A7%86%E9%A2%91-FB7299?logo=bilibili)](https://space.bilibili.com/527346837)
-![QQ Group](https://img.shields.io/badge/QQ%E7%BE%A4-1071821688-deepskyblue?logo=tencent-qq&logoColor=white)
+[![LINUX DO](https://img.shields.io/badge/LINUX.DO-Community-2EA44F)](https://linux.do/t/topic/2439437)
+[![Bilibili](https://img.shields.io/badge/Bilibili-Watch_Video-FB7299?logo=bilibili)](https://space.bilibili.com/527346837)
+![QQ Group](https://img.shields.io/badge/QQ%20Group-1071821688-deepskyblue?logo=tencent-qq&logoColor=white)
 [![Discord](https://img.shields.io/badge/Discord-Join%20Us-7289da?logo=discord&logoColor=white)](https://discord.gg/3Wnjvc7K)
 [![Epic Games Store](https://img.shields.io/badge/Epic%20Games%20Store-Get%20It%20Free-313131?logo=epicgames&logoColor=white)](https://store.epicgames.com/p/ai-cultivation-world-simulator-adebb8)
 
@@ -22,118 +16,121 @@
 
 
 <p align="center">
-  <img src="assets/screenshot.gif" alt="游戏演示" width="100%">
+  <img src="assets/screenshot.gif" alt="Game Demo" width="100%">
 </p>
 
-> **你将作为“天道”，观察一个由规则系统与 AI 共同驱动的修仙世界模拟器自行演化。**
-> **全员 LLM 驱动、群像涌现叙事，桌面版已在 Epic Games Store 免费发布，也支持 Docker 部署、源码开发与二次创作。**
+> **Act as the "Heavenly Dao" and observe a cultivation world simulator driven by rule systems and AI as it evolves on its own.**
+> **Fully LLM-driven with emergent ensemble storytelling, now available for free on the Epic Games Store, and also suitable for Docker deployment, source development, and secondary creation.**
 
 <table align="center">
   <tr>
-    <td align="center"><a href="https://hellogithub.com/repository/4thfever/cultivation-world-simulator" target="_blank"><img src="https://api.hellogithub.com/v1/widgets/recommend.svg?rid=d0d75240fb95445bba1d7af7574d8420&claim_uid=DogxfCROM1PBL89" alt="Featured｜HelloGitHub" width="300" /></a></td>
+    <td align="center"><a href="https://hellogithub.com/repository/4thfever/cultivation-world-simulator" target="_blank"><img src="https://api.hellogithub.com/v1/widgets/recommend.svg?rid=d0d75240fb95445bba1d7af7574d8420&claim_uid=DogxfCROM1PBL89" alt="Featured|HelloGitHub" width="300" /></a></td>
     <td align="center"><a href="https://trendshift.io/repositories/20502" target="_blank"><img src="https://trendshift.io/api/badge/repositories/20502" alt="4thfever%2Fcultivation-world-simulator | Trendshift" width="300" /></a></td>
   </tr>
 </table>
 
-## 📖 简介
+> This repository is an English-only fork of [4thfever/cultivation-world-simulator](https://github.com/4thfever/cultivation-world-simulator).
+> All credit for the original game, world design, and art goes to the upstream author and its [contributors](CONTRIBUTORS.md).
 
-这是一个 **AI 驱动的修仙世界模拟器**。
-模拟器中，每一个修士都是独立的Agent，可以自由观测环境并做出决策。同时，为了避免AI的幻觉与过度发散，编入了复杂灵活的修仙世界观与运行规则。在规则与 AI 共同编织的世界中，修士Agent们与宗门意志相互博弈又合作，新的精彩剧情不断涌现。你可以静观沧海桑田，见证门派兴衰与天骄崛起，也可以降下天劫或魔改心灵，微妙地干预世界进程。
+## 📖 Introduction
 
-### ✨ 核心亮点
+This is an **AI-driven cultivation world simulator**.
+In the simulator, every cultivator is an independent Agent who can freely observe the environment and make decisions. At the same time, to avoid AI hallucinations and excessive divergence, a complex and flexible cultivation worldview and operating rules have been incorporated. In a world woven by rules and AI, cultivator Agents and sect wills compete and cooperate with each other, and new exciting plots constantly emerge. You can quietly observe the changes of the world, witness the rise and fall of sects and the rise of geniuses, or bring down heavenly tribulations or modify minds to subtly intervene in the world's progress.
 
-- 👁️ **扮演“天道”**：你不是修士，而是掌控世界规则的**天道**。观察众生百态，体味苦辣酸甜。
-- 🤖 **全员 AI 驱动**：每个 NPC 都独立基于LLM驱动，都有独立的性格、记忆、人际关系和行为逻辑。他们会根据即时局势做出决策，会有爱恨情仇，会结党营私，甚至会逆天改命。
-- 🌏 **规则作为基石**：世界基于灵根、境界、功法、性格、宗门、丹药、兵器、武道会、拍卖会、寿元等元素共同组成的严谨体系运行。AI 的想象力被限制在合理又足够丰富的修仙逻辑框架内，确保世界真实可信。
-- 🦋 **涌现式剧情**：开发者也不知道下一秒会发生什么。没有预设剧本，只有无数因果交织出的世界演变。宗门大战、正魔之争、天骄陨落，皆由世界逻辑自主推演。
+### ✨ Core Highlights
+
+- 👁️ **Play as "Heavenly Dao"**: You are not a cultivator, but the **Heavenly Dao** who controls the rules of the world. Observe all walks of life and experience their joys and sorrows.
+- 🤖 **Fully AI-driven**: Every NPC is independently driven by LLM, with unique personality, memory, interpersonal relationships, and behavioral logic. They will make decisions based on the immediate situation, have love and hate, form cliques, and even change their fate against the heavens.
+- 🌏 **Rules as the Foundation**: The world runs on a rigorous system composed of spiritual roots, realms, cultivation methods, personalities, sects, elixirs, weapons, martial arts tournaments, auctions, lifespans, and other elements. AI's imagination is limited within a reasonable and rich cultivation logic framework, ensuring the world is authentic and credible.
+- 🦋 **Emergent Plot**: Even the developers don't know what will happen in the next second. There is no preset script, only world evolution woven by countless causes and effects. Sect wars, the struggle between righteous and demonic, and the fall of geniuses are all independently deduced by the world logic.
 
 <table border="0">
   <tr>
     <td width="33%" valign="top">
-      <h4 align="center">宗门体系</h4>
-      <img src="assets/zh-CN/screenshots/宗门.png" width="100%" />
+      <h4 align="center">Sect System</h4>
+      <img src="assets/en-US/screenshots/sect.png" width="100%" />
       <br/><br/>
-      <h4 align="center">城市区域</h4>
-      <img src="assets/zh-CN/screenshots/城市.png" width="100%" />
+      <h4 align="center">City Region</h4>
+      <img src="assets/en-US/screenshots/city.png" width="100%" />
       <br/><br/>
-      <h4 align="center">事件经历</h4>
-      <img src="assets/zh-CN/screenshots/经历.png" width="100%" />
+      <h4 align="center">Event History</h4>
+      <img src="assets/en-US/screenshots/history.png" width="100%" />
     </td>
     <td width="33%" valign="top">
-      <h4 align="center">角色面板</h4>
-      <img src="assets/zh-CN/screenshots/角色.png" width="100%" />
+      <h4 align="center">Character Panel</h4>
+      <img src="assets/en-US/screenshots/avatar.png" width="100%" />
       <br/><br/>
-      <h4 align="center">性格与装备</h4>
-      <img src="assets/zh-CN/screenshots/特质.png" width="100%" />
+      <h4 align="center">Personality & Equipment</h4>
+      <img src="assets/en-US/screenshots/traits.png" width="100%" />
       <br/><br/>
-      <h4 align="center">自主思考</h4>
-      <img src="assets/zh-CN/screenshots/思考.png" width="100%" />
+      <h4 align="center">Independent Thinking</h4>
+      <img src="assets/en-US/screenshots/thinking.png" width="100%" />
       <br/><br/>
-      <h4 align="center">江湖绰号</h4>
-      <img src="assets/zh-CN/screenshots/绰号.png" width="100%" />
+      <h4 align="center">Nicknames</h4>
+      <img src="assets/en-US/screenshots/nicknames.png" width="100%" />
     </td>
     <td width="33%" valign="top">
-      <h4 align="center">洞府探秘</h4>
-      <img src="assets/zh-CN/screenshots/洞府.png" width="100%" />
+      <h4 align="center">Cave Dwellings</h4>
+      <img src="assets/en-US/screenshots/cave_dwelling.png" width="100%" />
       <br/><br/>
-      <h4 align="center">角色信息</h4>
-      <img src="assets/zh-CN/screenshots/角色信息.png" width="100%" />
+      <h4 align="center">Character Info</h4>
+      <img src="assets/en-US/screenshots/avatar_info.png" width="100%" />
       <br/><br/>
-      <h4 align="center">丹药/法宝/武器</h4>
-      <img src="assets/zh-CN/screenshots/丹药.png" width="100%" />
-      <img src="assets/zh-CN/screenshots/法宝.png" width="100%" />
-      <img src="assets/zh-CN/screenshots/武器.png" width="100%" />
+      <h4 align="center">Elixirs/Treasures/Weapons</h4>
+      <img src="assets/en-US/screenshots/elixirs.png" width="100%" />
+      <img src="assets/en-US/screenshots/treasures.png" width="100%" />
+      <img src="assets/en-US/screenshots/weapons.png" width="100%" />
     </td>
   </tr>
 </table>
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 推荐方式
+### Recommended Method
 
-- **想改代码或调试**：使用源码部署，并准备 Python `3.10+`、Node.js `18+` 和可用的模型服务。
-- **想直接体验**：可前往 [Epic Games Store](https://store.epicgames.com/p/ai-cultivation-world-simulator-adebb8) 免费获取桌面版；也可以使用 Docker 一键部署。
-- 如需快速查阅世界信息、动作、宗门等资料，可在 `tools/wiki` 生成本地辅助 wiki。
+- **Want to modify code or debug**: Use source code deployment and prepare Python `3.10+`, Node.js `18+`, and available model services.
+- **Want to play directly**: Get the desktop version for free on the [Epic Games Store](https://store.epicgames.com/p/ai-cultivation-world-simulator-adebb8), or use one-click Docker deployment.
+- For a quick reference wiki on world info, actions, sects, and more, generate the local helper site in `tools/wiki`.
 
-### 首次启动说明
+### First Launch Instructions
 
-- 使用 Epic 桌面版时，启动后按设置页提示确认模型配置，即可开始新游戏。
-- 使用源码或 Docker 时，首次进入后需要先在设置页配置可用的模型预设（如 DeepSeek / MiniMax / Ollama），再开始新游戏。
-- 开发模式下，前端页面通常会自动打开；如果没有自动打开，请访问启动日志中显示的前端地址。
+- When using the Epic desktop version, launch the game and confirm the model configuration as prompted on the settings page before starting a new game.
+- When using source code or Docker, after entering for the first time, you need to configure available model presets (such as DeepSeek / MiniMax / Ollama) on the settings page before starting a new game.
+- In development mode, the frontend page usually opens automatically; if it doesn't, please visit the frontend address shown in the startup logs.
 
-### 方式零：Epic Games Store 桌面版
+### Method 0: Epic Games Store Desktop Version
 
-适合只想游玩、不想配置开发环境的玩家。
+Suitable for players who just want to play without setting up a development environment.
 
-1. 前往 [Epic Games Store](https://store.epicgames.com/p/ai-cultivation-world-simulator-adebb8) 免费获取并安装。
-2. 启动游戏后，按设置页提示确认模型配置，即可开始新游戏。
-3. 如果你希望使用自己的模型服务，可以在设置页切换 DeepSeek / MiniMax / Ollama 等预设。
+1. Get and install it for free from the [Epic Games Store](https://store.epicgames.com/p/ai-cultivation-world-simulator-adebb8).
+2. After launching the game, confirm the model configuration as prompted on the settings page, then start a new game.
+3. If you want to use your own model service, switch to presets such as DeepSeek / MiniMax / Ollama on the settings page.
 
-### 方式一：源码部署（开发模式，推荐）
+### Method 1: Source Code Deployment (Development Mode, Recommended)
 
-适合需要修改代码或调试的开发者。
+Suitable for developers who need to modify code or debug.
 
-1. **安装依赖并启动**
+1. **Install dependencies and start**
    ```bash
-   # 1. 安装后端依赖
+   # 1. Install backend dependencies
    pip install -r requirements.txt
 
-   # 2. 安装前端依赖 (需 Node.js)
+   # 2. Install frontend dependencies (requires Node.js)
    cd web && npm install && cd ..
 
-   # 3. 启动服务 (自动拉起前后端)
+   # 3. Start service (automatically pulls up frontend and backend)
    python src/server/main.py --dev
    ```
 
-2. **配置模型**
-   在前端设置页选择模型预设（如 DeepSeek / MiniMax / Ollama）后，即可开始新游戏。配置会自动保存到用户数据目录。
+2. **Configure Model**
+   After selecting a model preset (such as DeepSeek / MiniMax / Ollama) on the frontend settings page, you can start a new game. The configuration will be automatically saved to the user data directory.
 
-3. **访问前端**
-   开发模式会自动拉起前端开发服务器，请访问启动日志中显示的前端地址，通常为 `http://localhost:5173`。
+3. **Visit Frontend**
+   Development mode will automatically pull up the frontend development server. Please visit the frontend address shown in the startup logs, usually `http://localhost:5173`.
 
-### 方式二：Docker 一键部署（未测试）
+### Method 2: Docker One-click Deployment (Untested)
 
-无需配置环境，直接运行即可：
+No environment configuration required, just run directly:
 
 ```bash
 git clone https://github.com/4thfever/cultivation-world-simulator.git
@@ -141,32 +138,32 @@ cd cultivation-world-simulator
 docker-compose up -d --build
 ```
 
-访问前端：`http://localhost:8123`
+Visit frontend: `http://localhost:8123`
 
-后端容器通过 `CWS_DATA_DIR=/data` 统一持久化用户数据，包含设置、密钥、存档和日志。默认已映射到宿主机 `./docker-data`，即使执行 `docker compose down` 后重新 `up`，这些数据也会保留。
+The backend container persists user data through `CWS_DATA_DIR=/data`, including settings, secrets, saves, and logs. It is mapped to the host's `./docker-data` by default, so this data will be retained even if `docker compose down` is executed and then `up` again.
 
 <details>
-<summary><b>局域网/手机访问配置 (点击展开)</b></summary>
+<summary><b>LAN/Mobile Access Configuration (Click to expand)</b></summary>
 
-> ⚠️ 移动端 UI 暂未完全适配，仅供尝鲜。
+> ⚠️ Mobile UI is not fully adapted yet, for early access only.
 
-1. **后端配置**：推荐通过环境变量启动后端，例如 PowerShell 中执行 `$env:SERVER_HOST='0.0.0.0'; python src/server/main.py --dev`。如需改默认值，可编辑只读配置 `static/config.yml` 中的 `system.host`。
-2. **前端配置**：修改 `web/vite.config.ts`，在 server 块中添加 `host: '0.0.0.0'`。
-3. **访问方式**：确保手机与电脑在同一 WiFi 下，访问 `http://<电脑局域网IP>:5173`。
+1. **Backend Configuration**: It is recommended to start the backend through environment variables, for example, execute `$env:SERVER_HOST='0.0.0.0'; python src/server/main.py --dev` in PowerShell. If you need to change the default value, you can edit the read-only configuration `system.host` in `static/config.yml`.
+2. **Frontend Configuration**: Modify `web/vite.config.ts` and add `host: '0.0.0.0'` in the server block.
+3. **Access Method**: Ensure the phone and computer are on the same WiFi, and visit `http://<Computer LAN IP>:5173`.
 
 </details>
 
 <details>
-<summary><b>外接 API / Agent/Claw 接入 (点击展开)</b></summary>
+<summary><b>External API / Agent/Claw Access (Click to expand)</b></summary>
 
-这部分适合做外部 agent / Claw 接入、自动化脚本，或者实现“观察 -> 决策 -> 干预 -> 再观察”的闭环游玩。
+This part is suitable for external agent / Claw access, automation scripts, or achieving a closed-loop gameplay of "observation -> decision -> intervention -> re-observation".
 
-推荐直接围绕稳定命名空间开发：
+It is recommended to develop directly around stable namespaces:
 
-- 只读查询：`/api/v1/query/*`
-- 受控写入：`/api/v1/command/*`
+- Read-only Query: `/api/v1/query/*`
+- Controlled Write: `/api/v1/command/*`
 
-常见起点接口：
+Common starting endpoints:
 
 - `GET /api/v1/query/runtime/status`
 - `GET /api/v1/query/world/state`
@@ -176,15 +173,15 @@ docker-compose up -d --build
 - `POST /api/v1/command/avatar/*`
 - `POST /api/v1/command/world/*`
 
-最小接入流程通常是：
+The minimal access process is usually:
 
-1. 先调用 `GET /api/v1/query/runtime/status` 判断当前运行状态。
-2. 如未开局，调用 `POST /api/v1/command/game/start` 初始化。
-3. 用 `world/state`、`events`、`detail` 拉取世界快照与目标信息。
-4. 根据策略调用一个 `command` 执行干预。
-5. 干预后重新 `query`，不要依赖本地缓存推断结果。
+1. First call `GET /api/v1/query/runtime/status` to determine the current running state.
+2. If the game has not started, call `POST /api/v1/command/game/start` to initialize.
+3. Use `world/state`, `events`, and `detail` to pull world snapshots and target information.
+4. Call a `command` to perform an intervention according to the strategy.
+5. `query` again after intervention, do not rely on local cache to infer results.
 
-接口成功时通常返回：
+When the interface is successful, it usually returns:
 
 ```json
 {
@@ -193,37 +190,39 @@ docker-compose up -d --build
 }
 ```
 
-失败时会返回结构化错误，可读取 `detail.code` 与 `detail.message` 做程序判断。
+When it fails, it will return a structured error, and you can read `detail.code` and `detail.message` for program judgment.
 
-补充说明：
+Additional notes:
 
-- 应用设置仍通过 `/api/settings*` 与 `/api/settings/llm*` 管理，它们属于设置真源，不属于外接控制兼容层。
-- 更完整的接口清单、分层设计与扩展约定请参考 `docs/specs/external-control-api.md`。
+- Application settings are still managed through `/api/settings*` and `/api/settings/llm*`. They belong to the source of truth for settings and do not belong to the external control compatibility layer.
+- For a more complete interface list, layered design, and extension conventions, please refer to `docs/specs/external-control-api.md`.
 
 </details>
 
-### 💭 为什么要做这个？
-修仙网文中的世界很精彩，但读者永远只能观察到一隅。
+### 💭 Why make this?
+The world in cultivation web novels is wonderful, but readers can only ever observe a corner of it.
 
-修仙品类游戏要么是完全的预设剧本，要么依靠人工设计的简单规则状态机，有许许多多牵强和降智的表现。
+Cultivation genre games are either completely preset scripts or rely on simple rule state machines designed by humans, with many far-fetched and unintelligent performances.
 
-在大语言模型出现后，让“每一个角色都是鲜活的”的目标变得似乎可以触达了。
+After the emergence of large language models, the goal of making "every character vivid" seems reachable.
 
-希望能够创造出纯粹的、快乐的、直接的、活着的修仙世界的沉浸感。不是像一些游戏公司的纯粹宣传工具，也不是像斯坦福小镇那样的纯粹研究，而是能给玩家提供真实代入感和沉浸感的实际世界。
+I hope to create a pure, happy, direct, and living sense of immersion in the cultivation world. It's not like a pure publicity tool for some game companies, nor like a pure research like Stanford Town, but an actual world that can provide players with real sense of substitution and immersion.
 
-## 📞 联系方式
-如果您对项目有任何问题或建议，欢迎提交 Issue。
+## 📞 Contact
+If you have any questions or suggestions for the project, welcome to submit an Issue.
 
-- **Bilibili**: [点击关注](https://space.bilibili.com/527346837)
-- **QQ群**: `1071821688` (入群答案：肥桥今天吃什么)
-- **Discord**: [加入社区](https://discord.gg/3Wnjvc7K)
+- **Bilibili**: [Click to Follow](https://space.bilibili.com/527346837)
+- **QQ Group** (upstream, Chinese-speaking): `1071821688`
+- **Discord**: [Join Community](https://discord.gg/3Wnjvc7K)
+
+The community channels above belong to the upstream project.
 
 ---
 
 
 ## ⭐ Star History
 
-如果你觉得这个项目有趣，请给我们一个 Star ⭐！这将激励我们持续改进和添加新功能。
+If you find this project interesting, please give us a Star ⭐! This will motivate us to continuously improve and add new features.
 
 <div align="center">
   <a href="https://star-history.com/#4thfever/cultivation-world-simulator&Date">
@@ -231,15 +230,15 @@ docker-compose up -d --build
   </a>
 </div>
 
-# 分享
+## 🔗 Sharing
 
-感谢贡献者为本 repo 贡献分享。
+Thanks to contributors for sharing this repo and related projects.
 
 - [cultivation-world-simulator-api-skill](https://github.com/RealityError/cultivation-world-simulator-api-skill)
 - [cultivation-world-simulator-android](https://github.com/RealityError/cultivation-world-simulator-android)
-- [LINUX DO 社区分享帖](https://linux.do/t/topic/2439437)
+- [LINUX DO community post](https://linux.do/t/topic/2439437)
 
-## 👥 贡献者
+## 👥 Contributors
 
 <table>
   <tr>
@@ -263,136 +262,136 @@ docker-compose up -d --build
   </tr>
 </table>
 
-更多贡献细节请查看 [CONTRIBUTORS.md](CONTRIBUTORS.md)。
+For more contribution details, please check [CONTRIBUTORS.md](CONTRIBUTORS.md).
 
-## 📋 功能开发进度
+## 📋 Feature Development Progress
 
-### 🏗️ 基础系统
-- ✅ 基础世界地图、时间、事件系统
-- ✅ 多样化地形类型（平原、山脉、森林、沙漠、水域等）
-- ✅ 基于Web前端显示界面
-- ✅ 基础模拟器框架
-- ✅ 配置文件
-- ✅ 桌面版一键启动包
-- ✅ 菜单栏 & 存档 & 读档
-- ✅ 灵活自定义LLM接口
-- ✅ 支持mac os
-- ✅ 多语言本地化
-- ✅ 开始游戏页
-- ✅ BGM & 音效
-- ✅ 玩家可编辑
-- ✅ 扮演模式
+### 🏗️ Foundation System
+- ✅ Basic world map, time, event system
+- ✅ Diverse terrain types (plains, mountains, forests, deserts, waters, etc.)
+- ✅ Web frontend-based display interface
+- ✅ Basic simulator framework
+- ✅ Configuration files
+- ✅ One-click desktop build
+- ✅ Menu bar & Save & Load
+- ✅ Flexible custom LLM interface
+- ✅ Support Mac OS
+- ✅ Localization framework (gettext-based; this fork ships English only)
+- ✅ Start game page
+- ✅ BGM & Sound effects
+- ✅ Player editable
+- ✅ Roleplay mode
 
-### 🗺️ 世界系统
-- ✅ 基础tile地块系统
-- ✅ 基础区域、修行区域、城市区域、宗门区域
-- ✅ 同地块NPC交互
-- ✅ 灵气分布与产出设计
-- ✅ 世界事件
-- ✅ 天地人榜
-- ✅ 更大更美观地图 & 随机地图
+### 🗺️ World System
+- ✅ Basic tile system
+- ✅ Basic regions, cultivation regions, city regions, sect regions
+- ✅ Same-tile NPC interaction
+- ✅ Spiritual energy distribution and output design
+- ✅ World events
+- ✅ Heaven, Earth, and Mortal Rankings
+- ✅ Larger and more beautiful maps & Random maps
 
-### 👤 角色系统
-- ✅ 角色基础属性系统
-- ✅ 修炼境界体系
-- ✅ 灵根系统
-- ✅ 基础移动动作
-- ✅ 角色特质与性格
-- ✅ 境界突破机制
-- ✅ 角色间的相互关系
-- ✅ 角色交互范围
-- ✅ 角色Effects系统：增益/减益效果
-- ✅ 功法
-- ✅ 兵器 & 辅助装备
-- ✅ 外挂系统
-- ✅ 丹药
-- ✅ 角色长短期记忆
-- ✅ 角色的长短期目标，支持玩家主动设定
-- ✅ 角色绰号
-- ✅ 生活技能
-  - ✅ 采集、狩猎、采矿、种植
-  - ✅ 铸造
-  - ✅ 炼丹
-- ✅ 凡人
+### 👤 Character System
+- ✅ Character basic attribute system
+- ✅ Cultivation realm system
+- ✅ Spiritual root system
+- ✅ Basic movement actions
+- ✅ Character traits and personality
+- ✅ Realm breakthrough mechanism
+- ✅ Interpersonal relationships between characters
+- ✅ Character interaction range
+- ✅ Character Effects system: buff/debuff effects
+- ✅ Cultivation methods
+- ✅ Weapons & Auxiliary equipment
+- ✅ Cheat system
+- ✅ Elixirs
+- ✅ Character short and long-term memory
+- ✅ Character's short and long-term goals, supporting player active setting
+- ✅ Character nicknames
+- ✅ Life skills
+  - ✅ Gathering, Hunting, Mining, Planting
+  - ✅ Casting
+  - ✅ Alchemy
+- ✅ Mortals
 
-### 🏛️ 组织
-- ✅ 宗门
-  - ✅ 设定、功法、疗伤、驻地、行事风格、任务
-  - ✅ 宗门特殊动作：合欢宗（双修），百兽宗（御兽）等
-  - ✅ 宗门等阶
-  - ✅ 道统
-- ✅ 朝廷
-- ✅ 组织意志AI
-- ✅ 组织任务、资源、机能
-- ✅ 组织间关系网络
+### 🏛️ Organizations
+- ✅ Sects
+  - ✅ Settings, cultivation methods, healing, base, conduct style, tasks
+  - ✅ Sect special actions: Hehuan Sect (dual cultivation), Baishou Sect (beast taming), etc.
+  - ✅ Sect tiers
+  - ✅ Orthodoxy
+- ✅ Imperial Court
+- ✅ Organization Will AI
+- ✅ Organization tasks, resources, functions
+- ✅ Inter-organization relationship network
 
-### ⚡ 动作系统
-- ✅ 基础移动动作
-- ✅ 动作执行框架
-- ✅ 有明确规则的定义动作
-- ✅ 长动作执行和结算系统
-  - ✅ 支持多月份持续的动作（如修炼、突破、游戏等）
-  - ✅ 动作完成时的自动结算机制
-- ✅ 多人动作：动作发起与动作响应
-- ✅ 影响人际关系的LLM动作
-- ✅ 系统性的动作注册与运行逻辑
+### ⚡ Action System
+- ✅ Basic movement actions
+- ✅ Action execution framework
+- ✅ Defined actions with clear rules
+- ✅ Long-term action execution and settlement system
+  - ✅ Support multi-month continuous actions (such as cultivation, breakthrough, games, etc.)
+  - ✅ Automatic settlement mechanism when the action is completed
+- ✅ Multiplayer actions: action initiation and action response
+- ✅ LLM actions affecting interpersonal relationships
+- ✅ Systematic action registration and operation logic
 
-### 🎭 事件系统
-- ✅ 天地灵气变动
-- ✅ 多人大事件：
-  - ✅ 拍卖会
-  - ✅ 秘境探索
-  - ✅ 天下武道会
-  - ✅ 宗门传道大会
-- ✅ 突发事件
-  - ✅ 宝物出世
+### 🎭 Event System
+- ✅ Heaven and earth spiritual energy changes
+- ✅ Large multiplayer events:
+  - ✅ Auction
+  - ✅ Secret realm exploration
+  - ✅ World Martial Arts Tournament
+  - ✅ Sect preaching assembly
+- ✅ Sudden events
+  - ✅ Treasure emergence
 
-### ⚔️ 战斗系统
-- ✅ 优劣互克关系
-- ✅ 胜率计算系统
+### ⚔️ Combat System
+- ✅ Advantage and counter relationship
+- ✅ Win rate calculation system
 
-### 🎒 物品系统
-- ✅ 基础物品、灵石框架
-- ✅ 物品交易机制
+### 🎒 Item System
+- ✅ Basic items, spirit stone framework
+- ✅ Item trading mechanism
 
-### 🌿 生态系统
-- ✅ 动植物
-- ✅ 狩猎、采集、材料系统
-- ✅ 妖族
+### 🌿 Ecosystem
+- ✅ Animals and plants
+- ✅ Hunting, gathering, material system
+- ✅ Demon races
 
-### 🤖 AI增强系统
-- ✅ LLM接口集成
-- ✅ 角色AI系统（规则AI + LLM AI）
-- ✅ 协程化决策机制，异步运行，多线程加速ai决策
-- ✅ 长期规划和目标导向行为
-- ✅ 突发动作响应系统（对外界刺激的即时反应）
-- ✅ LLM驱动的NPC对话、思考、互动
-- ✅ LLM生成小片段剧情
-- ✅ 根据任务需求分别接入max/flash模型
-- ✅ 小剧场
-  - ✅ 战斗小剧场
-  - ✅ 对话小剧场
-  - ✅ 小剧场不同文字风格
-- ✅ 一次性选择（如是否要切换功法）
+### 🤖 AI Enhancement System
+- ✅ LLM interface integration
+- ✅ Character AI system (Rule AI + LLM AI)
+- ✅ Coroutine decision-making mechanism, asynchronous operation, multi-threaded acceleration of AI decision-making
+- ✅ Long-term planning and goal-oriented behavior
+- ✅ Sudden action response system (immediate response to external stimuli)
+- ✅ LLM-driven NPC dialogue, thinking, interaction
+- ✅ LLM generates small plot fragments
+- ✅ Access max/flash models separately according to task requirements
+- ✅ Micro-theaters
+  - ✅ Combat micro-theaters
+  - ✅ Dialogue micro-theaters
+  - ✅ Different text styles for micro-theaters
+- ✅ One-time choices (such as whether to switch cultivation methods)
 
-### 🏛️ 世界背景系统
-- ✅ 注入基础世界知识
-- ✅ 用户输入历史，动态生成功法、装备、宗门、区域信息
+### 🏛️ World Lore System
+- ✅ Inject basic world knowledge
+- ✅ Dynamic generation of cultivation methods, equipment, sects, and regional information based on user input history
 
-### ✨ 特殊
-- ✅ 奇遇
-- ✅ 天劫 & 心魔
-- ✅ 命格
-- ✅ 阵法
-- ✅ 蛊
-- ✅ 机缘
-- ✅ 世界秘密
+### ✨ Special
+- ✅ Fortuitous encounters
+- ✅ Heavenly Tribulation & Heart Devil
+- ✅ Fate Revelation
+- ✅ Formations
+- ✅ Gu
+- ✅ Fortuitous opportunity
+- ✅ World secrets
 - ✅ POI
-- ✅ 背景板NPC
+- ✅ Background NPCs
 
-### 🔭 远期展望
-- [ ] 飞升上界
-- [ ] 开宗立派/成为皇帝
-- [ ] 历史/事件的小说化&图片化&视频化
-- [ ] Skill agent化，修士自行规划、分析、调用工具、决策
-- [ ] 将自己的Claw配入修仙世界
+### 🔭 Long-term Prospects
+- [ ] Ascension to the upper realm
+- [ ] Found a sect / Become emperor
+- [ ] Novelization & Imaging & Video of history/events
+- [ ] Skill agentification, cultivators independently plan, analyze, call tools, and make decisions
+- [ ] Integrate your own Claw into the cultivation world

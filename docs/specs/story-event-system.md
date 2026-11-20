@@ -1,8 +1,8 @@
-# 小故事系统重构说明
+# Story Event System Refactor Notes
 
-> 本文档描述当前仓库已经落地的小故事（Story Event）机制。
+> This document describes the story event (Story Event) mechanism that has already landed in the current repository.
 >
-> 当前实现请优先参考以下代码：
+> For the current implementation, refer to the following code first:
 >
 > - `src/classes/story_event_service.py`
 > - `src/systems/battle.py`
@@ -12,47 +12,47 @@
 > - `src/classes/gathering/**/*.py`
 > - `static/config.yml`
 
-## 目标
+## Goals
 
-本次重构的目标是把“小故事”从“在若干业务文件中直接调用 LLM 并产出事件”改成“统一故事入口服务 + 按类型配置概率”的结构。
+The goal of this refactor is to change "story events" from "calling the LLM directly in several business files and producing events" into a structure of "a unified story entry service + per-kind configured probabilities".
 
-这样做主要解决三个问题：
+This mainly solves three problems:
 
-1. 以前许多入口会无条件出小故事，频率过高，容易重复。
-2. 概率逻辑分散在不同文件里，不容易维护，也难以统一调参。
-3. `gathering`、战斗、社交、奇遇等不同来源的故事语义不统一，后续代理改动时容易继续扩散。
+1. Previously, many entry points produced a story event unconditionally, so the frequency was too high and stories were often repetitive.
+2. Probability logic was scattered across different files, which made it hard to maintain and hard to tune uniformly.
+3. Stories from different sources such as `gathering`, combat, social interaction and fortunate encounters had inconsistent semantics, which made it easy for later agent changes to keep spreading the inconsistency.
 
-## 设计原则
+## Design Principles
 
-### 1. 小故事是结果事件的附加层
+### 1. A story event is an add-on layer on top of a result event
 
-所有动作、系统、聚会都应当先完成业务结算，再生成基础结果事件。  
-小故事只是在结果事件之后“尝试展开”的一层文本扩展。
+All actions, systems and gatherings should first complete their business settlement, then generate the base result event.  
+A story event is only a text-expansion layer that "attempts to elaborate" after the result event.
 
-因此标准流程是：
+Therefore the standard flow is:
 
-1. 结算状态变化
-2. 生成基础事件
-3. 调用 `StoryEventService.maybe_create_story(...)`
-4. 命中则追加故事事件，未命中则跳过
+1. Settle state changes
+2. Generate the base event
+3. Call `StoryEventService.maybe_create_story(...)`
+4. On a hit, append a story event; on a miss, skip
 
-### 2. 统一入口，避免散落
+### 2. Unified entry point, no scattering
 
-所有故事生成统一通过 `StoryEventService`：
+All story generation goes through `StoryEventService`:
 
 - `maybe_create_story(...)`
 - `maybe_create_gathering_story(...)`
 
-业务层不再自己决定概率，也尽量不直接构造 `Event(..., is_story=True)`。
+The business layer no longer decides probabilities itself, and should avoid constructing `Event(..., is_story=True)` directly where possible.
 
-### 3. `gathering` 固定 100%
+### 3. `gathering` is fixed at 100%
 
-聚会类事件的故事概率固定为 `100%`，不再参与普通概率抽签。  
-这类事件发生频率本就受外部系统控制，且天然适合用一段长文本来总结群体事件。
+The story probability for gathering events is fixed at `100%` and no longer takes part in the regular probability roll.  
+The frequency of these events is already controlled by external systems, and they are naturally suited to summarizing a group event with one long piece of text.
 
-## 故事类型分类
+## Story Kind Classification
 
-当前通过 `StoryEventKind` 对故事来源做统一分类：
+Story sources are currently classified uniformly through `StoryEventKind`:
 
 - `combat`
 - `relationship_major`
@@ -63,82 +63,82 @@
 - `world_misfortune`
 - `gathering`
 
-这些类型的概率配置统一放在：
+The probability configuration for these kinds lives in one place:
 
 - `static/config.yml -> game.story.probabilities`
 
-## 事件语义约定
+## Event Semantics Conventions
 
-### 基础事件
+### Base events
 
-基础结果事件继续保留原有语义：
+Base result events keep their original semantics:
 
-- `is_major=True`：重大事实，进入长期记忆
-- `is_major=False`：普通事实，进入短期记忆
+- `is_major=True`: a major fact, enters long-term memory
+- `is_major=False`: an ordinary fact, enters short-term memory
 
-### 小故事事件
+### Story events
 
-所有由 LLM 展开的“正文型故事”统一使用：
+All "narrative-body stories" expanded by the LLM uniformly use:
 
 - `is_story=True`
 
-这些事件仍然会：
+These events still:
 
-- 进入事件栏
-- 进入事件分页接口
+- appear in the event panel
+- appear in the paginated events API
 
-但它们不应替代基础事实事件本身。
+But they should not replace the base fact event itself.
 
-## 当前接入范围
+## Current Coverage
 
-### 已重构为统一故事入口的旧路径
+### Old paths refactored onto the unified story entry
 
-- 战斗收尾
-- 暗杀成功
-- 突破
-- 闭关
-- 表白
-- 双修
-- 结拜
-- 切磋
-- 奇遇
-- 霉运
+- Battle wrap-up
+- Successful assassination
+- Breakthrough
+- Secluded cultivation
+- Confession of love
+- Dual cultivation
+- Sworn brotherhood
+- Sparring
+- Fortunate encounter
+- Misfortune
 
-### 新增的低概率故事入口
+### New low-probability story entry points
 
-- 茶会
-- 下棋
-- 送礼
-- 传道
-- 交谈
-- 铸造
-- 炼丹
-- 御兽
+- Tea party
+- Playing chess
+- Gift giving
+- Preaching the Dao
+- Conversation
+- Forging
+- Alchemy
+- Beast taming
 
-### 固定 100% 出故事的 Gathering
+### Gatherings that always (100%) produce a story
 
-- 拍卖会
-- 秘境
-- 天下武道会
-- 宗门传道大会
+- Auction
+- Hidden domain
+- World martial tournament
+- Sect Dao-preaching conference
 
-## 测试策略
+## Testing Strategy
 
-与小故事相关的测试应遵守以下原则：
+Tests related to story events should follow these principles:
 
-1. 使用 `StoryEventService.should_trigger(...)` 控制是否出故事。
-2. 不直接依赖真实随机数。
-3. 业务测试分成两类：
-   - 验证基础结果事件仍然正确
-   - 验证命中或未命中故事时，事件列表结构符合预期
-4. Gathering 测试应验证其故事事件为 `is_story=True`。
+1. Use `StoryEventService.should_trigger(...)` to control whether a story is produced.
+2. Do not depend on real random numbers.
+3. Business tests fall into two categories:
+   - Verify that the base result event is still correct
+   - Verify that when a story hits or misses, the event list structure matches expectations
+4. Gathering tests should verify that their story events are `is_story=True`.
 
-## 后续维护建议
+## Maintenance Recommendations
 
-后续如果新增小故事入口，应优先判断它是否满足以下条件：
+If a new story entry point is added later, first check whether it meets the following conditions:
 
-- 是否有明确的“结果事件”可作为故事展开的锚点
-- 是否具备足够叙事张力，而不是高频流水行为
-- 是否能归入已有 `StoryEventKind`
+- Whether there is a clear "result event" that can serve as the anchor for expanding the story
+- Whether it has enough narrative tension, rather than being a high-frequency routine behavior
+- Whether it can be classified under an existing `StoryEventKind`
 
-若只是高频、重复、机械性的动作，不建议直接接入小故事，以免重新回到事件栏刷屏的问题。
+If it is just a high-frequency, repetitive, mechanical action, it is not recommended to hook it into story events directly, so as not to bring back the problem of flooding the event panel.

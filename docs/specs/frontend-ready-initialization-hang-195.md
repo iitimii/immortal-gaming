@@ -1,17 +1,17 @@
-# Issue #195：开发模式 ready 后前端停在进入游戏阶段
+# Issue #195: Frontend Stuck at the Enter-Game Stage After Ready in Dev Mode
 
-本文档记录 2026-05 针对 issue #195 的现象分析、LLM 关系判断与后续修复方案。
+This document records the symptom analysis, LLM relevance assessment and follow-up fix plan for issue #195 from 2026-05.
 
-当前状态：本文档仍是待收口的排障/修复 spec，不是已完成历史文档。代码中 `runtime.finish_initialization()` 已支持传入 `phase_name="complete"`，但新开局初始化主流程仍需要继续核对 ready 后的 phase 语义和前端初始化可恢复逻辑。
+Current status: this document is still a troubleshooting/fix spec pending closure, not a completed historical document. The code's `runtime.finish_initialization()` already supports passing `phase_name="complete"`, but the main initialization flow for a new game still needs further review of the phase semantics after ready and the recoverable frontend initialization logic.
 
-## 1. 用户现象
+## 1. User Symptoms
 
-用户反馈：
+User report:
 
-1. 开发模式启动。
-2. 点击进入游戏后界面不再推进。
-3. F12 Network 中一直看到 `runtime/status` 轮询。
-4. `runtime/status` 返回：
+1. Started in dev mode.
+2. After clicking to enter the game, the UI no longer advances.
+3. F12 Network keeps showing `runtime/status` polling.
+4. `runtime/status` returns:
 
 ```json
 {
@@ -29,114 +29,114 @@
 }
 ```
 
-关键判断：这不是“后端初始化还没结束”的典型状态。`status=ready` 与 `progress=100` 表明服务端已经认为世界初始化完成。
+Key judgement: this is not the typical "backend initialization has not finished" state. `status=ready` and `progress=100` show that the server already considers world initialization complete.
 
-## 2. 当前初始化链路
+## 2. Current Initialization Chain
 
-服务端初始化顺序在 `src/server/init_flow.py`：
+The server-side initialization order is in `src/server/init_flow.py`:
 
-1. phase 0：扫描资源。
-2. phase 1：加载地图。
-3. phase 2：生成世界背景。
-4. phase 3：初始化宗门。
-5. phase 4：生成角色。
-6. phase 5：检查 LLM。
-7. phase 6：生成初始事件。
-8. `runtime.finish_initialization()` 将 `init_status` 置为 `ready`，并将进度置为 100。
+1. phase 0: scan resources.
+2. phase 1: load map.
+3. phase 2: generate world background.
+4. phase 3: initialize sects.
+5. phase 4: generate avatars.
+6. phase 5: check LLM.
+7. phase 6: generate initial events.
+8. `runtime.finish_initialization()` sets `init_status` to `ready` and sets progress to 100.
 
-前端初始化顺序在 `web/src/composables/useGameInit.ts`：
+The frontend initialization order is in `web/src/composables/useGameInit.ts`:
 
-1. 每秒轮询 `/api/v1/query/runtime/status`。
-2. 在若干 phase 提前预加载地图、角色和纹理。
-3. 当状态从非 `ready` 变为 `ready`，且 `isInitialized=false` 时，执行 `initializeGame()`。
-4. `initializeGame()` 会连接 Socket、加载世界快照、地图、基础纹理、事件和宗门领地。
-5. 只有 `systemStore.setInitialized(true)` 后，`useAppShell` 才会从 `initializing` 切到 `game`。
+1. Poll `/api/v1/query/runtime/status` every second.
+2. Preload map, avatars and textures early at certain phases.
+3. When the status changes from non-`ready` to `ready` and `isInitialized=false`, run `initializeGame()`.
+4. `initializeGame()` connects the Socket and loads the world snapshot, map, base textures, events and sect territories.
+5. Only after `systemStore.setInitialized(true)` does `useAppShell` switch from `initializing` to `game`.
 
-因此本问题的高概率位置不是服务端开局任务，而是前端 ready 后的二段初始化。
+Therefore the most likely location of this problem is not the server-side new-game task, but the second-stage frontend initialization after ready.
 
-## 3. 可疑点
+## 3. Suspect Points
 
-### 3.1 phase_name 残留造成误判
+### 3.1 Leftover phase_name causes misjudgement
 
-服务端 `finish_initialization()` 当前只保证 `status=ready` 和 `progress=100`，不会强制把 `phase_name` 清理成 `complete`。
+The server's `finish_initialization()` currently only guarantees `status=ready` and `progress=100`; it does not force `phase_name` to be cleaned up to `complete`.
 
-所以 `status=ready` 同时 `phase_name=generating_initial_events` 是可解释的残留状态，不应单独判定为后端卡死。
+So `status=ready` together with `phase_name=generating_initial_events` is an explainable leftover state, and should not on its own be judged as the backend hanging.
 
-改进方向：
+Improvement direction:
 
-1. ready 后将 `phase_name` 设为 `complete`。
-2. 前端展示和逻辑只以 `status` 作为完成判断，不能让 phase 文案误导。
+1. After ready, set `phase_name` to `complete`.
+2. Frontend display and logic use only `status` as the completion check, and must not be misled by the phase text.
 
-### 3.2 ready 跃迁只触发一次
+### 3.2 The ready transition triggers only once
 
-`useGameInit.ts` 当前只在以下条件成立时执行 `initializeGame()`：
+`useGameInit.ts` currently only runs `initializeGame()` when the following condition holds:
 
 ```ts
 prevStatus !== 'ready' && res.status === 'ready' && !isInitialized.value
 ```
 
-这会导致几个边界问题：
+This leads to several edge-case problems:
 
-1. 如果 ready 那一次执行了 `initializeGame()`，但内部某个请求失败、挂起或被浏览器取消，后续轮询仍是 ready，却不会再次重试。
-2. 如果前端首次看到的状态已经是 ready，但前端内部状态没有正确进入 initialized，也可能错过可恢复机会。
-3. 用户只看 Network 会看到 `runtime/status` 正常轮询，但页面一直停留在初始化壳层。
+1. If `initializeGame()` ran on that ready tick, but some internal request failed, hung or was cancelled by the browser, subsequent polls are still ready but will not retry.
+2. If the first status the frontend sees is already ready, but the frontend's internal state did not correctly become initialized, the chance to recover may also be missed.
+3. A user looking only at Network sees `runtime/status` polling normally, while the page stays on the initialization shell.
 
-改进方向：
+Improvement direction:
 
-1. 将触发条件改成 `res.status === 'ready' && !isInitialized.value && !isInitializingFrontend.value`。
-2. 新增前端初始化 guard，避免并发重复初始化。
-3. 初始化失败时释放 guard，并记录清晰错误上下文。
-4. 对 ready 后前端初始化增加可重试策略。
+1. Change the trigger condition to `res.status === 'ready' && !isInitialized.value && !isInitializingFrontend.value`.
+2. Add a frontend initialization guard to avoid concurrent duplicate initialization.
+3. Release the guard on initialization failure, and record clear error context.
+4. Add a retry strategy for frontend initialization after ready.
 
-### 3.3 前端初始化内部吞错
+### 3.3 Frontend initialization swallows errors internally
 
-`worldStore.initialize()` 当前 catch 后只记录错误，不向上抛出。调用方无法知道世界是否真的初始化成功。
+`worldStore.initialize()` currently only logs the error after catching it, and does not rethrow. Callers cannot know whether the world was actually initialized successfully.
 
-风险：
+Risks:
 
-1. `world/state`、地图、事件、宗门领地或资源请求失败时，调用方可能继续执行。
-2. 错误可能只出现在 console，而页面没有明确错误态。
-3. 如果某个 fetch 一直 pending，由于 HTTP client 没有超时，`initializeGame()` 会长期不返回。
+1. When `world/state`, map, events, sect territories or resource requests fail, the caller may keep going.
+2. The error may only appear in the console, with no explicit error state on the page.
+3. If some fetch stays pending forever, since the HTTP client has no timeout, `initializeGame()` will not return for a long time.
 
-改进方向：
+Improvement direction:
 
-1. `worldStore.initialize()` 失败后返回明确结果或重新抛出。
-2. `initializeGame()` 在设置 `isInitialized=true` 前校验 `worldStore.isLoaded`。
-3. HTTP client 增加可配置超时，避免初始化请求无限 pending。
-4. loading overlay 在 ready 但前端初始化超过阈值时显示“正在加载世界数据/资源”，并提供可诊断错误信息。
+1. `worldStore.initialize()` returns an explicit result or rethrows on failure.
+2. `initializeGame()` checks `worldStore.isLoaded` before setting `isInitialized=true`.
+3. Add a configurable timeout to the HTTP client so initialization requests do not stay pending indefinitely.
+4. When ready but frontend initialization exceeds a threshold, the loading overlay shows "Loading world data/resources" and provides diagnosable error information.
 
-## 4. LLM 关系判断
+## 4. LLM Relevance Assessment
 
-从用户给出的返回看，本问题大概率不是 LLM 配置或 LLM 调用失败导致。
+Judging from the response the user provided, this problem is most likely not caused by LLM configuration or LLM call failure.
 
-原因：
+Reasons:
 
-1. LLM 检查发生在 phase 5：`checking_llm`。
-2. 即使 LLM 连通性检查失败，服务端也只是设置：
+1. The LLM check happens in phase 5: `checking_llm`.
+2. Even if the LLM connectivity check fails, the server only sets:
    - `llm_check_failed=true`
-   - `llm_error_message=<错误信息>`
-   然后继续进入 phase 6。
-3. 用户返回里 `llm_check_failed=false` 且 `llm_error_message=""`，表示服务端认为 LLM 检查通过。
-4. 用户返回里已经是 `status=ready` 和 `progress=100`，说明服务端已经越过 LLM 检查和初始事件生成阶段。
+   - `llm_error_message=<error message>`
+   and then continues to phase 6.
+3. The user's response has `llm_check_failed=false` and `llm_error_message=""`, meaning the server considers the LLM check passed.
+4. The user's response is already `status=ready` and `progress=100`, meaning the server has already passed the LLM check and initial event generation stages.
 
-LLM 仍可能造成的影响：
+Possible remaining LLM impact:
 
-1. 如果 LLM 响应很慢，可能拖慢 phase 5 或 phase 6 的耗时。
-2. phase 6 会执行一次 `sim.step()` 生成初始事件，某些动作、小故事或系统可能间接触发 LLM。
-3. 但只要最终已经返回 `ready`，LLM 就不再是“进不了游戏”的直接阻塞点。
+1. If LLM responses are slow, they may lengthen phase 5 or phase 6.
+2. phase 6 runs one `sim.step()` to generate initial events; some actions, story events or systems may indirectly trigger the LLM.
+3. But once `ready` has finally been returned, the LLM is no longer the direct blocker for "cannot enter the game".
 
-后续排查 LLM 的证据标准：
+Evidence criteria for further LLM investigation:
 
-1. 如果状态长期停在 `checking_llm` 或 `generating_initial_events` 且 `status=in_progress`，才优先怀疑 LLM 或初始事件生成。
-2. 如果状态是 `ready`，优先排查前端 ready 后的世界快照、地图、事件、宗门领地、纹理资源和 Socket 初始化。
-3. 如果 `llm_check_failed=true`，这是配置提醒路径，不应导致 ready 后前端卡死。
+1. Only if the status stays at `checking_llm` or `generating_initial_events` for a long time with `status=in_progress` should the LLM or initial event generation be suspected first.
+2. If the status is `ready`, first investigate the frontend's post-ready world snapshot, map, events, sect territories, texture resources and Socket initialization.
+3. If `llm_check_failed=true`, this is the configuration reminder path and should not cause the frontend to hang after ready.
 
-## 5. 建议让用户补充的排查信息
+## 5. Suggested Diagnostic Information to Request from the User
 
-请 issue 作者在 F12 中补充：
+Ask the issue author to provide from F12:
 
-1. Console 是否有红色错误。
-2. Network 中除 `runtime/status` 外，以下请求是否 pending、失败或 404：
+1. Whether the Console has red errors.
+2. Whether, in Network, besides `runtime/status`, the following requests are pending, failed or 404:
    - `/api/v1/query/world/state`
    - `/api/v1/query/map`
    - `/api/v1/query/events`
@@ -145,62 +145,62 @@ LLM 仍可能造成的影响：
    - `tiles/*.png`
    - `males/*.png`
    - `females/*.png`
-3. 当前页面是否仍显示 loading overlay，还是黑屏/空壳层。
-4. 是否使用了非根路径、代理、Electron dev、反向代理或自定义 `VITE_API_TARGET`。
+3. Whether the current page still shows the loading overlay, or a black screen / empty shell.
+4. Whether a non-root path, proxy, Electron dev, reverse proxy or custom `VITE_API_TARGET` is used.
 
-## 6. 修复计划
+## 6. Fix Plan
 
-### 6.1 服务端状态语义收口
+### 6.1 Consolidate server status semantics
 
-1. 初始化完成时将 `phase_name` 设为 `complete`。
-2. 保持 `status=ready` 作为唯一完成语义。
-3. 增加测试覆盖：ready 状态不再保留 `generating_initial_events` 作为当前阶段名。
+1. Set `phase_name` to `complete` when initialization finishes.
+2. Keep `status=ready` as the sole completion semantics.
+3. Add test coverage: the ready status no longer retains `generating_initial_events` as the current phase name.
 
-### 6.2 前端 ready 后初始化可恢复
+### 6.2 Make frontend post-ready initialization recoverable
 
-1. 在 `useGameInit` 中新增 `isInitializingFrontend`。
-2. 当 `res.status === 'ready' && !isInitialized.value` 时尝试初始化。
-3. 初始化中不重复启动第二次初始化。
-4. 初始化失败后记录错误、释放 guard，并允许下次轮询重试。
-5. 初始化成功后再设置 `isInitialized=true`。
+1. Add `isInitializingFrontend` in `useGameInit`.
+2. Attempt initialization when `res.status === 'ready' && !isInitialized.value`.
+3. Do not start a second initialization while one is in progress.
+4. After initialization failure, record the error, release the guard, and allow the next poll to retry.
+5. Set `isInitialized=true` only after initialization succeeds.
 
-### 6.3 世界初始化错误显性化
+### 6.3 Make world initialization errors explicit
 
-1. `worldStore.initialize()` 不再静默吞掉致命初始化错误。
-2. 初始化调用方根据错误设置前端初始化错误态。
-3. loading overlay 在 ready 但前端初始化失败时显示可读错误，而不是无限转圈或空壳。
+1. `worldStore.initialize()` no longer silently swallows fatal initialization errors.
+2. The initialization caller sets a frontend initialization error state based on the error.
+3. When ready but frontend initialization fails, the loading overlay shows a readable error instead of an endless spinner or an empty shell.
 
-### 6.4 HTTP 超时与诊断
+### 6.4 HTTP timeout and diagnostics
 
-1. `httpClient` 支持默认超时。
-2. 初始化关键请求可给出更明确的错误标签。
-3. Console 日志需要能区分：
-   - status 轮询失败
-   - 世界快照失败
-   - 地图失败
-   - 事件分页失败
-   - 宗门领地失败
-   - 纹理资源失败
+1. `httpClient` supports a default timeout.
+2. Critical initialization requests can provide more specific error labels.
+3. Console logs need to distinguish:
+   - status polling failure
+   - world snapshot failure
+   - map failure
+   - event pagination failure
+   - sect territory failure
+   - texture resource failure
 
-## 7. 验证策略
+## 7. Verification Strategy
 
-前端测试：
+Frontend tests:
 
-1. 首次轮询直接返回 ready 时，应执行 `initializeGame()`。
-2. ready 后前端初始化失败时，下次轮询应能重试。
-3. 初始化进行中时，连续 ready 轮询不应并发调用 `initializeGame()`。
-4. 初始化成功后不再重复初始化。
-5. `worldStore.initialize()` 失败时不应设置 `isInitialized=true`。
+1. When the first poll directly returns ready, `initializeGame()` should run.
+2. When frontend initialization fails after ready, the next poll should be able to retry.
+3. While initialization is in progress, consecutive ready polls should not call `initializeGame()` concurrently.
+4. After initialization succeeds, it is not repeated.
+5. When `worldStore.initialize()` fails, `isInitialized=true` should not be set.
 
-后端测试：
+Backend tests:
 
-1. 初始化完成后 `status=ready`、`progress=100`。
-2. 初始化完成后 `phase_name=complete` 或等价完成态。
-3. LLM 检查失败时仍可进入 ready，但 `llm_check_failed=true` 保留。
+1. After initialization completes, `status=ready` and `progress=100`.
+2. After initialization completes, `phase_name=complete` or an equivalent completion state.
+3. When the LLM check fails, ready can still be reached, but `llm_check_failed=true` is retained.
 
-手工验证：
+Manual verification:
 
-1. `cd web && npm run test`。
-2. `pytest tests/test_init_status_api.py tests/test_game_init_integration.py`。
-3. 开发模式启动，正常新开局进入游戏。
-4. 人为让 `world/state` 返回失败，确认页面不会永久无诊断卡住。
+1. `cd web && npm run test`.
+2. `pytest tests/test_init_status_api.py tests/test_game_init_integration.py`.
+3. Start in dev mode, and enter the game normally with a new game.
+4. Artificially make `world/state` return a failure, and confirm the page does not hang permanently without diagnostics.

@@ -24,7 +24,7 @@ Default scripts must remain serial, skip existing files unless `--overwrite` is 
 
 ## Prompt Rules
 
-Describe visible appearance only. Avoid invisible identity/background labels such as丹修、咒修、宗门、背景设定.
+Describe visible appearance only. Avoid invisible identity/background labels such as alchemy cultivator, curse cultivator, sect, or backstory setting.
 
 For text-to-image base prompts, keep:
 

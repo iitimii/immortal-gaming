@@ -1,24 +1,24 @@
 ---
 name: grave-poi-death-test
-description: "通过真实游戏模拟验证角色死亡、墓碑 POI 创建、地图渲染和点击详情。用于需要测试寿元死亡或其他游戏内死亡流程、墓碑 POI，且不得直接调用 handle_death 的任务。"
+description: "Verify avatar death, grave POI creation, map rendering, and click-through to details via a real game simulation. Use for tasks that need to test lifespan death or other in-game death flows and grave POIs, without calling handle_death directly."
 ---
 
-# 墓碑死亡验证
+# Grave Death Verification
 
-以独立数据目录启动测试局，绝不污染用户当前存档或设置。死亡必须由 `Simulator.step()` 的正常结算路径产生，不能为了测试直接调用 `handle_death()`、手工注册墓碑或伪造死亡事件。
+Start the test run with an isolated data directory; never pollute the user's current saves or settings. Death must come from the normal settlement path of `Simulator.step()`. Do not call `handle_death()` directly, register graves by hand, or fabricate death events for the sake of the test.
 
-## 流程
+## Flow
 
-1. 阅读 `docs/specs/external-control-api.md`，通过 `/api/v1/command/*` 创建或配置测试角色，不直接改 `game_instance`。
-2. 为测试角色设置一个会自然到达的死亡条件。寿元死亡最稳定：创建高龄 avatar，再运行完整月度模拟步骤，直到死亡结算完成。
-3. 如果完整模拟依赖 LLM，使用仅限本次测试的本地 OpenAI 兼容 stub；其数据目录、监听端口和进程名必须与正常开发服务隔离。
-4. 通过 API 核对完整因果链：
-   - 角色 detail 中 `is_dead` 为真，并包含 `death_info`。
-   - `world/map` 的 `pois` 含 `kind: "grave"`，位置与死者死亡位置一致。
-   - 墓碑摘要含 `deceased_avatar_id`，用作前端进入角色详情的关联。
-5. 在实际前端地图中确认图标已加载、尺寸接近头像且可点击。点击墓碑应选中 `avatar` 并打开死者现有的角色详情，不应打开独立墓碑详情面板。
+1. Read `docs/specs/external-control-api.md`, and create or configure test avatars through `/api/v1/command/*`; do not modify `game_instance` directly.
+2. Give the test avatar a death condition that will be reached naturally. Lifespan death is the most reliable: create an elderly avatar, then run full monthly simulation steps until death settlement completes.
+3. If the full simulation depends on an LLM, use a local OpenAI-compatible stub dedicated to this test; its data directory, listening port, and process name must be isolated from the normal development services.
+4. Verify the full causal chain through the API:
+   - The avatar detail has `is_dead` set to true and includes `death_info`.
+   - The `pois` of `world/map` contain `kind: "grave"`, at the same position where the deceased died.
+   - The grave summary contains `deceased_avatar_id`, used by the frontend to link into the avatar detail.
+5. On the actual frontend map, confirm the icon has loaded, is close to avatar portrait size, and is clickable. Clicking the grave should select the `avatar` and open the deceased's existing avatar detail, not a separate grave detail panel.
 
-## 最小验证
+## Minimal Verification
 
 ```powershell
 pytest tests/test_death.py
@@ -27,8 +27,8 @@ npm run type-check
 npm run test -- src/__tests__/composables/useTextures.test.ts
 ```
 
-UI 验证优先使用可用的浏览器控制工具；不可用时才以本地 Playwright 打开隔离的前端服务。不要用直接调用死亡处理函数来替代端到端验证。
+For UI verification, prefer any available browser control tool; only fall back to local Playwright opening the isolated frontend service when none is available. Do not substitute end-to-end verification with direct calls to the death handling function.
 
-## 清理
+## Cleanup
 
-测试结束后先暂停测试局，再停止本次启动的前端、后端和 LLM stub 进程。删除本次专用的数据目录、stub、日志和截图；仅保留仓库内的正式实现与回归测试。清理前核对所有目标都位于仓库 `tmp/` 或 `web/tmp/`，不得触碰用户的常规数据目录或正在使用的服务。
+After the test, pause the test run first, then stop the frontend, backend, and LLM stub processes started for this run. Delete the dedicated data directory, stub, logs, and screenshots for this run; keep only the real implementation and regression tests in the repository. Before cleaning up, verify that every target lives under the repository's `tmp/` or `web/tmp/`; never touch the user's regular data directory or services that are in use.

@@ -1,31 +1,31 @@
-当用户调用此命令时，请把 `.cursor` 目录中的规则、技能、命令沉淀到仓库根目录 `AGENTS.md`。
+When the user invokes this command, consolidate the rules, skills, and commands under the `.cursor` directory into the repository root `AGENTS.md`.
 
-请严格执行以下流程：
+Strictly follow this flow:
 
-1. **收集来源**：
-   - 读取 `.cursor/rules/*.mdc`
-   - 读取 `.cursor/skills/*/SKILL.md`
-   - 读取 `.cursor/commands/*.md`（包含本命令文件）
-2. **更新目标文件**：
-   - 创建或更新根目录 `AGENTS.md`
-   - 以“索引 + 关键约束”形式整理，不要简单拼接原文
-   - 至少包含以下章节：
-     - Codex 自动读取 `AGENTS.md` 的格式与优先级规则
-     - `.cursor/rules` 规则索引（作用范围 + 关键约束）
-     - `.cursor/skills` 技能索引（用途 + 关键流程）
-     - `.cursor/commands` 命令索引（命令名 + 功能）
-     - 测试与验证常用命令
-     - 维护约定
-3. **一致性要求**：
-   - 使用 UTF-8 编码
-   - 路径、命令、文件名使用反引号
-   - 文档语言默认中文，术语保持准确（如 `shallowRef`、`Socket`、`DTO`）
-4. **完成后自检**：
-   - 检查 `AGENTS.md` 是否覆盖了 `.cursor` 下全部规则/技能/命令
-   - 检查是否引入与原规则冲突的描述
-   - 输出变更摘要与新增/变更的命令清单
+1. **Collect sources**:
+   - Read `.cursor/rules/*.mdc`
+   - Read `.cursor/skills/*/SKILL.md`
+   - Read `.cursor/commands/*.md` (including this command file)
+2. **Update the target file**:
+   - Create or update the root `AGENTS.md`
+   - Organize it as "index + key constraints"; do not simply concatenate the source text
+   - Include at least the following sections:
+     - Format and precedence rules for how Codex automatically reads `AGENTS.md`
+     - `.cursor/rules` rule index (scope + key constraints)
+     - `.cursor/skills` skill index (purpose + key flow)
+     - `.cursor/commands` command index (command name + function)
+     - Common test and validation commands
+     - Maintenance conventions
+3. **Consistency requirements**:
+   - Use UTF-8 encoding
+   - Wrap paths, commands, and file names in backticks
+   - Write the document in English, keeping terminology precise (e.g. `shallowRef`, `Socket`, `DTO`)
+4. **Self-check when done**:
+   - Check that `AGENTS.md` covers every rule/skill/command under `.cursor`
+   - Check that no description conflicts with the original rules
+   - Output a change summary and the list of added/changed commands
 
-注意：
+Notes:
 
-- 不要修改 `.cursor/rules`、`.cursor/skills` 原文件内容。
-- 允许优化组织结构，但不得篡改规则语义。
+- Do not modify the original contents of `.cursor/rules` or `.cursor/skills`.
+- You may improve the organization, but must not alter the semantics of the rules.

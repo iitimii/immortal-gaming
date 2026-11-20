@@ -1,23 +1,23 @@
-# Docker 与生产前端 CI 防线说明
+# Docker and Production Frontend CI Safeguards
 
-本文档记录当前已经落地的 Docker 部署与生产前端构建 CI 防线。它不再是待实施计划，而是维护这些检查时的参考。
+This document records the Docker deployment and production frontend build CI safeguards that have already landed. It is no longer a pending implementation plan, but a reference for maintaining these checks.
 
-## 当前状态
+## Current Status
 
-Issue #196 暴露过一次 Docker 部署后浏览器黑屏的问题，原因是生产前端产物在真实浏览器中执行时报错。为避免这类问题复发，仓库现在保留两层 CI：
+Issue #196 once exposed a black browser screen after Docker deployment, caused by the production frontend bundle throwing errors when executed in a real browser. To prevent this kind of problem from recurring, the repository now keeps two layers of CI:
 
 1. `.github/workflows/test.yml`
-   - 后端全量 pytest。
-   - 前端 `npm run type-check`。
-   - 前端 `npm run test:coverage`。
-   - 前端 `npm run build`。
-   - Playwright 生产前端 smoke：`npm run smoke:production`。
+   - Full backend pytest.
+   - Frontend `npm run type-check`.
+   - Frontend `npm run test:coverage`.
+   - Frontend `npm run build`.
+   - Playwright production frontend smoke: `npm run smoke:production`.
 2. `.github/workflows/docker-smoke.yml`
-   - `docker compose build`。
-   - `pytest -m docker tests/test_docker_runtime_smoke.py -v`。
-   - Docker 前端浏览器 smoke：通过 nginx 入口访问 `http://127.0.0.1:8123` 并运行 Playwright。
+   - `docker compose build`.
+   - `pytest -m docker tests/test_docker_runtime_smoke.py -v`.
+   - Docker frontend browser smoke: access `http://127.0.0.1:8123` through the nginx entry and run Playwright.
 
-配套 contract / smoke 测试主要包括：
+The accompanying contract / smoke tests mainly include:
 
 - `tests/test_docker_build_contract.py`
 - `tests/test_data_paths_runtime_contract.py`
@@ -26,42 +26,42 @@ Issue #196 暴露过一次 Docker 部署后浏览器黑屏的问题，原因是�
 - `tests/test_server_binding.py`
 - `web/e2e/production-smoke.spec.ts`
 
-## 覆盖目标
+## Coverage Goals
 
-当前 CI 需要持续覆盖以下风险：
+The current CI must keep covering the following risks:
 
-1. 前端生产构建成功，但真实浏览器执行 JS 后黑屏。
-2. Docker 镜像构建成功，但运行镜像缺少 runtime 依赖。
-3. 前端容器健康检查只命中静态首页，无法证明 backend 代理链路可用。
-4. `CWS_DATA_DIR=/data` 持久化失效，导致 settings / secrets / saves / logs 在容器重建后丢失。
-5. Docker 场景中 WebSocket 断开或无人连接导致容器自动退出。
-6. nginx、静态资源路径、前端生产 bundle 与 backend API 代理之间出现断链。
+1. The frontend production build succeeds, but the real browser shows a black screen after executing the JS.
+2. The Docker image builds successfully, but the runtime image is missing runtime dependencies.
+3. The frontend container health check only hits the static home page and cannot prove the backend proxy chain works.
+4. `CWS_DATA_DIR=/data` persistence fails, causing settings / secrets / saves / logs to be lost after container rebuilds.
+5. In the Docker scenario, a WebSocket disconnect or no connected clients causes the container to exit automatically.
+6. Breaks occur between nginx, static asset paths, the frontend production bundle, and the backend API proxy.
 
-## 维护约束
+## Maintenance Constraints
 
-修改 Docker、部署、前端生产构建或持久化语义时，应同步维护：
+When modifying Docker, deployment, the frontend production build, or persistence semantics, keep the following in sync:
 
-1. Dockerfile / compose / nginx 配置。
-2. 不依赖 Docker daemon 的 contract 测试。
-3. 依赖 Docker 的 smoke 测试。
-4. `README.md` 与 `docs/readme/*.md` 中的部署说明。
+1. Dockerfile / compose / nginx configuration.
+2. Contract tests that do not depend on the Docker daemon.
+3. Smoke tests that depend on Docker.
+4. Deployment instructions in `README.md` and `docs/readme/*.md`.
 
-生产镜像只应安装 runtime dependencies；不要把 `pytest` 等测试依赖装入运行镜像。Docker 运行时用户数据统一由 `CWS_DATA_DIR` 决定，不要重新依赖旧的 `/app/assets/saves`、`/app/logs` 等运行目录。
+The production image should install only runtime dependencies; do not install test dependencies such as `pytest` into the runtime image. Docker runtime user data is determined solely by `CWS_DATA_DIR`; do not go back to relying on old runtime directories such as `/app/assets/saves` and `/app/logs`.
 
-## 失败诊断产物
+## Failure Diagnostic Artifacts
 
-Docker 相关 workflow 失败时应尽量保留以下 artifact：
+When Docker-related workflows fail, try to keep the following artifacts:
 
 1. `docker compose ps`
-2. backend / frontend 容器日志
-3. Playwright report、trace、screenshot
-4. `web/dist` 文件列表
+2. backend / frontend container logs
+3. Playwright report, trace, screenshot
+4. The `web/dist` file listing
 
-这些信息用于快速判断问题属于 backend 启动、nginx 代理、静态资源、生产 JS 执行，还是首屏渲染。
+This information helps quickly determine whether the problem lies in backend startup, the nginx proxy, static assets, production JS execution, or first-screen rendering.
 
-## 发布前建议
+## Pre-Release Recommendations
 
-发布前建议至少确认以下命令在 CI 或本地通过：
+Before a release, it is recommended to confirm at least that the following commands pass in CI or locally:
 
 ```bash
 pytest
@@ -72,4 +72,4 @@ cd web && npm run smoke:production
 pytest -m docker tests/test_docker_runtime_smoke.py -v
 ```
 
-如果本地没有 Docker，以 GitHub Actions 的 `Docker Smoke` workflow 作为 Docker 发布前确认入口。
+If Docker is not available locally, use the GitHub Actions `Docker Smoke` workflow as the pre-release confirmation entry for Docker.
