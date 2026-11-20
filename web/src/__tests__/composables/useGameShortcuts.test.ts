@@ -36,6 +36,8 @@ function setup() {
   const closeMenu = vi.fn(() => { showMenu.value = false })
   const toggleManualPause = vi.fn()
   const setSimulationSpeed = vi.fn((speed: number) => { simulationSpeed.value = speed })
+  const canStepOnce = ref(true)
+  const stepOnce = vi.fn()
 
   const Host = defineComponent({
     setup() {
@@ -49,6 +51,8 @@ function setup() {
         setSimulationSpeed,
         simulationSpeed,
         allowedSpeeds,
+        stepOnce,
+        canStepOnce,
       })
       return () => h('div')
     },
@@ -65,6 +69,8 @@ function setup() {
     closeMenu,
     toggleManualPause,
     setSimulationSpeed,
+    canStepOnce,
+    stepOnce,
   }
 }
 
@@ -279,6 +285,17 @@ describe('useGameShortcuts', () => {
     expect(helpVisible.value).toBe(false)
   })
 
+  it('. steps one month only when stepping is allowed', () => {
+    const { stepOnce, canStepOnce } = setup()
+
+    press('.')
+    expect(stepOnce).toHaveBeenCalledTimes(1)
+
+    canStepOnce.value = false
+    press('.')
+    expect(stepOnce).toHaveBeenCalledTimes(1)
+  })
+
   it('registers its shortcuts for the help overlay and removes them on unmount', () => {
     setup()
     const ids = getRegisteredShortcuts().map(shortcut => shortcut.id)
@@ -288,6 +305,7 @@ describe('useGameShortcuts', () => {
       'game.set-speed',
       'game.speed-up',
       'game.speed-down',
+      'game.step-once',
       'game.focus-selected-avatar',
       'game.escape',
       'game.toggle-help',

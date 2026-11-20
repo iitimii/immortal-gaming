@@ -14,6 +14,7 @@
     "set_speed": "Set speed (1st to 4th option)",
     "speed_up": "Speed up",
     "speed_down": "Slow down",
+    "step_once": "Advance one month (while paused)",
     "focus_avatar": "Focus selected character",
     "escape": "Close panel / open menu",
     "toggle_help": "Show / hide this help",

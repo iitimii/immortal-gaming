@@ -147,6 +147,8 @@ useGameShortcuts({
   setSimulationSpeed,
   simulationSpeed,
   allowedSpeeds,
+  stepOnce,
+  canStepOnce,
 })
 
 function handleShowShortcuts() {

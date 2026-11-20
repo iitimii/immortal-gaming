@@ -17,6 +17,8 @@ interface UseGameShortcutsOptions {
   setSimulationSpeed: (speed: number) => void
   simulationSpeed: Ref<number>
   allowedSpeeds: Ref<number[]>
+  stepOnce: () => void
+  canStepOnce: Ref<boolean>
 }
 
 const GROUP_SIMULATION = 'shortcuts.groups.simulation'
@@ -25,8 +27,8 @@ const GROUP_GENERAL = 'shortcuts.groups.general'
 
 /**
  * Registers the in-game shortcuts. All of them are game-scoped, so they only fire while the
- * game scene is active (see `installKeyboardShortcuts`). New shortcuts (e.g. stepping one month)
- * can be added as one more entry here or registered from any component via `useKeyboardShortcuts`.
+ * game scene is active (see `installKeyboardShortcuts`). New shortcuts can be added as one more
+ * entry here or registered from any component via `useKeyboardShortcuts`.
  */
 export function useGameShortcuts(options: UseGameShortcutsOptions) {
   const uiStore = useUiStore()
@@ -115,6 +117,15 @@ export function useGameShortcuts(options: UseGameShortcutsOptions) {
       allowRepeat: true,
       enabled: context => gameplayAvailable(context) && options.allowedSpeeds.value.length > 0,
       handler: () => stepSpeed(-1),
+    },
+    {
+      id: 'game.step-once',
+      keys: ['.'],
+      displayKeys: ['.'],
+      labelKey: 'shortcuts.actions.step_once',
+      groupKey: GROUP_SIMULATION,
+      enabled: context => gameplayAvailable(context) && options.canStepOnce.value,
+      handler: () => options.stepOnce(),
     },
     {
       id: 'game.focus-selected-avatar',
