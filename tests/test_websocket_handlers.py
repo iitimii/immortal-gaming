@@ -390,6 +390,23 @@ class TestStateAPI:
         assert data["month"] == 3
         assert data["is_paused"] is False
 
+    def test_state_exposes_playthrough_id(self, client, reset_game_instance):
+        """World state carries the stable playthrough id used to scope client preferences."""
+        mock_world = MagicMock()
+        mock_world.month_stamp.get_year.return_value = 100
+        mock_world.month_stamp.get_month.return_value = MagicMock(value=3)
+        mock_world.avatar_manager.avatars = {}
+        mock_world.event_manager = None
+        mock_world.current_phenomenon = None
+        mock_world.playthrough_id = "run-123"
+
+        game_instance["world"] = mock_world
+
+        response = client.get("/api/v1/query/world/state")
+
+        assert response.status_code == 200
+        assert response.json()["data"]["playthrough_id"] == "run-123"
+
     def test_state_includes_avatars(self, client, reset_game_instance):
         """Test world state query includes avatar data."""
         mock_avatar = MagicMock()

@@ -54,6 +54,7 @@ Suggested mapping:
 - `refresh-cw.svg`: retry or refresh data
 - `triangle-alert.svg`: warning, danger, or destructive confirmation
 - `check.svg`: confirm, apply, or success state
+- `star.svg`: watch / follow a cultivator (watchlist)
 - `sliders-horizontal.svg`: filter controls
 - `search.svg`: search inputs
 - `map.svg`: region detail or world map context

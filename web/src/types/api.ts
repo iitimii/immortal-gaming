@@ -47,6 +47,8 @@ export interface InitialStateDTO {
   phenomenon?: CelestialPhenomenon | null;
   active_domains?: HiddenDomainInfo[];
   world_revision?: number;
+  /** Stable per-run id; survives save/load and changes on a new game. */
+  playthrough_id?: string;
   is_paused?: boolean;
   speed?: number;
   allowed_speeds?: number[];
@@ -547,6 +549,8 @@ export interface FetchEventsParams {
   avatar_id?: string;
   avatar_id_1?: string;
   avatar_id_2?: string;
+  /** Any-of avatar filter: events related to at least one of these avatars. */
+  avatar_ids?: string[];
   sect_id?: number;
   major_scope?: 'all' | 'major' | 'minor';
   cursor?: string;

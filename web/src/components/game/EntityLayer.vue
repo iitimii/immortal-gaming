@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { useAvatarStore } from '../../stores/avatar'
+import { useWatchlistStore } from '../../stores/watchlist'
 import AnimatedAvatar from './AnimatedAvatar.vue'
 import { computed } from 'vue'
 import { calculateVisualOffsets } from './utils/avatarLayout'
 
 const avatarStore = useAvatarStore()
+const watchlistStore = useWatchlistStore()
 const TILE_SIZE = 64
 
 const emit = defineEmits<{
@@ -32,6 +34,7 @@ function handleAvatarSelect(payload: { type: 'avatar'; id: string; name?: string
       :avatar="avatar"
       :tile-size="TILE_SIZE"
       :offset="avatarOffsets.get(avatar.id)"
+      :watched="watchlistStore.watchedIdSet.has(avatar.id)"
       @select="handleAvatarSelect"
     />
   </container>

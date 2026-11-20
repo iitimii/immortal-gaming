@@ -49,6 +49,14 @@ const sectStoreMock = reactive({
   refreshTerritories: vi.fn(async () => {}),
 })
 
+const watchlistStoreMock = reactive({
+  watchedIds: [] as string[],
+})
+
+vi.mock('@/stores/watchlist', () => ({
+  useWatchlistStore: () => watchlistStoreMock,
+}))
+
 vi.mock('@/stores/avatar', () => ({
   useAvatarStore: () => avatarStoreMock,
 }))
@@ -95,6 +103,10 @@ function createEventPanelI18n(locale = 'en-US') {
             empty_single: 'none',
             export: 'Export',
             export_title: 'Export Chronicle',
+            empty_watched: 'no watched events',
+            filter_watched: 'Watched',
+            filter_watched_title: 'watched only',
+            filter_watched_disabled: 'watch someone first',
           },
           event_templates: {
             nickname_awarded: '{avatar_name} is now "{nickname}".',
@@ -109,6 +121,7 @@ function createEventPanelI18n(locale = 'en-US') {
 describe('EventPanel', () => {
   beforeEach(() => {
     eventStoreMock.events = []
+    watchlistStoreMock.watchedIds = []
     eventStoreMock.eventsHasMore = false
     eventStoreMock.eventsLoading = false
     eventStoreMock.resetEvents.mockClear()
@@ -602,5 +615,105 @@ describe('EventPanel', () => {
     await wrapper.vm.$nextTick()
 
     expect(eventStoreMock.resetEvents).toHaveBeenCalledWith(expect.objectContaining({ avatar_id: 'a1' }))
+  })
+
+  async function settle(wrapper: { vm: { $nextTick: () => Promise<void> } }) {
+    for (let i = 0; i < 4; i += 1) {
+      await Promise.resolve()
+      await wrapper.vm.$nextTick()
+    }
+  }
+
+  it('disables the watched filter while the watchlist is empty', () => {
+    const wrapper = mount(EventPanel, { global: { plugins: [createEventPanelI18n()] } })
+
+    const button = wrapper.find('[data-testid="watched-filter"]')
+    expect(button.attributes('disabled')).toBeDefined()
+    expect(button.attributes('title')).toBe('watch someone first')
+  })
+
+  it('loads events for any watched avatar through the server-side filter', async () => {
+    watchlistStoreMock.watchedIds = ['a1', 'a2']
+    const wrapper = mount(EventPanel, { global: { plugins: [createEventPanelI18n()] } })
+    await settle(wrapper)
+    eventStoreMock.resetEvents.mockClear()
+
+    const button = wrapper.find('[data-testid="watched-filter"]')
+    expect(button.attributes('disabled')).toBeUndefined()
+    await button.trigger('click')
+    await settle(wrapper)
+
+    expect(eventStoreMock.resetEvents).toHaveBeenCalledTimes(1)
+    expect(eventStoreMock.resetEvents).toHaveBeenCalledWith({ avatar_ids: ['a1', 'a2'] })
+    expect(button.attributes('aria-pressed')).toBe('true')
+    expect(wrapper.text()).toContain('no watched events')
+
+    eventStoreMock.resetEvents.mockClear()
+    await button.trigger('click')
+    await settle(wrapper)
+    expect(eventStoreMock.resetEvents).toHaveBeenCalledWith({})
+    expect(button.attributes('aria-pressed')).toBe('false')
+  })
+
+  it('combines the watched filter with the major scope and clears single-avatar and sect filters', async () => {
+    watchlistStoreMock.watchedIds = ['a2']
+    const wrapper = mount(EventPanel, { global: { plugins: [createEventPanelI18n()] } })
+    const selects = wrapper.findAllComponents(NSelect)
+    await selects[1].vm.$emit('update:value', 'a1')
+    await selects[2].vm.$emit('update:value', 'major')
+    await settle(wrapper)
+    eventStoreMock.resetEvents.mockClear()
+
+    await wrapper.find('[data-testid="watched-filter"]').trigger('click')
+    await settle(wrapper)
+
+    expect(eventStoreMock.resetEvents).toHaveBeenCalledTimes(1)
+    expect(eventStoreMock.resetEvents).toHaveBeenCalledWith({ avatar_ids: ['a2'], major_scope: 'major' })
+    expect(selects[1].props('value')).toBe('all')
+  })
+
+  it('turns the watched filter off when a single avatar is picked', async () => {
+    watchlistStoreMock.watchedIds = ['a2']
+    const wrapper = mount(EventPanel, { global: { plugins: [createEventPanelI18n()] } })
+    const button = wrapper.find('[data-testid="watched-filter"]')
+    await button.trigger('click')
+    await settle(wrapper)
+    eventStoreMock.resetEvents.mockClear()
+
+    await wrapper.findAllComponents(NSelect)[1].vm.$emit('update:value', 'a1')
+    await settle(wrapper)
+
+    expect(eventStoreMock.resetEvents).toHaveBeenLastCalledWith({ avatar_id: 'a1' })
+    expect(button.attributes('aria-pressed')).toBe('false')
+  })
+
+  it('reloads when the watchlist changes and switches off once it is empty', async () => {
+    watchlistStoreMock.watchedIds = ['a1']
+    const wrapper = mount(EventPanel, { global: { plugins: [createEventPanelI18n()] } })
+    const button = wrapper.find('[data-testid="watched-filter"]')
+    await button.trigger('click')
+    await settle(wrapper)
+    eventStoreMock.resetEvents.mockClear()
+
+    watchlistStoreMock.watchedIds = ['a1', 'a2']
+    await settle(wrapper)
+    expect(eventStoreMock.resetEvents).toHaveBeenLastCalledWith({ avatar_ids: ['a1', 'a2'] })
+
+    eventStoreMock.resetEvents.mockClear()
+    watchlistStoreMock.watchedIds = []
+    await settle(wrapper)
+    expect(eventStoreMock.resetEvents).toHaveBeenLastCalledWith({})
+    expect(button.attributes('aria-pressed')).toBe('false')
+  })
+
+  it('does not reload on watchlist changes while the watched filter is off', async () => {
+    const wrapper = mount(EventPanel, { global: { plugins: [createEventPanelI18n()] } })
+    await settle(wrapper)
+    eventStoreMock.resetEvents.mockClear()
+
+    watchlistStoreMock.watchedIds = ['a1']
+    await settle(wrapper)
+
+    expect(eventStoreMock.resetEvents).not.toHaveBeenCalled()
   })
 })

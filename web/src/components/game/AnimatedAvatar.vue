@@ -11,6 +11,7 @@ const props = defineProps<{
   avatar: AvatarSummary
   tileSize: number
   offset?: { x: number; y: number }
+  watched?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -146,6 +147,16 @@ const drawHoverRing = (g: Graphics) => {
     g.stroke({ width: 3, color: 0xf6d68a, alpha: 0.76 })
 }
 
+// Static ground ring for watched avatars: drawn once, no per-frame work.
+const drawWatchRing = (g: Graphics) => {
+    g.clear()
+    const radiusX = props.tileSize * 0.78
+    const radiusY = props.tileSize * 0.32
+    g.ellipse(0, 0, radiusX, radiusY)
+    g.fill({ color: 0xf2c94c, alpha: 0.08 })
+    g.stroke({ width: 3, color: 0xf2c94c, alpha: 0.55 })
+}
+
 function handlePointerTap() {
     useAudio().play('select')
     emit('select', {
@@ -227,6 +238,14 @@ const drawEmojiBg = (g: Graphics) => {
     @mouseout="isHovered = false"
     @pointertap="handlePointerTap"
   >
+    <graphics
+      v-if="watched && !isHovered"
+      :key="`${avatar.id}-watch-ring`"
+      :y="tileSize * 0.18"
+      event-mode="none"
+      @effect="drawWatchRing"
+    />
+
     <graphics
       v-if="isHovered"
       :key="`${avatar.id}-hover-ring`"

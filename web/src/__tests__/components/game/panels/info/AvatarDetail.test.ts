@@ -5,6 +5,7 @@ import AvatarDetail from '@/components/game/panels/info/AvatarDetail.vue'
 import { createPinia, setActivePinia } from 'pinia'
 import { createI18n } from 'vue-i18n'
 import { systemApi } from '@/api'
+import { useWatchlistStore } from '@/stores/watchlist'
 
 const entityRowSpy = vi.fn()
 
@@ -63,6 +64,8 @@ describe('AvatarDetail', () => {
           info_panel: {
             avatar: {
               empty_short: '-',
+              watch: 'Watch',
+              unwatch: 'Unwatch',
               set_objective: 'Set Objective',
               clear_objective: 'Clear Objective',
               compare: {
@@ -600,5 +603,71 @@ describe('AvatarDetail', () => {
       id: '1',
       name: 'Child of Fortune',
     })
+  })
+
+  it('toggles the watch star in the header and stores the avatar', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const wrapper = mount(AvatarDetail, {
+      props: {
+        data: { ...mockAvatarData, cultivation: undefined } as any,
+      },
+      global: {
+        plugins: [pinia, i18n],
+        stubs: {
+          StatItem: true,
+          RelationRow: true,
+          TagList: true,
+          SecondaryPopup: true,
+          AvatarAdjustPanel: true,
+          AvatarPortraitPanel: true,
+          RoleplayPanel: true,
+        },
+      },
+    })
+    const watchlist = useWatchlistStore()
+
+    const toggle = wrapper.find('[data-testid="watch-toggle"]')
+    expect(toggle.exists()).toBe(true)
+    expect(toggle.attributes('aria-pressed')).toBe('false')
+    expect(toggle.attributes('aria-label')).toBe('Watch')
+
+    await toggle.trigger('click')
+
+    expect(watchlist.isWatched('avatar_1')).toBe(true)
+    expect(watchlist.entries[0]).toMatchObject({ id: 'avatar_1', name: 'Test Avatar', deceased: false })
+    expect(toggle.attributes('aria-pressed')).toBe('true')
+    expect(toggle.attributes('aria-label')).toBe('Unwatch')
+    expect(toggle.classes()).toContain('is-watched')
+
+    await toggle.trigger('click')
+    expect(watchlist.isWatched('avatar_1')).toBe(false)
+    expect(toggle.attributes('aria-pressed')).toBe('false')
+  })
+
+  it('remembers dead avatars as deceased when watched from their detail panel', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const wrapper = mount(AvatarDetail, {
+      props: {
+        data: { ...mockAvatarData, is_dead: true, death_info: { reason: 'Old age' } } as any,
+      },
+      global: {
+        plugins: [pinia, i18n],
+        stubs: {
+          StatItem: true,
+          RelationRow: true,
+          TagList: true,
+          SecondaryPopup: true,
+          AvatarAdjustPanel: true,
+          AvatarPortraitPanel: true,
+          RoleplayPanel: true,
+        },
+      },
+    })
+
+    await wrapper.find('[data-testid="watch-toggle"]').trigger('click')
+
+    expect(useWatchlistStore().entries[0]).toMatchObject({ id: 'avatar_1', deceased: true })
   })
 })

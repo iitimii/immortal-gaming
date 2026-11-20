@@ -44,6 +44,15 @@ describe('public api module migration', () => {
     expect(page).toEqual({ events: [], nextCursor: null, hasMore: false })
   })
 
+  it('eventApi sends the any-of avatar filter as a comma-separated list', async () => {
+    const { eventApi } = await import('@/api/modules/event')
+    getMock.mockResolvedValue({ events: [], next_cursor: null, has_more: false })
+
+    await eventApi.fetchEvents({ avatar_ids: ['a1', 'a2'], cursor: 'c1', limit: 100 })
+
+    expect(getMock).toHaveBeenCalledWith('/api/v1/query/events?avatar_ids=a1%2Ca2&cursor=c1&limit=100')
+  })
+
   it('eventApi cleans up events through /api/v1 command endpoint', async () => {
     const { eventApi } = await import('@/api/modules/event')
     deleteMock.mockResolvedValue({ deleted: 12 })

@@ -146,6 +146,7 @@ class GameQueryService:
         major_scope: str,
         cursor: str | None,
         limit: int,
+        avatar_ids: str | None = None,
     ) -> dict:
         return self._deps.get_events_page(
             self._deps.runtime,
@@ -153,6 +154,7 @@ class GameQueryService:
             avatar_id=avatar_id,
             avatar_id_1=avatar_id_1,
             avatar_id_2=avatar_id_2,
+            avatar_ids=avatar_ids,
             sect_id=sect_id,
             major_scope=major_scope,
             cursor=cursor,
