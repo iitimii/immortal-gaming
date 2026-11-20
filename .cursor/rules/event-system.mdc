@@ -1,31 +1,31 @@
 ---
-description: 事件系统规范 (Event System)
+description: Event system rules
 globs: src/classes/event.py, src/classes/event_storage.py, src/systems/**/*.py
 ---
 
-# 事件系统规范 (Event System)
+# Event System Rules
 
-本规范定义了游戏中事件 (Event) 的生成、分类、关联与存储机制。事件是游戏历史记录和 LLM 上下文记忆的核心。
+These rules define how in-game events (`Event`) are generated, classified, linked, and stored. Events are the core of the game's history and the LLM's contextual memory.
 
-## 1. 事件粒度与分类 (`Event` 类)
+## 1. Event Granularity and Classification (`Event` class)
 
-*   **`is_major=True` (大事/长期记忆)**：
-    *   **定义**：对角色生命周期有重大影响的事件（如：出生、死亡、大境界突破、结仇、道侣）。
-    *   **处理**：永久保留，不会被清理。作为 LLM 推演时的核心上下文（长期记忆）。
-*   **`is_major=False` (小事/短期记忆)**：
-    *   **定义**：日常行为和琐碎交互（如：日常修炼、普通切磋、移动）。
-    *   **处理**：定期被 `EventStorage` 清理。仅作为近期行为的上下文（短期记忆）。
-*   **`is_story=True` (纯文本故事)**：
-    *   **定义**：为了丰富前端表现而生成的纯文本故事（如：双修过程描写、战斗细节）。
-    *   **处理**：不进入 AI 记忆引擎（不作为 prompt 传入 LLM），以节省 Token 消耗和避免干扰逻辑推理。
+*   **`is_major=True` (major events / long-term memory)**:
+    *   **Definition**: events with a significant impact on an avatar's life cycle (e.g. birth, death, major realm breakthrough, forming a grudge, Dao companions).
+    *   **Handling**: kept permanently and never cleaned up. Serves as core context (long-term memory) for LLM reasoning.
+*   **`is_major=False` (minor events / short-term memory)**:
+    *   **Definition**: everyday behavior and trivial interactions (e.g. routine cultivation, ordinary sparring, movement).
+    *   **Handling**: periodically cleaned up by `EventStorage`. Used only as context for recent behavior (short-term memory).
+*   **`is_story=True` (plain-text story)**:
+    *   **Definition**: plain-text stories generated to enrich the frontend presentation (e.g. descriptions of dual cultivation, battle details).
+    *   **Handling**: does not enter the AI memory engine (not passed to the LLM as prompt), to save tokens and avoid interfering with logical reasoning.
 
-## 2. 角色关联 (`related_avatars`)
+## 2. Avatar Links (`related_avatars`)
 
-*   **准确记录**：在实例化 `Event` 时，必须准确填写 `related_avatars` 列表，包含所有参与该事件的角色 ID。
-*   **双向查询**：底层 SQLite 依赖此字段建立 `event_avatars` 关联表。只有准确记录，才能支持 `get_events_between(id1, id2)` 这种双向关系查询。
+*   **Record accurately**: when instantiating an `Event`, fill in the `related_avatars` list accurately with the IDs of every avatar involved in the event.
+*   **Bidirectional queries**: the underlying SQLite relies on this field to build the `event_avatars` link table. Only accurate records can support bidirectional relationship queries such as `get_events_between(id1, id2)`.
 
-## 3. 存储与读取 (`EventStorage`)
+## 3. Storage and Retrieval (`EventStorage`)
 
-*   **统一入库**：业务代码（如 `Action` 或 `System`）只需生成并返回 `Event` 对象，由模拟器主循环 (`Simulator`) 统一收集并写入 `EventStorage`。严禁在业务逻辑中直接调用数据库写入。
-*   **分页查询**：前端或外围接口查询事件时，必须使用基于 `cursor` 的分页机制 (`get_events`)，严禁拉取全量数据，防止内存溢出和传输阻塞。
-*   **后端查询**：LLM 提示词组装时，应使用 `get_major_events_by_avatar` 和 `get_minor_events_by_avatar` 获取结构化的记忆切片。
+*   **Centralized persistence**: business code (e.g. an `Action` or `System`) only creates and returns `Event` objects; the simulator main loop (`Simulator`) collects them and writes them into `EventStorage`. Never write to the database directly from business logic.
+*   **Paginated queries**: when the frontend or external interfaces query events, they must use the `cursor`-based pagination (`get_events`); never fetch the full dataset, to prevent memory overflow and transfer stalls.
+*   **Backend queries**: when assembling LLM prompts, use `get_major_events_by_avatar` and `get_minor_events_by_avatar` to obtain structured memory slices.

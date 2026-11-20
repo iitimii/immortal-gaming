@@ -1,8 +1,5 @@
 # Contributors
 
-感谢每一位为这个开源项目贡献代码、创意、反馈与时间的朋友。
-每一个 Pull Request、Issue、讨论和评审，都在帮助 `Cultivation World Simulator` 变得更完整、更有生命力。
-
 Thanks to everyone who has contributed code, ideas, feedback, and time to this open source project.
 Every pull request, issue, discussion, and review helps `Cultivation World Simulator` grow into something better.
 

@@ -1,342 +1,342 @@
-# 地图质量优化 Spec
+# Map Quality Optimization Spec
 
-本文档记录官方地图质量优化的设计判断、潜在问题、分期方案与验收标准。它建立在现有 region-first 地图系统之上，不替代 `docs/specs/region-first-map-system.md`，而是补充“地图看起来是否合理、是否美观、是否容易维护”的质量层。
+This document records the design judgments, potential issues, phased plan, and acceptance criteria for optimizing the quality of the official maps. It builds on the existing region-first map system and does not replace `docs/specs/region-first-map-system.md`; instead it adds a quality layer about "whether the map looks reasonable, looks good, and is easy to maintain".
 
-## 背景
+## Background
 
-当前官方地图已经收束为 schema v2：
+The official maps have already converged on schema v2:
 
-1. 官方地图真源是 `static/game_configs/maps/<map_id>/map.json`。
-2. `region_rows` 是唯一语义矩阵，只保存 region id。
-3. tile 由 `static/game_configs/region_tile.csv` 与 `wilderness_tile` 推导。
-4. 一个 region 当前只允许绑定一种 tile。
-5. 城市、宗门、洞府、遗迹等大型图像位置由 `landmarks` 控制。
-6. 地图局部名称与描述差异由 `region_overrides` 控制。
+1. The source of truth for official maps is `static/game_configs/maps/<map_id>/map.json`.
+2. `region_rows` is the only semantic matrix and stores only region ids.
+3. Tiles are derived from `static/game_configs/region_tile.csv` and `wilderness_tile`.
+4. A region is currently allowed to bind only one tile.
+5. The positions of large images such as cities, sects, cave dwellings, and ruins are controlled by `landmarks`.
+6. Map-local differences in names and descriptions are controlled by `region_overrides`.
 
-这个设计适合当前阶段，不应为了修地图观感而恢复 `tile_map.csv + region_map.csv` 双矩阵，也不应引入每格地形覆盖作为新的主路径。
+This design suits the current stage. We should not restore the `tile_map.csv + region_map.csv` dual matrix to fix how the map looks, nor introduce per-cell terrain overrides as a new main path.
 
-当前问题主要不是 schema 选错，而是官方地图内容与工具链还没有形成稳定的质量门：地图可以被刷成大块 region，水系可以被切断，编辑工具也存在把官方地图尺寸写坏的风险。
+The current problem is mainly not a wrong schema choice, but that the official map content and the toolchain have not yet formed a stable quality gate: maps can be painted into large blocky regions, water systems can be cut off, and the editing tool also risks writing broken official map dimensions.
 
-## 当前已观察到的问题
+## Currently Observed Issues
 
-### 地图设计问题
+### Map Design Issues
 
-1. 水系拓扑不稳定。
-   - `106` 在全局配置中是强水系语义 region。
-   - `classic` 中 `106` 当前拆成多段水域，视觉上像河流被切断。
-   - `mountain_frontier` 中 `106` 也拆成多段，与“峡河奔流”的地图覆盖文本不匹配。
-   - `island_seas` 中 `106` 作为潮汐航道可以多段，但应表现为海峡、航道、内湾，而不是随机水块。
+1. Water system topology is unstable.
+   - `106` is a region with strong water-system semantics in the global configuration.
+   - In `classic`, `106` is currently split into multiple water segments, which visually looks like a river that has been cut off.
+   - In `mountain_frontier`, `106` is also split into multiple segments, which does not match the map override text "a gorge river rushing through".
+   - In `island_seas`, `106` as a tidal channel may have multiple segments, but should read as straits, channels, and inner bays, rather than random water blobs.
 
-2. 大面积 region 过于块状。
-   - 沙漠、雨林、冰原、山脉、草原、毒泽、海岸等 region 的主体过于实心。
-   - 即使没有超长直线边界，整体仍像用矩形或大圆刷子铺出来。
-   - 缺少山麓、湾口、岬角、河湾、绿洲、林缘、支脉、半岛等自然形态。
+2. Large regions are too blocky.
+   - The bodies of desert, rainforest, ice field, mountain, grassland, poison marsh, coast, and similar regions are too solid.
+   - Even without very long straight boundaries, they still look as if they were laid down with a rectangle or a big round brush.
+   - They lack natural forms such as foothills, bay mouths, headlands, river bends, oases, forest edges, spurs, and peninsulas.
 
-3. 边界参差不足但碎片又缺少语义。
-   - 自然边界需要犬牙交错，但不是满天星碎片。
-   - 少量 1 到 5 格小块如果没有绿洲、离岛、礁湖、山口、支流等地理解释，会显得像误刷。
+3. Boundaries are not jagged enough, yet fragments lack semantics.
+   - Natural boundaries need to interlock, but not as a scatter of fragments everywhere.
+   - A few small patches of 1 to 5 cells look like painting mistakes if there is no geographic explanation such as an oasis, outlying island, lagoon, mountain pass, or tributary.
 
-4. 地图语义与视觉位置容易漂移。
-   - 全局 region 名称中有方向、地貌和用途语义。
-   - 地图覆盖文本可以修正局部语义，但如果形状和 landmark 不匹配，文本修正也会显得牵强。
-   - 城市、宗门、洞府、遗迹应落在符合其描述的位置附近，而不仅是满足 landmark anchor 属于 region。
+4. Map semantics and visual positions easily drift apart.
+   - Global region names carry direction, landform, and purpose semantics.
+   - Map override text can correct local semantics, but if the shape and landmark do not match, the text correction also looks forced.
+   - Cities, sects, cave dwellings, and ruins should sit near positions that match their descriptions, not merely satisfy the requirement that the landmark anchor belongs to the region.
 
-5. 三张官方地图的差异还可以更强。
-   - `classic` 应该是均衡大陆，重点是主河、东海、西域、南疆、北境之间的完整地理关系。
-   - `island_seas` 应该以群岛、海峡、港口、内湾、离岛为主，而不是把大陆地貌拆成小块散在海上。
-   - `mountain_frontier` 应该以山脉、谷地、峡河、边城、荒原为主，而不是单纯扩大 mountain tile 的面积。
+5. The differences between the three official maps could be stronger.
+   - `classic` should be a balanced continent, focusing on the complete geographic relationship among the main river, the Eastern Sea, the Western Regions, the Southern Frontier, and the Northern Border.
+   - `island_seas` should be dominated by archipelagos, straits, harbors, inner bays, and outlying islands, rather than continental landforms broken into small pieces scattered on the sea.
+   - `mountain_frontier` should be dominated by mountain ranges, valleys, gorge rivers, border towns, and wastelands, rather than simply enlarging the area of the mountain tile.
 
-### 代码与工具链问题
+### Code and Toolchain Issues
 
-1. `tools/map_creator/main.py` 的保存尺寸存在风险。
-   - 当前常量仍是 `MAP_WIDTH = 70`、`MAP_HEIGHT = 50`。
-   - 官方地图当前是 `84x60`。
-   - 加载时会读 map source 的真实尺寸，但保存时仍按常量重建矩阵，可能裁坏地图。
+1. Save dimensions in `tools/map_creator/main.py` are risky.
+   - The constants are still `MAP_WIDTH = 70`, `MAP_HEIGHT = 50`.
+   - The official maps are currently `84x60`.
+   - Loading reads the real dimensions of the map source, but saving still rebuilds the matrix from the constants, which may crop the map.
 
-2. `tools/map_creator/main.py` 当前默认只加载 `classic`。
-   - `DEFAULT_MAP_ID = "classic"` 固定。
-   - 缺少从 URL 或接口选择 `mapId` 的主路径。
-   - 维护三张官方地图时容易误改或无法直接编辑目标预设。
+2. `tools/map_creator/main.py` currently loads only `classic` by default.
+   - `DEFAULT_MAP_ID = "classic"` is fixed.
+   - There is no main path for selecting `mapId` from the URL or the API.
+   - When maintaining the three official maps it is easy to edit the wrong one or be unable to edit the target preset directly.
 
-3. 地图编辑器保存 payload 没有充分复用现有 parser / serializer。
-   - `src/run/map_source.py` 已经有 `MapSource`、`map_source_to_dict`、读取与校验逻辑。
-   - 编辑器目前自己组装 JSON，容易与主路径 drift。
+3. The map editor's save payload does not sufficiently reuse the existing parser / serializer.
+   - `src/run/map_source.py` already has `MapSource`, `map_source_to_dict`, and read and validation logic.
+   - The editor currently assembles the JSON itself, which easily drifts from the main path.
 
-4. 校验器偏重格式正确，缺少质量审计。
-   - 现有 `tools/map_presets/validate_presets.py` 已检查 schema、region id、连通性、landmark anchor 等。
-   - 视觉检查目前只有少量特例，例如群岛 island/plain 噪声、山脉左边缘过直。
-   - 尚未系统检查水系连续性、小碎片、孤立水块、块状度、海岸/河岸质量、语义锚点。
+4. The validator focuses on format correctness and lacks a quality audit.
+   - The existing `tools/map_presets/validate_presets.py` already checks schema, region ids, connectivity, landmark anchors, etc.
+   - Visual checks currently cover only a few special cases, such as island/plain noise in the archipelago and an overly straight left edge of the mountains.
+   - It does not yet systematically check water continuity, small fragments, isolated water blobs, blockiness, coast/riverbank quality, or semantic anchors.
 
-5. 运行时 region 创建失败当前只 `print`。
-   - `src/run/load_map.py` 中 `_load_and_assign_regions()` 创建 region 失败时打印错误后继续。
-   - 对官方地图来说，这可能把数据错误变成“地图能加载但少 region”的隐性故障。
-   - 校验器可以先兜住，但 loader 对官方预设也应尽量 fail fast。
+5. Runtime region creation failures currently only `print`.
+   - In `src/run/load_map.py`, `_load_and_assign_regions()` prints an error and continues when region creation fails.
+   - For official maps, this can turn a data error into a hidden failure where "the map loads but is missing regions".
+   - The validator can catch it first, but the loader should also fail fast for official presets where possible.
 
-6. 前端地图预览组件手写 preset import。
-   - `web/src/components/game/panels/system/MapPresetPreview.vue` 直接 import 三张 SVG。
-   - `tools/map_presets/export_frontend_previews.py` 能导出所有预设，但前端展示表仍需要手动同步。
-   - 后续新增地图时容易出现已导出但前端不显示的状态。
+6. The frontend map preview component hand-writes preset imports.
+   - `web/src/components/game/panels/system/MapPresetPreview.vue` directly imports three SVGs.
+   - `tools/map_presets/export_frontend_previews.py` can export all presets, but the frontend display table still needs manual syncing.
+   - When adding maps later, it is easy to end up in a state where a preview is exported but not shown in the frontend.
 
-7. 预览体系分散。
-   - `render_preview.py` 输出 PNG 给人工审图。
-   - `export_frontend_previews.py` 输出 SVG 给前端启动页。
-   - 两者颜色表与标记规则重复维护，未来可能不一致。
+7. The preview system is fragmented.
+   - `render_preview.py` outputs PNGs for human review.
+   - `export_frontend_previews.py` outputs SVGs for the frontend start page.
+   - The two maintain duplicate color tables and marker rules, which may diverge in the future.
 
-8. 地图质量问题缺少可复现报告。
-   - 现在需要人工看图发现“河断了”“太整齐”。
-   - 应提供机器可读的 audit 输出，让 PR、测试和人工审图有共同语言。
+8. Map quality issues lack reproducible reports.
+   - Currently someone has to look at the image to discover "the river is broken" or "it is too regular".
+   - There should be machine-readable audit output, so PRs, tests, and human review share a common language.
 
-## 设计原则
+## Design Principles
 
-1. 保持 region-first。
-   - 本轮不新增 tile layer、river layer、road layer、height layer。
-   - 不恢复旧双矩阵。
-   - 不为单个 region 增加每格 tile override。
+1. Stay region-first.
+   - This round does not add a tile layer, river layer, road layer, or height layer.
+   - Do not restore the old dual matrix.
+   - Do not add per-cell tile overrides for a single region.
 
-2. 地图质量优先通过 `region_rows` 改善。
-   - 水系用水域 region 的连续形状表达。
-   - 海岸用海域、岛屿、荒野海面和陆地 region 的边界表达。
-   - 山地、森林、沙漠、草原通过 region 犬牙交错表达过渡。
+2. Improve map quality primarily through `region_rows`.
+   - Water systems are expressed by the continuous shape of water regions.
+   - Coasts are expressed by the boundaries between sea, island, sea wilderness, and land regions.
+   - Mountains, forests, deserts, and grasslands express transitions through interlocking regions.
 
-3. 自动化只做辅助，不做完全随机生成。
-   - 官方地图是视觉资产，需要人工审图。
-   - 可以用脚本发现问题、生成候选边界扰动、统计质量指标。
-   - 最终 `map.json` 应是可审查的确定性结果。
+3. Automation only assists; no fully random generation.
+   - Official maps are visual assets and need human review.
+   - Scripts can be used to find issues, generate candidate boundary perturbations, and compute quality metrics.
+   - The final `map.json` should be a reviewable deterministic result.
 
-4. 不用碎片冒充自然。
-   - 自然边界要有主体与方向。
-   - 小块必须有地理语义，否则合并或删除。
-   - city / sect / cultivate region 应保持清晰连续。
+4. Do not use fragments to fake naturalness.
+   - Natural boundaries need a main body and direction.
+   - Small patches must have geographic semantics; otherwise merge or delete them.
+   - city / sect / cultivate regions should stay clear and contiguous.
 
-5. 文本、landmark、形状三者一致。
-   - 带方向词、河海词、山谷词、港口词的名称和描述必须匹配实际位置。
-   - 优先移动 region / landmark，其次用 `region_overrides` 修正局部称呼。
-
-6. 质量门分层。
-   - 格式和运行时契约错误应 hard fail。
-   - 审美指标先作为 audit warning 输出，稳定后再逐步转 hard fail。
+5. Text, landmark, and shape must agree.
+   - Names and descriptions containing direction words, river/sea words, mountain/valley words, or harbor words must match the actual position.
+   - Prefer moving the region / landmark; otherwise use `region_overrides` to correct the local name.
+
+6. Layered quality gates.
+   - Format and runtime contract errors should hard fail.
+   - Aesthetic metrics are first output as audit warnings, and gradually turned into hard fails once stable.
 
-## 分期方案
+## Phased Plan
 
-### Phase 0：修维护工具的安全问题
+### Phase 0: Fix Safety Issues in Maintenance Tools
 
-状态：已落地。
+Status: landed.
 
-目标：确保后续编辑三张官方地图不会被工具链写坏。
+Goal: ensure later edits to the three official maps will not be broken by the toolchain.
 
-任务：
+Tasks:
 
-1. 修复 `tools/map_creator/main.py` 保存尺寸。
-   - 保存时使用请求中的 `width` / `height`。
-   - 如果请求缺失，读取当前 `map.json` 的 `width` / `height` 兜底。
-   - 禁止保存时无条件使用 `MAP_WIDTH` / `MAP_HEIGHT`。
+1. Fix save dimensions in `tools/map_creator/main.py`.
+   - Use `width` / `height` from the request when saving.
+   - If missing from the request, fall back to `width` / `height` read from the current `map.json`.
+   - Forbid unconditionally using `MAP_WIDTH` / `MAP_HEIGHT` when saving.
 
-2. 支持选择地图预设。
-   - `load_map_data()` 支持传入 `map_id`。
-   - `/api/init` 支持 `?mapId=<id>`。
-   - `/api/save` 使用 payload 中的 `mapId`，并校验该目录存在或显式允许创建。
-   - 页面初始化可从 URL query 读取 `mapId`。
+2. Support selecting a map preset.
+   - `load_map_data()` accepts a `map_id`.
+   - `/api/init` supports `?mapId=<id>`.
+   - `/api/save` uses `mapId` from the payload and validates that the directory exists or creation is explicitly allowed.
+   - Page initialization can read `mapId` from the URL query.
 
-3. 保存时保留 map source 元数据。
-   - 保留已有 `schema_version`。
-   - 保留或正确递增 `version` 的规则需要明确。
-   - 保留 `wilderness_tile`、`landmarks`、`region_overrides`。
-   - 输出仍使用 `ensure_ascii=False, indent=2` 并以换行结尾。
+3. Preserve map source metadata when saving.
+   - Keep the existing `schema_version`.
+   - The rule for keeping or correctly incrementing `version` needs to be made explicit.
+   - Keep `wilderness_tile`, `landmarks`, and `region_overrides`.
+   - Output still uses `ensure_ascii=False, indent=2` and ends with a newline.
 
-4. 加入工具级 smoke test。
-   - 至少覆盖：读取 `84x60` 地图后保存仍是 `84x60`。
-   - 覆盖：保存非 classic 地图不会写到 classic。
-   - 可以优先抽出纯函数测试，避免启动 Flask 服务。
+4. Add a tool-level smoke test.
+   - Cover at least: after reading an `84x60` map and saving, it is still `84x60`.
+   - Cover: saving a non-classic map does not write to classic.
+   - Prefer extracting pure functions for tests, to avoid starting the Flask server.
 
-验收：
+Acceptance:
 
-1. 使用地图编辑器读写 `classic` 后，`width=84`、`height=60`、`region_rows` 尺寸不变。
-2. 使用地图编辑器读写 `island_seas` 与 `mountain_frontier` 不会覆盖 `classic`。
-3. `python tools\map_presets\validate_presets.py` 通过。
+1. After reading and writing `classic` with the map editor, `width=84`, `height=60`, and the `region_rows` dimensions are unchanged.
+2. Reading and writing `island_seas` and `mountain_frontier` with the map editor does not overwrite `classic`.
+3. `python tools\map_presets\validate_presets.py` passes.
 
-已落地内容：
+Landed:
 
-1. `tools/map_creator/main.py` 已改为按请求或现有 `map.json` 的真实尺寸保存。
-2. 地图编辑器支持通过 `?mapId=<id>` 加载和保存指定预设。
-3. 保存 payload 会携带 `mapId`、`width`、`height`、`regionOverrides`。
-4. 未显式允许创建时，未知 map id 会被拒绝。
-5. 已新增 `tests/test_map_creator.py` 覆盖尺寸保留、非 classic 读写、未知 map 拒绝和路径式 map id 拒绝。
+1. `tools/map_creator/main.py` now saves using the real dimensions from the request or the existing `map.json`.
+2. The map editor supports loading and saving a specific preset via `?mapId=<id>`.
+3. The save payload carries `mapId`, `width`, `height`, and `regionOverrides`.
+4. Unless creation is explicitly allowed, unknown map ids are rejected.
+5. Added `tests/test_map_creator.py`, covering dimension preservation, non-classic read/write, unknown map rejection, and rejection of path-like map ids.
 
-### Phase 1：建立地图质量审计
-
-状态：已落地第一版。
+### Phase 1: Establish a Map Quality Audit
+
+Status: first version landed.
 
-目标：把“河流断了”“太方”“太碎”变成可复现报告。
+Goal: turn "the river is broken", "too square", and "too fragmented" into reproducible reports.
 
-任务：
+Tasks:
 
-1. 在 `tools/map_presets` 下新增质量审计能力。
-   - 可以集成进 `validate_presets.py`，也可以先新增 `audit_quality.py`。
-   - 推荐先输出 warning report，避免初期 hard fail 过多。
-
-2. 审计指标：
-   - region 连通块数量与小碎片面积。
-   - water / sea 连通块数量。
-   - `106` 在 `classic` 与 `mountain_frontier` 中是否连续。
-   - `106` 是否与 `105` 或海岸出口建立合理接触。
-   - 小于阈值的孤立 water / sea / normal region 组件。
-   - 大面积 region 的块状度，例如 `area / bbox_area`、perimeter、边界方向变化率。
-   - region 边界长直线与长阶梯。
-   - landmark 2x2 覆盖是否大部分落在所属 region 内。
-   - landmark 到所属 region 边界距离是否过近。
+1. Add quality audit capability under `tools/map_presets`.
+   - It can be integrated into `validate_presets.py`, or first added as `audit_quality.py`.
+   - Recommend outputting a warning report first, to avoid too many hard fails early on.
+
+2. Audit metrics:
+   - Number of region connected components and the area of small fragments.
+   - Number of water / sea connected components.
+   - Whether `106` is contiguous in `classic` and `mountain_frontier`.
+   - Whether `106` makes reasonable contact with `105` or a coastal outlet.
+   - Isolated water / sea / normal region components below a threshold.
+   - Blockiness of large regions, e.g. `area / bbox_area`, perimeter, rate of boundary direction change.
+   - Long straight lines and long staircases on region boundaries.
+   - Whether most of a landmark's 2x2 footprint falls inside its region.
+   - Whether a landmark is too close to its region's boundary.
 
-3. 输出格式：
-   - 控制台友好文本，用于人工阅读。
-   - 可选 JSON，用于后续 CI 或 PR 评论。
-   - 每条 warning 包含 map id、region id、问题类型、关键数值、建议动作。
+3. Output format:
+   - Console-friendly text for human reading.
+   - Optional JSON for later CI or PR comments.
+   - Each warning includes map id, region id, issue type, key values, and a suggested action.
 
-4. 测试：
-   - 为审计纯函数加单元测试。
-   - 使用小矩阵覆盖断流、孤立水块、过高填充率、小碎片等场景。
+4. Tests:
+   - Add unit tests for the audit's pure functions.
+   - Use small matrices to cover scenarios such as broken rivers, isolated water blobs, overly high fill ratios, and small fragments.
 
-验收：
+Acceptance:
 
-1. 审计脚本能对三张官方地图输出稳定报告。
-2. 现有地图即使有 warning，也不阻断 `validate_presets.py` 的基础校验，除非明确启用 strict。
-3. 小矩阵测试覆盖核心指标。
+1. The audit script outputs stable reports for the three official maps.
+2. Even if the existing maps have warnings, they do not block the basic validation of `validate_presets.py` unless strict is explicitly enabled.
+3. Small-matrix tests cover the core metrics.
 
-已落地内容：
+Landed:
 
-1. 新增 `tools/map_presets/quality_audit.py`。
-2. 审计支持控制台报告、`--json` 机器可读输出、`--strict` 非零退出。
-3. 当前第一版指标包括：
-   - region 连通块与小碎片。
-   - water / sea 小组件。
-   - `classic` / `mountain_frontier` 的 `106` 连续性与入海口。
-   - 大面积 normal region 的块状度。
-   - normal region 长直边。
-   - landmark 2x2 覆盖与贴边情况。
-4. 新增 `tests/test_map_quality_audit.py` 覆盖核心审计函数。
+1. Added `tools/map_presets/quality_audit.py`.
+2. The audit supports a console report, `--json` machine-readable output, and `--strict` non-zero exit.
+3. The current first-version metrics include:
+   - Region connected components and small fragments.
+   - Small water / sea components.
+   - Continuity and sea outlet of `106` in `classic` / `mountain_frontier`.
+   - Blockiness of large normal regions.
+   - Long straight edges of normal regions.
+   - Landmark 2x2 footprint fit and edge-hugging.
+4. Added `tests/test_map_quality_audit.py` covering the core audit functions.
 
-### Phase 2：重绘三张官方地图
+### Phase 2: Redraw the Three Official Maps
 
-状态：已完成结构性硬问题修复，整体美化仍可继续迭代。
+Status: structural hard issues fixed; overall beautification can continue to iterate.
 
-目标：修复不合理与不美观问题，并强化三张地图的差异。
+Goal: fix unreasonable and unattractive issues, and strengthen the differences between the three maps.
 
-通用规则：
+General rules:
 
-1. 修改 `static/game_configs/maps/<id>/map.json` 的 `region_rows`。
-2. 不改 `region_tile.csv`，除非发现 region 绑定本身错误。
-3. 不新增 region id。
-4. 不删除三张图共享的 region roster。
-5. 移动 landmark 时必须保持 anchor 属于对应 region。
-6. 修改地图后同步生成预览。
-
-`classic` 调整方向：
+1. Modify `region_rows` in `static/game_configs/maps/<id>/map.json`.
+2. Do not change `region_tile.csv` unless a region binding itself is found to be wrong.
+3. Do not add new region ids.
+4. Do not delete the region roster shared by the three maps.
+5. When moving a landmark, keep its anchor inside the corresponding region.
+6. Regenerate previews after modifying a map.
+
+`classic` direction:
 
-1. 将 `106` 整理为连续主河。
-2. 河流应从中北或西北水源穿过中部，最终接入东海或河口水域。
-3. `110`、`115`、`112` 可沿河形成林带、竹境、农田过渡。
-4. 西部 `102` / `117` 与南部 `103` 的交界应有戈壁、沙缘、林缘过渡。
-5. 东海 `105` 海岸线增加湾口与岬角，避免一整块竖切海岸。
-6. `118` 作为海外岛屿保留清晰孤岛语义。
+1. Turn `106` into a contiguous main river.
+2. The river should flow from a north-central or northwestern source, through the center, and finally into the Eastern Sea or an estuary.
+3. `110`, `115`, and `112` can form forest belts, bamboo lands, and farmland transitions along the river.
+4. The borders of western `102` / `117` with southern `103` should have Gobi, desert-edge, and forest-edge transitions.
+5. Add bay mouths and headlands to the Eastern Sea `105` coastline, avoiding a single vertically cut coast.
+6. Keep `118` as an overseas island with clear isolated-island semantics.
 
-`island_seas` 调整方向：
+`island_seas` direction:
 
-1. 保持大面积 `-1` sea wilderness 作为海面背景。
-2. `106` 表达潮汐航道、海峡和内湾，允许多段，但应避免随机水块。
-3. 删除或合并缺少语义的 1 到 2 格碎片。
-4. 大岛边缘增加湾、岬、礁湖，但避免棋盘噪声。
-5. 城市优先靠港口、内湾或河口。
-6. `105` 表达强语义海域，不需要覆盖所有海面。
+1. Keep large areas of `-1` sea wilderness as the sea background.
+2. `106` expresses tidal channels, straits, and inner bays; multiple segments are allowed, but random water blobs should be avoided.
+3. Delete or merge 1 to 2 cell fragments that lack semantics.
+4. Add bays, headlands, and lagoons to the edges of large islands, but avoid checkerboard noise.
+5. Cities preferably sit by harbors, inner bays, or estuaries.
+6. `105` expresses a sea area with strong semantics and does not need to cover all sea surface.
 
-`mountain_frontier` 调整方向：
+`mountain_frontier` direction:
 
-1. 将 `106` 整理为连续峡河。
-2. 峡河应穿过山地和谷地，让城市、宗门、洞府位置更有解释。
-3. `107` 从大灰块改为主山脉加支脉。
-4. `109` / `101` / `301` / `406` 形成中央谷地或山口走廊。
-5. `117` 戈壁边缘减少贴边整块感，增加山脚、荒原、绿洲式交错。
-6. `105` 东海边界处理成海岸或入海湾，而不是被裁开的蓝块。
+1. Turn `106` into a contiguous gorge river.
+2. The gorge river should pass through mountains and valleys, giving the positions of cities, sects, and cave dwellings a better explanation.
+3. Change `107` from a large gray block into a main mountain range plus spurs.
+4. `109` / `101` / `301` / `406` form a central valley or mountain-pass corridor.
+5. Reduce the edge-hugging block feel at the edge of the `117` Gobi, adding foothill, wasteland, and oasis-like interlocking.
+6. Treat the `105` Eastern Sea boundary as a coast or estuary bay, rather than a cropped blue block.
 
-验收：
+Acceptance:
 
-1. 人工查看 PNG 预览，三张图不再有明显断河。
-2. 大面积 region 边缘有自然参差，但没有满天星碎片。
-3. landmark 与文本语义匹配。
-4. `python tools\map_presets\validate_presets.py` 通过。
-5. `python tools\map_presets\render_preview.py --all` 生成预览。
-6. `python tools\map_presets\export_frontend_previews.py` 更新前端预览 SVG。
+1. Human review of the PNG previews shows no obvious broken rivers on the three maps.
+2. Edges of large regions are naturally jagged, but without a scatter of fragments.
+3. Landmarks match the text semantics.
+4. `python tools\map_presets\validate_presets.py` passes.
+5. `python tools\map_presets\render_preview.py --all` generates previews.
+6. `python tools\map_presets\export_frontend_previews.py` updates the frontend preview SVGs.
 
-已落地第一轮内容：
+First round landed:
 
-1. `classic` 的 `106` 已从多段水域调整为连续水系，并保持 `202`、`303` 等特殊 region 连续。
-2. `mountain_frontier` 的 `106` 已调整为连续峡河，并补出入海口。
-3. `mountain_frontier` 的 `406` 已从 1 格扩为可承载 2x2 landmark 的驻地区域。
-4. `island_seas` 已清理部分缺少语义的 1 到 2 格小碎片。
-5. 三张地图的 `map.json` 与 `meta.json` 版本已提升到 `2`。
-6. 前端地图预览 SVG 已重新导出。
-7. `tests/test_map_presets.py` 已增加核心质量回归，锁住大陆/山脉水系连续性和山脉 `406` landmark fit。
+1. In `classic`, `106` has been adjusted from multiple water segments into a contiguous water system, keeping special regions such as `202` and `303` contiguous.
+2. In `mountain_frontier`, `106` has been adjusted into a contiguous gorge river, with a sea outlet added.
+3. In `mountain_frontier`, `406` has been expanded from 1 cell into a station region that can hold a 2x2 landmark.
+4. In `island_seas`, some 1 to 2 cell fragments lacking semantics have been cleaned up.
+5. The `map.json` and `meta.json` versions of the three maps have been bumped to `2`.
+6. The frontend map preview SVGs have been re-exported.
+7. `tests/test_map_presets.py` has added core quality regressions, locking water-system continuity for the continent/mountain maps and the mountain `406` landmark fit.
 
-已落地第二轮内容：
+Second round landed:
 
-1. `classic` 的东海 `105` 已进一步雕刻海岸线，北部林地、中部山麓与田垄形成连续岬角和湾口，块状度 warning 已消除。
-2. `mountain_frontier` 的 `107` 山脚长直边已由相邻谷地区域轻微咬开，长直边 warning 已消除。
-3. 当前质量审计中，断河、无入海口、块状大区、长直边、小碎片和 tiny water / sea component 等结构性 warning 已清零。
-4. 三张 PNG 预览与前端 SVG 预览已重新生成，并完成人工预览检查。
+1. In `classic`, the Eastern Sea `105` coastline has been further carved; the northern woodland, central foothills, and fields form continuous headlands and bay mouths, and the blockiness warning has been eliminated.
+2. In `mountain_frontier`, the long straight foothill edge of `107` has been slightly bitten into by adjacent valley regions, and the long straight edge warning has been eliminated.
+3. In the current quality audit, structural warnings such as broken river, no sea outlet, blocky large region, long straight edge, small fragment, and tiny water / sea component have been cleared to zero.
+4. The three PNG previews and frontend SVG previews have been regenerated, and a human preview check has been completed.
 
-当前剩余重点：
+Remaining focus:
 
-1. 当前自动审计剩余项均为 `landmark_near_boundary` 软提示。
-2. `island_seas` 因为群岛和小岛语义天然容易贴边，不宜为了消除 warning 机械移动所有 landmark。
-3. `classic` 的 `202`、`303` 与 `mountain_frontier` 的 `301`、`303`、`406` 可在后续实机审图时单独判断是否需要移动或扩区。
-4. 后续美化可以继续做局部边界雕刻，但应优先保持地理语义、连通性和 landmark 可读性。
+1. The remaining automated audit items are all `landmark_near_boundary` soft hints.
+2. Because of archipelago and small-island semantics, `island_seas` naturally tends to hug edges; landmarks should not be mechanically moved just to eliminate warnings.
+3. `202` and `303` in `classic`, and `301`, `303`, and `406` in `mountain_frontier`, can be judged individually during later in-game review as to whether they need moving or expanding.
+4. Later beautification can continue with local boundary carving, but should prioritize keeping geographic semantics, connectivity, and landmark readability.
 
-### Phase 3：收紧质量门与文档
+### Phase 3: Tighten the Quality Gate and Documentation
 
-状态：已落地第一版质量门与前端预览自动映射。
+Status: first version of the quality gate and automatic frontend preview mapping landed.
 
-目标：避免以后官方地图再次退化。
+Goal: prevent official maps from degrading again in the future.
 
-任务：
+Tasks:
 
-1. 将稳定审计项接入 `validate_presets.py` strict 模式。
-   - 基础格式错误继续 hard fail。
-   - 已稳定且低误报的质量项可 hard fail。
-   - 审美项保留 warning。
+1. Wire stable audit items into the strict mode of `validate_presets.py`.
+   - Basic format errors continue to hard fail.
+   - Quality items that are stable and have low false-positive rates can hard fail.
+   - Aesthetic items remain warnings.
 
-2. 更新测试。
-   - `tests/test_map_presets.py` 增加关键质量断言。
-   - 断言 `classic` / `mountain_frontier` 的 `106` 连续。
-   - 断言群岛图没有过多孤立 1 格 sea/water 组件。
-   - 断言 map creator 保存尺寸不会退回 `70x50`。
+2. Update tests.
+   - Add key quality assertions to `tests/test_map_presets.py`.
+   - Assert `106` is contiguous in `classic` / `mountain_frontier`.
+   - Assert the archipelago map does not have too many isolated 1-cell sea/water components.
+   - Assert map creator save dimensions do not revert to `70x50`.
 
-3. 更新文档。
-   - `docs/map-design-notes.md` 增加地图质量维护流程。
-   - 如 `.cursor/rules/map-system.mdc` 后续变更，需要同步 `AGENTS.md`。
+3. Update documentation.
+   - Add a map quality maintenance workflow to `docs/map-design-notes.md`.
+   - If `.cursor/rules/map-system.mdc` changes later, `AGENTS.md` needs to be synced.
 
-4. 改善前端预览同步。
-   - 优先让 `MapPresetPreview.vue` 使用动态映射或生成文件，避免每新增地图手动 import。
-   - 如果受 bundler 限制必须静态 import，则由导出脚本同步生成一个 manifest。
+4. Improve frontend preview syncing.
+   - Prefer having `MapPresetPreview.vue` use a dynamic mapping or a generated file, to avoid manual imports for every new map.
+   - If bundler constraints require static imports, have the export script generate a manifest in sync.
 
-已落地内容：
+Landed:
 
-1. `tools/map_presets/validate_presets.py` 已接入 `quality_audit.audit_map_source()`。
-2. 除 `landmark_near_boundary` 之外的质量审计项已成为官方地图 hard fail：
-   - 断河 / 无入海口。
-   - 小碎片 / tiny water / sea component。
-   - 大面积 normal region 过度块状。
-   - normal region 长直边。
-   - landmark 2x2 poor fit。
-3. `landmark_near_boundary` 仍保留为软提示，因为群岛、小岛、港口和洞府等语义经常需要贴边，机械 hard fail 容易误伤。
-4. `web/src/components/game/panels/system/MapPresetPreview.vue` 已改为通过 `import.meta.glob()` 自动收集 `web/src/assets/map-previews/*.svg`，新增地图预览 SVG 后不再需要手写 import。
-5. `tests/test_map_quality_audit.py` 已增加软/硬质量项分层的回归测试。
+1. `tools/map_presets/validate_presets.py` now calls `quality_audit.audit_map_source()`.
+2. Quality audit items other than `landmark_near_boundary` are now hard fails for official maps:
+   - Broken river / no sea outlet.
+   - Small fragment / tiny water / sea component.
+   - Overly blocky large normal region.
+   - Long straight edge of a normal region.
+   - Landmark 2x2 poor fit.
+3. `landmark_near_boundary` remains a soft hint, because archipelagos, small islands, harbors, cave dwellings, and similar semantics often need to hug edges, and a mechanical hard fail would easily cause false positives.
+4. `web/src/components/game/panels/system/MapPresetPreview.vue` now automatically collects `web/src/assets/map-previews/*.svg` via `import.meta.glob()`, so adding a new map preview SVG no longer requires a hand-written import.
+5. `tests/test_map_quality_audit.py` has added regression tests for the soft/hard quality item layering.
 
-验收：
+Acceptance:
 
-1. 地图质量审计已成为官方地图维护流程的一部分。
-2. 新增或修改官方地图时，`python tools\map_presets\validate_presets.py` 会阻止客观结构问题进入官方预设。
-3. 前端地图预览不会因为忘记手写 import 而漏图。
+1. The map quality audit has become part of the official map maintenance workflow.
+2. When adding or modifying an official map, `python tools\map_presets\validate_presets.py` prevents objective structural issues from entering the official presets.
+3. Frontend map previews will not be missing because someone forgot a hand-written import.
 
-## 推荐命令
+## Recommended Commands
 
-修改地图或地图工具后至少运行：
+After modifying a map or map tool, run at least:
 
 ```powershell
 python tools\map_presets\validate_presets.py
@@ -345,13 +345,13 @@ python tools\map_presets\export_frontend_previews.py
 pytest tests/test_map_presets.py
 ```
 
-如果修改了地图编辑器：
+If the map editor was modified:
 
 ```powershell
 pytest tests/test_map_presets.py
 ```
 
-如果修改了前端预览组件或地图启动面板：
+If the frontend preview component or the map start panel was modified:
 
 ```powershell
 cd web
@@ -359,24 +359,24 @@ npm run type-check
 npm run test -- --run
 ```
 
-## 暂不做
+## Not Doing for Now
 
-1. 不引入随机地图生成。
-2. 不引入独立河流图层。
-3. 不引入道路图层。
-4. 不引入高度、气候、生态模拟。
-5. 不引入每格 tile overlay。
-6. 不改变三张官方地图共享同一 region roster 的阶段性约定。
-7. 不为旧版地图格式增加新的兼容双轨。
+1. No random map generation.
+2. No independent river layer.
+3. No road layer.
+4. No height, climate, or ecology simulation.
+5. No per-cell tile overlay.
+6. No change to the interim convention that the three official maps share the same region roster.
+7. No new compatibility dual track for old map formats.
 
-## 后续留白
+## Future Room
 
-如果未来需要更强地图表达，可以重新设计以下能力：
+If stronger map expression is needed in the future, the following capabilities can be redesigned:
 
-1. base terrain layer：允许无 region 地貌不止一种。
-2. river / road overlay：让河流、道路脱离 region 归属。
-3. coast / border autotile：根据邻接关系自动渲染边缘。
-4. runtime overlay：战争、灾害、建设改变局部地貌。
-5. map editor brush：提供边缘扰动、连通河流、岛屿生成等确定性辅助工具。
+1. base terrain layer: allow more than one kind of no-region landform.
+2. river / road overlay: decouple rivers and roads from region ownership.
+3. coast / border autotile: automatically render edges based on adjacency.
+4. runtime overlay: war, disaster, and construction change local landforms.
+5. map editor brush: provide deterministic helper tools such as edge perturbation, river connection, and island generation.
 
-这些能力都应在独立 spec 中设计，并重新评估存档、前端渲染、外接控制 API 与测试契约。
+These capabilities should be designed in separate specs, with a fresh evaluation of saves, frontend rendering, the external control API, and test contracts.

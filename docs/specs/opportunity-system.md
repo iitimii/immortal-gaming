@@ -1,80 +1,80 @@
-# 机缘系统设计说明
+# Opportunity System Design Notes
 
-本文档描述“机缘（opportunity）”系统的一期设计。机缘与现有 `fortune` 奇遇不同：`fortune` 是月度随机命中后即时结算的世界事件；机缘是先生成一条绑定单人的限时感应，角色之后通过移动或接近目标才触发结算。
+This document describes the phase-one design of the "opportunity" system. Opportunity differs from the existing `fortune` encounter: `fortune` is a world event that is resolved immediately after a monthly random hit; an opportunity first generates a time-limited sense bound to a single person, and is only resolved later when the avatar moves to or approaches the target.
 
-当前设计目标是先把核心体验做稳：不新增动作，不做任务导航，不做复杂分层奖励，不做直接突破。
+The current design goal is to make the core experience solid first: no new actions, no quest navigation, no complex tiered rewards, no direct breakthroughs.
 
-## 1. 目标
+## 1. Goals
 
-机缘系统希望表达修仙叙事中的“缘法牵引”：
+The opportunity system aims to express the xianxia narrative of "the pull of fate":
 
-1. 角色偶尔福至心灵，感应到某人或某地与自身缘法相牵。
-2. 感应不是明确任务，也不是系统导航，只是一段模糊线索。
-3. 角色是否追寻、如何追寻，交给现有 AI 决策。
-4. 角色若在期限内抵达目标地或接近目标人，则触发结算。
-5. 结算可能获得宝物、获得助益、空手而返，或遭遇凶险受伤乃至死亡。
+1. An avatar occasionally has a sudden flash of insight, sensing that some person or place is tied to their own fate.
+2. The sense is not an explicit quest, nor system navigation; it is just a vague clue.
+3. Whether and how the avatar pursues it is left to the existing AI decision-making.
+4. If the avatar reaches the target place or approaches the target person within the time limit, resolution is triggered.
+5. Resolution may yield a treasure, yield a boon, return empty-handed, or encounter danger leading to injury or even death.
 
-## 2. 与现有系统的边界
+## 2. Boundaries with Existing Systems
 
-### 2.1 与 fortune 的区别
+### 2.1 Difference from fortune
 
-现有 `fortune` 位于 `src/systems/fortune.py`，语义是“当月触发，当月结算”。
+The existing `fortune` lives in `src/systems/fortune.py`, with the semantics "triggered this month, resolved this month".
 
-机缘不复用该语义：
+Opportunity does not reuse those semantics:
 
-- `fortune`：即时奇遇，触发后立刻给装备、功法、修为、灵石等结果。
-- `opportunity`：限时线索，先进入 active state，之后靠角色移动命中目标再结算。
+- `fortune`: an instant encounter; once triggered, it immediately grants equipment, techniques, cultivation, spirit stones, and other results.
+- `opportunity`: a time-limited clue; it first enters an active state, and is resolved later when the avatar's movement hits the target.
 
-因此机缘应有独立概率、独立配置、独立状态与独立故事类型，不应继续挤入 `fortune_probability` 或 `StoryEventKind.WORLD_FORTUNE`。
+Therefore opportunity should have its own probability, configuration, state, and story type, and should not keep being squeezed into `fortune_probability` or `StoryEventKind.WORLD_FORTUNE`.
 
-### 2.2 与 hidden domain 的区别
+### 2.2 Difference from hidden domain
 
-秘境是世界级或 gathering 类内容，通常由系统开放并吸引多人参与。
+A hidden domain is world-level or gathering-type content, usually opened by the system and attracting multiple participants.
 
-机缘是一名角色自己的私有缘法：
+An opportunity is a single avatar's private fate:
 
-- 不公开展示为世界入口。
-- 不作为前端独立板块。
-- 不允许多人共享同一条机缘状态。
+- Not publicly displayed as a world entrance.
+- Not a standalone frontend section.
+- Multiple avatars are not allowed to share the same opportunity state.
 
-### 2.3 与动作系统的关系
+### 2.3 Relationship with the action system
 
-机缘一期不新增动作。
+Phase one of opportunity adds no new actions.
 
-追寻机缘只复用现有行动：
+Pursuing an opportunity only reuses existing actions:
 
 - `MoveToDirection`
 - `MoveToRegion`
 - `MoveToAvatar`
 
-系统不提供 `SearchOpportunity`、`FollowOpportunity` 等新动作。
+The system does not provide new actions such as `SearchOpportunity` or `FollowOpportunity`.
 
-## 3. 非目标
+## 3. Non-goals
 
-一期明确不做以下内容：
+Phase one explicitly does not include the following:
 
-1. 不新增专用追寻机缘动作。
-2. 不新增前端机缘板块。
-3. 不做坐标型机缘。
-4. 不做 direction 型目标；方向只可作为模糊感应文本的一部分。
-5. 不做直接突破奖励。
-6. 不做普通成功 / 巨大成功二级成功判定。
-7. 不做复杂风险预告。
-8. 不在 AI context 中提供 `suggested_search`、`risk_hint`、推荐动作或真实目标 ID。
-9. 不把机缘做成可点击任务导航。
+1. No new dedicated opportunity-pursuit action.
+2. No new frontend opportunity section.
+3. No coordinate-based opportunities.
+4. No direction-type targets; direction can only be part of the vague sense text.
+5. No direct breakthrough rewards.
+6. No two-level ordinary success / great success judgment.
+7. No complex risk forecasting.
+8. Do not provide `suggested_search`, `risk_hint`, recommended actions, or real target IDs in the AI context.
+9. Do not make opportunities into clickable quest navigation.
 
-## 4. 核心模型
+## 4. Core Model
 
-机缘是一条绑定单个 avatar 的限时世界状态。
+An opportunity is a time-limited piece of world state bound to a single avatar.
 
-建议新增一个 manager 或等价服务来维护 active opportunities，例如：
+Suggest adding a manager or equivalent service to maintain active opportunities, for example:
 
 - `world.opportunity_manager`
-- 或 `world.active_opportunities`
+- or `world.active_opportunities`
 
-同一名角色最多同时拥有一条 active opportunity。
+The same avatar can have at most one active opportunity at a time.
 
-建议内部记录结构：
+Suggested internal record structure:
 
 ```python
 {
@@ -88,113 +88,113 @@
 }
 ```
 
-其中：
+Where:
 
-- `target_type` 只允许 `region` 或 `avatar`。
-- `target_id` 存真实 region id 或 avatar id。
-- `hint_text` 是给角色和事件系统看的模糊文本。
-- `created_month` 用于避免生成当月立刻触发。
-- `expires_month` 用于过期清理。
+- `target_type` only allows `region` or `avatar`.
+- `target_id` stores the real region id or avatar id.
+- `hint_text` is the vague text shown to the avatar and the event system.
+- `created_month` is used to avoid triggering in the same month it is generated.
+- `expires_month` is used for expiry cleanup.
 
-如果未来需要扩展 reward profile 或 story archetype，可以在该 record 中追加字段，但一期不要求提前复杂化。
+If reward profiles or story archetypes need to be extended in the future, fields can be appended to this record, but phase one does not require complicating it in advance.
 
-## 5. 目标类型
+## 5. Target Types
 
-### 5.1 Region 目标
+### 5.1 Region target
 
-Region 目标表示机缘落在某个区域。
+A region target means the opportunity lies in some region.
 
-命中条件：
+Hit condition:
 
-- 角色当前 tile 有 region；
-- 且 `avatar.tile.region.id == opportunity.target_id`；
-- 且 `current_month > created_month`。
+- The avatar's current tile has a region;
+- and `avatar.tile.region.id == opportunity.target_id`;
+- and `current_month > created_month`.
 
-进入目标 region 任意 tile 即可触发，不要求精确坐标。
+Entering any tile of the target region triggers it; exact coordinates are not required.
 
-生成约束：
+Generation constraints:
 
-- 不选择荒野 `-1`。
-- 不选择角色当前所在 region。
-- 不选择不存在的 region。
-- 对敌宗总部等通常不可进入区域，应谨慎过滤，除非后续明确设计高风险机缘。
+- Do not select wilderness `-1`.
+- Do not select the region the avatar is currently in.
+- Do not select a region that does not exist.
+- Regions that are usually not enterable, such as enemy sect headquarters, should be filtered carefully, unless high-risk opportunities are explicitly designed later.
 
-### 5.2 Avatar 目标
+### 5.2 Avatar target
 
-Avatar 目标表示机缘系于某个具体角色。
+An avatar target means the opportunity is tied to a specific avatar.
 
-命中条件：
+Hit condition:
 
-- 目标角色仍然存在；
-- 目标角色未死亡；
-- 目标进入 owner avatar 的观察范围；
-- 且 `current_month > created_month`。
+- The target avatar still exists;
+- the target avatar is not dead;
+- the target enters the owner avatar's observation range;
+- and `current_month > created_month`.
 
-不要求同 tile。
+Same tile is not required.
 
-目标角色后续移动、突破不影响机缘。目标死亡后，机缘散去。
+Subsequent movement or breakthroughs of the target avatar do not affect the opportunity. After the target dies, the opportunity dissipates.
 
-当前没有改名机制，因此不需要为改名设计特殊规则；若未来新增改名，内部仍以 avatar id 为准。
+There is currently no renaming mechanism, so no special rule is needed for renaming; if renaming is added in the future, avatar id is still used internally.
 
-## 6. 线索文本
+## 6. Hint Text
 
-线索文本只表达角色主观感应，不提供系统建议。
+Hint text only expresses the avatar's subjective sense and provides no system suggestion.
 
-允许文本中包含：
+The text is allowed to contain:
 
-- 大致方向；
-- 模糊地貌；
-- 模糊人物特征；
-- 模糊因果意象；
-- 期限感。
+- A rough direction;
+- vague terrain;
+- vague personal characteristics;
+- vague karmic imagery;
+- a sense of time limit.
 
-不允许文本中包含：
+The text is not allowed to contain:
 
-- 真实目标 ID；
-- 明确推荐动作；
-- `MoveToDirection` / `MoveToRegion` / `MoveToAvatar` 等动作名；
-- “你应该去……”这类系统指令；
-- 风险等级提示。
+- Real target IDs;
+- explicit recommended actions;
+- action names such as `MoveToDirection` / `MoveToRegion` / `MoveToAvatar`;
+- system instructions like "you should go to...";
+- risk level hints.
 
-推荐形式：
+Recommended forms:
 
 ```text
-某某福至心灵，隐约感到一线机缘与东南水泽间某处相牵。
+So-and-so had a sudden flash of insight, faintly sensing a thread of opportunity tied to somewhere among the marshes to the southeast.
 ```
 
 ```text
-某某心有所感，似有一线机缘系于北方某位金丹剑修。
+So-and-so felt a stir in the heart, as if a thread of opportunity were tied to a certain Core Formation sword cultivator to the north.
 ```
 
 ```text
-某某近日屡梦残钟，似有机缘落在西方一座古城之中。
+So-and-so has repeatedly dreamed of a broken bell of late, as if an opportunity lay within an ancient city to the west.
 ```
 
-AI context 中也应只暴露这类自然语言，例如：
+The AI context should likewise only expose this kind of natural language, for example:
 
 ```text
-机缘感应：近日心神偶动，似有一线机缘牵系于北方某位金丹剑修。此感应约还可维持三年余。
+Opportunity sense: Of late the mind has stirred now and then, as if a thread of opportunity were tied to a certain Core Formation sword cultivator to the north. This sense may last a little over three more years.
 ```
 
-不要额外提供 `suggested_search` 或 `risk_hint`。
+Do not additionally provide `suggested_search` or `risk_hint`.
 
-## 7. 生成规则
+## 7. Generation Rules
 
-### 7.1 触发时机
+### 7.1 Trigger timing
 
-机缘生成可以放在月度世界事件阶段，与 fortune / misfortune 类似，但使用独立概率。
+Opportunity generation can be placed in the monthly world event phase, similar to fortune / misfortune, but with its own probability.
 
-生成前应检查：
+Before generation, check:
 
-1. 角色存活。
-2. 角色可以触发世界事件。
-3. 角色当前没有 active opportunity。
-4. 角色不在 opportunity cooldown 中。
-5. 随机概率命中。
+1. The avatar is alive.
+2. The avatar can trigger world events.
+3. The avatar currently has no active opportunity.
+4. The avatar is not in an opportunity cooldown.
+5. The random probability hits.
 
-### 7.2 配置建议
+### 7.2 Configuration suggestion
 
-建议在 `static/config.yml` 中新增：
+Suggested addition to `static/config.yml`:
 
 ```yaml
 world:
@@ -213,149 +213,149 @@ world:
       injury: 10
 ```
 
-这些字段属于版本内置静态平衡配置，应放在 `static/config.yml`，不属于用户设置或 `RunConfig`。
+These fields are built-in static balance configuration for the version and should live in `static/config.yml`; they are not user settings or `RunConfig`.
 
-### 7.3 概率修正
+### 7.3 Probability modifiers
 
-机缘触发概率应独立于 `fortune_probability`。
+Opportunity trigger probability should be independent of `fortune_probability`.
 
-建议新增 effect 字段：
+Suggest adding an effect field:
 
 - `extra_opportunity_probability`
 
-该字段用于修正机缘生成概率。
+This field modifies the opportunity generation probability.
 
-气运、goldfinger、persona 等可通过现有 effect 系统提供该字段。是否额外让 luck 派生 opportunity 概率，可在实现时按平衡需求决定，但命名上不应复用 `extra_fortune_probability` 作为机缘唯一入口。
+Luck, goldfinger, persona, etc. can provide this field through the existing effect system. Whether luck additionally derives an opportunity probability can be decided at implementation time according to balance needs, but naming should not reuse `extra_fortune_probability` as the sole entry point for opportunity.
 
-一期暂不新增复杂的成功率、危险率、结果权重 effect，避免过早发散。
+Phase one does not yet add complex success rate, danger rate, or outcome weight effects, to avoid diverging too early.
 
-## 8. AI 决策上下文
+## 8. AI Decision Context
 
-角色有 active opportunity 时，AI 决策上下文应包含该感应。
+When an avatar has an active opportunity, the AI decision context should include the sense.
 
-推荐只以自然语言暴露：
-
-```text
-机缘感应：某某福至心灵，隐约感到一线机缘与东南水泽间某处相牵。此感应约还可维持四年。
-```
-
-不建议暴露结构化攻略字段。
-
-允许内部使用结构化字段管理状态，但给 LLM 的内容应保持“角色主观感应”语义。
-
-persona 对追寻行为的影响分两类：
-
-1. 数值影响：通过 effect 修正触发概率。
-2. 行为影响：在 persona / goldfinger 的叙事提示中体现追逐或回避机缘的倾向。
-
-例如：
-
-- 冒险性格可在行为提示中说明“更愿意追逐未知机缘”。
-- 保守性格可说明“不轻易为模糊机缘涉险”。
-
-这类行为影响交给 LLM 决策，不做硬编码动作选择。
-
-## 9. 检测与清理
-
-### 9.1 命中检测
-
-命中检测放在动作执行后。
-
-原因：
-
-- `MoveToDirection` 当月移动到目标 region 后可以触发。
-- `MoveToRegion` 到达目标 region 后可以触发。
-- `MoveToAvatar` 或自然移动接近目标后可以触发。
-- 避免行动前莫名结算。
-
-检测时应跳过生成当月的机缘，即 `current_month <= created_month` 时不触发。
-
-### 9.2 过期清理
-
-当 `current_month >= expires_month` 时，机缘散去。
-
-散去后：
-
-- 清理 active opportunity。
-- 记录 cooldown。
-- 生成普通事件。
-
-推荐事件：
+Recommended to expose it only as natural language:
 
 ```text
-某某心头那缕机缘感应渐渐散去，终究未能寻得。
+Opportunity sense: So-and-so had a sudden flash of insight, faintly sensing a thread of opportunity tied to somewhere among the marshes to the southeast. This sense may last about four more years.
 ```
 
-### 9.3 目标失效
+Exposing structured walkthrough fields is not recommended.
 
-目标失效时，机缘散去。
+Structured fields may be used internally to manage state, but content given to the LLM should keep the "avatar's subjective sense" semantics.
 
-Region 目标失效：
+The influence of persona on pursuit behavior falls into two categories:
 
-- target region 不存在。
+1. Numeric influence: modify trigger probability through effects.
+2. Behavioral influence: reflect a tendency to chase or avoid opportunities in the persona / goldfinger narrative hints.
 
-Avatar 目标失效：
+For example:
 
-- target avatar 不存在；
-- target avatar 已死亡。
+- An adventurous personality can state in its behavior hint that it is "more willing to chase unknown opportunities".
+- A cautious personality can state that it "does not lightly take risks for a vague opportunity".
 
-推荐事件：
+These behavioral influences are left to LLM decision-making; no hardcoded action selection is done.
+
+## 9. Detection and Cleanup
+
+### 9.1 Hit detection
+
+Hit detection is placed after action execution.
+
+Reasons:
+
+- After `MoveToDirection` moves into the target region in the current month, it can trigger.
+- After `MoveToRegion` reaches the target region, it can trigger.
+- After `MoveToAvatar` or natural movement approaches the target, it can trigger.
+- Avoids inexplicable resolution before actions.
+
+Detection should skip opportunities from their generation month, i.e. no trigger when `current_month <= created_month`.
+
+### 9.2 Expiry cleanup
+
+When `current_month >= expires_month`, the opportunity dissipates.
+
+After dissipating:
+
+- Clear the active opportunity.
+- Record the cooldown.
+- Generate an ordinary event.
+
+Recommended event:
 
 ```text
-某某心头那缕机缘感应骤然断绝，终究无从寻起。
+The faint sense of opportunity in So-and-so's heart gradually faded; in the end it was never found.
 ```
 
-### 9.4 Owner 死亡
+### 9.3 Target invalidation
 
-机缘 owner 死亡时，清理 active opportunity。
+When the target becomes invalid, the opportunity dissipates.
 
-不强制额外生成散去事件；死亡事件本身已经足够表达重大事实。
+Region target invalidation:
 
-## 10. 结算结果
+- The target region does not exist.
 
-一期 outcome 只包含四种：
+Avatar target invalidation:
+
+- The target avatar does not exist;
+- the target avatar is dead.
+
+Recommended event:
+
+```text
+The faint sense of opportunity in So-and-so's heart was abruptly severed; in the end there was nowhere to seek it.
+```
+
+### 9.4 Owner death
+
+When the opportunity owner dies, clear the active opportunity.
+
+An additional dissipation event is not required; the death event itself is enough to express the major fact.
+
+## 10. Resolution Outcomes
+
+Phase one outcomes include only four kinds:
 
 - `equipment`
 - `boon`
 - `empty`
 - `injury`
 
-死亡不是独立 outcome，而是 `injury` 扣减 HP 后自然导致的结果。
+Death is not a separate outcome, but a result that naturally follows from `injury` reducing HP.
 
 ### 10.1 Equipment
 
-装备奖励规则：
+Equipment reward rules:
 
-1. 奖励装备品阶为角色当前境界 +1 阶。
-2. 封顶最高境界。
-3. 不做 +2 阶。
-4. 不做普通成功 / 巨大成功二级判定。
-5. 装备类型包含 weapon 与 auxiliary。
-6. 优先补角色短板：
-   - 无 weapon 或 weapon 低于当前境界时，提高 weapon 权重。
-   - 无 auxiliary 或 auxiliary 低于当前境界时，提高 auxiliary 权重。
-   - 两者都不缺时，可随机或转为 boon。
-7. 获得装备时应复用现有 item exchange 逻辑，避免静默覆盖已有装备。
+1. The reward equipment grade is the avatar's current realm +1 rank.
+2. Capped at the highest realm.
+3. No +2 rank.
+4. No two-level ordinary success / great success judgment.
+5. Equipment types include weapon and auxiliary.
+6. Prefer filling the avatar's weak spots:
+   - When there is no weapon or the weapon is below the current realm, increase the weapon weight.
+   - When there is no auxiliary or the auxiliary is below the current realm, increase the auxiliary weight.
+   - When neither is lacking, it can be random or converted to a boon.
+7. When obtaining equipment, reuse the existing item exchange logic to avoid silently overwriting existing equipment.
 
-推荐事件：
+Recommended event:
 
 ```text
-某某循着机缘而至，得获古修遗物：{item_name}。
+So-and-so followed the opportunity and obtained an ancient cultivator's relic: {item_name}.
 ```
 
 ### 10.2 Boon
 
-巨大加成应优先复用现有 effect 系统，不新造平行属性系统。
+Great boons should preferentially reuse the existing effect system, without creating a parallel attribute system.
 
-建议通过配表驱动 boon，而不是把加成规则写死在业务代码中。
+Suggest driving boons through config tables rather than hardcoding the bonus rules in business code.
 
-可选配表字段：
+Optional config table fields:
 
 ```csv
 id,effects,duration_months,weight,min_realm,max_realm,title_id,desc_id
 ```
 
-示例：
+Example:
 
 ```csv
 1,"{extra_luck: 1}",0,10,QI_REFINEMENT,NASCENT_SOUL,...
@@ -364,109 +364,109 @@ id,effects,duration_months,weight,min_realm,max_realm,title_id,desc_id
 4,"{extra_battle_strength_points: 2}",60,10,QI_REFINEMENT,NASCENT_SOUL,...
 ```
 
-其中：
+Where:
 
-- `duration_months = 0` 表示永久效果，写入 `persistent_effects`。
-- `duration_months > 0` 表示限时效果，写入 `temporary_effects`。
+- `duration_months = 0` means a permanent effect, written into `persistent_effects`.
+- `duration_months > 0` means a temporary effect, written into `temporary_effects`.
 
-添加效果后必须重算角色 effects。
+After adding effects, the avatar's effects must be recalculated.
 
-推荐事件：
+Recommended event:
 
 ```text
-某某循着机缘有所悟，气机洗练，获得了新的助益。
+So-and-so followed the opportunity and gained insight; their qi was tempered and refined, gaining a new boon.
 ```
 
 ### 10.3 Empty
 
-无事发生表示角色找到了感应源头，但机缘已经散尽或并未成真。
+Nothing happening means the avatar found the source of the sense, but the opportunity had already dissipated or never came true.
 
-推荐事件：
+Recommended event:
 
 ```text
-某某循着感应而至，却只见灵机散尽，终究无所得。
+So-and-so followed the sense, but only found the spiritual trace already gone, and in the end gained nothing.
 ```
 
-该结果仍然视为已结算，清理 active opportunity，并进入 resolved cooldown。
+This result is still treated as resolved: clear the active opportunity and enter the resolved cooldown.
 
 ### 10.4 Injury
 
-受伤表示角色追寻机缘时遭遇凶险。
+Injury means the avatar encountered danger while pursuing the opportunity.
 
-伤害建议按最大 HP 百分比计算，避免固定值在不同境界上失衡。
+Damage is suggested to be calculated as a percentage of max HP, to avoid fixed values becoming unbalanced across realms.
 
-若扣减后 HP 小于或等于 0，则按现有死亡流程处理。死亡不需要独立 outcome。
+If HP after deduction is less than or equal to 0, handle it via the existing death flow. Death does not need a separate outcome.
 
-推荐事件：
-
-```text
-某某循着机缘而至，却遭残留凶险反噬，受伤 {damage} 点。
-```
-
-若死亡：
+Recommended event:
 
 ```text
-某某循着机缘而至，却遭残留凶险反噬，身死道消。
+So-and-so followed the opportunity, but suffered backlash from lingering danger and was injured for {damage} HP.
 ```
 
-## 11. 事件语义
+If death:
 
-### 11.1 感应事件
+```text
+So-and-so followed the opportunity, but suffered backlash from lingering danger and perished.
+```
 
-生成 active opportunity 时，写入一条普通事实事件。
+## 11. Event Semantics
 
-建议：
+### 11.1 Sense event
+
+When an active opportunity is generated, write an ordinary factual event.
+
+Suggested:
 
 - `is_major=False`
 - `is_story=False`
 - `related_avatars=[owner.id]`
 
-### 11.2 散去事件
+### 11.2 Dissipation event
 
-过期或目标失效时，写入普通事实事件。
+On expiry or target invalidation, write an ordinary factual event.
 
-建议：
+Suggested:
 
 - `is_major=False`
 - `is_story=False`
 - `related_avatars=[owner.id]`
 
-### 11.3 结算事件
+### 11.3 Resolution event
 
-命中后写入结算事实事件。
+After a hit, write a resolution factual event.
 
-建议：
+Suggested:
 
-- equipment / boon / injury death 可设为 `is_major=True`
-- empty / non-lethal injury 可设为 `is_major=False`
-- `related_avatars` 至少包含 owner id
-- avatar 目标命中时包含 target avatar id
+- equipment / boon / injury death can be set to `is_major=True`
+- empty / non-lethal injury can be set to `is_major=False`
+- `related_avatars` includes at least the owner id
+- when an avatar target is hit, include the target avatar id
 
-### 11.4 故事事件
+### 11.4 Story event
 
-感应和散去不走 LLM。
+Sense and dissipation do not go through the LLM.
 
-命中结算后可按概率尝试追加故事事件。
+After a hit is resolved, a story event can be appended by probability.
 
-建议新增：
+Suggested additions:
 
 - `StoryEventKind.OPPORTUNITY`
 - `static/config.yml -> world.story.probabilities.opportunity`
 
-故事事件仍遵守现有小故事系统规则：
+Story events still follow the existing story event system rules:
 
-- 先生成基础事实事件。
-- 再尝试通过 `StoryEventService.maybe_create_story(...)` 追加故事。
-- LLM 展开的正文事件使用 `is_story=True`。
-- 默认 `allow_relation_changes=False`。
+- Generate the base factual event first.
+- Then try to append a story via `StoryEventService.maybe_create_story(...)`.
+- LLM-expanded body events use `is_story=True`.
+- Default `allow_relation_changes=False`.
 
-## 12. 存档结构
+## 12. Save Structure
 
-active opportunities 是世界长期状态，应进入存档。
+Active opportunities are long-term world state and should go into the save file.
 
-不应只写入事件数据库，也不应视为 runtime 临时状态。
+They should not only be written into the event database, nor treated as temporary runtime state.
 
-建议存档结构：
+Suggested save structure:
 
 ```json
 "opportunities": {
@@ -487,134 +487,133 @@ active opportunities 是世界长期状态，应进入存档。
 }
 ```
 
-读档后应恢复 active opportunities 与 cooldowns。
+After loading, active opportunities and cooldowns should be restored.
 
-开发阶段不要求为旧存档付出复杂兼容成本；若零代价可 `.get` 兜底，则可顺带处理。
+During development, there is no requirement to pay complex compatibility costs for old saves; if a `.get` fallback is zero-cost, it can be handled along the way.
 
-## 13. Cooldown 规则
+## 13. Cooldown Rules
 
-建议 cooldown 分两类：
+Suggest two kinds of cooldown:
 
-1. 散去 cooldown：12 个月。
-2. 已结算 cooldown：60 个月。
+1. Dissipation cooldown: 12 months.
+2. Resolved cooldown: 60 months.
 
-其中已结算包括：
+Resolved includes:
 
 - equipment
 - boon
 - empty
 - injury
-- injury 后死亡
+- death after injury
 
-目标 avatar 死亡导致散去，按散去 cooldown。
+Dissipation caused by the target avatar's death uses the dissipation cooldown.
 
 ## 14. World Info
 
-应在 `static/game_configs/world_info.csv` 中新增“机缘”通用说明。
+A general "Opportunity" description should be added to `static/game_configs/world_info.csv`.
 
-说明只描述世界概念，不暴露机制数字。
+The description only describes the world concept and does not expose mechanic numbers.
 
-推荐文案：
+Recommended text:
 
 ```text
-修士偶有福至心灵，感应到某人或某地与自身缘法相牵。若循感应而去，或得宝物与助益，或空手而返，亦可能遭逢凶险；若迟迟未寻，机缘也会自行散去。
+Cultivators may occasionally feel a sudden stir of fate, sensing that a person or place is tied to their own opportunity. If they follow the sense, they may gain treasure or a boon, return empty-handed, or meet danger; if they delay too long, the opportunity fades away.
 ```
 
 ## 15. i18n
 
-新增文本应遵守当前 i18n 规则：
+New text should follow the current i18n rules:
 
-1. 日常开发默认 Phase 1，可优先只补 `zh-CN`。
-2. 若进入正式多语言补全，应按 `static/locales/registry.json` 中启用语言统一处理。
-3. `.po` 中 `msgid` 不得直接写中文。
-4. 中文内容放在 `msgstr`。
-5. 不要直接修改 `LC_MESSAGES/*.po` 合并产物；优先维护 `modules/` 或 `game_configs_modules/`。
-6. 改完源文件后运行 `python tools/i18n/build_mo.py`。
+1. The game is English-only; `en-US` is the sole and source locale.
+2. In `.po` files, `msgid` uses English source text or a stable key.
+3. Display text goes in `msgstr`.
+4. Do not directly modify the merged `LC_MESSAGES/*.po` artifacts; maintain `modules/` or `game_configs_modules/` instead.
+5. After editing source files, run `python tools/i18n/build_mo.py`.
 
-建议新增模块：
+Suggested new module:
 
-- `static/locales/<lang>/modules/opportunity.po`
+- `static/locales/en-US/modules/opportunity.po`
 
-若新增 opportunity / boon 配表，则对应新增：
+If opportunity / boon config tables are added, correspondingly add:
 
-- `static/locales/<lang>/game_configs_modules/opportunity.po`
-- 或按最终配表文件名拆分。
+- `static/locales/en-US/game_configs_modules/opportunity.po`
+- or split by the final config table file name.
 
-## 16. 前端
+## 16. Frontend
 
-一期不新增前端独立机缘板块。
+Phase one does not add a standalone frontend opportunity section.
 
-允许通过以下已有路径体现机缘：
+Opportunities may be reflected through the following existing paths:
 
-1. 事件栏显示感应、散去、结算事件。
-2. 角色详情或 AI context 中显示当前机缘感应文本。
-3. Roleplay 场景下，玩家接管角色时应能看到当前机缘感应。
+1. The event bar shows sense, dissipation, and resolution events.
+2. The avatar detail or AI context shows the current opportunity sense text.
+3. In roleplay scenarios, when the player takes over an avatar, they should be able to see the current opportunity sense.
 
-如果角色详情展示 active opportunity，也应保持克制，只显示一行自然语言感应，不做任务面板、倒计时任务卡或导航按钮。
+If the avatar detail shows the active opportunity, it should also stay restrained: show only one line of natural-language sense, with no quest panel, countdown quest card, or navigation button.
 
-## 17. 建议实现位置
+## 17. Suggested Implementation Locations
 
-后续实现时建议新增独立模块，避免继续扩散到 `src/server/main.py` 或 fortune 文件中。
+Later implementation should add independent modules, to avoid spreading further into `src/server/main.py` or the fortune file.
 
-可能位置：
+Possible locations:
 
 - `src/systems/opportunity/`
 - `src/systems/opportunity_types.py`
 - `src/systems/opportunity_loader.py`
 - `src/systems/opportunity_service.py`
 
-接入 phase：
+Phase integration:
 
-- 月度生成：world passive/world event phase。
-- 命中检测：action execution 之后的新 phase。
-- 过期清理：可在月度 passive phase 或命中检测 phase 中统一处理。
+- Monthly generation: world passive/world event phase.
+- Hit detection: a new phase after action execution.
+- Expiry cleanup: can be handled uniformly in the monthly passive phase or in the hit detection phase.
 
-若新增 manager：
+If a new manager is added:
 
-- 可挂载在 `World` 上；
-- 存档时序列化到 `world_data["opportunities"]`；
-- 读档时恢复。
+- It can be attached to `World`;
+- serialized into `world_data["opportunities"]` on save;
+- restored on load.
 
-## 18. 测试建议
+## 18. Test Suggestions
 
-至少应覆盖：
+Should cover at least:
 
-1. 没有 active opportunity 且概率命中时生成机缘。
-2. 有 active opportunity 时不再生成新机缘。
-3. cooldown 中不生成新机缘。
-4. region 目标进入任意 tile 后触发结算。
-5. avatar 目标进入观察范围后触发结算。
-6. 生成当月不立刻触发。
-7. 过期后写入散去事件并清理 active opportunity。
-8. target avatar 死亡后写入断绝事件并清理 active opportunity。
-9. owner 死亡后清理 active opportunity。
-10. equipment outcome 给当前境界 +1 阶装备，并复用 item exchange。
-11. boon outcome 写入 temporary / persistent effects，并重算 effects。
-12. empty outcome 清理 opportunity 并进入 resolved cooldown。
-13. injury outcome 扣减 HP。
-14. injury 导致 HP <= 0 时走死亡流程。
-15. active opportunities 与 cooldowns 可存档和读档恢复。
-16. AI context 只暴露模糊感应文本，不暴露 target id、suggested action 或 risk hint。
-17. 新增 `StoryEventKind.OPPORTUNITY` 后，故事事件仍使用 `is_story=True`。
-18. world info 包含机缘通用说明。
+1. When there is no active opportunity and the probability hits, an opportunity is generated.
+2. When there is an active opportunity, no new opportunity is generated.
+3. During cooldown, no new opportunity is generated.
+4. A region target triggers resolution after entering any tile.
+5. An avatar target triggers resolution after entering observation range.
+6. No immediate trigger in the generation month.
+7. After expiry, a dissipation event is written and the active opportunity is cleared.
+8. After the target avatar dies, a severance event is written and the active opportunity is cleared.
+9. After the owner dies, the active opportunity is cleared.
+10. The equipment outcome gives equipment at current realm +1 rank, and reuses item exchange.
+11. The boon outcome writes temporary / persistent effects and recalculates effects.
+12. The empty outcome clears the opportunity and enters the resolved cooldown.
+13. The injury outcome deducts HP.
+14. When injury causes HP <= 0, the death flow is followed.
+15. Active opportunities and cooldowns can be saved and restored on load.
+16. The AI context only exposes the vague sense text, not the target id, suggested action, or risk hint.
+17. After adding `StoryEventKind.OPPORTUNITY`, story events still use `is_story=True`.
+18. World info includes the general opportunity description.
 
-## 19. 当前拍板结论
+## 19. Current Decisions
 
-本轮需求确认后的最终结论：
+Final conclusions after this round of requirements confirmation:
 
-1. 机缘与 fortune 分离，是独立限时状态。
-2. 机缘目标只有 region 和 avatar。
-3. Region 命中范围是任意目标 region tile。
-4. Avatar 命中范围是 owner 的观察范围。
-5. 命中检测放在动作执行后。
-6. 机缘线索不提供 suggested search、risk hint 或动作推荐。
-7. AI 只看到自然语言的模糊感应和剩余时间。
-8. 角色是否追寻由现有 AI 决策。
-9. 一期奖励只有越一阶装备和巨大加成。
-10. 不做直接突破。
-11. 不做普通成功 / 巨大成功。
-12. 受伤可能自然导致死亡；死亡不是独立 outcome。
-13. 感应、散去、结算都写入事件系统。
-14. 感应和散去不走 LLM；结算可选走小故事。
-15. active opportunities 与 cooldowns 进入存档。
-16. 前端不新增独立机缘板块。
+1. Opportunity is separate from fortune and is an independent time-limited state.
+2. Opportunity targets are only region and avatar.
+3. The region hit range is any tile of the target region.
+4. The avatar hit range is the owner's observation range.
+5. Hit detection is placed after action execution.
+6. Opportunity hints do not provide suggested search, risk hint, or action recommendations.
+7. The AI only sees the natural-language vague sense and the remaining time.
+8. Whether the avatar pursues it is decided by the existing AI.
+9. Phase one rewards are only one-rank-higher equipment and great boons.
+10. No direct breakthroughs.
+11. No ordinary success / great success.
+12. Injury may naturally lead to death; death is not a separate outcome.
+13. Sense, dissipation, and resolution are all written into the event system.
+14. Sense and dissipation do not go through the LLM; resolution can optionally go through a story event.
+15. Active opportunities and cooldowns go into the save file.
+16. The frontend does not add a standalone opportunity section.

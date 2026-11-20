@@ -1,51 +1,51 @@
 ---
 name: spec-interview
-description: 进行深入访谈以收集需求并编写详细的规格说明书 (spec)
+description: Conduct an in-depth interview to gather requirements and write a detailed specification (spec)
 ---
 
-## 概述
+## Overview
 
-使用 `AskUserQuestion` 进行深入的访谈，在编写规格说明书之前深入理解一个功能、系统或想法。
+Use `AskUserQuestion` to run an in-depth interview and thoroughly understand a feature, system, or idea before writing a spec.
 
-## 核心原则
+## Core Principles
 
-1. **运用你的判断力** - 根据主题调整问题的深度和重点。一个小的 UI 更改需要的问题与一个新的认证系统不同。
+1. **Use your judgment** - Adjust the depth and focus of your questions to the topic. A small UI change needs different questions than a new authentication system.
 
-2. **问非显而易见的问题** - 跳过表面问题。探究：
-   - 用户尚未表达的隐藏假设
-   - 他们尚未考虑的边缘情况
-   - 他们隐式做出的权衡
-   - 他们忘记提及的约束条件
-   - 故障模式和恢复路径
+2. **Ask non-obvious questions** - Skip surface-level questions. Probe for:
+   - Hidden assumptions the user has not stated
+   - Edge cases they have not considered
+   - Trade-offs they are making implicitly
+   - Constraints they forgot to mention
+   - Failure modes and recovery paths
 
-3. **跟随有趣的线索** - 当答案揭示了复杂性或不确定性时，在继续之前深入挖掘。
+3. **Follow interesting threads** - When an answer reveals complexity or uncertainty, dig deeper before moving on.
 
-4. **温和地挑战** - 问“如果 X 失败了怎么办？”或“为什么不改用 Y？”来对设计进行压力测试。
+4. **Challenge gently** - Ask "What if X fails?" or "Why not use Y instead?" to stress-test the design.
 
-5. **知道何时停止** - 当你有足够的清晰度来编写有用的规格说明书时结束访谈。并非每个主题都需要详尽的覆盖。
+5. **Know when to stop** - End the interview once you have enough clarity to write a useful spec. Not every topic needs exhaustive coverage.
 
-## 问题领域（根据需要使用，而不是作为清单）
+## Question Areas (use as needed, not as a checklist)
 
-- **问题与动机**：为什么是现在？不这样做的代价是什么？
-- **技术设计**：数据模型、状态、API、性能、数据迁移
-- **用户体验**：错误状态、加载、边缘情况、无障碍访问
-- **集成**：这还会影响什么？安全性？可观测性？
-- **权衡**：你**不**构建什么？你接受了什么技术债务？
-- **风险**：哪些假设可能是错的？什么会导致这个项目失败？
+- **Problem and motivation**: Why now? What is the cost of not doing this?
+- **Technical design**: Data model, state, API, performance, data migration
+- **User experience**: Error states, loading, edge cases, accessibility
+- **Integration**: What else does this affect? Security? Observability?
+- **Trade-offs**: What are you **not** building? What technical debt are you accepting?
+- **Risks**: Which assumptions might be wrong? What would make this project fail?
 
-## 访谈流程
+## Interview Flow
 
-1. 每轮通过 `AskUserQuestion` 开始 2-4 个问题。
-2. 综合答案并跟进空白或模糊之处。
-3. 定期总结以确认理解。
-4. 当足够完整时，与用户确认并编写规格说明书。
+1. Start each round with 2-4 questions via `AskUserQuestion`.
+2. Synthesize the answers and follow up on gaps or ambiguities.
+3. Summarize periodically to confirm understanding.
+4. When it is complete enough, confirm with the user and write the spec.
 
-## 输出
+## Output
 
-将规格说明书写入 `docs/specs/<feature-name>.md`（或询问用户首选路径）。包含任何相关的部分——不要强求死板的模板。
+Write the spec to `docs/specs/<feature-name>.md` (or ask the user for a preferred path). Write it in English. Include whichever sections are relevant; do not force a rigid template.
 
-## 调用
+## Invocation
 
 ```
-/spec-interview [主题]
+/spec-interview [topic]
 ```

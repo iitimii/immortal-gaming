@@ -41,4 +41,4 @@ New awakened avatars use a simplified configuration compared to initial world ge
 
 ### Localization
 Event text for awakening uses modular PO files:
-- `static/locales/<lang>/modules/avatar_awakening.po`
+- `static/locales/en-US/modules/avatar_awakening.po`

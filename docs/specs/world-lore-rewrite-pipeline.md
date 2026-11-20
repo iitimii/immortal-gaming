@@ -1,90 +1,90 @@
 # World Lore Rewrite Pipeline Spec
 
-本文档记录“世界观与历史”开局塑形系统的目标设计。它用于替代当前 `WorldLoreManager` 中“地图 / 宗门 / 物品三个大 LLM 任务读取全局 CSV 并返回局部修改意见”的实现。
+This document records the target design of the "World Lore and History" start-of-run shaping system. It is meant to replace the current implementation in `WorldLoreManager` where "three large LLM tasks for map / sects / items read the global CSVs and return partial modification suggestions".
 
-本方案不要求向前兼容旧世界观塑形输出结构。实现时以当前代码清晰、结果完整、等待时间可控为优先。
+This plan does not require backward compatibility with the old world lore shaping output structure. Implementation prioritizes clarity of the current code, completeness of results and controllable wait time.
 
-## 目标
+## Goals
 
-世界观输入不应只是少量配置项的建议性改名，而应产出本局专属的静态文本快照。
+World lore input should not just produce suggested renames for a few configuration entries; it should produce a static text snapshot exclusive to the current run.
 
-当玩家在开局填写“世界观与历史”后，系统应根据当前选择的地图和该世界观，统一重写以下内容：
+After the player fills in "World Lore and History" at the start of a run, the system should, based on the currently selected map and that world lore, uniformly rewrite the following:
 
-1. 当前地图实际存在的所有地点：
-   - 城市区域
-   - 普通区域
-   - 修炼区域
-   - 宗门驻地
-2. 所有宗门本体：
+1. All locations that actually exist on the current map:
+   - City regions
+   - Normal regions
+   - Cultivation regions
+   - Sect headquarters
+2. All sects themselves:
    - `name`
    - `desc`
-3. 所有功法：
+3. All techniques:
    - `name`
    - `desc`
-4. 所有兵器：
+4. All weapons:
    - `name`
    - `desc`
-5. 所有辅助装备：
+5. All auxiliary equipment:
    - `name`
    - `desc`
 
-默认应全量重写物品文本。若后续确实需要产品级开关，可以加入 `world_lore.rewrite_items`，但架构主路径必须支持全量重写，不应再以“只让 LLM 挑部分修改项”为核心流程。
+Item text should be fully rewritten by default. If a product-level switch is really needed later, `world_lore.rewrite_items` can be added, but the main architectural path must support full rewriting and should no longer use "let the LLM pick a few items to modify" as the core flow.
 
-## 非目标
+## Non-Goals
 
-本系统只重写本局静态展示文本，不改变玩法数值和结构。
+This system only rewrites the current run's static display text and does not change gameplay values or structure.
 
-不做：
+It does not:
 
-1. 不新增地图 region。
-2. 不新增宗门、功法、装备。
-3. 不修改功法属性、品阶、条件。
-4. 不修改兵器类型、境界、价格、效果。
-5. 不修改辅助装备境界、价格、效果。
-6. 不让 LLM 直接写入存档或运行时对象。
-7. 不要求兼容旧 `world_lore_snapshot` 结构。
+1. Add map regions.
+2. Add sects, techniques or equipment.
+3. Modify technique attributes, grades or conditions.
+4. Modify weapon types, realms, prices or effects.
+5. Modify auxiliary equipment realms, prices or effects.
+6. Let the LLM write directly into save files or runtime objects.
+7. Require compatibility with the old `world_lore_snapshot` structure.
 
-## 当前问题
+## Current Problems
 
-当前实现位于 `src/classes/world_lore.py`，开局初始化阶段由 `src/server/init_flow.py` 调用。
+The current implementation lives in `src/classes/world_lore.py` and is called by `src/server/init_flow.py` during the start-of-run initialization phase.
 
-现状主要问题：
+Main problems with the status quo:
 
-1. 只有 `world_lore_map`、`world_lore_sect`、`world_lore_item` 三个大任务。
-2. 三个任务虽然并发，但每个任务 prompt 都很大，尤其 `world_lore_item` 会塞入完整 `technique.csv`、`weapon.csv`、`auxiliary.csv`。
-3. 世界观任务传入 `max_retries=3`，底层语义是初次调用加最多 3 次重试；单次 HTTP timeout 当前为 120 秒，最坏等待时间过长。
-4. prompt 要求输出 `thinking`，地图和物品模板还要求详细分析，增加输出 token 和 JSON 解析失败概率。
-5. 地图任务读取全局 region CSV，而不是当前 `world.map`，因此不能真正理解当前地图预设、`wilderness_tile`、`region_overrides`、landmarks 和当前 region 位置语义。
-6. 失败粒度太粗，一个大任务卡住或解析失败会拖慢整个初始化阶段。
-7. 初始化状态只显示 `shaping_world_lore`，无法定位卡在地图、宗门、功法还是装备。
+1. There are only three large tasks: `world_lore_map`, `world_lore_sect` and `world_lore_item`.
+2. Although the three tasks run concurrently, each task's prompt is very large; in particular `world_lore_item` stuffs in the complete `technique.csv`, `weapon.csv` and `auxiliary.csv`.
+3. The world lore tasks pass `max_retries=3`, whose underlying semantics are the initial call plus up to 3 retries; the single HTTP timeout is currently 120 seconds, so the worst-case wait is far too long.
+4. The prompts require outputting `thinking`, and the map and item templates also require detailed analysis, which increases output tokens and the probability of JSON parse failures.
+5. The map task reads the global region CSV instead of the current `world.map`, so it cannot truly understand the current map preset, `wilderness_tile`, `region_overrides`, landmarks or the current region position semantics.
+6. The failure granularity is too coarse; one large task getting stuck or failing to parse slows down the whole initialization phase.
+7. The initialization status only shows `shaping_world_lore`, making it impossible to tell whether it is stuck on the map, sects, techniques or equipment.
 
-## 总体设计
+## Overall Design
 
-新系统采用“全量分块重写 + 共享全局 LLM semaphore + 局部 fallback + 一次性应用”的 pipeline。
+The new system uses a pipeline of "full chunked rewriting + shared global LLM semaphore + local fallback + one-shot apply".
 
-流程：
+Flow:
 
-1. 从当前 `world` 和玩家输入的 `world_lore` 构建重写上下文。
-2. 可选生成一个短 `style_guide`，用于统一所有分块任务的命名和描述风格。
-3. 基于当前 world 构建 rewrite jobs：
-   - 地点 jobs
-   - 宗门组 jobs
-   - 功法 jobs
-   - 兵器 jobs
-   - 辅助装备 jobs
-4. 每个 job 处理一个 chunk，输入数量固定，输出数量必须相同。
-5. 所有 job 走现有 `call_llm_with_task_name`，共用全局 LLM semaphore。
-6. 每个 job 有独立时间预算、最多一次格式重试。
-7. 失败、超时、校验不通过的 job 使用 fallback 补齐。
-8. 所有结果汇总为 `WorldLoreRewriteDraft`。
-9. 先校验 draft 覆盖所有目标实体，再一次性 apply 到 world 和全局 registries。
-10. 构建新的 `world_lore_snapshot` 并随存档保存。
+1. Build the rewrite context from the current `world` and the player-entered `world_lore`.
+2. Optionally generate a short `style_guide` to unify naming and description style across all chunk tasks.
+3. Build rewrite jobs based on the current world:
+   - Location jobs
+   - Sect group jobs
+   - Technique jobs
+   - Weapon jobs
+   - Auxiliary equipment jobs
+4. Each job processes one chunk; the input count is fixed and the output count must be the same.
+5. All jobs go through the existing `call_llm_with_task_name` and share the global LLM semaphore.
+6. Each job has its own time budget and at most one format retry.
+7. Jobs that fail, time out or fail validation are filled in with fallback.
+8. All results are aggregated into a `WorldLoreRewriteDraft`.
+9. First verify that the draft covers all target entities, then apply it in one shot to the world and global registries.
+10. Build the new `world_lore_snapshot` and save it with the save file.
 
-## 模块拆分
+## Module Split
 
-不要继续把完整 pipeline 堆进 `src/classes/world_lore.py`。
+Do not keep piling the complete pipeline into `src/classes/world_lore.py`.
 
-建议结构：
+Suggested structure:
 
 ```text
 src/classes/world_lore.py
@@ -102,27 +102,27 @@ src/systems/world_lore_rewrite/
   apply.py
 ```
 
-职责：
+Responsibilities:
 
 1. `models.py`
-   - 定义 context、job、chunk、draft、rewrite payload 等数据模型。
+   - Defines data models such as context, job, chunk, draft and rewrite payload.
 2. `planner.py`
-   - 从当前 world 和 registries 构建 jobs。
-   - 不读取全局 region CSV 原文作为地图输入。
+   - Builds jobs from the current world and registries.
+   - Does not read the raw global region CSV as map input.
 3. `prompts.py`
-   - 构造短 prompt infos。
-   - 使用结构化 JSON 摘要，不传无关玩法字段。
+   - Builds short prompt infos.
+   - Uses structured JSON summaries and does not pass irrelevant gameplay fields.
 4. `runner.py`
-   - 调度 jobs。
-   - 处理全局 deadline、job deadline、parse retry、取消、进度。
+   - Schedules jobs.
+   - Handles the global deadline, job deadlines, parse retries, cancellation and progress.
 5. `validation.py`
-   - 校验 LLM 输出 JSON、id 集合、字段长度和禁止内容。
+   - Validates LLM output JSON, id sets, field lengths and forbidden content.
 6. `fallback.py`
-   - 对失败 job 生成保底重写文本。
+   - Generates baseline rewrite text for failed jobs.
 7. `apply.py`
-   - 一次性应用 draft 到 world、sects、techniques、weapons、auxiliaries、ItemRegistry 和 name indexes。
+   - Applies the draft in one shot to the world, sects, techniques, weapons, auxiliaries, ItemRegistry and name indexes.
 
-`WorldLoreManager.apply_world_lore()` 应收束为门面：
+`WorldLoreManager.apply_world_lore()` should be reduced to a facade:
 
 ```python
 async def apply_world_lore(self, lore_text: str) -> None:
@@ -131,11 +131,11 @@ async def apply_world_lore(self, lore_text: str) -> None:
     apply_world_lore_rewrite(self.world, draft)
 ```
 
-## 当前地图输入
+## Current Map Input
 
-地图重写必须基于当前 `world.map`，而不是全局 region CSV。
+Map rewriting must be based on the current `world.map`, not the global region CSV.
 
-地图上下文至少包含：
+The map context includes at least:
 
 1. `map_id`
 2. `map_name`
@@ -145,16 +145,16 @@ async def apply_world_lore(self, lore_text: str) -> None:
 6. `wilderness_tile`
 7. `landmarks`
 8. `region_overrides`
-9. 当前地图实际存在的 `regions`
+9. The `regions` that actually exist on the current map
 
-每个 region 输入建议包含：
+Each region input is suggested to include:
 
 ```json
 {
   "id": 305,
   "type": "city",
-  "name": "揽月港",
-  "desc": "潮汐平稳的海港城，夜里月影落在长堤与船帆之间。",
+  "name": "Moon-Embracing Harbor",
+  "desc": "A harbor city with calm tides, where at night the moon's reflection falls between the long breakwater and the ship sails.",
   "tile_count": 23,
   "center": [50, 18],
   "landmark": {
@@ -166,235 +166,235 @@ async def apply_world_lore(self, lore_text: str) -> None:
 }
 ```
 
-不建议把完整 `region_rows` 传给 LLM。模型不擅长理解大型矩阵，且会显著增加 prompt 体积。若需要地图语义，应由代码预先生成摘要，例如：
+It is not recommended to pass the complete `region_rows` to the LLM. Models are not good at understanding large matrices, and it would significantly increase prompt size. If map semantics are needed, code should generate a summary in advance, for example:
 
-1. 当前地图大面积荒野是海域还是平原。
-2. region 所属类型。
-3. region 是否使用地图局部覆盖名。
-4. region landmark 是否为城市、宗门、洞府、遗迹等。
-5. 可选的邻接地貌摘要。
+1. Whether the large wilderness area of the current map is sea or plain.
+2. The type a region belongs to.
+3. Whether a region uses a map-local override name.
+4. Whether a region landmark is a city, sect, cave dwelling, ruin, etc.
+5. An optional summary of adjacent terrain.
 
-## Job 类型
+## Job Types
 
 ### Style Guide Job
 
-可选前置任务，用于将玩家世界观压缩成短风格指南。
+An optional preliminary task that compresses the player's world lore into a short style guide.
 
-输出示例：
+Example output:
 
 ```json
 {
-  "world_tone": "末法、荒寒、宗门秩序崩坏",
+  "world_tone": "Dharma-ending age, desolate and cold, collapse of sect order",
   "naming_rules": [
-    "地名偏残破、荒凉、古战场感",
-    "功法名避免传统祥瑞词，偏灰烬、残阳、断脉"
+    "Place names lean toward ruined, desolate, ancient-battlefield feel",
+    "Technique names avoid traditional auspicious words, leaning toward ash, setting sun, severed meridians"
   ],
   "forbidden_patterns": [
-    "不要频繁使用太虚、玄天、九霄",
-    "不要写数值加成"
+    "Do not frequently use Great Void, Mystic Heaven, Nine Heavens",
+    "Do not write numeric bonuses"
   ],
-  "description_style": "具体、可视化，不解释游戏机制"
+  "description_style": "Concrete and visual, without explaining game mechanics"
 }
 ```
 
-该任务不得输出长思考。超时或失败时使用代码生成的默认 style guide。
+This task must not output long thinking. On timeout or failure, a code-generated default style guide is used.
 
 ### Region Rewrite Jobs
 
-覆盖当前地图实际存在的所有 region，包括 sect regions。
+Covers all regions that actually exist on the current map, including sect regions.
 
-输入 N 个 region，输出必须 N 个 region。
+Input N regions; the output must be N regions.
 
-输出统一结构：
+Unified output structure:
 
 ```json
 {
   "entities": [
     {
       "id": 305,
-      "name": "新的地点名",
-      "desc": "新的地点描述"
+      "name": "New location name",
+      "desc": "New location description"
     }
   ]
 }
 ```
 
-地点描述要求：
+Location description requirements:
 
-1. 匹配当前地图语义。
-2. 侧重地貌、建筑、环境异象、生活氛围、修行氛围。
-3. 不写玩家加成、数值效果、系统机制。
-4. `desc` 默认 60 到 120 个中文字符左右。
+1. Match the current map semantics.
+2. Focus on terrain, architecture, environmental phenomena, everyday atmosphere and cultivation atmosphere.
+3. Do not write player bonuses, numeric effects or system mechanics.
+4. `desc` is around 60 to 120 characters by default.
 
 ### Sect Group Rewrite Jobs
 
-宗门本体和对应宗门驻地应尽量在同一个宗门组 job 中处理，避免宗门描述和驻地描述脱节。
+A sect itself and its corresponding sect headquarters should be processed in the same sect group job where possible, to avoid the sect description and the headquarters description drifting apart.
 
-输入：
+Input:
 
-1. N 个 sects。
-2. 对应 N 个 sect regions。
+1. N sects.
+2. The corresponding N sect regions.
 
-输出：
+Output:
 
 ```json
 {
   "sects": [
     {
       "id": 1,
-      "name": "新宗门名",
-      "desc": "新宗门描述"
+      "name": "New sect name",
+      "desc": "New sect description"
     }
   ],
   "sect_regions": [
     {
       "id": 401,
-      "name": "新驻地名",
-      "desc": "新驻地描述"
+      "name": "New headquarters name",
+      "desc": "New headquarters description"
     }
   ]
 }
 ```
 
-宗门本体描述要求：
+Sect description requirements:
 
-1. 侧重宗门定位、修行方式、组织气质、内部结构、潜在矛盾。
-2. 不重复驻地地貌。
-3. 不复述门规、禁令、惩罚逻辑。
-4. 不写玩家加成、数值效果、系统机制。
+1. Focus on the sect's positioning, cultivation style, organizational temperament, internal structure and latent conflicts.
+2. Do not repeat the headquarters terrain.
+3. Do not restate sect rules, prohibitions or punishment logic.
+4. Do not write player bonuses, numeric effects or system mechanics.
 
-宗门驻地描述要求：
+Sect headquarters description requirements:
 
-1. 侧重地貌、建筑、空间层次、环境异象、动态景象和感官氛围。
-2. 与宗门本体语义互相配合，但不重复同一批信息。
+1. Focus on terrain, architecture, spatial layering, environmental phenomena, dynamic scenery and sensory atmosphere.
+2. Complement the semantics of the sect itself, without repeating the same information.
 
 ### Technique Rewrite Jobs
 
-全量重写所有功法 `name/desc`。
+Fully rewrite the `name/desc` of all techniques.
 
-输入每个 technique 的必要字段：
+Necessary fields input for each technique:
 
 ```json
 {
   "id": 1,
-  "name": "混元金身",
-  "desc": "旧描述",
+  "name": "Primordial Golden Body",
+  "desc": "Old description",
   "attribute": "GOLD",
   "grade": "LOWER"
 }
 ```
 
-输出：
+Output:
 
 ```json
 {
   "entities": [
     {
       "id": 1,
-      "name": "新功法名",
-      "desc": "新功法描述"
+      "name": "New technique name",
+      "desc": "New technique description"
     }
   ]
 }
 ```
 
-要求：
+Requirements:
 
-1. 保持原本属性和品阶定位。
-2. 描述修行路径、气息、风险、意象。
-3. 不写具体伤害、加成或游戏机制。
-4. 不修改条件、权重、效果等字段。
+1. Keep the original attribute and grade positioning.
+2. Describe the cultivation path, aura, risks and imagery.
+3. Do not write specific damage, bonuses or game mechanics.
+4. Do not modify fields such as conditions, weights or effects.
 
 ### Weapon Rewrite Jobs
 
-全量重写所有兵器 `name/desc`。
+Fully rewrite the `name/desc` of all weapons.
 
-输入每个 weapon 的必要字段：
+Necessary fields input for each weapon:
 
 ```json
 {
   "id": 1001,
-  "name": "旧兵器名",
-  "desc": "旧描述",
+  "name": "Old weapon name",
+  "desc": "Old description",
   "weapon_type": "SWORD",
   "realm": "Qi_Refinement"
 }
 ```
 
-要求：
+Requirements:
 
-1. 保持原本武器类型和境界定位。
-2. 描述材质、形制、来历、使用气质。
-3. 不写数值加成。
-4. 不改变武器类型语义。
+1. Keep the original weapon type and realm positioning.
+2. Describe material, form, origin and the temperament of its use.
+3. Do not write numeric bonuses.
+4. Do not change the weapon type semantics.
 
 ### Auxiliary Rewrite Jobs
 
-全量重写所有辅助装备 `name/desc`。
+Fully rewrite the `name/desc` of all auxiliary equipment.
 
-输入每个 auxiliary 的必要字段：
+Necessary fields input for each auxiliary:
 
 ```json
 {
   "id": 2001,
-  "name": "旧辅助装备名",
-  "desc": "旧描述",
+  "name": "Old auxiliary equipment name",
+  "desc": "Old description",
   "realm": "Qi_Refinement"
 }
 ```
 
-要求：
+Requirements:
 
-1. 保持原本境界和辅助定位。
-2. 描述佩戴方式、法器性质、护持或辅助意象。
-3. 不写数值加成。
-4. 不承诺不存在的机制。
+1. Keep the original realm and auxiliary positioning.
+2. Describe how it is worn, the nature of the magic tool, and protective or supportive imagery.
+3. Do not write numeric bonuses.
+4. Do not promise mechanics that do not exist.
 
-## Prompt 约束
+## Prompt Constraints
 
-所有 rewrite prompt 都应短、强约束、无 thinking。
+All rewrite prompts should be short, strongly constrained and without thinking.
 
-通用要求：
+General requirements:
 
-1. 只输出 JSON。
-2. 不要输出 markdown。
-3. 不要输出 thinking。
-4. 输入多少个实体，输出多少个实体。
-5. id 必须完全保留。
-6. 不允许新增 id。
-7. 不允许遗漏 id。
-8. 只返回允许字段。
-9. 不写游戏机制、数值、玩家加成。
-10. 世界观风格要明显，但不要所有名称重复同一个词。
+1. Output JSON only.
+2. Do not output markdown.
+3. Do not output thinking.
+4. Output as many entities as were input.
+5. ids must be preserved exactly.
+6. No new ids allowed.
+7. No missing ids allowed.
+8. Return only the allowed fields.
+9. Do not write game mechanics, numbers or player bonuses.
+10. The world lore style should be evident, but not every name should repeat the same word.
 
-示意：
+Illustration:
 
 ```text
-你是仙侠世界设定编辑。根据世界观和风格指南，重写输入实体的 name 和 desc。
+You are a xianxia world-setting editor. Based on the world lore and the style guide, rewrite the name and desc of the input entities.
 
-必须遵守：
-- 输入多少个实体，输出多少个实体。
-- id 必须完全保留。
-- 只输出 JSON，不要解释，不要 markdown。
-- 不要输出 thinking。
-- 不要写游戏机制、数值、玩家加成。
-- name 简洁，desc 具体、可视化。
-- 保留实体原本的类别和玩法定位。
-- 世界观风格要明显，但不要所有名称重复同一个词。
+You must follow:
+- Output as many entities as were input.
+- ids must be preserved exactly.
+- Output JSON only, no explanations, no markdown.
+- Do not output thinking.
+- Do not write game mechanics, numbers or player bonuses.
+- Keep name concise; make desc concrete and visual.
+- Preserve each entity's original category and gameplay positioning.
+- The world lore style should be evident, but not every name should repeat the same word.
 
-世界观：
+World lore:
 {world_lore}
 
-风格指南：
+Style guide:
 {style_guide}
 
-当前地图摘要：
+Current map summary:
 {map_summary}
 
-实体：
+Entities:
 {entities_json}
 
-返回：
+Return:
 {
   "entities": [
     {"id": 1, "name": "...", "desc": "..."}
@@ -402,33 +402,33 @@ async def apply_world_lore(self, lore_text: str) -> None:
 }
 ```
 
-## 并发设计
+## Concurrency Design
 
-世界观重写任务应共用现有 LLM 全局 semaphore。
+World lore rewrite tasks should share the existing global LLM semaphore.
 
-现有 `src/utils/llm/client.py` 中 `call_llm()` 已通过 `_get_semaphore()` 控制外部请求并发。World Lore rewrite jobs 必须继续走 `call_llm_with_task_name`，不要���过该入口。
+`call_llm()` in the existing `src/utils/llm/client.py` already controls external request concurrency via `_get_semaphore()`. World Lore rewrite jobs must keep going through `call_llm_with_task_name` and must not bypass that entry point.
 
-原则：
+Principles:
 
-1. `max_concurrent_requests` 是唯一真实外部 LLM 请求并发上限。
-2. 不新增 world lore 专用 HTTP 并发上限。
-3. World Lore runner 可以维护 pending window，限制本地同时调度的 chunk task 数量。
-4. pending window 不是服务商并发设置，只是避免一次性创建过多 coroutine。
-5. 后续如果初始化或 step 中存在其他 LLM 任务，全局 semaphore 会统一保护服务商并发额度。
+1. `max_concurrent_requests` is the only real upper bound on external LLM request concurrency.
+2. Do not add a world-lore-specific HTTP concurrency limit.
+3. The World Lore runner may maintain a pending window that limits how many chunk tasks are scheduled locally at the same time.
+4. The pending window is not a provider concurrency setting; it only avoids creating too many coroutines at once.
+5. If there are other LLM tasks during initialization or step later, the global semaphore uniformly protects the provider's concurrency quota.
 
-推荐 pending window：
+Recommended pending window:
 
 ```text
 pending_window = max(current_llm_max_concurrent_requests * 2, 8)
 ```
 
-若 jobs 总数小于 pending window，可一次调度全部 jobs。若后续实体数量扩大，则按窗口批量推进。
+If the total number of jobs is smaller than the pending window, all jobs can be scheduled at once. If the number of entities grows later, advance in batches by window.
 
-## Timeout 和 Retry
+## Timeout and Retry
 
-世界观重写是批处理任务，失败可以局部 fallback，因此不应沿用通用 LLM 的长等待和多次重试策略。
+World lore rewriting is a batch task whose failures can be handled with local fallback, so it should not reuse the generic LLM strategy of long waits and multiple retries.
 
-推荐默认配置：
+Recommended default configuration:
 
 ```yaml
 world_lore:
@@ -439,7 +439,7 @@ world_lore:
   max_transport_retries: 0
 ```
 
-可收紧配置：
+Tighter configuration:
 
 ```yaml
 world_lore:
@@ -450,92 +450,92 @@ world_lore:
   max_transport_retries: 0
 ```
 
-语义：
+Semantics:
 
 1. `total_timeout_seconds`
-   - 整个 world lore rewrite 的硬预算。
-   - 到点后取消未完成 jobs。
-   - 已完成结果保留。
-   - 未完成 jobs 用 fallback 补齐。
-   - 不中断初始化。
+   - The hard budget for the entire world lore rewrite.
+   - When it is reached, unfinished jobs are cancelled.
+   - Completed results are kept.
+   - Unfinished jobs are filled in with fallback.
+   - Initialization is not interrupted.
 2. `task_timeout_seconds`
-   - 单个 chunk job 从开始到成功、重试或 fallback 的总预算。
-   - 不是单次请求预算。
+   - The total budget for a single chunk job from start to success, retry or fallback.
+   - Not a per-request budget.
 3. `min_retry_budget_seconds`
-   - 剩余预算低于该值时，不再发起 parse retry。
+   - When the remaining budget is below this value, no more parse retries are issued.
 4. `max_parse_retries`
-   - JSON 解析失败、id 缺失、输出数量不匹配、字段非法时最多重试一次。
-   - 第二次 prompt 应附带上一次校验错误。
+   - At most one retry on JSON parse failure, missing ids, mismatched output count or invalid fields.
+   - The second prompt should include the previous validation error.
 5. `max_transport_retries`
-   - 网络超时、连接失败、HTTP 错误默认不重试。
-   - 这类失败直接 fallback，避免拖垮初始化。
+   - Network timeouts, connection failures and HTTP errors are not retried by default.
+   - Such failures go straight to fallback, to avoid dragging down initialization.
 
-不建议：
+Not recommended:
 
 ```yaml
 task_timeout_seconds: 120
 max_parse_retries: 3
 ```
 
-这会复现当前 300 秒以上等待的问题。
+This would reproduce the current problem of waits over 300 seconds.
 
 ## Validation
 
-LLM 输出必须通过严格校验后才能进入 draft。
+LLM output must pass strict validation before entering the draft.
 
-通用校验：
+General validation:
 
-1. 输出必须是 JSON object。
-2. 必须包含约定字段。
-3. 输出 id 集合必须等于输入 id 集合。
-4. 输出数量必须等于输入数量。
-5. `name` 必须非空。
-6. `desc` 必须非空。
-7. `name` 和 `desc` 长度必须在合理范围内。
-8. 不允许写明显游戏机制或数值加成。
-9. 不允许出现 markdown 代码块。
-10. 额外字段应丢弃，不应应用。
+1. The output must be a JSON object.
+2. It must contain the agreed fields.
+3. The output id set must equal the input id set.
+4. The output count must equal the input count.
+5. `name` must be non-empty.
+6. `desc` must be non-empty.
+7. The lengths of `name` and `desc` must be within a reasonable range.
+8. Obvious game mechanics or numeric bonuses are not allowed.
+9. Markdown code blocks are not allowed.
+10. Extra fields should be discarded and not applied.
 
-校验失败后：
+After a validation failure:
 
-1. 若还有 parse retry 预算，则重试一次。
-2. 若重试仍失败，则该 job 使用 fallback。
-3. fallback 结果也必须通过基础非空和 id 校验。
+1. If there is parse retry budget left, retry once.
+2. If the retry still fails, the job uses fallback.
+3. Fallback results must also pass the basic non-empty and id validation.
 
 ## Fallback
 
-Fallback 的目标不是产出最佳文案，而是保证本局世界观快照完整。
+The goal of fallback is not to produce the best copy, but to guarantee that the current run's world lore snapshot is complete.
 
-触发场景：
+Trigger scenarios:
 
-1. style guide 失败。
-2. job 超时。
-3. 网络或 HTTP 失败。
-4. JSON 解析失败且重试耗尽。
-5. 输出 id 缺失或数量错误且重试耗尽。
-6. total timeout 到达后仍未完成的 jobs。
+1. The style guide fails.
+2. A job times out.
+3. A network or HTTP failure.
+4. JSON parse failure with retries exhausted.
+5. Missing output ids or wrong count with retries exhausted.
+6. Jobs still unfinished when the total timeout is reached.
 
-Fallback 策略：
+Fallback strategy:
 
-1. 使用世界观关键词、实体旧名、实体类型生成轻量改写。
-2. 不保留完全原文作为主 fallback。
-3. 不写数值或机制。
-4. 保持 id、类型、品阶、境界、武器类型等玩法语义。
-5. 标记结果来源为 `fallback`，用于日志和统计。
+1. Generate a lightweight rewrite using world lore keywords, the entity's old name and the entity type.
+2. Do not keep the full original text as the primary fallback.
+3. Do not write numbers or mechanics.
+4. Preserve gameplay semantics such as id, type, grade, realm and weapon type.
+5. Mark the result source as `fallback`, for logging and statistics.
 
-Draft 中可以保留来源：
+The draft may keep the source:
 
 ```python
 source: Literal["llm", "fallback"]
 ```
 
-该字段不一定进入存档，但应进入日志统计。
+This field does not necessarily go into the save file, but should go into log statistics.
 
-## Apply 语义
+## Apply Semantics
 
-LLM job 不应直接修改 world 或全局 registry。
+LLM jobs should not directly modify the world or global registries.
 
-应先汇总 draft：
+First aggregate the draft:
 
 ```python
 @dataclass
@@ -547,33 +547,33 @@ class WorldLoreRewriteDraft:
     auxiliaries: dict[int, EntityRewrite]
 ```
 
-然后统一 apply：
+Then apply uniformly:
 
-1. 更新当前 `world.map.regions` 中的 region `name/desc`。
-2. 更新 `sects_by_id` 中的 sect `name/desc`。
-3. sect 改名后更新 `sects_by_name`。
-4. 更新 `techniques_by_id` 中的 technique `name/desc`。
-5. technique 改名后更新 `techniques_by_name`。
-6. 更新 weapons 和 auxiliaries。
-7. item 改名后更新对应 by-name index。
-8. 更新 `ItemRegistry`。
-9. 调用 `sync_world_sect_metadata(world)`，确保宗门和驻地链接一致。
-10. 构建新的 `world_lore_snapshot`。
+1. Update region `name/desc` in the current `world.map.regions`.
+2. Update sect `name/desc` in `sects_by_id`.
+3. Update `sects_by_name` after a sect is renamed.
+4. Update technique `name/desc` in `techniques_by_id`.
+5. Update `techniques_by_name` after a technique is renamed.
+6. Update weapons and auxiliaries.
+7. Update the corresponding by-name index after an item is renamed.
+8. Update `ItemRegistry`.
+9. Call `sync_world_sect_metadata(world)` to ensure sect and headquarters links are consistent.
+10. Build the new `world_lore_snapshot`.
 
-Apply 前应校验 draft 覆盖所有目标实体。若缺失，先 fallback 补齐，不允许应用半成品 draft。
+Before applying, verify that the draft covers all target entities. If anything is missing, fill it in with fallback first; applying a half-finished draft is not allowed.
 
 ## Snapshot
 
-新的 `world_lore_snapshot` 建议使用 schema v2。
+The new `world_lore_snapshot` is suggested to use schema v2.
 
-结构示例：
+Structure example:
 
 ```json
 {
   "schema_version": 2,
-  "lore_text": "玩家输入的世界观与历史",
+  "lore_text": "World lore and history entered by the player",
   "map_id": "island_seas",
-  "map_name": "群岛海域",
+  "map_name": "Azure Isles",
   "preset_version": 2,
   "rewrite_config": {
     "rewrite_items": true,
@@ -592,8 +592,8 @@ Apply 前应校验 draft 覆盖所有目标实体。若缺失，先 fallback 补
   },
   "regions": {
     "305": {
-      "name": "新地点名",
-      "desc": "新地点描述"
+      "name": "New location name",
+      "desc": "New location description"
     }
   },
   "sects": {},
@@ -603,11 +603,11 @@ Apply 前应校验 draft 覆盖所有目标实体。若缺失，先 fallback 补
 }
 ```
 
-读档时只需要按 v2 snapshot 应用当前文本。开发阶段不需要为旧 snapshot 增加复杂兼容路径。
+On load, the current text only needs to be applied according to the v2 snapshot. During the development phase there is no need to add complex compatibility paths for old snapshots.
 
-## 配置
+## Configuration
 
-建议在 `static/config.yml` 增加：
+Suggested additions to `static/config.yml`:
 
 ```yaml
 world_lore:
@@ -631,7 +631,7 @@ world_lore:
     auxiliary: [45, 100]
 ```
 
-同时在 `llm.default_modes` 增加：
+Also add to `llm.default_modes`:
 
 ```yaml
 llm:
@@ -644,13 +644,13 @@ llm:
     world_lore_auxiliary_rewrite: "fast"
 ```
 
-`max_concurrent_requests` 仍来自 LLM 设置，不在 `world_lore` 中重复配置。
+`max_concurrent_requests` still comes from the LLM settings and is not duplicated in `world_lore`.
 
-## 初始化进度
+## Initialization Progress
 
-初始化阶段仍可保留 `shaping_world_lore` 作为大 phase，但 runtime 应记录更细的世界观进度。
+The initialization phase can still keep `shaping_world_lore` as the overall phase, but the runtime should record finer-grained world lore progress.
 
-建议状态：
+Suggested status:
 
 ```json
 {
@@ -665,7 +665,7 @@ llm:
 }
 ```
 
-至少日志必须包含：
+At minimum, logs must include:
 
 ```text
 [WorldLore] style guide done
@@ -676,64 +676,64 @@ llm:
 [WorldLore] rewrite complete: llm=142 fallback=10 elapsed=93.2s
 ```
 
-## 与 Step 的关系
+## Relationship with Step
 
-世界观重写在开局初始化阶段执行，位于生成初始 NPC 和角色 profile 之前。
+World lore rewriting runs during the start-of-run initialization phase, before generating the initial NPCs and avatar profiles.
 
-并发方面：
+Concurrency-wise:
 
-1. 所有 world lore jobs 共用全局 LLM semaphore。
-2. 当前初始化顺序下，world lore 阶段通常不会与初始 backstory / long-term objective 并发抢 LLM。
-3. 即便未来初始化阶段并行化，统一 semaphore 也能保护服务商并发额度。
-4. 世界观重写不应在 `Simulator.step()` 中触发。
-5. 读档时只应用 snapshot，不重新调用 LLM。
+1. All world lore jobs share the global LLM semaphore.
+2. Under the current initialization order, the world lore phase usually does not compete for the LLM concurrently with the initial backstory / long-term objective.
+3. Even if the initialization phase is parallelized in the future, the unified semaphore protects the provider's concurrency quota.
+4. World lore rewriting should not be triggered in `Simulator.step()`.
+5. On load, only the snapshot is applied; the LLM is not called again.
 
-## 测试契约
+## Test Contract
 
-需要补充或调整以下测试：
+The following tests need to be added or adjusted:
 
 1. `test_world_lore_planner_uses_current_map`
-   - 验证 planner 从 `world.map.regions` 构建 region 输入。
-   - 验证不读取全局 region CSV 作为地图 prompt 主输入。
+   - Verify that the planner builds region input from `world.map.regions`.
+   - Verify that the global region CSV is not read as the main input for the map prompt.
 2. `test_world_lore_planner_includes_map_context`
-   - 验证 `map_id`、`map_name`、`wilderness_tile`、`region_overrides`、`landmarks` 进入 context。
+   - Verify that `map_id`, `map_name`, `wilderness_tile`, `region_overrides` and `landmarks` enter the context.
 3. `test_world_lore_chunks_all_entities`
-   - 验证所有 region、sect、technique、weapon、auxiliary 都被分配到 jobs。
+   - Verify that every region, sect, technique, weapon and auxiliary is assigned to a job.
 4. `test_world_lore_runner_uses_global_llm_entrypoint`
-   - mock `call_llm_with_task_name`，验证 jobs 通过统一 LLM 调用入口。
+   - Mock `call_llm_with_task_name` and verify that jobs go through the unified LLM call entry point.
 5. `test_world_lore_runner_limits_pending_window`
-   - 验证本地 pending tasks 不超过 pending window。
+   - Verify that local pending tasks do not exceed the pending window.
 6. `test_world_lore_validation_rejects_missing_ids`
-   - LLM 少返回 id 时触发 retry 或 fallback。
+   - Retry or fallback is triggered when the LLM returns fewer ids.
 7. `test_world_lore_validation_rejects_mechanics_text`
-   - 输出包含明显数值加成或机制说明时被拒绝。
+   - Output containing obvious numeric bonuses or mechanics explanations is rejected.
 8. `test_world_lore_runner_applies_fallback_on_timeout`
-   - 单 job 超时后最终 draft 仍包含该 job 全部实体。
+   - After a single job times out, the final draft still contains all entities of that job.
 9. `test_world_lore_total_timeout_fills_unfinished_jobs`
-   - 总 timeout 到达后未完成 jobs 用 fallback 补齐。
+   - After the total timeout is reached, unfinished jobs are filled in with fallback.
 10. `test_world_lore_apply_updates_indexes`
-    - 宗门、功法、武器改名后 by-name index 正确更新。
+    - After sects, techniques and weapons are renamed, by-name indexes are updated correctly.
 11. `test_world_lore_snapshot_v2_roundtrip`
-    - 保存读档后文本保持一致。
+    - Text stays consistent after save and load.
 12. `test_world_lore_multi_map_uses_overrides`
-    - 群岛或山脉地图的 region override 进入 prompt，并作为当前文本来源。
+    - Region overrides for the island or mountain map enter the prompt and serve as the current text source.
 13. `test_init_world_lore_timeout_does_not_abort_initialization`
-    - 世界观超时不导致初始化失败。
+    - A world lore timeout does not cause initialization to fail.
 
-涉及地图上下文时，应结合 `docs/specs/region-first-map-system.md` 的约束，确保使用当前地图的 `region_rows` 派生结果、`wilderness_tile`、`landmarks` 和 `region_overrides`。
+Where map context is involved, combine with the constraints in `docs/specs/region-first-map-system.md` to ensure the use of results derived from the current map's `region_rows`, `wilderness_tile`, `landmarks` and `region_overrides`.
 
-## 实施完成标准
+## Completion Criteria
 
-实现完成后应满足：
+After implementation, the following should hold:
 
-1. 输入世界观后，地点、宗门、功法、兵器、辅助装备都有本局专属文本。
-2. 当前选择不同地图时，世界观重写基于不同地图上下文。
-3. 不再把全量 region CSV 作为地图重写主输入。
-4. 不再要求 LLM 输出详细 thinking。
-5. 单 chunk 超时和整体超时均可控。
-6. JSON 格式错误最多重试一次。
-7. 网络失败和超时不会中断初始化。
-8. 失败 chunk 使用 fallback 补齐，最终 draft 完整。
-9. apply 前后 indexes 和 ItemRegistry 保持一致。
-10. 存档和读档通过 v2 snapshot 保留重写结果。
-11. 日志能定位慢任务、失败任务和 fallback 数量。
+1. After entering world lore, locations, sects, techniques, weapons and auxiliary equipment all have text exclusive to the current run.
+2. When a different map is selected, the world lore rewrite is based on the different map context.
+3. The full region CSV is no longer used as the main input for map rewriting.
+4. The LLM is no longer required to output detailed thinking.
+5. Both single-chunk timeouts and the overall timeout are controllable.
+6. JSON format errors are retried at most once.
+7. Network failures and timeouts do not interrupt initialization.
+8. Failed chunks are filled in with fallback, and the final draft is complete.
+9. Indexes and ItemRegistry stay consistent before and after apply.
+10. Save and load preserve the rewrite results via the v2 snapshot.
+11. Logs can locate slow tasks, failed tasks and the fallback count.

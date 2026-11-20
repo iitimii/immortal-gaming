@@ -1,151 +1,151 @@
-# 背景板 NPC / 凡人场景系统设计说明
+# Background NPC / Mortal Scene System Design
 
-本文档描述“背景板 NPC”一期设计。这里的 NPC 不是 `Avatar`，也不是会长期存在的世界实体，而是用于填充世界烟火气的无名凡人画像与预写场景事件。
+This document describes the phase-one design of "background NPCs". The NPCs here are not `Avatar`s, nor long-lived world entities; they are nameless mortal portraits and pre-written scene events used to fill the world with the bustle of everyday life.
 
-一期目标是用低成本、配置驱动的方式，让城市、港口、山岭、宗门山下、官府、坊市等场景里出现凡俗生活的回声，同时允许不同身份的 Avatar 遇到不同凡人片段。系统不调用在线 LLM，不改变世界状态，不引入 NPC 生命周期。
+The phase-one goal is to use a low-cost, config-driven approach to bring echoes of mortal life into scenes such as cities, ports, mountain ranges, the foot of sect mountains, government offices, and markets, while letting Avatars of different identities encounter different mortal vignettes. The system does not call an online LLM, does not change world state, and does not introduce an NPC lifecycle.
 
-## 1. 目标
+## 1. Goals
 
-背景板 NPC 系统解决三个问题：
+The background NPC system solves three problems:
 
-1. 让世界不只由 Avatar 之间的慢速 LLM 互动构成，也有低成本的凡俗背景事件。
-2. 让 Avatar 的种族、阵营、境界、宗门身份、官职等能被凡人世界“看见”，但不改变数值。
-3. 让部分 Avatar 小事和行动结果能附带一条凡人反馈，增强修仙者压过人间的叙事感。
+1. The world should not consist only of slow LLM interactions between Avatars; it should also have low-cost mortal background events.
+2. An Avatar's race, alignment, realm, sect identity, official post, etc. should be "seen" by the mortal world, without changing any numbers.
+3. Some Avatar minor events and action results can carry a mortal reaction, strengthening the narrative sense of cultivators towering over the mortal world.
 
-一期的标准体验是：
+The standard phase-one experience is:
 
-- 城市里有药材商、药铺伙计、茶馆说书人、巡街差役等无名职业剪影。
-- 港口里有船老大、水手、潮汐引路人、港口税吏等无名职业剪影。
-- 宗门山下有山门守童、外门杂役、求仙父母、采买人等无名职业剪影。
-- 妖族、邪道、高境界修士、有官职者、宗门弟子等遇到的凡人反应可以不同。
-- 背景板 NPC 不产生关系、不进存档、不成为可对话实体。
+- Cities have nameless occupational silhouettes such as herb vendors, medicine shop assistants, teahouse storytellers, and street patrol runners.
+- Ports have nameless occupational silhouettes such as ship captains, sailors, tide guides, and port tax collectors.
+- The foot of sect mountains has nameless occupational silhouettes such as sect gate children, outer sect servants, immortal-seeking parents, and buyers.
+- Yao, evil-path cultivators, high-realm cultivators, officials, sect disciples, etc. can meet different mortal reactions.
+- Background NPCs do not create relations, do not enter save files, and do not become entities you can talk to.
 
-## 2. 设计原则
+## 2. Design Principles
 
-### 2.1 背景板 NPC 不是 Avatar
+### 2.1 Background NPCs are not Avatars
 
-背景板 NPC 一期不进入：
+In phase one, background NPCs do not enter:
 
 1. `AvatarManager`
-2. 行动系统
-3. 关系系统
-4. 宗门成员系统
-5. 死亡、年龄、背包、境界、位置等实体生命周期
+2. The action system
+3. The relation system
+4. The sect membership system
+5. Entity lifecycles such as death, age, inventory, realm, and location
 
-它们只作为“画像 + 预写事件模板”的配置素材存在。
+They exist only as config material in the form of "portrait + pre-written event template".
 
-### 2.2 所有背景 NPC 都无名
+### 2.2 All background NPCs are nameless
 
-一期禁止给背景板 NPC 起具体姓名。
+Phase one forbids giving background NPCs specific personal names.
 
-推荐写法：
+Recommended:
 
-- `药材商`
-- `茶棚老人`
-- `驿卒`
-- `山门守童`
-- `船老大`
-- `更夫`
-- `黑市掮客`
-- `几个码头脚夫`
-- `年老的采药人`
-- `守在山门外的童子`
+- `herb vendor`
+- `old man at the tea shed`
+- `post courier`
+- `sect gate child`
+- `ship captain`
+- `night watchman`
+- `black-market broker`
+- `several dock porters`
+- `an aged herb gatherer`
+- `the boy keeping watch outside the sect gate`
 
-不推荐写法：
+Not recommended:
 
-- `老陈头`
-- `赵账房`
-- `柳掌柜`
-- `某某船老大`
+- `Old Chen`
+- `Bookkeeper Zhao`
+- `Shopkeeper Liu`
+- `Captain So-and-so`
 
-原因是一期不支持二次出场。职业身份重复是合理的，具体姓名重复会让玩家误以为同一个人反复出现。
+The reason is that phase one does not support repeat appearances. Repeated occupational identities are reasonable, but repeated personal names would make players think the same person keeps showing up.
 
-### 2.3 只做背景，不改变状态
+### 2.3 Background only, no state changes
 
-一期背景板 NPC 事件不应直接改变：
+Phase-one background NPC events should not directly change:
 
-1. Avatar 属性、资源、关系、行动计划
-2. 城市人口、经济、商品、治安
-3. 宗门收入、关系、战争、库存
-4. 朝廷、官府、地图、POI、机缘、秘境等世界状态
+1. Avatar attributes, resources, relations, or action plans
+2. City population, economy, goods, or public order
+3. Sect income, relations, wars, or inventory
+4. The court, government offices, the map, POIs, opportunities, hidden domains, or other world state
 
-所有事件只生成 `Event`。
+All events only produce an `Event`.
 
-可以预留配置字段表达未来效果，但一期 loader / service 不执行这些字段。
+Config fields expressing future effects may be reserved, but the phase-one loader / service does not execute them.
 
-### 2.4 不在线调用 LLM
+### 2.4 No online LLM calls
 
-事件正文全部使用预写模板。运行时只做：
+All event text uses pre-written templates. At runtime the system only does:
 
-1. 条件过滤
-2. 权重抽样
-3. 变量替换
-4. 生成 `Event`
+1. Condition filtering
+2. Weighted sampling
+3. Variable substitution
+4. `Event` generation
 
-开发期可以用 AI 批量生成候选文本，但最终进入游戏的内容必须落到配置和 locale 源文件中。
+During development, AI may be used to batch-generate candidate text, but content that ships in the game must live in config and locale source files.
 
-### 2.5 画像和事件分离
+### 2.5 Portraits and events are separate
 
-一个背景板 NPC 画像可以绑定多个不同事件。画像负责“谁会出现”，事件负责“出现时演哪一幕”。
+One background NPC portrait can be bound to multiple different events. The portrait decides "who appears"; the event decides "which scene plays out when they appear".
 
-例如：
+For example:
 
-- `herb_vendor` 药材商
-  - 城市集市验货争执
-  - Avatar 买药时掌柜收起凡药
-  - 妖族经过时摊主压低声音
-  - 高境界修士问价时只展示玉盒灵材
+- `herb_vendor` herb vendor
+  - An argument over goods inspection at the city market
+  - The shopkeeper puts away mortal-grade herbs when an Avatar buys medicine
+  - The stallholder lowers their voice when a yao passes by
+  - Only jade-boxed spirit materials are shown when a high-realm cultivator asks about prices
 
-画像不持有运行时状态，事件也不承诺同一个 NPC 会再次出现。
+Portraits hold no runtime state, and events make no promise that the same NPC will appear again.
 
-## 3. 非目标
+## 3. Non-Goals
 
-一期明确不做以下内容：
+Phase one explicitly does not do the following:
 
-1. 不做 NPC 二次出场。
-2. 不做 NPC 对话对象。
-3. 不做 NPC 关系、好感、仇怨。
-4. 不做 NPC 长期记忆。
-5. 不做 NPC 名册。
-6. 不做城市或宗门内部 NPC 人口模拟。
-7. 不做经济、治安、人口、宗门收入等数值影响。
-8. 不把背景 NPC 加入 Avatar AI 可观察对象列表。
-9. 不让背景 NPC 进入存档。
-10. 不新增玩家任务、导航、POI 或可点击目标。
+1. No NPC repeat appearances.
+2. No NPCs as conversation targets.
+3. No NPC relations, favor, or grudges.
+4. No NPC long-term memory.
+5. No NPC roster.
+6. No NPC population simulation inside cities or sects.
+7. No numeric effects on the economy, public order, population, sect income, etc.
+8. Background NPCs are not added to the list of objects observable by Avatar AI.
+9. Background NPCs do not enter save files.
+10. No new player quests, navigation, POIs, or clickable targets.
 
-## 4. 事件类型
+## 4. Event Types
 
-一期支持三种触发语义。
+Phase one supports three trigger semantics.
 
 ### 4.1 `region_tick`
 
-地区自然发生的背景事件，不绑定具体 Avatar。
+Background events that happen naturally in a region, not bound to a specific Avatar.
 
-示例：
+Example:
 
 ```text
-城中药材商和采药人为一捆草药年份争执半日，药铺伙计请来掌柜验货，围观的人群才慢慢散去。
+In the city, a herb vendor and an herb gatherer argued for half a day over the age of a bundle of herbs; only after the medicine shop assistant fetched the shopkeeper to inspect it did the crowd of onlookers slowly disperse.
 ```
 
-事件语义：
+Event semantics:
 
 - `related_avatars=None`
-- `related_sects` 可选
+- `related_sects` optional
 - `is_major=False`
 - `is_story=False`
 - `event_type="background_npc"`
 
 ### 4.2 `avatar_witness`
 
-Avatar 在某地停留、经过或满足身份条件时见到的凡人片段。
+A mortal vignette an Avatar sees while staying in or passing through a place, or when meeting identity conditions.
 
-示例：
+Example:
 
 ```text
-{avatar_name}经过药铺门前时，伙计把柜台擦了又擦，始终不敢催促。
+As {avatar_name} passed the medicine shop, the shop assistant wiped the counter again and again, never daring to hurry them.
 ```
 
-事件语义：
+Event semantics:
 
 - `related_avatars=[avatar.id]`
 - `is_major=False`
@@ -154,15 +154,15 @@ Avatar 在某地停留、经过或满足身份条件时见到的凡人片段。
 
 ### 4.3 `action_echo`
 
-Avatar 完成某些行动后追加的凡人反馈，不改变行动结算。
+A mortal reaction appended after an Avatar completes certain actions; it does not change the action's resolution.
 
-示例：
+Example:
 
 ```text
-{avatar_name}离开后，医馆大夫把剩下的止血散送到粥棚，几个流民在廊下低声道谢。
+After {avatar_name} left, the clinic physician took the remaining blood-staunching powder to the gruel shed, and a few refugees murmured their thanks under the eaves.
 ```
 
-适合优先接入的行动：
+Actions suitable for early integration:
 
 - `Buy`
 - `Sell`
@@ -174,66 +174,66 @@ Avatar 完成某些行动后追加的凡人反馈，不改变行动结算。
 - `SectMission`
 - `MoveToRegion`
 
-事件语义：
+Event semantics:
 
 - `related_avatars=[avatar.id]`
 - `is_major=False`
 - `is_story=False`
 - `event_type="background_npc"`
 
-## 5. 配置总览
+## 5. Config Overview
 
-一期推荐三张配置表：
+Phase one recommends three config tables:
 
 1. `static/game_configs/background_npc_profile.csv`
 2. `static/game_configs/background_npc_event.csv`
 3. `static/game_configs/background_npc_region_binding.csv`
 
-其中：
+Of these:
 
-- profile 表定义无名职业画像。
-- event 表定义一个画像可触发的多个事件。
-- region binding 表把地图 region 绑定到场景标签，避免事件硬写具体 region。
+- The profile table defines nameless occupational portraits.
+- The event table defines the multiple events a portrait can trigger.
+- The region binding table binds map regions to scene tags, so events do not hard-code specific regions.
 
-所有用户可见文本都应通过 `*_id` 指向 locale 条目。CSV 可以保留中文备注列用于维护，但运行时不应依赖备注列作为用户可见文案真源。
+All user-visible text should point to locale entries via `*_id`. The CSV may keep a remark column for maintenance, but the runtime should not depend on the remark column as the source of truth for user-visible text.
 
-新增 locale 源文件建议：
+Suggested new locale source files:
 
 ```text
-static/locales/<lang>/game_configs_modules/background_npc_profile.po
-static/locales/<lang>/game_configs_modules/background_npc_event.po
+static/locales/en-US/game_configs_modules/background_npc_profile.po
+static/locales/en-US/game_configs_modules/background_npc_event.po
 ```
 
-日常开发默认 Phase 1，只维护 `zh-CN`。正式多语言补全时再按 `static/locales/registry.json` 补齐启用语言。
+`en-US` is the sole and source locale; maintain entries in these split source files, and run `python tools/i18n/build_mo.py` after editing them (`LC_MESSAGES/*.po` are merged artifacts).
 
-## 6. Profile 表
+## 6. Profile Table
 
-`background_npc_profile.csv` 定义背景板 NPC 画像。
+`background_npc_profile.csv` defines background NPC portraits.
 
-建议字段：
+Suggested fields:
 
 ```csv
 id,profile_key,role_label_id,category,default_scene_tags,comment
-1,herb_vendor,BACKGROUND_NPC_ROLE_HERB_VENDOR,city_market,city_market|medicine,药材商
-2,storyteller,BACKGROUND_NPC_ROLE_STORYTELLER,city_market,city_market|rumor|teahouse,茶馆说书人
-3,tide_guide,BACKGROUND_NPC_ROLE_TIDE_GUIDE,port,port|tide|sea_trade,潮汐引路人
-4,sect_gate_child,BACKGROUND_NPC_ROLE_SECT_GATE_CHILD,sect_edge,sect_edge|pilgrimage,山门守童
+1,herb_vendor,BACKGROUND_NPC_ROLE_HERB_VENDOR,city_market,city_market|medicine,herb vendor
+2,storyteller,BACKGROUND_NPC_ROLE_STORYTELLER,city_market,city_market|rumor|teahouse,teahouse storyteller
+3,tide_guide,BACKGROUND_NPC_ROLE_TIDE_GUIDE,port,port|tide|sea_trade,tide guide
+4,sect_gate_child,BACKGROUND_NPC_ROLE_SECT_GATE_CHILD,sect_edge,sect_edge|pilgrimage,sect gate child
 ```
 
-字段说明：
+Field descriptions:
 
-1. `id`：数字 ID，仅用于配置引用。
-2. `profile_key`：稳定 key，推荐业务代码、测试、工具优先使用。
-3. `role_label_id`：职业称谓 i18n key。
-4. `category`：画像粗分类，例如 `city_market`、`port`、`mountain_frontier`、`sect_edge`、`official_order`、`black_market`。
-5. `default_scene_tags`：画像天然适配的场景标签，使用 `|` 分隔。
-6. `comment`：维护备注，不作为运行时用户可见文本。
+1. `id`: numeric ID, used only for config references.
+2. `profile_key`: stable key; business code, tests, and tools should prefer it.
+3. `role_label_id`: i18n key for the occupational title.
+4. `category`: coarse portrait category, e.g. `city_market`, `port`, `mountain_frontier`, `sect_edge`, `official_order`, `black_market`.
+5. `default_scene_tags`: scene tags the portrait naturally fits, separated by `|`.
+6. `comment`: maintenance remark, not used as user-visible text at runtime.
 
-画像层只描述“这类人是谁”。不要在 profile 中写事件正文。
+The portrait layer only describes "who this kind of person is". Do not write event text in the profile.
 
-### 6.1 画像命名约定
+### 6.1 Portrait naming conventions
 
-`profile_key` 使用英文 snake_case，避免中文 key：
+`profile_key` uses English snake_case; avoid non-English keys:
 
 - `herb_vendor`
 - `inn_keeper`
@@ -242,71 +242,71 @@ id,profile_key,role_label_id,category,default_scene_tags,comment
 - `mountain_hunter`
 - `sect_errand_servant`
 
-`role_label_id` 使用稳定英文 key：
+`role_label_id` uses stable English keys:
 
 - `BACKGROUND_NPC_ROLE_HERB_VENDOR`
 - `BACKGROUND_NPC_ROLE_INN_KEEPER`
 - `BACKGROUND_NPC_ROLE_YAMEN_CLERK`
 
-对应 zh-CN `.po`：
+Corresponding en-US `.po`:
 
 ```po
 msgid "BACKGROUND_NPC_ROLE_HERB_VENDOR"
-msgstr "药材商"
+msgstr "herb vendor"
 ```
 
-## 7. Event 表
+## 7. Event Table
 
-`background_npc_event.csv` 定义具体事件。一个 `profile_key` 可以绑定多条事件。
+`background_npc_event.csv` defines concrete events. One `profile_key` can be bound to multiple events.
 
-建议字段：
+Suggested fields:
 
 ```csv
 id,event_key,profile_key,trigger_kind,region_types,required_tags,excluded_tags,map_ids,avatar_filters,action_keys,weight,cooldown_months,max_per_month,text_id,comment
-1,herb_vendor_market_argument,herb_vendor,region_tick,city,city_market|medicine,, , , ,1.0,24,1,BACKGROUND_NPC_EVENT_HERB_VENDOR_MARKET_ARGUMENT,药材年份争执
-2,herb_vendor_avatar_buy_echo,herb_vendor,action_echo,city,medicine,, , ,Buy,1.0,12,1,BACKGROUND_NPC_EVENT_HERB_VENDOR_AVATAR_BUY_ECHO,买药回声
-3,market_reacts_to_yao,herb_vendor,avatar_witness,city,city_market,, ,race=yao, ,1.0,12,1,BACKGROUND_NPC_EVENT_MARKET_REACTS_TO_YAO,妖族经过市集
+1,herb_vendor_market_argument,herb_vendor,region_tick,city,city_market|medicine,, , , ,1.0,24,1,BACKGROUND_NPC_EVENT_HERB_VENDOR_MARKET_ARGUMENT,herb age dispute
+2,herb_vendor_avatar_buy_echo,herb_vendor,action_echo,city,medicine,, , ,Buy,1.0,12,1,BACKGROUND_NPC_EVENT_HERB_VENDOR_AVATAR_BUY_ECHO,medicine purchase echo
+3,market_reacts_to_yao,herb_vendor,avatar_witness,city,city_market,, ,race=yao, ,1.0,12,1,BACKGROUND_NPC_EVENT_MARKET_REACTS_TO_YAO,yao passing through the market
 ```
 
-字段说明：
+Field descriptions:
 
-1. `id`：数字 ID。
-2. `event_key`：稳定事件 key。
-3. `profile_key`：引用 `background_npc_profile.csv`。
-4. `trigger_kind`：`region_tick`、`avatar_witness`、`action_echo`。
-5. `region_types`：粗筛 region 类型，使用 `|` 分隔；可选值按运行时 region type，例如 `city`、`sect`、`normal`、`cultivate`。
-6. `required_tags`：必须匹配的场景标签，使用 `|` 分隔。
-7. `excluded_tags`：排除标签，使用 `|` 分隔。
-8. `map_ids`：限定地图，使用 `|` 分隔；空表示所有地图。
-9. `avatar_filters`：Avatar 身份条件；空表示不限。
-10. `action_keys`：`action_echo` 使用，允许多个行动 key，使用 `|` 分隔；其他触发类型为空。
-11. `weight`：权重。
-12. `cooldown_months`：同一 `event_key` 冷却月数。
-13. `max_per_month`：同一事件每月最多出现次数，通常为 `1`。
-14. `text_id`：事件正文 i18n key。
-15. `comment`：维护备注。
+1. `id`: numeric ID.
+2. `event_key`: stable event key.
+3. `profile_key`: references `background_npc_profile.csv`.
+4. `trigger_kind`: `region_tick`, `avatar_witness`, `action_echo`.
+5. `region_types`: coarse filter on region type, separated by `|`; valid values follow the runtime region type, e.g. `city`, `sect`, `normal`, `cultivate`.
+6. `required_tags`: scene tags that must match, separated by `|`.
+7. `excluded_tags`: excluded tags, separated by `|`.
+8. `map_ids`: restrict to maps, separated by `|`; empty means all maps.
+9. `avatar_filters`: Avatar identity conditions; empty means unrestricted.
+10. `action_keys`: used by `action_echo`; allows multiple action keys separated by `|`; empty for other trigger types.
+11. `weight`: weight.
+12. `cooldown_months`: cooldown in months for the same `event_key`.
+13. `max_per_month`: maximum occurrences of the same event per month, usually `1`.
+14. `text_id`: i18n key for the event text.
+15. `comment`: maintenance remark.
 
-### 7.1 文本 i18n
+### 7.1 Text i18n
 
-事件正文不直接写在主 CSV 的运行字段中，统一放到 locale `.po`。
+Event text is not written into the runtime fields of the main CSV; it all lives in locale `.po` files.
 
-示例：
+Example:
 
 ```po
-#. background_npc_event.csv: 药材年份争执
+#. background_npc_event.csv: herb age dispute
 msgid "BACKGROUND_NPC_EVENT_HERB_VENDOR_MARKET_ARGUMENT"
-msgstr "城中药材商和采药人为一捆草药年份争执半日，药铺伙计请来掌柜验货，围观的人群才慢慢散去。"
+msgstr "In the city, a herb vendor and an herb gatherer argued for half a day over the age of a bundle of herbs; only after the medicine shop assistant fetched the shopkeeper to inspect it did the crowd of onlookers slowly disperse."
 
-#. background_npc_event.csv: 买药回声
+#. background_npc_event.csv: medicine purchase echo
 msgid "BACKGROUND_NPC_EVENT_HERB_VENDOR_AVATAR_BUY_ECHO"
-msgstr "{avatar_name}挑选灵材时，药铺伙计把柜台擦了又擦，始终不敢催促。"
+msgstr "While {avatar_name} chose spirit materials, the medicine shop assistant wiped the counter again and again, never daring to hurry them."
 ```
 
-`msgid` 必须是稳定英文 key，不得直接使用中文。中文只放在 `msgstr`。
+`msgid` must be a stable English key; the display text goes in `msgstr`.
 
-### 7.2 可用模板变量
+### 7.2 Available template variables
 
-一期建议只支持少量稳定变量：
+Phase one should support only a small set of stable variables:
 
 1. `{avatar_name}`
 2. `{region_name}`
@@ -314,50 +314,50 @@ msgstr "{avatar_name}挑选灵材时，药铺伙计把柜台擦了又擦，始�
 4. `{dynasty_title}`
 5. `{npc_role}`
 
-变量来源：
+Variable sources:
 
-- `{avatar_name}`：当前 Avatar。
-- `{region_name}`：触发 region 展示名，优先使用地图 `region_overrides` 后的名称。
-- `{sect_name}`：region 或 Avatar 关联宗门名；无值时该事件不应入选，除非文本不使用此变量。
-- `{dynasty_title}`：当前王朝称号；无王朝时该事件不应入选，除非文本不使用此变量。
-- `{npc_role}`：`role_label_id` 本地化结果。
+- `{avatar_name}`: the current Avatar.
+- `{region_name}`: display name of the triggering region, preferring the name after the map's `region_overrides`.
+- `{sect_name}`: name of the sect associated with the region or Avatar; if there is no value, the event should not be selected unless its text does not use this variable.
+- `{dynasty_title}`: title of the current dynasty; if there is no dynasty, the event should not be selected unless its text does not use this variable.
+- `{npc_role}`: localized result of `role_label_id`.
 
-不建议一期允许任意 Python 表达式或复杂条件替换。
+Phase one should not allow arbitrary Python expressions or complex conditional substitution.
 
-## 8. Region Binding 表
+## 8. Region Binding Table
 
-`background_npc_region_binding.csv` 用于把具体地图和 region 映射到场景标签。
+`background_npc_region_binding.csv` maps specific maps and regions to scene tags.
 
-推荐字段：
+Recommended fields:
 
 ```csv
 id,map_id,region_id,scene_tags,comment
-1,classic,301,city_market|medicine|official_order,青云城
-2,classic,304,port|river_trade|sea_trade,沧澜城
-3,island_seas,305,port|sea_trade|shipyard,海岛港城
-4,mountain_frontier,305,mountain_pass|mining|frontier,山岭边城
+1,classic,301,city_market|medicine|official_order,Qingyun City
+2,classic,304,port|river_trade|sea_trade,Canglan City
+3,island_seas,305,port|sea_trade|shipyard,island port city
+4,mountain_frontier,305,mountain_pass|mining|frontier,mountain frontier city
 ```
 
-字段说明：
+Field descriptions:
 
-1. `id`：数字 ID。
-2. `map_id`：地图 ID，必须对应 `static/game_configs/maps/<map_id>`。
-3. `region_id`：region ID，必须存在于对应地图 `region_rows` 或 region 配置中。
-4. `scene_tags`：该 region 具备的场景标签。
-5. `comment`：维护备注。
+1. `id`: numeric ID.
+2. `map_id`: map ID; must correspond to `static/game_configs/maps/<map_id>`.
+3. `region_id`: region ID; must exist in the corresponding map's `region_rows` or region config.
+4. `scene_tags`: scene tags the region has.
+5. `comment`: maintenance remark.
 
-这样事件不需要硬绑 `region_id`。同一事件可以在所有带 `medicine` 的城市出现，也可以用 `map_ids` 限定只在海岛或山岭地图出现。
+This way events do not need to be hard-bound to a `region_id`. The same event can appear in every city tagged `medicine`, or be restricted with `map_ids` to appear only on island or mountain maps.
 
-### 8.1 默认标签
+### 8.1 Default tags
 
-若某个 region 没有 binding 记录，可以从 region 类型推导基础标签：
+If a region has no binding record, basic tags can be derived from the region type:
 
 - `city` -> `city`
 - `sect` -> `sect|sect_edge`
 - `normal` -> `wild`
 - `cultivate` -> `cultivate`
 
-但细分标签必须显式配置，例如：
+But fine-grained tags must be configured explicitly, for example:
 
 - `port`
 - `medicine`
@@ -370,11 +370,11 @@ id,map_id,region_id,scene_tags,comment
 
 ## 9. Avatar Filter
 
-`avatar_filters` 用于让不同身份的 Avatar 遇到不同事件。
+`avatar_filters` lets Avatars of different identities encounter different events.
 
-一期建议使用简单 `;` 分隔的键值条件，不实现复杂表达式。
+Phase one should use simple `;`-separated key-value conditions and not implement complex expressions.
 
-示例：
+Examples:
 
 ```text
 race=yao
@@ -387,14 +387,14 @@ realm_min=FOUNDATION_ESTABLISHMENT
 realm_max=GOLDEN_CORE
 ```
 
-多个条件表示全部满足：
+Multiple conditions mean all must be satisfied:
 
 ```text
 race=yao;alignment=evil
 sect=any;realm_min=FOUNDATION_ESTABLISHMENT
 ```
 
-建议支持字段：
+Suggested supported fields:
 
 1. `race`
 2. `alignment`
@@ -403,13 +403,13 @@ sect=any;realm_min=FOUNDATION_ESTABLISHMENT
 5. `realm_min`
 6. `realm_max`
 
-一期不建议支持 `or`、括号、比较表达式或脚本化条件。
+Phase one should not support `or`, parentheses, comparison expressions, or scripted conditions.
 
-## 10. 触发与限流
+## 10. Triggering and Rate Limiting
 
-一期建议新增独立配置项，具体路径放在 `static/config.yml -> world.background_npc`，与现有 `random_minor_event_prob`、`fortune_probability` 等世界事件配置保持同层。
+Phase one should add a dedicated config section at `static/config.yml -> world.background_npc`, at the same level as existing world event settings such as `random_minor_event_prob` and `fortune_probability`.
 
-推荐配置：
+Recommended config:
 
 ```yaml
 world:
@@ -423,19 +423,19 @@ world:
     max_action_echo_per_month: 2
 ```
 
-建议限流原则：
+Suggested rate-limiting principles:
 
-1. `region_tick` 每月最多 1 条。
-2. `avatar_witness` 每月最多 2 条。
-3. `action_echo` 每月最多 2 条。
-4. 同一 `event_key` 遵守 `cooldown_months`。
-5. 同一 Avatar 的 `avatar_witness` 不应过密，建议运行时额外按 `avatar_id + event_key` 记录月度冷却。
+1. At most 1 `region_tick` per month.
+2. At most 2 `avatar_witness` per month.
+3. At most 2 `action_echo` per month.
+4. The same `event_key` respects `cooldown_months`.
+5. `avatar_witness` events for the same Avatar should not be too frequent; the runtime should additionally track a monthly cooldown keyed by `avatar_id + event_key`.
 
-冷却状态可以是 runtime 内存态，不进存档。读档或重启后冷却清空可以接受，因为一期事件不影响状态。
+Cooldown state can be in-memory runtime state and does not go into save files. It is acceptable for cooldowns to reset after a load or restart, because phase-one events do not affect state.
 
-## 11. 模拟器接入建议
+## 11. Simulator Integration Suggestions
 
-建议新增：
+Suggested new package:
 
 ```text
 src/systems/background_npc/
@@ -445,42 +445,42 @@ src/systems/background_npc/
   service.py
 ```
 
-模拟器 phase 可以放在 `random_minor_events` 附近，语义上属于低成本小事件层。
+The simulator phase can sit near `random_minor_events`; semantically it belongs to the low-cost minor event layer.
 
-候选接入：
+Candidate integration:
 
 ```python
 async def phase_background_npc_events(world, living_avatars) -> list[Event]:
     return BackgroundNpcService.try_create_monthly_events(world, living_avatars)
 ```
 
-相位位置建议：
+Suggested phase placement:
 
-1. 在行动执行之后。
-2. 在 `random_minor_events` 附近。
-3. 在 `finalize_step()` 之前统一入库。
+1. After action execution.
+2. Near `random_minor_events`.
+3. Before `finalize_step()`, which stores events centrally.
 
-不要在 `src/server/main.py` 中扩散逻辑。
+Do not spread logic into `src/server/main.py`.
 
-## 12. 与 Random Minor Event 的边界
+## 12. Boundary with Random Minor Event
 
-现有 `random_minor_event` 面向 Avatar 小事，且当前会在线调用 LLM 生成文本。
+The existing `random_minor_event` targets Avatar minor events and currently calls an online LLM to generate text.
 
-背景板 NPC 系统与其边界如下：
+The boundary between the background NPC system and it is:
 
-1. `random_minor_event`：角色自身或角色间的微观事件。
-2. `background_npc`：凡人背景、地区烟火、Avatar 被凡俗世界看见。
+1. `random_minor_event`: micro events about an avatar itself or between avatars.
+2. `background_npc`: mortal background, regional bustle, and Avatars being seen by the mortal world.
 
-两者都生成普通小事件，但：
+Both produce ordinary minor events, but:
 
-- `random_minor_event` 可以改变关系。
-- `background_npc` 不改变任何状态。
-- `random_minor_event` 的文本由 LLM 生成。
-- `background_npc` 的文本来自预写 i18n 模板。
+- `random_minor_event` can change relations.
+- `background_npc` does not change any state.
+- `random_minor_event` text is generated by the LLM.
+- `background_npc` text comes from pre-written i18n templates.
 
-## 13. 与事件系统的关系
+## 13. Relationship with the Event System
 
-背景板 NPC 事件统一使用：
+Background NPC events uniformly use:
 
 ```python
 Event(
@@ -494,164 +494,164 @@ Event(
 )
 ```
 
-显示策略：
+Display policy:
 
-1. `region_tick` 进入主事件流，但不进入 Avatar 个人事件栏。
-2. `avatar_witness` 进入主事件流和对应 Avatar 个人事件栏。
-3. `action_echo` 进入主事件流和对应 Avatar 个人事件栏。
+1. `region_tick` enters the main event stream but not any Avatar's personal event panel.
+2. `avatar_witness` enters the main event stream and the corresponding Avatar's personal event panel.
+3. `action_echo` enters the main event stream and the corresponding Avatar's personal event panel.
 
-不使用 `is_story=True`。背景板 NPC 事件不是 LLM 展开的小故事正文。
+Do not use `is_story=True`. Background NPC events are not LLM-expanded story text.
 
-## 14. 内容写作规范
+## 14. Content Writing Guidelines
 
-### 14.1 推荐风格
+### 14.1 Recommended style
 
-背景板 NPC 的价值是低保真凡俗视角。
+The value of background NPCs is a low-fidelity mortal perspective.
 
-推荐：
+Recommended:
 
-- 描述余波，不解释真相。
-- 写误读、传闻、旁观、恐惧、敬畏、买卖、秩序。
-- 让凡人体现修士行动的社会回声。
-- 使用无名身份和群体称谓。
+- Describe the aftermath; do not explain the truth.
+- Write about misreadings, rumors, onlooking, fear, awe, trade, and order.
+- Let mortals reflect the social echo of cultivators' actions.
+- Use nameless identities and group terms.
 
-示例：
+Example:
 
 ```text
-茶馆说书人声称东海有仙府出世，听客喝彩，账房却只记下多卖了三壶茶。
+A teahouse storyteller claimed an immortal estate had surfaced in the eastern sea; the listeners cheered, while the bookkeeper only noted three more pots of tea sold.
 ```
 
-### 14.2 避免写法
+### 14.2 Things to avoid
 
-避免：
+Avoid:
 
-1. 给 NPC 起名。
-2. 承诺 NPC 将来再次出现。
-3. 让凡人准确解释高阶修仙真相。
-4. 在事件中直接生成任务、秘境、机缘、POI。
-5. 写出会暗示状态已经改变的结果，例如“城中米价从此下降”。
-6. 写需要后续追踪的句子，例如“他暗暗记下了此事，来日必有回报”。
+1. Naming NPCs.
+2. Promising that an NPC will appear again in the future.
+3. Having mortals accurately explain high-level cultivation truths.
+4. Directly generating quests, hidden domains, opportunities, or POIs in events.
+5. Writing outcomes that imply state has changed, e.g. "From then on, the price of rice in the city fell."
+6. Writing sentences that require follow-up tracking, e.g. "He quietly took note of this; one day he would surely repay it."
 
-## 15. 首批内容包建议
+## 15. Suggested First Content Packs
 
-一期可先做六个内容包，每包 8 到 12 条事件。
+Phase one can start with six content packs, each with 8 to 12 events.
 
-### 15.1 城市市井
+### 15.1 City streets
 
-画像：
+Portraits:
 
-- 药材商
-- 药铺掌柜
-- 客栈掌柜
-- 茶馆说书人
-- 巡街差役
-- 医馆大夫
-- 当铺朝奉
-- 材料牙人
+- Herb vendor
+- Medicine shop keeper
+- Innkeeper
+- Teahouse storyteller
+- Street patrol runner
+- Clinic physician
+- Pawnshop appraiser
+- Materials broker
 
-### 15.2 港口海岛
+### 15.2 Port and islands
 
-画像：
+Portraits:
 
-- 船老大
-- 水手
-- 渔民
-- 海货商贩
-- 潮汐引路人
-- 采珠人
-- 海图贩子
-- 港口税吏
+- Ship captain
+- Sailor
+- Fisherman
+- Sea goods peddler
+- Tide guide
+- Pearl diver
+- Chart peddler
+- Port tax collector
 
-### 15.3 山岭边境
+### 15.3 Mountain frontier
 
-画像：
+Portraits:
 
-- 山口守卒
-- 矿队管事
-- 采矿苦工
-- 走山猎户
-- 峡河船夫
-- 驿站马夫
-- 采参人
-- 矿洞幸存者
+- Mountain pass guard
+- Mine foreman
+- Mine laborer
+- Mountain hunter
+- Gorge river boatman
+- Post station groom
+- Ginseng gatherer
+- Mine survivor
 
-### 15.4 宗门山下
+### 15.4 Foot of the sect mountain
 
-画像：
+Portraits:
 
-- 外门杂役
-- 山门守童
-- 药田农夫
-- 灵兽园饲养人
-- 炼丹房火工
-- 藏经阁抄书人
-- 山下佃户
-- 求仙父母
-- 采买人
+- Outer sect servant
+- Sect gate child
+- Medicine field farmer
+- Spirit beast garden keeper
+- Alchemy room fireworker
+- Scripture pavilion copyist
+- Tenant farmer at the mountain foot
+- Immortal-seeking parent
+- Buyer
 
-### 15.5 官府朝廷
+### 15.5 Government and court
 
-画像：
+Portraits:
 
-- 县令
-- 太守
-- 税吏
-- 布告官
-- 粮仓管事
-- 师爷
-- 更夫
-- 驿传官
-- 国师门客
+- County magistrate
+- Prefect
+- Tax collector
+- Notice crier
+- Granary steward
+- Private secretary
+- Night watchman
+- Courier officer
+- Retainer of the National Preceptor
 
-### 15.6 黑市坊市
+### 15.6 Black market and bazaar
 
-画像：
+Portraits:
 
-- 黑市掮客
-- 坊市摊主
-- 鉴货朝奉
-- 寄售行管事
-- 店铺护院
-- 收旧货商
-- 灵材牙人
+- Black-market broker
+- Bazaar stallholder
+- Goods appraiser
+- Consignment house steward
+- Shop guard
+- Secondhand goods dealer
+- Spirit materials broker
 
-## 16. 测试建议
+## 16. Testing Suggestions
 
-一期实现时建议补以下测试：
+The phase-one implementation should add the following tests:
 
-1. loader 能读取 profile / event / region binding。
-2. 一个 profile 可以绑定多条 event。
-3. `region_types`、`required_tags`、`excluded_tags`、`map_ids` 过滤正确。
-4. `avatar_filters` 对 race / alignment / sect / official / realm 生效。
-5. `region_tick` 事件不带 `related_avatars`。
-6. `avatar_witness` / `action_echo` 事件带 `related_avatars=[avatar.id]`。
-7. 所有生成事件 `is_major=False`、`is_story=False`、`event_type="background_npc"`。
-8. 限流和 cooldown 生效。
-9. 文本通过 `text_id` 渲染，未翻译时有可控 fallback。
-10. region binding 中的 `map_id + region_id` 能通过官方地图校验。
+1. The loader can read profile / event / region binding.
+2. One profile can be bound to multiple events.
+3. Filtering by `region_types`, `required_tags`, `excluded_tags`, and `map_ids` is correct.
+4. `avatar_filters` takes effect for race / alignment / sect / official / realm.
+5. `region_tick` events do not carry `related_avatars`.
+6. `avatar_witness` / `action_echo` events carry `related_avatars=[avatar.id]`.
+7. All generated events have `is_major=False`, `is_story=False`, `event_type="background_npc"`.
+8. Rate limiting and cooldowns take effect.
+9. Text is rendered via `text_id`, with a controlled fallback when untranslated.
+10. `map_id + region_id` in the region binding passes official map validation.
 
-若改动官方地图绑定，至少运行：
+If you change official map bindings, at minimum run:
 
 ```bash
 python tools/map_presets/validate_presets.py
 ```
 
-若新增 locale 源文件或条目，运行：
+If you add locale source files or entries, run:
 
 ```bash
 python tools/i18n/build_mo.py
 pytest tests/test_backend_locales.py
 ```
 
-## 17. 后续二期口子
+## 17. Phase-Two Extension Points
 
-一期完成后，二期可以从少量高频画像中挑选“可二次出场”的轻量 NPC，但二期不应反向污染一期模型。
+After phase one is complete, phase two can pick a few high-frequency portraits and turn them into lightweight NPCs that "can appear again", but phase two should not contaminate the phase-one model in reverse.
 
-可能方向：
+Possible directions:
 
-1. 将少数 profile 升级为可持久化的 `named_mortal_npc`。
-2. 扮演模式中允许和部分 NPC 对话。
-3. 让对话 summary 以事件形式落地，但原始聊天记录不进长期事件流。
-4. 为特定城市维护少量本地常驻 NPC。
+1. Upgrade a few profiles into persistable `named_mortal_npc`.
+2. Allow conversations with some NPCs in roleplay mode.
+3. Have conversation summaries land as events, while raw chat logs do not enter the long-term event stream.
+4. Maintain a small number of local resident NPCs for specific cities.
 
-这些都属于后续设计。一期只做无名、一次性、预写、无状态的凡人场景。
+All of these are future designs. Phase one only does nameless, one-off, pre-written, stateless mortal scenes.

@@ -1,42 +1,42 @@
-# 阵法系统 Spec
+# Formation System Spec
 
-本文档记录阵法系统的第一版设计目标与落地约束。阵法系统应与现有动作、辅助装备、region-first 地图、effect、存档结构协同，但不应把区域效果强行塞进角色临时效果链。
+This document records the first-version design goals and implementation constraints of the formation system. The formation system should work together with the existing actions, auxiliary equipment, region-first map, effects and save structure, but should not force regional effects into the avatar temporary effect chain.
 
-## 目标
+## Goals
 
-阵法是一种通过阵盘在当前区域布置的限时区域效果：
+A formation is a time-limited regional effect set up in the current region using a formation disk:
 
-1. 阵盘是一种辅助装备。
-2. 装备阵盘后，角色可以执行“布置阵法”动作。
-3. 布阵只能作用于角色当前所在的 region，不支持远程布阵，也不绑定 tile。
-4. 阵法绑定 region，不绑定 avatar。
-5. 一个 region 同时只能存在一个阵法。
-6. 新布置的阵法会自动替换该 region 原有阵法。
-7. 阵法消耗灵石，不消耗阵盘。
-8. 阵法不设置失败率，满足条件则成功。
-9. 阵法持续一段时间，到期自动结束。
-10. 第一版不做撤回、破阵、维护费、阵眼争夺、多阵法叠加或城市经济阵法。
+1. A formation disk is a kind of auxiliary equipment.
+2. After equipping a formation disk, an avatar can perform the "Set Formation" action.
+3. Setting a formation can only affect the region the avatar is currently in; remote formation setting is not supported, and it is not bound to a tile.
+4. A formation is bound to a region, not to an avatar.
+5. A region can only have one formation at a time.
+6. A newly set formation automatically replaces the region's existing formation.
+7. A formation consumes spirit stones, not the formation disk.
+8. A formation has no failure rate; if the conditions are met, it succeeds.
+9. A formation lasts for a period of time and ends automatically on expiry.
+10. The first version does not include withdrawal, formation breaking, maintenance fees, contesting formation eyes, stacking multiple formations, or city economy formations.
 
-阵法和蛊在结构上相似，但目标不同：
+Formations and Gu are structurally similar but have different targets:
 
-| 系统 | 工具 | 动作 | 目标 | 状态承载 | 玩法定位 |
+| System | Tool | Action | Target | State carrier | Gameplay role |
 |---|---|---|---|---|---|
-| 蛊 | 蛊具 auxiliary | 下蛊 | avatar | avatar temporary effects | 暗中影响单人 |
-| 阵法 | 阵盘 auxiliary | 布置阵法 | 当前 region | map/region formation state | 改造一片区域 |
+| Gu | Gu vessel auxiliary | Plant Gu | avatar | avatar temporary effects | Covertly influence a single person |
+| Formation | Formation disk auxiliary | Set Formation | current region | map/region formation state | Reshape an area |
 
-## 设计原则
+## Design Principles
 
-### 1. 阵法是区域光环，不是角色临时效果
+### 1. A formation is a regional aura, not an avatar temporary effect
 
-阵法没有单个 avatar 受体，因此不应写入：
+A formation has no single avatar recipient, so it should not be written into:
 
 ```python
 avatar.temporary_effects
 ```
 
-角色只有位于该 region 内，并执行与阵法相关的动作或参与该 region 内的战斗时，才临时享受阵法效果。
+An avatar only temporarily benefits from a formation's effects while located in that region and performing formation-related actions or taking part in battles within that region.
 
-建议由 `src/systems/formation.py` 提供统一查询函数，例如：
+It is recommended that `src/systems/formation.py` provide unified query functions, for example:
 
 ```python
 get_active_region_formation(world, region_id)
@@ -44,39 +44,39 @@ get_active_region_formation_effects(world, region_id)
 get_current_region_formation_effects(avatar)
 ```
 
-具体动作和系统在结算时读取当前 region 的 active formation effects，并与角色自身 `avatar.effects` 叠加计算。
+Specific actions and systems read the current region's active formation effects at settlement time and combine them with the avatar's own `avatar.effects`.
 
-### 2. 只给当前所在地布阵
+### 2. Only set formations at the current location
 
-“布置阵法”动作不需要 region 参数。动作直接读取：
+The "Set Formation" action does not need a region parameter. The action reads directly:
 
 ```python
 region = avatar.tile.region
 ```
 
-这能保持动作简单，也符合“阵师亲临地脉布阵”的玩法语义。
+This keeps the action simple, and matches the gameplay semantics of "a formation master personally sets the formation on the earth veins".
 
-### 3. 覆盖旧阵，不做撤回
+### 3. Overwrite the old formation, no withdrawal
 
-每个 region 同时最多一个 active formation。若当前 region 已有阵法，新阵法直接覆盖旧阵法。
+Each region has at most one active formation at a time. If the current region already has a formation, the new formation directly overwrites the old one.
 
-覆盖不返还灵石，也不保留旧阵剩余时间。
+Overwriting does not refund spirit stones and does not keep the old formation's remaining time.
 
-### 4. 动作说明使用说明文
+### 4. Action descriptions use expository text
 
-阵法动作的描述用于玩家和 LLM AI 理解行为边界，应保持纯说明文，不写文学性渲染。
+Formation action descriptions are used by players and the LLM AI to understand behavioral boundaries, so they should remain plain expository text without literary embellishment.
 
-推荐说明：
+Recommended description:
 
 ```text
-在当前区域布置一个阵法。需要装备阵盘并消耗灵石。每个区域同时只能存在一个阵法，新阵法会替换该区域原有阵法。聚灵阵提升吐纳收益，适合修炼区域和宗门总部。护山阵提升阵内战斗能力，适合宗门总部和修炼区域。疗愈阵提升疗伤恢复，适合宗门总部、修炼区域和城市。清心阵提升闭关和突破稳定性，适合修炼区域和宗门总部。寻脉阵提升挖矿收益，适合有矿脉的普通区域。丰木阵提升采集收益，适合有植物的普通区域。驱兽阵提升狩猎收益，适合有动物的普通区域。
+Set a formation in the current region. Requires an equipped formation disk and consumes spirit stones. Each region can have only one active formation at a time; a new formation replaces the existing one. The Spirit-Gathering Formation increases breathing cultivation gains and suits cultivation regions and sect headquarters. The Mountain-Guard Formation improves combat capability within the formation and suits sect headquarters and cultivation regions. The Healing Formation improves healing recovery and suits sect headquarters, cultivation regions, and cities. The Clarity Formation improves seclusion and breakthrough stability and suits cultivation regions and sect headquarters. The Vein-Seeking Formation increases mining gains and suits normal regions with mineral lodes. The Wood-Growth Formation increases gathering gains and suits normal regions with plants. The Beast-Driving Formation increases hunting gains and suits normal regions with animals.
 ```
 
-小故事由故事模块自行发挥，阵法动作本身只负责基础事实事件。
+Story events are left to the story module; the formation action itself is only responsible for the base fact event.
 
-## 数据模型
+## Data Model
 
-第一版建议在运行时 `Map` 上维护 region formation 字典：
+For the first version, it is recommended to maintain a region formation dict on the runtime `Map`:
 
 ```python
 world.map.region_formations = {
@@ -94,52 +94,52 @@ world.map.region_formations = {
 }
 ```
 
-字段说明：
+Field descriptions:
 
-1. `formation_type`：阵法类型 key。
-2. `caster_id`：布阵角色 ID，只保存 ID，不保存对象引用。
-3. `disk_item_id`：使用的阵盘物品 ID。
-4. `start_month`：布阵开始月份。
-5. `duration`：持续月份。
-6. `effects`：该阵法提供的区域效果，使用 JSON 基础类型。
-7. `cost`：本次布阵消耗灵石，主要用于展示和调试。
+1. `formation_type`: formation type key.
+2. `caster_id`: ID of the avatar who set the formation; only the ID is saved, not an object reference.
+3. `disk_item_id`: item ID of the formation disk used.
+4. `start_month`: the month the formation was set.
+5. `duration`: duration in months.
+6. `effects`: regional effects provided by the formation, using JSON primitive types.
+7. `cost`: spirit stones consumed by this formation setting, mainly for display and debugging.
 
-过期判断：
+Expiry check:
 
 ```python
 current_month >= start_month + duration
 ```
 
-过期后从 `region_formations` 删除。
+After expiry, it is deleted from `region_formations`.
 
-## 阵盘
+## Formation Disks
 
-阵盘作为 `Auxiliary` 配置。阵盘本身提供动作权限：
+Formation disks are configured as `Auxiliary`. The formation disk itself grants the action permission:
 
 ```text
 {legal_actions: ['SetFormation']}
 ```
 
-建议阵盘等级：
+Suggested formation disk grades:
 
-| 阵盘 | 对应境界 | 基础持续 | 基础成本 | 说明 |
+| Formation disk | Corresponding realm | Base duration | Base cost | Notes |
 |---|---|---:|---:|---|
-| 下品阵盘 | 练气 | 18 个月 | 80 | 入门阵盘 |
-| 中品阵盘 | 筑基 | 24 个月 | 200 | 稳定阵盘 |
-| 上品阵盘 | 金丹 | 30 个月 | 600 | 高阶阵盘 |
-| 极品阵盘 | 元婴 | 36 个月 | 1800 | 顶级阵盘 |
+| Low-grade formation disk | Qi Refinement | 18 months | 80 | Entry-level disk |
+| Mid-grade formation disk | Foundation Establishment | 24 months | 200 | Stable disk |
+| High-grade formation disk | Core Formation | 30 months | 600 | Advanced disk |
+| Supreme-grade formation disk | Nascent Soul | 36 months | 1800 | Top-tier disk |
 
-阵盘不作为一次性消耗品。布阵只消耗灵石。
+Formation disks are not one-time consumables. Setting a formation only consumes spirit stones.
 
 ## Persona
 
-第一版新增两个和阵法相关的 persona：
+The first version adds two formation-related personas:
 
-### 阵师
+### Formation Master
 
-阵师是较稀有的布阵专长 persona。
+Formation Master is a relatively rare formation-setting specialty persona.
 
-建议效果：
+Suggested effects:
 
 ```python
 {
@@ -149,11 +149,11 @@ current_month >= start_month + duration
 }
 ```
 
-### 阵仙
+### Formation Immortal
 
-阵仙是更稀有、更强效的布阵专长 persona。
+Formation Immortal is a rarer, more powerful formation-setting specialty persona.
 
-建议效果：
+Suggested effects:
 
 ```python
 {
@@ -163,7 +163,7 @@ current_month >= start_month + duration
 }
 ```
 
-计算方式：
+Calculation:
 
 ```text
 final_effect = base_effect * (1 + extra_formation_power)
@@ -171,43 +171,43 @@ duration = base_duration + extra_formation_duration_months + random_delta
 cost = base_cost * (1 - formation_cost_reduction)
 ```
 
-若角色同时拥有多个相关 persona，按现有 effect 合并规则累加即可。由于阵仙应足够稀有，第一版不需要额外做互斥逻辑。
+If an avatar has several related personas at the same time, simply accumulate them according to the existing effect merge rules. Since Formation Immortal should be sufficiently rare, the first version does not need extra mutual-exclusion logic.
 
-## 阵法类型
+## Formation Types
 
-第一版包含以下阵法。不包含聚市阵和血煞阵。
+The first version includes the following formations. It does not include the Market-Gathering Formation or the Blood Fiend Formation.
 
-| 阵法 key | 中文名 | 效果 | 允许 region |
+| Formation key | Name | Effect | Allowed regions |
 |---|---|---|---|
-| `spirit_gathering` | 聚灵阵 | 提升吐纳收益 | 修炼区域、宗门总部 |
-| `mountain_guard` | 护山阵 | 提升阵内战斗能力 | 宗门总部、修炼区域 |
-| `healing` | 疗愈阵 | 提升疗伤恢复 | 宗门总部、修炼区域、城市 |
-| `clarity` | 清心阵 | 提升闭关和突破稳定性 | 修炼区域、宗门总部 |
-| `vein_seeking` | 寻脉阵 | 提升挖矿收益 | 有矿脉的普通区域 |
-| `wood_growth` | 丰木阵 | 提升采集收益 | 有植物的普通区域 |
-| `beast_driving` | 驱兽阵 | 提升狩猎收益 | 有动物的普通区域 |
+| `spirit_gathering` | Spirit-Gathering Formation | Increases breathing gains | Cultivation regions, sect headquarters |
+| `mountain_guard` | Mountain-Guard Formation | Improves combat capability within the formation | Sect headquarters, cultivation regions |
+| `healing` | Healing Formation | Improves healing recovery | Sect headquarters, cultivation regions, cities |
+| `clarity` | Clarity Formation | Improves seclusion and breakthrough stability | Cultivation regions, sect headquarters |
+| `vein_seeking` | Vein-Seeking Formation | Increases mining gains | Normal regions with lodes |
+| `wood_growth` | Wood-Growth Formation | Increases gathering gains | Normal regions with plants |
+| `beast_driving` | Beast-Driving Formation | Increases hunting gains | Normal regions with animals |
 
-### 效果建议
+### Suggested effects
 
-聚灵阵：
+Spirit-Gathering Formation:
 
 ```python
 {"extra_respire_exp_multiplier": 0.10 / 0.18 / 0.28 / 0.40}
 ```
 
-护山阵：
+Mountain-Guard Formation:
 
 ```python
 {"extra_battle_strength_points": 1 / 2 / 4 / 7}
 ```
 
-疗愈阵：
+Healing Formation:
 
 ```python
 {"extra_hp_recovery_rate": 0.20 / 0.35 / 0.55 / 0.80}
 ```
 
-清心阵：
+Clarity Formation:
 
 ```python
 {
@@ -216,80 +216,80 @@ cost = base_cost * (1 - formation_cost_reduction)
 }
 ```
 
-寻脉阵：
+Vein-Seeking Formation:
 
 ```python
 {"extra_mine_materials": 1 / 1 / 2 / 3}
 ```
 
-丰木阵：
+Wood-Growth Formation:
 
 ```python
 {"extra_harvest_materials": 1 / 1 / 2 / 3}
 ```
 
-驱兽阵：
+Beast-Driving Formation:
 
 ```python
 {"extra_hunt_materials": 1 / 1 / 2 / 3}
 ```
 
-数值顺序对应下品、中品、上品、极品阵盘。最终数值再受 `extra_formation_power` 加成。
+The value order corresponds to low-grade, mid-grade, high-grade and supreme-grade formation disks. The final values are further boosted by `extra_formation_power`.
 
-## 成本与持续时间
+## Cost and Duration
 
-基础成本由阵盘等级决定，再乘阵法类型倍率和 region 类型倍率。
+The base cost is determined by the formation disk grade, then multiplied by the formation type multiplier and the region type multiplier.
 
-阵法类型倍率：
+Formation type multipliers:
 
-| 阵法 | 倍率 |
+| Formation | Multiplier |
 |---|---:|
-| 聚灵阵 | 1.2 |
-| 护山阵 | 1.4 |
-| 疗愈阵 | 1.0 |
-| 清心阵 | 1.3 |
-| 寻脉阵 | 0.8 |
-| 丰木阵 | 0.8 |
-| 驱兽阵 | 0.8 |
+| Spirit-Gathering Formation | 1.2 |
+| Mountain-Guard Formation | 1.4 |
+| Healing Formation | 1.0 |
+| Clarity Formation | 1.3 |
+| Vein-Seeking Formation | 0.8 |
+| Wood-Growth Formation | 0.8 |
+| Beast-Driving Formation | 0.8 |
 
-region 类型倍率：
+Region type multipliers:
 
-| region | 倍率 |
+| region | Multiplier |
 |---|---:|
-| 普通区域 | 1.0 |
-| 城市 | 1.1 |
-| 修炼区域 | 1.3 |
-| 宗门总部 | 1.5 |
+| Normal region | 1.0 |
+| City | 1.1 |
+| Cultivation region | 1.3 |
+| Sect headquarters | 1.5 |
 
-最终成本：
+Final cost:
 
 ```text
 cost = disk_base_cost * formation_multiplier * region_multiplier * (1 - formation_cost_reduction)
 ```
 
-最终持续时间：
+Final duration:
 
 ```text
 duration = disk_base_duration + extra_formation_duration_months + random_delta
 ```
 
-`random_delta` 建议控制在小范围，例如 `-3` 到 `+6` 个月，保持结果可预期。
+`random_delta` should be kept within a small range, e.g. `-3` to `+6` months, to keep results predictable.
 
-## 动作设计
+## Action Design
 
-新增动作：
+New action:
 
 ```python
 SetFormation
 ```
 
-中文名：
+Display name:
 
 ```text
-布置阵法
+Set Formation
 ```
 
-动作参数：
+Action parameters:
 
 ```python
 PARAMS = {
@@ -297,7 +297,7 @@ PARAMS = {
 }
 ```
 
-参数来源：
+Parameter sources:
 
 ```python
 PARAM_OPTION_SOURCES = {
@@ -305,72 +305,72 @@ PARAM_OPTION_SOURCES = {
 }
 ```
 
-`AVAILABLE_FORMATION_TYPE` 应只返回当前 region 可布置的阵法，避免 LLM AI 选择明显无效的阵法。
+`AVAILABLE_FORMATION_TYPE` should only return formations that can be set in the current region, to avoid the LLM AI choosing obviously invalid formations.
 
-`can_possibly_start` 建议检查：
+`can_possibly_start` should check:
 
-1. 角色装备了阵盘。
-2. 角色当前在有效 region 内。
-3. 当前 region 至少有一种可布置阵法。
-4. 角色拥有布置任意可用阵法的最低灵石。
+1. The avatar has a formation disk equipped.
+2. The avatar is currently in a valid region.
+3. The current region has at least one formation that can be set.
+4. The avatar has the minimum spirit stones needed to set any available formation.
 
-`can_start(formation_type)` 建议检查：
+`can_start(formation_type)` should check:
 
-1. 已装备阵盘。
-2. `formation_type` 合法。
-3. 当前 region 允许该阵法。
-4. 角色灵石足够。
+1. A formation disk is equipped.
+2. `formation_type` is valid.
+3. The current region allows this formation.
+4. The avatar has enough spirit stones.
 
-`_execute` 建议流程：
+Suggested `_execute` flow:
 
-1. 计算成本。
-2. 扣除灵石。
-3. 构造 formation 记录。
-4. 覆盖写入 `world.map.region_formations[region.id]`。
+1. Calculate the cost.
+2. Deduct spirit stones.
+3. Build the formation record.
+4. Overwrite `world.map.region_formations[region.id]`.
 
-`finish` 基础事件建议使用说明文：
-
-```text
-{avatar}在{region}布置了{formation}。
-```
-
-若覆盖旧阵：
+The `finish` base event should use expository text:
 
 ```text
-{avatar}在{region}布置了{formation}，该区域原有阵法已被替换。
+{avatar} set {formation} in {region}.
 ```
 
-## 结算接入点
+If an old formation is overwritten:
 
-阵法效果在具体结算点读取，不进入 avatar 自身 effect 主链。
+```text
+{avatar} set {formation} in {region}; the original formation in this region was replaced.
+```
 
-建议接入：
+## Settlement Integration Points
+
+Formation effects are read at specific settlement points and do not enter the avatar's own main effect chain.
+
+Suggested integration:
 
 1. `src/classes/action/respire.py`
-   - 聚灵阵：吐纳经验倍率。
+   - Spirit-Gathering Formation: breathing experience multiplier.
 2. `src/classes/action/self_heal.py`
-   - 疗愈阵：疗伤恢复倍率。
+   - Healing Formation: healing recovery multiplier.
 3. `src/systems/battle.py`
-   - 护山阵：阵内战斗力加成。
-   - 第一版可只在双方位于同一 region 时生效。
+   - Mountain-Guard Formation: combat strength bonus within the formation.
+   - The first version may apply it only when both sides are in the same region.
 4. `src/classes/action/breakthrough.py`
-   - 清心阵：突破成功率加成。
+   - Clarity Formation: breakthrough success rate bonus.
 5. `src/classes/action/retreat.py`
-   - 清心阵：闭关成功率加成。
+   - Clarity Formation: seclusion success rate bonus.
 6. `src/classes/action/mine.py`
-   - 寻脉阵：挖矿收益。
+   - Vein-Seeking Formation: mining gains.
 7. `src/classes/action/harvest.py`
-   - 丰木阵：采集收益。
+   - Wood-Growth Formation: gathering gains.
 8. `src/classes/action/hunt.py`
-   - 驱兽阵：狩猎收益。
+   - Beast-Driving Formation: hunting gains.
 
-后续若驱兽阵需要影响捕捉，可再接入 `src/classes/action/catch.py`，但第一版不要求。
+If the Beast-Driving Formation later needs to affect capturing, it can be hooked into `src/classes/action/catch.py`, but this is not required in the first version.
 
-## 存档
+## Save Files
 
-阵法是世界状态，应随存档保存。
+Formations are world state and should be saved with the save file.
 
-推荐保存到 map/world 相关状态中：
+Recommended to save into map/world-related state:
 
 ```json
 {
@@ -390,64 +390,64 @@ PARAM_OPTION_SOURCES = {
 }
 ```
 
-加载时按当前模型恢复为 `dict[int, dict]` 即可，不需要恢复为复杂对象。
+On load, restoring it as `dict[int, dict]` according to the current model is enough; there is no need to restore it into complex objects.
 
-遵守存档约束：
+Follow the save constraints:
 
-1. 只保存 JSON 基础类型。
-2. 跨对象引用只保存 ID。
-3. 不保存 avatar、region、auxiliary 对象引用。
+1. Only save JSON primitive types.
+2. Cross-object references only save IDs.
+3. Do not save avatar, region or auxiliary object references.
 
-## 展示
+## Display
 
-第一版展示应保持克制：
+The first-version display should stay restrained:
 
-1. region 详情显示当前阵法名称、剩余时间、效果说明。
-2. 地图 region tooltip 可显示当前阵法简述。
-3. 角色动作列表出现“布置阵法”动作。
-4. 不新增专门阵法管理页面。
+1. Region details show the current formation name, remaining time and effect description.
+2. The map region tooltip can show a brief summary of the current formation.
+3. The "Set Formation" action appears in the avatar action list.
+4. No dedicated formation management page is added.
 
-因为第一版没有撤回、破阵、维护和多阵法叠加，region 详情展示已足够。
+Because the first version has no withdrawal, formation breaking, maintenance or multi-formation stacking, the region detail display is sufficient.
 
-## 测试建议
+## Testing Suggestions
 
-后端测试至少覆盖：
+Backend tests should cover at least:
 
-1. 未装备阵盘时不能布阵。
-2. 装备阵盘后出现 `SetFormation` 权限。
-3. `param_options` 只返回当前 region 可布置的阵法。
-4. 当前 region 无可用阵法时 `can_possibly_start` 为 false。
-5. 灵石不足时不能布阵。
-6. 布阵成功后扣除灵石并写入 `region_formations`。
-7. 同一 region 新阵法覆盖旧阵法。
-8. 阵法到期自动删除。
-9. 存档保存并恢复 `region_formations`。
-10. 聚灵阵影响吐纳收益。
-11. 护山阵影响阵内战斗力。
-12. 疗愈阵影响疗伤恢复。
-13. 清心阵影响闭关或突破成功率。
-14. 寻脉阵、丰木阵、驱兽阵分别影响对应采集动作。
-15. 阵师和阵仙影响阵法强度、持续时间和成本。
+1. A formation cannot be set without an equipped formation disk.
+2. The `SetFormation` permission appears after equipping a formation disk.
+3. `param_options` only returns formations that can be set in the current region.
+4. `can_possibly_start` is false when the current region has no available formation.
+5. A formation cannot be set with insufficient spirit stones.
+6. After a successful setting, spirit stones are deducted and `region_formations` is written.
+7. A new formation in the same region overwrites the old one.
+8. Formations are deleted automatically on expiry.
+9. Saving stores and restores `region_formations`.
+10. The Spirit-Gathering Formation affects breathing gains.
+11. The Mountain-Guard Formation affects combat strength within the formation.
+12. The Healing Formation affects healing recovery.
+13. The Clarity Formation affects seclusion or breakthrough success rate.
+14. The Vein-Seeking, Wood-Growth and Beast-Driving Formations each affect their corresponding gathering action.
+15. Formation Master and Formation Immortal affect formation power, duration and cost.
 
-前端测试按实际展示范围补充：
+Frontend tests should be added according to the actual display scope:
 
-1. region detail 能展示当前阵法。
-2. 首次打开 region detail 时可加载阵法信息。
-3. 类型定义和 mapper 不使用 `any` 扩散。
+1. Region detail can display the current formation.
+2. Formation info can be loaded when region detail is opened for the first time.
+3. Type definitions and mappers do not spread `any`.
 
-## 暂不包含
+## Not Included Yet
 
-第一版明确不包含：
+The first version explicitly does not include:
 
-1. 聚市阵。
-2. 血煞阵。
-3. 远程布阵。
-4. 布阵失败率。
-5. 撤回阵法。
-6. 破阵动作。
-7. 阵法维护费。
-8. 多阵法叠加。
-9. tile 级阵法。
-10. 阵法对不在该 region 的角色生效。
-11. 专门阵法管理 UI。
+1. Market-Gathering Formation.
+2. Blood Fiend Formation.
+3. Remote formation setting.
+4. Formation setting failure rate.
+5. Withdrawing formations.
+6. Formation-breaking actions.
+7. Formation maintenance fees.
+8. Stacking multiple formations.
+9. Tile-level formations.
+10. Formations affecting avatars not in that region.
+11. Dedicated formation management UI.
 
