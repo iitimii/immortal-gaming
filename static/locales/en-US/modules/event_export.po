@@ -1,0 +1,43 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: cultivation-world-simulator 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-20 00:00+0000\n"
+"PO-Revision-Date: 2026-11-20 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: en-US\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "event_export_title"
+msgstr "Chronicle of the Cultivation World"
+
+msgid "event_export_world_date"
+msgstr "Exported at: {date}"
+
+msgid "event_export_map"
+msgstr "Map: {map_id}"
+
+msgid "event_export_scope_avatar"
+msgstr "Related to: {avatar}"
+
+msgid "event_export_scope_major"
+msgstr "Major events only"
+
+msgid "event_export_scope_years"
+msgstr "Years: {from_year} to {to_year}"
+
+msgid "event_export_event_count"
+msgstr "Events: {count}"
+
+msgid "event_export_empty"
+msgstr "No events were recorded for this selection."
+
+msgid "event_export_year_heading"
+msgstr "Year {year}"
+
+msgid "event_export_month_label"
+msgstr "Month {month}"

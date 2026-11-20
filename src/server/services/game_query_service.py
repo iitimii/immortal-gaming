@@ -157,6 +157,26 @@ class GameQueryService:
             limit=limit,
         )
 
+    def get_events_export(
+        self,
+        *,
+        format: str | None,
+        avatar_id: str | None,
+        major_only: str | None,
+        from_year: str | None,
+        to_year: str | None,
+    ) -> Any:
+        from src.server.services.event_export import build_event_export
+
+        return build_event_export(
+            self._deps.runtime,
+            format=format,
+            avatar_id=avatar_id,
+            major_only=major_only,
+            from_year=from_year,
+            to_year=to_year,
+        )
+
     def get_rankings(self) -> dict:
         return self._deps.get_rankings_query(self._deps.runtime)
 

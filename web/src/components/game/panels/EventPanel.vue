@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { NSelect, NSpin } from 'naive-ui'
 import EventStreamList from '@/components/game/EventStreamList.vue'
+import EventExportMenu from '@/components/game/panels/EventExportMenu.vue'
 import { useI18n } from 'vue-i18n'
 import { useEventPanel } from '@/composables/useEventPanel'
 
@@ -15,6 +16,7 @@ const {
   filterOptions,
   sectFilterOptions,
   majorFilterOptions,
+  exportAvatarId,
   panelTitle,
   displayEvents,
   emptyEventMessage,
@@ -56,6 +58,7 @@ const {
           class="event-filter event-filter--scope"
           data-testid="major-filter"
         />
+        <EventExportMenu :avatar-id="exportAvatarId" />
       </div>
     </div>
     <div v-if="eventStore.eventsLoading && displayEvents.length === 0" class="loading">

@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import EventPanel from '@/components/game/panels/EventPanel.vue'
+import EventExportMenu from '@/components/game/panels/EventExportMenu.vue'
 import { createI18n } from 'vue-i18n'
 import { reactive } from 'vue'
 import { NSelect } from 'naive-ui'
@@ -92,6 +93,8 @@ function createEventPanelI18n(locale = 'en-US') {
             story_subject_prefix: '[{avatar}] {content}',
             empty_none: 'none',
             empty_single: 'none',
+            export: 'Export',
+            export_title: 'Export Chronicle',
           },
           event_templates: {
             nickname_awarded: '{avatar_name} is now "{nickname}".',
@@ -549,6 +552,29 @@ describe('EventPanel', () => {
     expect(selects[0].props('disabled')).toBeFalsy()
     expect(selects[1].props('disabled')).toBeFalsy()
     expect(wrapper.text()).toContain('Events')
+  })
+
+  it('renders the export menu and passes the avatar filter to it', async () => {
+    const i18n = createEventPanelI18n()
+
+    const wrapper = mount(EventPanel, {
+      global: { plugins: [i18n] }
+    })
+
+    const exportMenu = wrapper.findComponent(EventExportMenu)
+    expect(exportMenu.exists()).toBe(true)
+    expect(exportMenu.props('avatarId')).toBe('')
+    expect(wrapper.get('[data-testid="event-export-trigger"]').text()).toBe('Export')
+
+    const avatarSelect = wrapper.findAllComponents(NSelect)[1]
+    await avatarSelect.vm.$emit('update:value', 'a2')
+    await wrapper.vm.$nextTick()
+
+    expect(exportMenu.props('avatarId')).toBe('a2')
+
+    await avatarSelect.vm.$emit('update:value', 'all')
+    await wrapper.vm.$nextTick()
+    expect(exportMenu.props('avatarId')).toBe('')
   })
 
   it('restores previous event filters after leaving roleplay', async () => {

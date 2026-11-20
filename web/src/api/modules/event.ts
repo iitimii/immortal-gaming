@@ -1,11 +1,29 @@
 import { httpClient } from '../http';
-import type { 
+import type {
+  EventExportParams,
   EventsResponseDTO,
   FetchEventsParams
 } from '../../types/api';
 import { normalizeEventsResponse } from '../mappers/event';
 
+const EVENT_EXPORT_PATH = '/api/v1/query/events/export';
+const EVENT_EXPORT_TIMEOUT_MS = 120000;
+
+export function buildEventExportPath(params: EventExportParams): string {
+  const query = new URLSearchParams();
+  query.set('format', params.format);
+  if (params.avatar_id) query.set('avatar_id', params.avatar_id);
+  if (params.major_only) query.set('major_only', 'true');
+  if (params.from_year != null) query.set('from_year', String(params.from_year));
+  if (params.to_year != null) query.set('to_year', String(params.to_year));
+  return `${EVENT_EXPORT_PATH}?${query}`;
+}
+
 export const eventApi = {
+  downloadEventExport(params: EventExportParams) {
+    return httpClient.download(buildEventExportPath(params), { timeoutMs: EVENT_EXPORT_TIMEOUT_MS });
+  },
+
   async fetchEvents(params: FetchEventsParams = {}) {
     const query = new URLSearchParams();
     if (params.avatar_id) query.set('avatar_id', params.avatar_id);

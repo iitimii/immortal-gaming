@@ -72,6 +72,9 @@ export function useEventPanel() {
     { label: t('game.event_panel.filter_event_scope_minor'), value: 'minor' },
   ])
 
+  // Avatar the panel is filtered to, used to offer an avatar-scoped export.
+  const exportAvatarId = computed(() => (filterValue1.value !== 'all' ? filterValue1.value : ''))
+
   const panelTitle = computed(() => t('game.event_panel.title'))
   const displayEvents = computed(() => eventStore.events || [])
 
@@ -343,6 +346,7 @@ export function useEventPanel() {
     filterOptions,
     sectFilterOptions,
     majorFilterOptions,
+    exportAvatarId,
     panelTitle,
     displayEvents,
     emptyEventMessage,
