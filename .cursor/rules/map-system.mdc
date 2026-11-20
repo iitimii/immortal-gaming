@@ -21,73 +21,73 @@ globs:
 alwaysApply: false
 ---
 
-# Region-first 地图系统规则
+# Region-First Map System Rules
 
-地图系统的完整设计优先参考 `docs/specs/region-first-map-system.md`。后续修改地图源、加载、存档、查询、预览、地图设计工具或前端地图交互时，必须遵守本规则。
+For the full design of the map system, refer to `docs/specs/region-first-map-system.md` first. Any later change to map sources, loading, saving, queries, previews, map design tools, or frontend map interaction must follow these rules.
 
-## 官方地图真源
+## Official Map Source of Truth
 
-1. 官方地图预设真源是 `static/game_configs/maps/<map_id>/map.json`。
-2. `map.json` 当前为 schema v2，主矩阵是 `region_rows`。
-3. 不要重新引入 `tile_map.csv` / `region_map.csv` 作为平行主路径。
-4. `region_rows` 是地图语义唯一矩阵；每格 tile 必须由 `region_tile.csv` 和 `wilderness_tile` 推导。
-5. `-1` 表示无 region / 荒野。荒野可以按地图使用不同 `wilderness_tile`，例如群岛地图用 `sea`。
+1. The source of truth for official map presets is `static/game_configs/maps/<map_id>/map.json`.
+2. `map.json` is currently schema v2, and its main matrix is `region_rows`.
+3. Do not reintroduce `tile_map.csv` / `region_map.csv` as a parallel main path.
+4. `region_rows` is the only semantic matrix of the map; each cell's tile must be derived from `region_tile.csv` and `wilderness_tile`.
+5. `-1` means no region / wilderness. Wilderness can use a different `wilderness_tile` per map, e.g. `sea` for an archipelago map.
 
-## Region 与 Tile
+## Region and Tile
 
-1. 一个 region 当前只能绑定一个 tile 图像。
-2. 不允许为同一个 region 的不同格子写不同 tile。
-3. 想做犬牙交错的真实地图边界时，应调整不同 region 的边界，而不是引入每格 tile override。
-4. `static/game_configs/region_tile.csv` 是 region 到底层 tile / landmark asset 的统一绑定表。
-5. `tile` 是底层地貌图像；`landmark_asset` 是城市、宗门、洞府、遗迹等大型覆盖图像，不要混用。
+1. A region can currently be bound to only one tile image.
+2. Different cells of the same region must not have different tiles.
+3. To create jagged, realistic map borders, adjust the borders between regions instead of introducing per-cell tile overrides.
+4. `static/game_configs/region_tile.csv` is the single binding table from region to underlying tile / landmark asset.
+5. `tile` is the underlying terrain image; `landmark_asset` is a large overlay image for cities, sects, cave dwellings, ruins, etc. Do not mix them.
 
-## 交互语义
+## Interaction Semantics
 
-1. 只有 region 可以点击。
-2. tile 不可点击，也不应有独立 detail 面板。
-3. 后续如果支持点击地图格子，也必须解析为点击该格子的 region。
-4. 点击 `-1` 荒野不应打开 region detail。
+1. Only regions are clickable.
+2. Tiles are not clickable and should not have their own detail panel.
+3. If clicking map cells is supported later, a click must still resolve to the region of that cell.
+4. Clicking `-1` wilderness must not open a region detail.
 
 ## Landmark
 
-1. `landmarks` 负责大型视觉标记位置，region 范围负责区域占格，两者不要混成一个概念。
-2. landmark 坐标必须在地图范围内。
-3. landmark 锚点格子应属于对应 region。
-4. city / sect / cultivate region 应保持连续。
-5. normal region 可以少量分块以表现自然边界，但碎片数量应受校验器限制。
+1. `landmarks` own the positions of large visual markers, and region extents own the cells a region occupies; do not merge the two into one concept.
+2. Landmark coordinates must be within the map bounds.
+3. A landmark's anchor cell must belong to the corresponding region.
+4. City / sect / cultivate regions should stay contiguous.
+5. Normal regions may be split into a few pieces to express natural borders, but the number of fragments is limited by the validator.
 
 ## Region Overrides
 
-1. `region_overrides` 是 map-local 的 region 展示文本覆盖，目前支持 `name` 和 `desc`。
-2. 只有某张地图需要不同地理称呼或描述时，使用 `region_overrides`；所有地图都共享的语义才改全局 region CSV。
-3. `region_overrides` 必须随 map source、map snapshot、map creator 保存和恢复，不能在工具保存或读档时丢失。
-4. 覆盖文本必须匹配该地图中的实际位置、周边地貌和 landmark 位置。
-5. 带方向词的名称必须与地图坐标一致；若方向不稳定，优先改成不含方向的名称。
-6. i18n Phase 1 下日常可只维护中文覆盖文本；正式多语言补全时不得把中文 `region_overrides` 复制到非中文 locale 伪装翻译，应升级翻译 key 或结构化本地化策略。
+1. `region_overrides` are map-local overrides of region display text; currently `name` and `desc` are supported.
+2. Use `region_overrides` only when a specific map needs a different geographic name or description; change the global region CSV only for semantics shared by all maps.
+3. `region_overrides` must be saved and restored with the map source, map snapshot, and map creator; they must not be lost when a tool saves or a save is loaded.
+4. Override text must match the actual location in that map, the surrounding terrain, and the landmark positions.
+5. Names containing direction words must agree with the map coordinates; if the direction is unstable, prefer a name without a direction.
+6. Override text is maintained in English (`en-US`, the single locale). If more locales are added in the future, move it to translation keys or a structured localization strategy instead of copying the text across locales.
 
-## 语义一致性
+## Semantic Consistency
 
-1. 地图文本、地理位置、tile 绑定、landmark 和周边 region 必须互相解释得通。
-2. 群岛地图应避免直接继承大陆、山城、内陆农田等不匹配描述。
-3. 山脉边疆地图应让城市、宗门、洞府和特殊地点贴合山岭、峡谷、寒林、边城等拓扑。
-4. 如果发现名称或描述与地图不匹配，优先移动 region / landmark，或添加 `region_overrides`；不要让明显不匹配的全局文本继续暴露到 region detail。
+1. Map text, geographic position, tile bindings, landmarks, and surrounding regions must all be mutually consistent.
+2. Archipelago maps should avoid directly inheriting mismatched descriptions such as continents, mountain cities, or inland farmland.
+3. Mountain frontier maps should fit cities, sects, cave dwellings, and special locations to topology such as ridges, gorges, cold forests, and border towns.
+4. If a name or description does not match the map, prefer moving the region / landmark or adding `region_overrides`; do not let clearly mismatched global text keep showing in the region detail.
 
-## 验证
+## Validation
 
-修改官方地图后至少运行：
+After changing an official map, run at least:
 
 ```powershell
 python tools\map_presets\validate_presets.py
 ```
 
-涉及预览资源时运行：
+When preview assets are involved, run:
 
 ```powershell
 python tools\map_presets\render_preview.py --all
 python tools\map_presets\export_frontend_previews.py
 ```
 
-涉及加载、存档、查询或编辑器时，按改动范围运行：
+When loading, saving, queries, or the editor are involved, run according to the scope of the change:
 
 ```powershell
 pytest tests/test_map_presets.py tests/test_save_load_map_snapshot.py

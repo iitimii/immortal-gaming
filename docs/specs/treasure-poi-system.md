@@ -1,94 +1,94 @@
-# 宝物出世 POI 系统 Spec
+# Treasure Emergence POI System Spec
 
-本文档定义“宝物出世”系统的实现方案。宝物是地图上的限时 Point of Interest（POI），不是全世界立刻可见具体地点的普通事件文本，也不是新的装备栏、法宝成长体系或独立争夺战系统。
+This document defines the implementation plan for the "treasure emergence" system. A treasure is a time-limited Point of Interest (POI) on the map. It is not ordinary event text whose specific location is immediately visible to the whole world, nor is it a new equipment slot, a treasure growth system, or a standalone contest system.
 
-当前状态：已确认设计，待实现运行时逻辑与前端接入。
+Current status: design confirmed; runtime logic and frontend integration pending implementation.
 
-相关既有系统：
+Related existing systems:
 
-- 墓碑与通用 POI：[grave-poi-system.md](grave-poi-system.md)
-- 单选装备交换与角色扮演 continuation：[single-choice-unified-framework.md](single-choice-unified-framework.md)
-- 事件语义：[story-event-system.md](story-event-system.md)
-- 地图官方真源与运行时状态：[region-first-map-system.md](region-first-map-system.md)
+- Grave and general POI: [grave-poi-system.md](grave-poi-system.md)
+- Single-choice equipment exchange and roleplay continuation: [single-choice-unified-framework.md](single-choice-unified-framework.md)
+- Event semantics: [story-event-system.md](story-event-system.md)
+- Official map source of truth and runtime state: [region-first-map-system.md](region-first-map-system.md)
 
-## 1. 目标与边界
+## 1. Goals and Boundaries
 
-### 1.1 目标
+### 1.1 Goals
 
-1. 世界中会随机出现限时宝物 POI。
-2. 宝物存在二十年，即 `240` 个游戏月；到期无人取走时，宝光消散并移除。
-3. 出世可产生全局模糊异象，公开宝物大境界但不公开坐标、具体物品或来源。
-4. 角色进入 POI 的既有观察范围时，必定发现宝物。
-5. 地图上帝视角始终显示有效宝物 POI；但角色的行动参数只包含自己已发现的宝物。
-6. 已发现角色可通过既有 `MoveToPOI` 前往；到达同格后可执行即时动作“取宝”。
-7. 取宝是否发生、是否继续停留、离开或攻击同格角色，仍由既有行动决策系统决定；宝物系统不替角色强制选择行为。
-8. 成功取宝后仅复用既有武器和辅助装备替换流程。
-9. 所有宝物状态、发现关系、尝试次数和待取物品都可随存档恢复。
+1. Time-limited treasure POIs randomly appear in the world.
+2. A treasure exists for twenty years, i.e. `240` game months; if no one takes it by expiry, its treasure light dissipates and it is removed.
+3. Emergence can produce a global, vague celestial sign that reveals the treasure's major realm but not its coordinates, specific item, or source.
+4. When an avatar enters the POI's existing observation range, it always discovers the treasure.
+5. The god's-eye view map always shows valid treasure POIs; but an avatar's action parameters only include treasures it has discovered itself.
+6. Avatars that have discovered it can travel there via the existing `MoveToPOI`; after arriving on the same tile they can perform the instant action "Take Treasure".
+7. Whether taking the treasure happens, whether to keep staying, leave, or attack avatars on the same tile is still decided by the existing action decision system; the treasure system does not force choices on avatars.
+8. After successfully taking a treasure, only the existing weapon and auxiliary equipment replacement flow is reused.
+9. All treasure state, discovery relationships, attempt counts, and pending items can be restored with the save file.
 
-### 1.2 非目标
+### 1.2 Non-goals
 
-第一阶段明确不做：
+The first phase explicitly does not include:
 
-1. 新的装备槽、本命法宝、器灵、认主、成长、封印或独特性。
-2. 谈判、结伴、组队、专属争夺战或“占领宝物”状态。
-3. 按伤势、HP、感知、气运、宗门或其他临时状态修正取宝成功率。
-4. 取宝失败后给出材料、边角、部分奖励等中间产物。
-5. 地图预设中的静态宝物点；宝物是运行时世界状态，不写入 `map.json`。
-6. 为旧存档维护复杂迁移或双轨反序列化。旧存档缺少宝物数据时按“无活跃宝物”恢复即可。
+1. New equipment slots, natal treasures, artifact spirits, binding, growth, sealing, or uniqueness.
+2. Negotiation, alliances, teams, dedicated contests, or an "occupy treasure" state.
+3. Modifying the take-treasure success rate by injury, HP, perception, luck, sect, or any other temporary state.
+4. Giving intermediate products such as materials, scraps, or partial rewards after a failed take.
+5. Static treasure points in map presets; treasures are runtime world state and are not written into `map.json`.
+6. Maintaining complex migrations or dual-track deserialization for old saves. When an old save lacks treasure data, restore it as "no active treasures".
 
-## 2. 已确认产品规则
+## 2. Confirmed Product Rules
 
-### 2.1 生成规则
+### 2.1 Generation rules
 
-| 项目 | 确认值 |
+| Item | Confirmed value |
 |---|---|
-| 检查频率 | 每月一次 |
-| 出世概率 | `0.5%` / 月 |
-| 活跃上限 | 全世界最多 `3` 个有效宝物 POI |
-| 持续时间 | `240` 月（二十年） |
-| 坐标 | 在随机有效地图格生成 |
-| 地图显示 | 上帝视角地图显示全部有效宝物 |
-| 角色认知 | 仅进入观察范围的角色被写入 `discovered_by` |
-| 可生成物品 | 既有 `weapon` 或 `auxiliary` |
-| 可生成大境界 | 筑基、金丹、元婴；没有练气 |
+| Check frequency | Once per month |
+| Emergence probability | `0.5%` / month |
+| Active cap | At most `3` valid treasure POIs in the whole world |
+| Duration | `240` months (twenty years) |
+| Coordinates | Generated on a random valid map tile |
+| Map display | The god's-eye view map shows all valid treasures |
+| Avatar awareness | Only avatars that enter the observation range are written into `discovered_by` |
+| Generatable items | Existing `weapon` or `auxiliary` |
+| Generatable major realms | Foundation Establishment, Core Formation, Nascent Soul; no Qi Refinement |
 
-“随机有效地图格”至少要求：在边界内、能被地图模型正常读取、不是已存在宝物所在格。实现时应优先使用地图已有的合法 tile 语义，不恢复或引入 `tile_map.csv/region_map.csv` 平行路径。
+A "random valid map tile" at least requires: within bounds, readable normally by the map model, and not a tile where a treasure already exists. Implementation should prefer the map's existing valid tile semantics, and must not restore or introduce a parallel `tile_map.csv/region_map.csv` path.
 
-### 2.2 叙事来源
+### 2.2 Narrative source
 
-每个宝物在生成时确定一种叙事来源并随存档保存：
+Each treasure determines one narrative source at generation time and saves it with the save file:
 
 ```text
-ancient_cultivator_relic  # 古修遗兵
-spirit_vein_treasure      # 灵脉孕宝
-demon_king_relic          # 妖王遗宝
-demonic_artifact          # 魔道凶器
-meteorite_relic           # 天外陨宝
-lost_sect_artifact        # 宗门失传器
+ancient_cultivator_relic  # relic weapon of an ancient cultivator
+spirit_vein_treasure      # treasure born of a spirit vein
+demon_king_relic          # relic of a demon king
+demonic_artifact          # demonic-path fell artifact
+meteorite_relic           # treasure from beyond the heavens (meteorite)
+lost_sect_artifact        # lost artifact of a sect
 ```
 
-来源仅服务事件与详情叙事，不改变装备数值、取宝概率、地图位置或争夺规则。
+The source only serves event and detail narrative; it does not change equipment stats, take probability, map location, or contest rules.
 
-### 2.3 发现与行动可见性
+### 2.3 Discovery and action visibility
 
-发现规则严格复用墓碑 POI 的实现：`POIManager.discover_nearby()` 以 `get_avatar_observation_radius()` 和曼哈顿距离检查；POI 在观察范围内时必定发现。
+Discovery rules strictly reuse the grave POI implementation: `POIManager.discover_nearby()` checks with `get_avatar_observation_radius()` and Manhattan distance; a POI within observation range is always discovered.
 
-发现关系只保存在 `poi.discovered_by`，不在 Avatar 上维护第二份 `known_poi_ids`，以避免双写不一致。
+The discovery relationship is only stored in `poi.discovered_by`; a second `known_poi_ids` is not maintained on the Avatar, to avoid double-write inconsistency.
 
-以下两个可见性层必须区分：
+The following visibility layers must be distinguished:
 
-| 层 | 宝物是否可见 |
+| Layer | Is the treasure visible |
 |---|---|
-| `/api/v1/query/world/map`、地图 POI 图层 | 所有尚未到期的宝物都显示 |
-| `MoveToPOI` 参数选项 | 仅当前角色已发现的 POI |
-| `TakeTreasure` 参数选项 | 仅当前角色已发现的 `treasure` POI |
-| 动作 `can_start()` | 额外校验 POI 未过期且角色处于同格 |
+| `/api/v1/query/world/map`, map POI layer | All treasures that have not expired are shown |
+| `MoveToPOI` parameter options | Only POIs the current avatar has discovered |
+| `TakeTreasure` parameter options | Only `treasure` POIs the current avatar has discovered |
+| Action `can_start()` | Additionally checks that the POI has not expired and the avatar is on the same tile |
 
-## 3. 领域模型与存档
+## 3. Domain Model and Save Files
 
 ### 3.1 `TreasurePOI`
 
-新增 `src/classes/poi/treasure.py`：
+Add `src/classes/poi/treasure.py`:
 
 ```python
 @dataclass(kw_only=True)
@@ -101,7 +101,7 @@ class TreasurePOI(PointOfInterest):
     attempt_count: int = 0
 ```
 
-`PointOfInterest` 已经承担以下通用字段，宝物不得重复维护：
+`PointOfInterest` already carries the following common fields, which treasures must not maintain again:
 
 ```text
 id, kind, x, y, name, desc,
@@ -109,17 +109,17 @@ created_month, expires_month,
 discovered_by, icon_key, is_clickable
 ```
 
-ID 建议为不可冲突的运行时 ID，例如：
+The ID should be a non-colliding runtime ID, for example:
 
 ```text
 treasure:<created_month>:<short-random-id>
 ```
 
-宝物物品只有一个 `treasure_payload`。它不应同时持有武器和辅助装备，也不应在 payload 外额外保存一个活的 Python Item 对象。
+A treasure item has only one `treasure_payload`. It should not hold both a weapon and auxiliary equipment, nor should it save an extra live Python Item object outside the payload.
 
-### 3.2 通用装备 payload
+### 3.2 Common equipment payload
 
-现有墓碑在 `src/classes/poi/grave.py` 内含有物品 snapshot 和恢复逻辑。实现宝物时应提取为 POI 范围的共享 helper，例如：
+The existing grave in `src/classes/poi/grave.py` contains the item snapshot and restore logic. When implementing treasures, extract it into a POI-scoped shared helper, for example:
 
 ```text
 src/classes/poi/item_payload.py
@@ -127,23 +127,23 @@ src/classes/poi/item_payload.py
   restore_equipment_item(payload) -> Weapon | Auxiliary | None
 ```
 
-payload 只保存 JSON 基础类型：
+The payload only stores basic JSON types:
 
 ```json
 {
   "kind": "weapon",
   "item_id": 1001,
-  "name": "玄陨剑",
+  "name": "Mysterious Meteor Sword",
   "realm": "CORE_FORMATION",
   "special_data": {}
 }
 ```
 
-恢复时通过既有 `weapons_by_id` 或 `auxiliaries_by_id` 找到原型并实例化，再恢复 `special_data`。这样墓碑与宝物共用同一份持久化契约，且不会共享物品实例。
+On restore, find the prototype through the existing `weapons_by_id` or `auxiliaries_by_id`, instantiate it, and then restore `special_data`. This way graves and treasures share the same persistence contract and never share item instances.
 
-### 3.3 存档格式
+### 3.3 Save format
 
-世界存档继续只通过既有 `world_data["pois"]` 保存：
+The world save continues to save only through the existing `world_data["pois"]`:
 
 ```json
 {
@@ -152,8 +152,8 @@ payload 只保存 JSON 基础类型：
   "kind": "treasure",
   "x": 42,
   "y": 17,
-  "name": "金丹宝物",
-  "desc": "灵光氤氲，一件古老宝物正在此地出世。",
+  "name": "Core Formation Treasure",
+  "desc": "Spiritual light swirls; an ancient treasure is emerging here.",
   "created_month": 1296,
   "expires_month": 1416,
   "discovered_by": ["avatar-1", "avatar-8"],
@@ -164,7 +164,7 @@ payload 只保存 JSON 基础类型：
   "treasure_payload": {
     "kind": "weapon",
     "item_id": 1001,
-    "name": "玄陨剑",
+    "name": "Mysterious Meteor Sword",
     "realm": "CORE_FORMATION",
     "special_data": {}
   },
@@ -173,17 +173,17 @@ payload 只保存 JSON 基础类型：
 }
 ```
 
-序列化约束：
+Serialization constraints:
 
-1. 只保存 JSON 基础类型。
-2. 跨对象关系只保存 Avatar ID，不持有 Avatar 引用。
-3. `discovered_by` 存为字符串数组，加载时恢复 `set[str]`。
-4. `icon_key`、来源、物品、境界和尝试次数读档后保持不变，不重新随机。
-5. 如果配置中对应 item ID 已不存在，动作应产生受控失败事件并保留 POI，不得异常中断模拟。
+1. Only store basic JSON types.
+2. Cross-object relationships only store Avatar IDs and do not hold Avatar references.
+3. `discovered_by` is stored as a string array and restored to `set[str]` on load.
+4. `icon_key`, source, item, realm, and attempt count remain unchanged after loading and are not re-randomized.
+5. If the corresponding item ID no longer exists in configuration, the action should produce a controlled failure event and keep the POI; it must not abort the simulation with an exception.
 
-### 3.4 多态反序列化
+### 3.4 Polymorphic deserialization
 
-当前 `POIManager.load_from_list()` 主要只识别 `grave`。实现时应使用明确 loader 分发表：
+The current `POIManager.load_from_list()` mainly only recognizes `grave`. Implementation should use an explicit loader dispatch table:
 
 ```python
 POI_LOADERS = {
@@ -192,13 +192,13 @@ POI_LOADERS = {
 }
 ```
 
-不认识的 `kind` 可忽略并记录 warning；不需要为了旧存档新建兼容分支。`src/classes/poi/__init__.py` 必须导出 `TreasurePOI` 和共享 helper，保证导入路径完整。
+An unknown `kind` can be ignored with a warning logged; there is no need to add a compatibility branch for old saves. `src/classes/poi/__init__.py` must export `TreasurePOI` and the shared helper, to keep the import path complete.
 
-## 4. 世界生命周期
+## 4. World Lifecycle
 
-### 4.1 配置
+### 4.1 Configuration
 
-新增 `static/config.yml -> world.treasure`：
+Add `static/config.yml -> world.treasure`:
 
 ```yaml
 world:
@@ -221,55 +221,55 @@ world:
     backlash_hp_ratio: 0.12
 ```
 
-运行时应在调用时读取当前配置，避免在模块 import 时冻结配置对象。
+The runtime should read the current configuration at call time, to avoid freezing the configuration object at module import.
 
-### 4.2 服务职责
+### 4.2 Service responsibilities
 
-新增 `src/systems/treasure.py`，职责是：
+Add `src/systems/treasure.py`, responsible for:
 
-1. 判断活跃宝物数量和本月出世概率。
-2. 随机抽取有效格、可用大境界、装备类别、对应物品、叙事来源和宝箱图标。
-3. 创建并交给 `POIManager.add()`。
-4. 生成不含地点的全局异象事件。
-5. 清理本月到期的宝物并生成宝光消散事件。
+1. Judging the number of active treasures and this month's emergence probability.
+2. Randomly drawing a valid tile, an available major realm, an equipment category, the corresponding item, a narrative source, and a treasure chest icon.
+3. Creating the POI and handing it to `POIManager.add()`.
+4. Generating a global celestial sign event that contains no location.
+5. Cleaning up treasures expiring this month and generating treasure light dissipation events.
 
-`TreasurePOI` 只保存状态、序列化和 detail payload；它不读取概率配置，也不主动扫描地图。
+`TreasurePOI` only stores state, serialization, and the detail payload; it does not read probability configuration, nor does it actively scan the map.
 
-### 4.3 模拟相位
+### 4.3 Simulation phase
 
-新增月度 `treasure_lifecycle` 相位，位置在死亡结算之后、POI 发现之前：
+Add a monthly `treasure_lifecycle` phase, positioned after death resolution and before POI discovery:
 
 ```text
 11  resolve_death
 12  treasure_lifecycle
-      a. 删除本月到期的 treasure POI，并产生消散事件
-      b. 活跃宝物少于上限时按概率尝试出世
-      c. 生成成功时通过 POIManager.add() 产生 upsert 增量
+      a. Remove treasure POIs expiring this month, and produce dissipation events
+      b. When active treasures are below the cap, attempt emergence by probability
+      c. On successful generation, POIManager.add() produces an upsert increment
 13  discover_pois
-      a. 在观察范围的角色自动发现新旧宝物
+      a. Avatars within observation range automatically discover new and existing treasures
 ```
 
-新增相位后必须重排后续 `SimulationPhase.index`，`step()` 仍只负责编排。宝物到期清理不能继续只依赖年度维护，因为年度清理无法保证“第 240 个月”精确消散。墓碑是否继续走年度清理由墓碑系统自身决定，本改动不改变其 50 年语义。
+After adding the phase, the subsequent `SimulationPhase.index` values must be reordered; `step()` remains responsible only for orchestration. Treasure expiry cleanup cannot keep relying only on annual maintenance, because annual cleanup cannot guarantee precise dissipation at "the 240th month". Whether graves continue to use annual cleanup is decided by the grave system itself; this change does not alter its 50-year semantics.
 
-### 4.4 事件
+### 4.4 Events
 
-所有事件继续由模拟器集中收集和入库：
+All events continue to be collected and stored centrally by the simulator:
 
-| 时机 | 内容范围 | 关联 | `is_major` |
+| Timing | Content scope | Related | `is_major` |
 |---|---|---|---:|
-| 宝物出世 | 模糊异象，公开宝物等级，不含坐标 | 无 | `False` |
-| 角色发现 | 坐标、名称、来源可见 | 发现者 | `False` |
-| 取宝失败 | 失败或禁制反震 | 尝试者 | `False` |
-| 取宝成功并接受 | 获得具体物品 | 取宝者 | `True` |
-| 二十年消散 | 宝光消散，不必公开坐标 | 无 | `False` |
+| Treasure emergence | Vague celestial sign, reveals treasure grade, no coordinates | None | `False` |
+| Avatar discovery | Coordinates, name, and source visible | Discoverer | `False` |
+| Take failure | Failure or restriction backlash | Attempter | `False` |
+| Take success and accept | Obtains the specific item | Taker | `True` |
+| Twenty-year dissipation | Treasure light dissipates; coordinates need not be revealed | None | `False` |
 
-事件先产生事实结果；本阶段不为宝物另加 LLM 小故事。未来需要扩写时再以 `StoryEventService` 在基础事件之后追加 `is_story=True` 正文。
+Events produce the factual result first; this phase does not add an LLM story event for treasures. When expansion is needed in the future, use `StoryEventService` to append `is_story=True` body text after the base event.
 
-## 5. 动作与取宝结算
+## 5. Action and Take-Treasure Resolution
 
-### 5.1 参数与可开始条件
+### 5.1 Parameters and start conditions
 
-新增 `src/classes/action/take_treasure.py`：
+Add `src/classes/action/take_treasure.py`:
 
 ```python
 class TakeTreasure(InstantAction):
@@ -284,29 +284,29 @@ class TakeTreasure(InstantAction):
     IS_MAJOR = True
 ```
 
-`EMOJI` 沿用现有动作展示惯例，具体值在实现时选择一个已有兼容符号。动作需要在 `src/classes/action/__init__.py` 导入，确保动作注册生效。
+`EMOJI` follows the existing action display convention; the specific value is chosen at implementation time as an existing compatible symbol. The action must be imported in `src/classes/action/__init__.py` to ensure action registration takes effect.
 
-新增 `ParamOptionSource.KNOWN_TREASURE_POI_ID`，实现为：
+Add `ParamOptionSource.KNOWN_TREASURE_POI_ID`, implemented as:
 
 ```python
 _known_poi_options(avatar, kind="treasure")
 ```
 
-选项的 `value` 必须是 POI ID，不能是名称，且要补可执行性测试。
+The option's `value` must be the POI ID, not the name, and executability tests must be added.
 
-`can_start(poi_id)` 必须依次校验：
+`can_start(poi_id)` must check, in order:
 
-1. POI 存在且 `isinstance(poi, TreasurePOI)`。
-2. POI 未到期。
-3. 当前角色已发现该 POI。
-4. `treasure_payload` 尚存在。
-5. 当前角色坐标与 POI 坐标完全一致。
+1. The POI exists and `isinstance(poi, TreasurePOI)`.
+2. The POI has not expired.
+3. The current avatar has discovered the POI.
+4. `treasure_payload` still exists.
+5. The current avatar's coordinates exactly match the POI's coordinates.
 
-`can_possibly_start()` 只有在当前格存在已发现、有效且仍有 payload 的宝物时才返回 `True`。
+`can_possibly_start()` returns `True` only when the current tile has a discovered, valid treasure that still has a payload.
 
-### 5.2 成功率
+### 5.2 Success rate
 
-取宝只由取宝者与宝物的大境界差决定：
+Taking a treasure is determined only by the major realm difference between the taker and the treasure:
 
 ```python
 success_rate = clamp(
@@ -316,50 +316,50 @@ success_rate = clamp(
 )
 ```
 
-| 大境界差 | 成功率 |
+| Major realm difference | Success rate |
 |---:|---:|
-| 低两阶或更多 | 5% |
-| 低一阶 | 30% |
-| 相同 | 45% |
-| 高一阶 | 60% |
-| 高两阶 | 75% |
-| 高四阶或更多 | 95% |
+| Two or more ranks lower | 5% |
+| One rank lower | 30% |
+| Same | 45% |
+| One rank higher | 60% |
+| Two ranks higher | 75% |
+| Four or more ranks higher | 95% |
 
-实现时将 `DigGrave` 内部的境界 rank 映射提取为共享 helper，避免两份硬编码。宝物没有练气等级，但练气角色允许尝试筑基宝物。
+During implementation, extract the realm rank mapping inside `DigGrave` into a shared helper, to avoid two hardcoded copies. Treasures have no Qi Refinement grade, but Qi Refinement avatars are allowed to attempt Foundation Establishment treasures.
 
-禁止将以下因素加入取宝概率：当前 HP、伤势、感知、气运、性格、宗门、装备品质、同格角色数量或之前失败次数。
+The following factors must not be added to the take probability: current HP, injuries, perception, luck, personality, sect, equipment quality, the number of avatars on the same tile, or previous failure count.
 
-### 5.3 失败与反震
+### 5.3 Failure and backlash
 
-每次 `TakeTreasure.step()` 都将 `attempt_count += 1`。
+Each `TakeTreasure.step()` increments `attempt_count += 1`.
 
-若随机判定失败：
+If the random check fails:
 
-1. POI 与 payload 保留。
-2. 不发任何物品或材料。
-3. 按 `world.treasure.backlash_probability` 小概率触发禁制反震。
-4. 反震伤害为当前最大 HP 的配置比例，最少 `1` 点。
-5. 伤害致死时必须走正常死亡结算，不直接绕过 `handle_death()`。
-6. 产生仅关联尝试者的非重大事件。
+1. The POI and payload are kept.
+2. No item or material is given.
+3. A restriction backlash is triggered with small probability per `world.treasure.backlash_probability`.
+4. Backlash damage is the configured ratio of current max HP, at least `1` point.
+5. When the damage is lethal, it must go through normal death resolution and not bypass `handle_death()`.
+6. Produce a non-major event related only to the attempter.
 
-本动作不复用掘墓的气运扣除规则。
+This action does not reuse the luck deduction rule from grave digging.
 
-### 5.4 成功与装备交换
+### 5.4 Success and equipment exchange
 
-成功后：
+After success:
 
-1. 从 `treasure_payload` 恢复一个独立装备实例。
-2. 根据 payload `kind` 构造 `ItemExchangeKind.WEAPON` 或 `ItemExchangeKind.AUXILIARY`。
-3. 调用既有 `resolve_item_exchange()`，使 LLM、规则 fallback 与角色扮演 continuation 仍走同一决策框架。
-4. 只有角色实际接受新装备时，才 `poi_manager.remove(treasure.id)`。
-5. POI 删除自动产生现有 `poi_updates` remove 增量。
-6. 写入取宝成功重大事件。
+1. Restore an independent equipment instance from `treasure_payload`.
+2. Construct `ItemExchangeKind.WEAPON` or `ItemExchangeKind.AUXILIARY` according to the payload `kind`.
+3. Call the existing `resolve_item_exchange()`, so that the LLM, rule fallback, and roleplay continuation still go through the same decision framework.
+4. Only when the avatar actually accepts the new equipment, call `poi_manager.remove(treasure.id)`.
+5. POI removal automatically produces the existing `poi_updates` remove increment.
+6. Write the take-success major event.
 
-空装备栏时沿用 `auto_accept_when_empty=True`。已有装备时，角色可以接受替换或拒绝。
+When the equipment slot is empty, keep using `auto_accept_when_empty=True`. When equipment already exists, the avatar can accept the replacement or reject.
 
-### 5.5 “拒绝后保留在原处”交换语义
+### 5.5 "Rejected and left in place" exchange semantics
 
-现有 `RejectMode.ABANDON_NEW` 的叙事是放弃新物品，不能准确表达宝物仍在 POI 的规则。应在 `src/systems/single_choice/item_exchange.py` 增加通用语义：
+The existing `RejectMode.ABANDON_NEW` narrative is abandoning the new item, which cannot accurately express the rule that the treasure remains at the POI. Add a general semantic in `src/systems/single_choice/item_exchange.py`:
 
 ```python
 class RejectMode(Enum):
@@ -372,26 +372,26 @@ class ItemDisposition(Enum):
     LEFT_AT_SOURCE = "left_at_source"
 ```
 
-`TakeTreasure` 使用 `LEAVE_AT_SOURCE`。拒绝选项文案应表达“暂不取用，宝物仍留在原处”；动作根据 `outcome.accepted` 决定是否删除 POI。该设计保持 `single_choice` 的领域中立性，既不让 POI 逻辑侵入决策引擎，也不把角色扮演分支散落到业务动作中。
+`TakeTreasure` uses `LEAVE_AT_SOURCE`. The reject option text should express "not taking it for now; the treasure remains where it is"; the action decides whether to remove the POI based on `outcome.accepted`. This design keeps `single_choice` domain-neutral: it neither lets POI logic intrude into the decision engine nor scatters roleplay branches into business actions.
 
-## 6. API 与前端
+## 6. API and Frontend
 
-### 6.1 已有 API 复用
+### 6.1 Reusing existing APIs
 
-无需新增宝物专用 HTTP endpoint：
+No treasure-specific HTTP endpoint needs to be added:
 
-| 现有接口或机制 | 宝物接入方式 |
+| Existing interface or mechanism | How treasures plug in |
 |---|---|
-| `/api/v1/query/world/map` | 复用 `poi.get_summary_payload()` 返回全部有效宝物 |
-| tick WebSocket `poi_updates` | `POIManager.add/remove()` 自动 upsert/remove |
-| `/api/v1/query/detail?type=poi&id=...` | `TreasurePOI.get_detail_payload(world)` 返回宝物详情 |
-| `MoveToPOI` | 已有通用 POI 移动动作，无需改语义 |
+| `/api/v1/query/world/map` | Reuse `poi.get_summary_payload()` to return all valid treasures |
+| tick WebSocket `poi_updates` | `POIManager.add/remove()` automatically upsert/remove |
+| `/api/v1/query/detail?type=poi&id=...` | `TreasurePOI.get_detail_payload(world)` returns the treasure detail |
+| `MoveToPOI` | Existing general POI move action; no semantic change needed |
 
-地图公开显示所有有效 POI 是已确认产品决策；不得为宝物在 `get_world_map()` 中按发现者过滤。
+Publicly showing all valid POIs on the map is a confirmed product decision; `get_world_map()` must not filter treasures by discoverer.
 
 ### 6.2 DTO
 
-先更新 `web/src/types/api.ts`，再更新 `web/src/types/core.ts` 与 mapper。`POIDetail` 应增加宝物可选详情：
+Update `web/src/types/api.ts` first, then `web/src/types/core.ts` and the mapper. `POIDetail` should add optional treasure detail:
 
 ```ts
 treasure?: {
@@ -408,11 +408,11 @@ treasure?: {
 }
 ```
 
-不使用 `any`，不在前端写死后端提供的用户可见来源或境界 label。若来源需要本地化，应由后端提供稳定 key 和本地化结构化 DTO，或前端按 i18n key 映射。
+Do not use `any`, and do not hardcode in the frontend the user-visible source or realm labels that the backend provides. If sources need localization, the backend should provide stable keys and a localized structured DTO, or the frontend maps them via i18n keys.
 
-### 6.3 地图图标与详情
+### 6.3 Map icons and detail
 
-已生成并验收的资产：
+Assets already generated and accepted:
 
 ```text
 web/src/assets/icons/pois/
@@ -427,21 +427,21 @@ web/src/assets/icons/pois/
   treasure_09.png
 ```
 
-实现时：
+During implementation:
 
-1. 在 `web/src/utils/poiIcons.ts` 显式导入并注册上述 9 个 key。
-2. `TreasurePOI.icon_key` 在创建时从这 9 个 key 中随机选择并随存档保存。
-3. `POILayer.vue` 复用已有纹理加载和点击事件，无需按宝物重写图层。
-4. 现有墓碑点击仍跳转死者 Avatar detail；宝物保持普通 `type: 'poi'`，打开 `POIDetail.vue`。
-5. `POIDetail.vue` 以 `data.kind` 分支：墓碑展示死者/遗物，宝物展示来源、境界、物品、尝试次数和剩余期限。
+1. Explicitly import and register the 9 keys above in `web/src/utils/poiIcons.ts`.
+2. `TreasurePOI.icon_key` is randomly chosen from these 9 keys at creation and saved with the save file.
+3. `POILayer.vue` reuses the existing texture loading and click events; no need to rewrite the layer for treasures.
+4. Existing grave clicks still jump to the deceased Avatar detail; treasures remain ordinary `type: 'poi'` and open `POIDetail.vue`.
+5. `POIDetail.vue` branches on `data.kind`: graves show the deceased/grave goods, treasures show source, realm, item, attempt count, and remaining time.
 
-图标生成工具为 `tools/item_icons/generate_treasure_icons.py`：它读取不入库的 `tools/img_gen/image_api.env` 中的 `FAL_API_KEY`，调用 `openai/gpt-image-2` 生成洋红底 3x3 图集，经过切图、去背景、去溢色、像素化后写入以上资产目录。密钥不得进入 git、日志、测试断言或前端包。
+The icon generation tool is `tools/item_icons/generate_treasure_icons.py`: it reads `FAL_API_KEY` from the untracked `tools/img_gen/image_api.env`, calls `openai/gpt-image-2` to generate a 3x3 atlas on a magenta background, then slices, removes background, removes color spill, pixelates, and writes to the asset directory above. The key must not enter git, logs, test assertions, or the frontend bundle.
 
 ### 6.4 i18n
 
-日常开发遵守 i18n Phase 1，只补 `zh-CN` 拆分源 PO 文件；修改后运行 `python tools/i18n/build_mo.py`。
+The game is English-only: `en-US` is the sole and source locale. Add new entries to the `en-US` split source PO files (under `modules/` / `game_configs_modules/`, not the merged `LC_MESSAGES/*.po` artifacts); after editing, run `python tools/i18n/build_mo.py`.
 
-至少新增：
+Add at least:
 
 ```text
 take_treasure_action_name
@@ -456,52 +456,52 @@ poi.treasure.expires
 poi.treasure.empty
 ```
 
-`.po` 的 `msgid` 使用稳定英文 key 或英文源文，中文只写入 `msgstr`。事件文本、动作文本、来源文案不能直接在 Python 逻辑中硬编码中文最终文案。
+`.po` `msgid` uses a stable English key or English source text; the display text goes in `msgstr`. Event text, action text, and source text must not hardcode final display text directly in Python logic.
 
-## 7. 实施顺序
+## 7. Implementation Order
 
-1. 完成 POI 共享装备 payload helper，并迁移墓碑调用。
-2. 新增 `TreasurePOI`、POI loader 分发、序列化和 detail payload。
-3. 新增 `TreasureService`、配置与 `treasure_lifecycle` 月度相位。
-4. 扩展发现事件文案和精确 240 月消散事件。
-5. 新增 `KNOWN_TREASURE_POI_ID` 和 `TakeTreasure` 动作，并在 action 包导入注册。
-6. 为 item exchange 加入 `LEAVE_AT_SOURCE`，让拒绝不消耗宝物。
-7. 扩展 map/detail DTO、mapper、图标映射和 POI detail 展示。
-8. 补后端与前端测试，运行针对性回归、类型检查和 locale 编译。
+1. Complete the POI shared equipment payload helper, and migrate the grave's calls to it.
+2. Add `TreasurePOI`, POI loader dispatch, serialization, and detail payload.
+3. Add `TreasureService`, configuration, and the `treasure_lifecycle` monthly phase.
+4. Extend discovery event text and the precise 240-month dissipation event.
+5. Add `KNOWN_TREASURE_POI_ID` and the `TakeTreasure` action, and import/register it in the action package.
+6. Add `LEAVE_AT_SOURCE` to item exchange, so that rejection does not consume the treasure.
+7. Extend map/detail DTOs, mapper, icon mapping, and POI detail display.
+8. Add backend and frontend tests, and run targeted regression, type checking, and locale compilation.
 
-该顺序先完成后端事实与存档，再接行动决策和显示，避免前端先依赖临时 DTO 或尚未持久化的状态。
+This order completes the backend facts and save files first, then wires in action decisions and display, avoiding the frontend depending on a temporary DTO or state that is not yet persisted.
 
-## 8. 测试与验收
+## 8. Testing and Acceptance
 
-### 8.1 后端
+### 8.1 Backend
 
-1. `TreasurePOI.to_save_dict/from_save_dict` 保留所有字段、payload、来源、发现者、图标和尝试次数。
-2. `POIManager.load_from_list()` 同时恢复墓碑和宝物。
-3. 旧存档未含 `pois` 或不含宝物时可正常加载。
-4. 生成只会选择筑基、金丹、元婴武器或辅助装备，永不产生练气宝物。
-5. 活跃宝物达到 3 个时不再生成。
-6. 生成位置始终有效且不与已有宝物同格。
-7. 出世事件公开等级但不含坐标。
-8. POI 在观察范围内必定发现，范围外不发现。
-9. `MoveToPOI` 与 `TakeTreasure` 的参数 value 都是可执行 POI ID。
-10. 未发现、过期、非宝物、不同格、payload 为空时，`TakeTreasure.can_start()` 必须拒绝。
-11. 成功率覆盖低阶、同阶、高阶和 5%/95% 边界，且不读取 HP、伤势、气运等无关字段。
-12. 失败保留 POI 与 payload；反震只影响 HP，且伤害致死走正常死亡入口。
-13. 成功接受后更新角色装备、移除整个 POI、产生 major event 与 remove 增量。
-14. 成功但拒绝后 POI/payload 仍在，且返回 `LEFT_AT_SOURCE`。
-15. 第 240 个月恰好移除宝物并产生消散事件，不等到年度维护。
+1. `TreasurePOI.to_save_dict/from_save_dict` preserves all fields, payload, source, discoverers, icon, and attempt count.
+2. `POIManager.load_from_list()` restores both graves and treasures.
+3. Old saves without `pois` or without treasures load normally.
+4. Generation only selects Foundation Establishment, Core Formation, or Nascent Soul weapons or auxiliary equipment, and never produces Qi Refinement treasures.
+5. No more generation when active treasures reach 3.
+6. The generation position is always valid and never on the same tile as an existing treasure.
+7. The emergence event reveals the grade but contains no coordinates.
+8. A POI within observation range is always discovered; outside range it is not.
+9. Parameter values of `MoveToPOI` and `TakeTreasure` are both executable POI IDs.
+10. `TakeTreasure.can_start()` must reject when the POI is undiscovered, expired, not a treasure, on a different tile, or has an empty payload.
+11. Success rate covers lower rank, same rank, higher rank, and the 5%/95% boundaries, and does not read unrelated fields such as HP, injuries, or luck.
+12. Failure keeps the POI and payload; backlash only affects HP, and lethal damage goes through the normal death entry point.
+13. After successful acceptance, avatar equipment is updated, the entire POI is removed, and a major event and remove increment are produced.
+14. After success but rejection, the POI/payload remain, and `LEFT_AT_SOURCE` is returned.
+15. The treasure is removed exactly at month 240 and a dissipation event is produced, without waiting for annual maintenance.
 
-### 8.2 前端
+### 8.2 Frontend
 
-1. `treasure_01` 至 `treasure_09` 全部在 `POI_ICON_URLS` 注册。
-2. 图标缺失时仍走 `fallback_poi`。
-3. Map DTO、mapper 和 map store 可接收宝物 summary/upsert/remove。
-4. `POILayer` 正确加载并点击宝物图标。
-5. 宝物点击打开 POI detail，不触发墓碑专用的死者跳转。
-6. 宝物详情展示来源、境界、装备、尝试次数与到期信息；墓碑详情不回归。
-7. `npm run type-check` 通过，不引入 `any`。
+1. `treasure_01` through `treasure_09` are all registered in `POI_ICON_URLS`.
+2. When an icon is missing, `fallback_poi` is still used.
+3. Map DTO, mapper, and map store can receive treasure summary/upsert/remove.
+4. `POILayer` correctly loads and clicks treasure icons.
+5. Clicking a treasure opens POI detail and does not trigger the grave-specific jump to the deceased.
+6. Treasure detail shows source, realm, equipment, attempt count, and expiry info; grave detail does not regress.
+7. `npm run type-check` passes, with no `any` introduced.
 
-### 8.3 建议命令
+### 8.3 Suggested commands
 
 ```powershell
 & 'C:\Users\wangx\AppData\Local\Programs\Python\Python312\python.exe' -m pytest tests/test_grave_poi.py tests/test_action_poi.py
@@ -510,7 +510,7 @@ npm run test -- poiIcons
 npm run type-check
 ```
 
-实现中新增宝物测试后，应将对应测试路径加入第一条 pytest 命令。若改动 i18n 源文件，还需执行：
+After adding treasure tests during implementation, add the corresponding test paths to the first pytest command. If i18n source files are changed, also run:
 
 ```powershell
 & 'C:\Users\wangx\AppData\Local\Programs\Python\Python312\python.exe' tools/i18n/build_mo.py

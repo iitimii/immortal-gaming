@@ -1,271 +1,271 @@
-# 角色扮演模式（个人模式）设计说明
+# Avatar Roleplay Mode (Personal Mode) Design Notes
 
-本文档描述“默认上帝视角 + 可接管单个角色扮演”的完整设计方案，覆盖三期范围。
+This document describes the complete design for "god's-eye view by default + the ability to take over a single avatar for roleplay", covering three phases of scope.
 
-目标不是额外做一个与上帝模式并列的新模式，而是在现有观察世界、查看信息、控制时间流逝的框架上，引入一个轻量、清晰、可中断于“决策边界”而非“动作执行中途”的玩家扮演能力。
+The goal is not to build an additional new mode parallel to god mode, but to introduce, on top of the existing framework for observing the world, viewing information, and controlling the passage of time, a lightweight, clear player roleplay capability that can be interrupted at "decision boundaries" rather than "in the middle of action execution".
 
-## 1. 背景与目标
+## 1. Background and Goals
 
-当前游戏的主体验是：
+The current game's main experience is:
 
-- 玩家以上帝视角观察世界。
-- 角色默认由 AI 决策并执行动作链。
-- 玩家可以通过系统菜单、角色详情、天地异象等接口进行有限干预。
+- The player observes the world from a god's-eye view.
+- Avatars make decisions via AI and execute action chains by default.
+- The player can intervene in limited ways via the system menu, avatar details, heavenly phenomena, and other interfaces.
 
-这套结构已经适合“观察”和“轻干预”，但还缺少一种更强的代入方式：
+This structure already suits "observation" and "light intervention", but it lacks a stronger form of immersion:
 
-- 玩家可以任选一个角色进行扮演。
-- 玩家扮演时仍保留完整世界信息，不降级为传统“迷雾中的第一人称”。
-- 玩家可以在关键决策点输入意图，而不是每月被迫逐指令操作。
+- The player can choose any avatar to roleplay.
+- While roleplaying, the player still keeps full world information, rather than being downgraded to a traditional "first person in the fog".
+- The player can enter intentions at key decision points, rather than being forced to issue commands one by one every month.
 
-本设计的核心目标：
+The core goals of this design:
 
-1. 默认仍是上帝视角，不再单独切出“个人模式”和“上帝模式”两套全局模式。
-2. 玩家可以随时选择一个角色进入扮演态，但同一时间最多只能扮演一个角色。
-3. 玩家扮演时，角色在“已有动作链执行期间”不允许被强行打断。
-4. 仅在该角色需要新一步决策时，世界自动暂停并无限等待玩家输入。
-5. 扮演态是纯运行时状态，不进入存档，不改变现有 save/load 技术形状。
-6. 一期先做“文本决策接管”，二期做“一次性选择与邀约响应”，三期做“自由对话”。
+1. The default is still the god's-eye view; there are no longer two separate global modes, "personal mode" and "god mode".
+2. The player can choose an avatar to enter the roleplay state at any time, but can roleplay at most one avatar at a time.
+3. While the player is roleplaying, the avatar may not be forcibly interrupted "while an existing action chain is executing".
+4. Only when the avatar needs a new decision step does the world pause automatically and wait indefinitely for player input.
+5. The roleplay state is purely runtime state; it does not go into the save file and does not change the existing save/load technical shape.
+6. Phase 1 does "text decision takeover" first, Phase 2 does "one-off choices and invitation responses", and Phase 3 does "free-form dialogue".
 
-## 2. 设计原则
+## 2. Design Principles
 
-### 2.1 默认仍是上帝视角
+### 2.1 The Default Is Still the God's-Eye View
 
-本功能的定位是“上帝视角下的局部角色接管”，而不是新的全局游玩模式。
+This feature is positioned as "local avatar takeover under the god's-eye view", not a new global play mode.
 
-因此：
+Therefore:
 
-- 玩家即使进入扮演态，仍可自由查看地图、事件栏、其他角色详情、宗门态势等信息。
-- 不收窄信息，不额外引入基于角色感知范围的 UI 限制。
-- 不把玩家锁进角色镜头或角色专属页面。
+- Even after entering the roleplay state, the player can still freely view the map, event panel, other avatars' details, sect situations, and other information.
+- Information is not narrowed, and no extra UI restrictions based on the avatar's perception range are introduced.
+- The player is not locked into an avatar camera or an avatar-exclusive page.
 
-### 2.2 决策边界暂停，而不是动作中途暂停
+### 2.2 Pause at Decision Boundaries, Not in the Middle of Actions
 
-玩家不能打断一个已经开始执行的动作链条。
+The player cannot interrupt an action chain that has already started executing.
 
-允许暂停的唯一标准边界是：
+The only standard boundary at which pausing is allowed is:
 
-- 当前扮演角色没有正在执行的动作；
-- 且没有待提交的 planned actions；
-- 因而需要产生下一轮新决策。
+- The currently roleplayed avatar has no action executing;
+- And there are no pending planned actions to submit;
+- And therefore a new round of decision needs to be produced.
 
-这保证：
+This ensures:
 
-- 与现有动作链模型一致；
-- 不破坏动作内部的多步执行语义；
-- 不需要实现“半动作回滚”或“动作中途换脑”。
+- Consistency with the existing action chain model;
+- The multi-step execution semantics inside actions are not broken;
+- There is no need to implement "half-action rollback" or "changing minds mid-action".
 
-### 2.3 运行时扮演态不进存档
+### 2.3 Runtime Roleplay State Does Not Go into the Save
 
-扮演态是一个 UI/Runtime 层状态，而不是世界状态。
+The roleplay state is a UI/Runtime layer state, not world state.
 
-因此：
+Therefore:
 
-- 不写入 world；
-- 不写入 save 文件；
-- 读档、重开、重置、reinit 后自动清空。
+- It is not written into world;
+- It is not written into the save file;
+- It is cleared automatically after load, restart, reset, and reinit.
 
-### 2.4 复用现有系统，不平行新造一套
+### 2.4 Reuse Existing Systems Instead of Building a Parallel One
 
-本功能优先复用：
+This feature prioritizes reusing:
 
-- 现有 AI 决策 prompt 与动作链装载机制；
-- 现有 `single_choice` 体系；
-- 现有 mutual action 响应动作模型；
-- 现有事件栏与详情面板；
-- 现有 `/api/v1/query/*` 与 `/api/v1/command/*` 稳定接口分层。
+- The existing AI decision prompt and action chain loading mechanism;
+- The existing `single_choice` system;
+- The existing mutual action response action model;
+- The existing event panel and detail panels;
+- The existing `/api/v1/query/*` and `/api/v1/command/*` stable interface layering.
 
-不建议额外发明一套“roleplay-only world loop”“roleplay-only event log”“roleplay-only action engine”。
+Inventing an additional "roleplay-only world loop", "roleplay-only event log", or "roleplay-only action engine" is not recommended.
 
-### 2.5 二期优先做“通用有限决策框架”，而不是按场景逐个补按钮
+### 2.5 Phase 2 Prioritizes a "General Finite Decision Framework" over Adding Buttons Scenario by Scenario
 
-二期若按“某个业务点单独加一套按钮 UI + 接口 + 暂停点”的方式推进，短期看似简单，长期会迅速失控：
+If Phase 2 proceeds by "adding a separate button UI + interface + pause point for each business point", it looks simple in the short term but will quickly get out of control in the long term:
 
-- 每个场景都要重复接入暂停、恢复、状态查询、按钮渲染、错误处理；
-- 业务层会不断散落“如果是玩家扮演就弹按钮，否则走 LLM”的分支；
-- 后续新增一次性选择、邀约响应、有限对话时会重复造轮子。
+- Every scenario has to repeatedly wire up pausing, resuming, state queries, button rendering, and error handling;
+- The business layer will keep accumulating scattered branches like "if the player is roleplaying, show buttons, otherwise go through the LLM";
+- Adding one-off choices, invitation responses, and finite dialogues later will reinvent the wheel.
 
-因此二期的正确目标不是“多加几个按钮场景”，而是：
+Therefore the correct goal of Phase 2 is not "add a few more button scenarios", but:
 
-1. 把现有 `single_choice` 升级为统一的“有限决策框架”。
-2. 把“玩家扮演”视为一种新的决策来源，而不是新的业务系统。
-3. 让业务层只声明“这里需要一个有限决策”，而不关心这次决策最终来自 LLM、玩家还是 fallback。
+1. Upgrade the existing `single_choice` into a unified "finite decision framework".
+2. Treat "player roleplay" as a new decision source, not a new business system.
+3. Let the business layer only declare "a finite decision is needed here", without caring whether this decision ultimately comes from the LLM, the player, or a fallback.
 
-## 3. 非目标
+## 3. Non-Goals
 
-本次设计明确不包含以下目标：
+This design explicitly does not include the following goals:
 
-1. 不做传统 RPG 式信息遮蔽或战争迷雾。
-2. 不做同时扮演多个角色。
-3. 不做动作执行中途强制改指令。
-4. 不做“万能自然语言控制一切世界对象”的通用代理接口。
-5. 不把扮演态写进存档，也不要求读档后恢复到扮演中的上下文。
-6. 一期不做完整的自由对话多轮会话。
+1. No traditional RPG-style information hiding or fog of war.
+2. No roleplaying multiple avatars at the same time.
+3. No forced command changes in the middle of action execution.
+4. No general-purpose agent interface for "universal natural language control of every world object".
+5. The roleplay state is not written into the save, and there is no requirement to restore the roleplay context after loading.
+6. Phase 1 does not include full multi-turn free-form dialogue sessions.
 
-## 4. 核心体验概览
+## 4. Core Experience Overview
 
-### 4.1 玩家视角
+### 4.1 Player Perspective
 
-玩家的常规体验保持不变：
+The player's regular experience stays unchanged:
 
-- 世界正常运行；
-- 玩家观察地图与事件；
-- 玩家点开某个 avatar 的 info panel。
+- The world runs normally;
+- The player observes the map and events;
+- The player opens an avatar's info panel.
 
-在 avatar info panel 中新增“扮演模式”区域：
+A new "Roleplay Mode" section is added to the avatar info panel:
 
-- 可进入扮演；
-- 可退出扮演；
-- 若当前已扮演其他角色，则不可同时接管第二个角色。
+- Can enter roleplay;
+- Can exit roleplay;
+- If another avatar is already being roleplayed, a second avatar cannot be taken over at the same time.
 
-进入扮演后：
+After entering roleplay:
 
-- 下方出现一个类似命令行的输入区；
-- 扮演角色的最近事件列表显示在该区域中；
-- 事件列表内容与右侧全局事件栏针对该角色筛选后的结果一致。
+- A command-line-like input area appears at the bottom;
+- The roleplayed avatar's recent event list is shown in that area;
+- The event list content matches the result of filtering the right-side global event panel for that avatar.
 
-### 4.2 运行中的停顿行为
+### 4.2 Pause Behavior During Runtime
 
-进入扮演后，世界不会立刻无条件暂停。
+After entering roleplay, the world does not pause unconditionally right away.
 
-标准行为应为：
+The standard behavior should be:
 
-1. 若该角色当前仍有动作链在执行，世界照常推进。
-2. 当该角色动作链执行完毕、需要新决策时，系统自动进入“等待玩家输入”状态。
-3. 进入该状态后，世界自动暂停，并无限等待玩家提交决策。
-4. 玩家提交成功后，系统装载该角色的新动作链并恢复世界运行。
+1. If the avatar still has an action chain executing, the world advances as usual.
+2. When the avatar's action chain finishes and a new decision is needed, the system automatically enters the "waiting for player input" state.
+3. After entering that state, the world pauses automatically and waits indefinitely for the player to submit a decision.
+4. After the player submits successfully, the system loads the avatar's new action chain and resumes the world.
 
-### 4.3 信息展示
+### 4.3 Information Display
 
-扮演态下应同时展示两类信息：
+In the roleplay state, two kinds of information should be displayed at the same time:
 
-- 全局信息：世界时间、其他角色、地图、全局事件栏、宗门态势；
-- 局部信息：当前扮演角色的事件流、当前等待决策的提示、输入框或选项按钮。
+- Global information: world time, other avatars, the map, the global event panel, sect situations;
+- Local information: the currently roleplayed avatar's event stream, the prompt for the decision currently awaited, and the input box or option buttons.
 
-### 4.4 退出行为
+### 4.4 Exit Behavior
 
-玩家应可主动退出扮演。
+The player should be able to exit roleplay voluntarily.
 
-退出后：
+After exiting:
 
-- 该角色恢复 AI 接管；
-- 后续再次需要决策时，不再等待玩家；
-- 若退出时正处于等待玩家输入状态，应在确认后恢复 AI 决策或解除该等待请求。
+- The avatar returns to AI control;
+- When a decision is needed again later, the player is no longer waited on;
+- If exiting while in the waiting-for-player-input state, after confirmation the AI decision should resume or the waiting request should be released.
 
-## 5. 三期范围
+## 5. Three-Phase Scope
 
-## 5.1 一期：文本决策接管
+## 5.1 Phase 1: Text Decision Takeover
 
-一期只解决“当角色需要新一步动作规划时，由玩家输入文本意图”。
+Phase 1 only solves "when the avatar needs a new step of action planning, the player enters a text intention".
 
-### 一期包含
+### Phase 1 Includes
 
-- 进入/退出扮演态。
-- 同时最多扮演一个角色。
-- 角色动作链执行完后暂停世界并等待玩家输入。
-- 玩家通过文本输入下一步意图。
-- 服务端复用现有决策 prompt，将玩家输入转换为动作链。
-- 右侧全局事件栏继续工作。
-- info panel 中展示该角色的局部事件流。
+- Entering/exiting the roleplay state.
+- Roleplaying at most one avatar at a time.
+- Pausing the world after the avatar's action chain finishes and waiting for player input.
+- The player enters the next intention via text.
+- The server reuses the existing decision prompt to convert player input into an action chain.
+- The right-side global event panel keeps working.
+- The avatar's local event stream is shown in the info panel.
 
-### 一期不包含
+### Phase 1 Excludes
 
-- 一次性选择按钮；
-- 邀约接受/拒绝按钮；
-- 多轮自由对话；
-- 对动作链中途插入新决策；
-- 复杂的“可编辑计划队列 UI”。
+- One-off choice buttons;
+- Invitation accept/decline buttons;
+- Multi-turn free-form dialogue;
+- Inserting new decisions in the middle of an action chain;
+- A complex "editable plan queue UI".
 
-### 一期 prompt 约束
+### Phase 1 Prompt Constraints
 
-玩家输入是“意图描述”，不是直接的内部 action DSL。
+Player input is an "intention description", not a direct internal action DSL.
 
-服务端应在 prompt 中加入以下约束：
+The server should add the following constraints to the prompt:
 
-- 优先根据玩家意图生成合理动作链；
-- 若玩家要求前往角色未知位置，不报错，而是自动转化为“探索/前往可探索方向”的行为；
-- 若玩家意图不满足当前条件，应生成最接近且可执行的动作链；
-- 仍保留当前 AI 决策 prompt 中的安全约束、世界规则与动作合法性校验。
+- Prioritize generating a reasonable action chain based on the player's intention;
+- If the player asks to go to a location unknown to the avatar, do not error; instead automatically convert it into "explore / head toward an explorable direction" behavior;
+- If the player's intention does not satisfy current conditions, generate the closest executable action chain;
+- Keep the safety constraints, world rules, and action legality checks of the current AI decision prompt.
 
-## 5.2 二期：一次性选择与双人事件邀约
+## 5.2 Phase 2: One-Off Choices and Two-Person Event Invitations
 
-二期处理“本质上不是自由文本规划，而是有限选项决策”的场景。
+Phase 2 handles scenarios that are "essentially not free-text planning but finite-option decisions".
 
-### 二期包含
+### Phase 2 Includes
 
-- 将现有 `single_choice` 体系升级为统一的“有限决策框架”。
-- 将一次性选择场景暴露为按钮选项，而不是文本框。
-- 将双人/多人互动中的邀约响应接入同一套决策框架，而不是每个动作各写一套专用按钮逻辑。
-- 前端只需渲染统一 `choice` 请求，不要求每个业务点拥有独立 UI。
+- Upgrading the existing `single_choice` system into a unified "finite decision framework".
+- Exposing one-off choice scenarios as option buttons rather than a text box.
+- Hooking invitation responses in two-person/multi-person interactions into the same decision framework, rather than writing dedicated button logic for each action.
+- The frontend only needs to render a unified `choice` request; each business point is not required to have its own UI.
 
-### 二期来源
+### Phase 2 Sources
 
-优先复用现有机制：
+Prioritize reusing existing mechanisms:
 
 - `single_choice`
-- mutual action 的 `RESPONSE_ACTIONS`
+- mutual action `RESPONSE_ACTIONS`
 
-二期不是重新设计选择系统，而是把原本由 LLM 或固定逻辑处理的“有限决策位”，改为在“当前扮演角色是决策主体”时转交给玩家。
+Phase 2 is not a redesign of the choice system; it hands the "finite decision slots" originally handled by the LLM or fixed logic over to the player when "the currently roleplayed avatar is the decision subject".
 
-更准确地说，二期的核心不是“按钮”，而是：
+More precisely, the core of Phase 2 is not "buttons", but:
 
-- `single_choice` request 统一建模；
-- 决策来源统一解析；
-- 玩家选择暂停/恢复统一托管；
-- 前端统一渲染 `choice` 型 request。
+- Unified modeling of `single_choice` requests;
+- Unified resolution of decision sources;
+- Unified hosting of pause/resume for player choices;
+- Unified frontend rendering of `choice`-type requests.
 
-### 二期限制
+### Phase 2 Limitations
 
-- 仍不支持长文本自由对话。
-- 仍不支持同一时刻多个扮演角色同时等待不同选择。
-- 按钮数应保持克制，优先二选一或有限选项，不做复杂树状对话 UI。
-- 二期不追求一口气接完所有现有场景，应先完成通用框架，再逐步把具体业务迁移到统一入口。
+- Long-text free-form dialogue is still not supported.
+- Multiple roleplayed avatars waiting on different choices at the same moment is still not supported.
+- The number of buttons should be kept restrained, preferring binary or limited options, without a complex tree-shaped dialogue UI.
+- Phase 2 does not aim to hook up all existing scenarios in one go; the general framework should be completed first, and then specific business logic migrated to the unified entry point step by step.
 
-## 5.3 三期：自由对话
+## 5.3 Phase 3: Free-Form Dialogue
 
-三期处理“角色作为社交主体，与其他角色发生多轮对话”的复杂场景。
+Phase 3 handles the complex scenario of "the avatar as a social subject having multi-turn dialogue with other avatars".
 
-### 三期目标
+### Phase 3 Goals
 
-- 玩家可以在对话上下文中扮演角色进行自由发言。
-- 可连续多轮交互，直到玩家主动结束。
-- 对话结果最终压缩为抽象叙述事件，而不是把全部原始聊天记录灌入长期事件流。
-- 对话必须依附现有 `Conversation` 动作触发，不新增“脱离世界动作语义的自由聊天入口”。
-- 对话中只有玩家扮演侧由玩家输入，另一侧仍由 LLM 回复。
+- The player can roleplay the avatar and speak freely within a dialogue context.
+- Multiple consecutive rounds of interaction are possible until the player actively ends it.
+- The dialogue result is ultimately compressed into an abstract narrative event, rather than pouring the entire raw chat log into the long-term event stream.
+- Dialogue must be triggered by attaching to the existing `Conversation` action; no "free chat entry point detached from world action semantics" is added.
+- In the dialogue, only the player's roleplay side is entered by the player; the other side is still answered by the LLM.
 
-### 三期必须新增的能力
+### Capabilities Phase 3 Must Add
 
-- 一个独立的“对话会话态”；
-- 对话轮次缓存；
-- 对话结束后的 summary 服务；
-- 将 summary 结果写入事件系统。
+- An independent "conversation session state";
+- Conversation turn caching;
+- A summary service after the dialogue ends;
+- Writing the summary result into the event system.
 
-### 三期事件落地规则
+### Phase 3 Event Landing Rules
 
-不论中间有多少轮聊天，最终进入事件栏的应是：
+No matter how many rounds of chat occur in between, what ultimately enters the event panel should be:
 
-- 叙述化 summary；
-- 相关角色 ID；
-- 必要的情绪/关系/后续动作影响。
-- 可选的故事扩展事件；
+- A narrative summary;
+- Related avatar IDs;
+- Necessary emotion/relationship/follow-up action effects.
+- An optional story extension event;
 
-不建议长期保存原始逐轮对话文本到事件存储中，以避免：
+Long-term storage of the raw turn-by-turn dialogue text in the event store is not recommended, to avoid:
 
-- 事件栏刷屏；
-- 存储膨胀；
-- 后续上下文重复注入成本过高。
+- Flooding the event panel;
+- Storage bloat;
+- Excessive cost of repeatedly injecting context later.
 
-## 6. 术语与状态定义
+## 6. Terminology and State Definitions
 
-为避免把多种语义都压到单个 `is_paused` 布尔值上，建议引入更细的运行时概念。
+To avoid cramming multiple semantics into a single `is_paused` boolean, introducing finer-grained runtime concepts is recommended.
 
-### 6.1 扮演会话
+### 6.1 Roleplay Session
 
-建议引入运行时对象：
+Proposed runtime object:
 
 - `RoleplaySession`
 
-建议字段：
+Proposed fields:
 
 - `controlled_avatar_id: str | None`
 - `status: inactive | observing | awaiting_decision | awaiting_choice | conversing | submitting`
@@ -274,22 +274,22 @@
 - `last_prompt_context: dict | None`
 - `conversation_session: dict | None`
 
-语义：
+Semantics:
 
-- `inactive`：当前无扮演角色。
-- `observing`：已扮演该角色，但暂未阻塞世界等待玩家。
-- `awaiting_decision`：一期文本决策等待中。
-- `awaiting_choice`：二期选项等待中。
-- `conversing`：三期自由对话会话中。
-- `submitting`：前端已提交，服务端正在解析或装载结果。
+- `inactive`: no avatar is currently being roleplayed.
+- `observing`: the avatar is being roleplayed, but the world is not yet blocked waiting for the player.
+- `awaiting_decision`: waiting on a Phase 1 text decision.
+- `awaiting_choice`: waiting on a Phase 2 option.
+- `conversing`: in a Phase 3 free-form dialogue session.
+- `submitting`: the frontend has submitted and the server is parsing or loading the result.
 
-### 6.1.1 三期对话会话态
+### 6.1.1 Phase 3 Conversation Session State
 
-建议在 `RoleplaySession` 中新增运行时字段：
+Proposed new runtime field in `RoleplaySession`:
 
 - `conversation_session`
 
-建议字段：
+Proposed fields:
 
 - `session_id`
 - `request_id`
@@ -301,22 +301,22 @@
 - `started_at`
 - `last_summary`
 
-语义要求：
+Semantic requirements:
 
-- 该结构是纯 runtime 状态，不写入 world，不写入 save；
-- `messages` 保存本次会话逐轮聊天记录，仅用于本轮对话上下文和结束后的 summary；
-- `last_summary` 仅作为本轮结束态的临时缓存，不作为长期事实来源。
+- This structure is purely runtime state; it is not written into world and not written into the save;
+- `messages` stores the turn-by-turn chat log of this session, used only for this dialogue's context and the post-dialogue summary;
+- `last_summary` is only a temporary cache of this round's end state and is not a long-term source of facts.
 
-### 6.2 暂停原因
+### 6.2 Pause Reasons
 
-建议将“暂停”从单一布尔值提升为“聚合状态 + 原因”。
+It is recommended to elevate "pause" from a single boolean to "aggregate state + reasons".
 
-建议新增：
+Proposed additions:
 
 - `pause_reasons`
 - `pause_reason_detail`
 
-候选原因包括：
+Candidate reasons include:
 
 - `manual_pause`
 - `init_pending`
@@ -325,18 +325,18 @@
 - `roleplay_waiting_choice`
 - `roleplay_conversation`
 
-聚合规则：
+Aggregation rules:
 
-- 只要存在任一阻塞型 pause reason，`is_paused = true`。
-- UI 应展示最关键的当前原因，而不是只显示“已暂停”。
+- As long as any blocking pause reason exists, `is_paused = true`.
+- The UI should show the most important current reason, rather than only showing "Paused".
 
-### 6.3 扮演请求
+### 6.3 Roleplay Request
 
-建议统一抽象为：
+Proposed unified abstraction:
 
 - `RoleplayPromptRequest`
 
-建议字段：
+Proposed fields:
 
 - `request_id`
 - `type: decision | choice | conversation`
@@ -350,29 +350,29 @@
 - `can_end`
 - `created_at`
 
-其中：
+Of these:
 
-- `decision` 对应一期文本输入；
-- `choice` 对应二期按钮选择；
-- `conversation` 对应三期会话输入。
+- `decision` corresponds to Phase 1 text input;
+- `choice` corresponds to Phase 2 button selection;
+- `conversation` corresponds to Phase 3 session input.
 
-三期约束：
+Phase 3 constraints:
 
-- `conversation` 请求必须绑定一个已经进入中的 `Conversation` 动作；
-- 不允许前端脱离动作链凭空创建自由聊天会话；
-- `messages` 仅用于前端渲染当前会话，不进入正式事件存储。
+- A `conversation` request must be bound to a `Conversation` action that is already in progress;
+- The frontend is not allowed to create a free chat session out of thin air, detached from the action chain;
+- `messages` is used only for rendering the current session in the frontend and does not enter formal event storage.
 
-### 6.4 通用有限决策请求
+### 6.4 General Finite Decision Request
 
-建议在二期显式引入统一概念：
+It is recommended to explicitly introduce unified concepts in Phase 2:
 
 - `ChoiceRequest`
 - `ChoiceDecision`
 - `ChoiceResolver`
 
-其中 `ChoiceRequest` 可以直接由现有 `SingleChoiceRequest` 演进而来。
+Of these, `ChoiceRequest` can evolve directly from the existing `SingleChoiceRequest`.
 
-建议字段：
+Proposed fields:
 
 - `request_id`
 - `avatar_id`
@@ -384,303 +384,303 @@
 - `context`
 - `decision_mode`
 
-语义说明：
+Semantic notes:
 
-- `request_id`：运行时唯一标识；
-- `avatar_id`：当前决策主体；
-- `task_name/template_path`：兼容当前 LLM 决策链；
-- `situation/options/fallback_policy/context`：沿用当前 `single_choice` 模型；
-- `decision_mode`：用于标注当前是 `llm`、`roleplay_player`、`fallback_only` 等模式。
+- `request_id`: runtime unique identifier;
+- `avatar_id`: the current decision subject;
+- `task_name/template_path`: compatible with the current LLM decision chain;
+- `situation/options/fallback_policy/context`: carried over from the current `single_choice` model;
+- `decision_mode`: marks whether the current mode is `llm`, `roleplay_player`, `fallback_only`, etc.
 
-### 6.5 决策来源
+### 6.5 Decision Source
 
-建议将“决策从哪里来”统一抽象为：
+It is recommended to abstract "where the decision comes from" uniformly as:
 
 - `DecisionSource`
 
-二期至少包含：
+Phase 2 includes at least:
 
 - `llm`
 - `player_roleplay`
 - `fallback`
 
-关键原则：
+Key principles:
 
-- 业务层不直接判断“当前是不是玩家在扮演”；
-- 业务层只创建 request，然后交给统一 resolver；
-- resolver 再根据当前 runtime/session 决定由谁来完成此次决策。
+- The business layer does not directly check "whether the player is currently roleplaying";
+- The business layer only creates the request and hands it to the unified resolver;
+- The resolver then decides, based on the current runtime/session, who completes this decision.
 
 ### 6.6 Continuation / Resume Token
 
-二期最大的技术难点不是按钮渲染，而是“暂停后怎么恢复原业务流程”。
+The biggest technical difficulty in Phase 2 is not button rendering, but "how to resume the original business flow after pausing".
 
-当前很多 `single_choice` 场景是在一段异步结算流程中直接 `await resolve_xxx()`：
+Many current `single_choice` scenarios directly `await resolve_xxx()` within an asynchronous settlement flow:
 
-1. 构建 request
-2. 立即得到 decision
-3. 立即 apply
-4. 继续后续逻辑
+1. Build the request
+2. Get the decision immediately
+3. Apply immediately
+4. Continue with subsequent logic
 
-若该 decision 改由玩家提供，中间就会出现跨 tick / 跨请求的等待。  
-因此需要引入统一的 continuation 语义。
+If that decision is instead provided by the player, a cross-tick / cross-request wait appears in the middle.  
+Therefore unified continuation semantics need to be introduced.
 
-建议字段：
+Proposed field:
 
 - `continuation_token`
 
-其职责不是暴露给前端做业务判断，而是：
+Its responsibility is not to be exposed to the frontend for business decisions, but to:
 
-- 标识这次 choice 对应哪个挂起中的决策 continuation；
-- 在玩家提交后恢复到原本等待 decision 的流程；
-- 避免业务层自己手写“挂起半个结算流程”的散乱逻辑。
+- Identify which suspended decision continuation this choice corresponds to;
+- Resume the flow that was originally waiting on the decision after the player submits;
+- Avoid the business layer hand-writing scattered "suspend half a settlement flow" logic.
 
-## 7. 一期详细流程
+## 7. Phase 1 Detailed Flow
 
-### 7.1 开始扮演
+### 7.1 Starting Roleplay
 
-玩家在 avatar info panel 中点击“开始扮演”：
+The player clicks "Start Roleplay" in the avatar info panel:
 
-1. 后端检查当前是否已有正在扮演的角色。
-2. 若已有且不是当前角色，则拒绝并返回明确错误。
-3. 若当前角色有效，则创建/更新 `RoleplaySession`。
-4. 若此时角色已有动作链，则 `status = observing`。
-5. 若此时角色已处于“无当前动作且无计划”的决策边界，则立刻创建 `pending_request` 并进入等待状态。
+1. The backend checks whether an avatar is already being roleplayed.
+2. If one exists and it is not the current avatar, reject and return an explicit error.
+3. If the current avatar is valid, create/update the `RoleplaySession`.
+4. If the avatar already has an action chain at this point, `status = observing`.
+5. If the avatar is already at the decision boundary of "no current action and no plan", immediately create a `pending_request` and enter the waiting state.
 
-### 7.2 世界推进过程中的触发
+### 7.2 Triggers During World Advancement
 
-在模拟器的“补决策”阶段，若检测到某角色满足：
+In the simulator's "fill in decisions" phase, if an avatar is detected that satisfies:
 
-- 是当前被扮演角色；
-- 当前动作为空；
-- planned actions 为空；
+- It is the currently roleplayed avatar;
+- Its current action is empty;
+- Its planned actions are empty;
 
-则不走普通 LLM 决策，而是：
+then instead of going through the normal LLM decision, it:
 
-1. 创建决策请求；
-2. 记录到 runtime 的 roleplay session；
-3. 设置对应 pause reason；
-4. 结束当前 tick 的后续推进或在下一轮 loop 中停住。
+1. Creates a decision request;
+2. Records it in the runtime's roleplay session;
+3. Sets the corresponding pause reason;
+4. Ends further advancement of the current tick or stops in the next loop iteration.
 
-### 7.3 玩家提交文本意图
+### 7.3 Player Submits a Text Intention
 
-玩家输入例如：
+Example player input:
 
-- 去附近探索机缘
-- 找某人交谈，看看能不能结交
-- 先调息恢复，再继续突破
+- Go explore nearby for opportunities
+- Find someone to talk to and see if we can become friends
+- First regulate breathing to recover, then continue the breakthrough
 
-后端处理：
+Backend handling:
 
-1. 校验当前 `pending_request` 仍有效。
-2. 校验提交者面向的 avatar 与当前扮演角色一致。
-3. 调用“玩家决策转动作链”的服务。
-4. 服务复用 AI prompt 与动作合法性校验。
-5. 成功后把结果装载到该 avatar 的 planned actions。
-6. 清除 `pending_request` 与对应 pause reason。
-7. 将会话状态切回 `observing`。
+1. Validate that the current `pending_request` is still valid.
+2. Validate that the avatar the submitter targets matches the currently roleplayed avatar.
+3. Call the "player decision to action chain" service.
+4. The service reuses the AI prompt and action legality checks.
+5. On success, load the result into the avatar's planned actions.
+6. Clear the `pending_request` and the corresponding pause reason.
+7. Switch the session status back to `observing`.
 
-### 7.4 玩家无效输入
+### 7.4 Invalid Player Input
 
-无效输入不应直接让世界恢复运行。
+Invalid input should not directly resume the world.
 
-应优先：
+It should prioritize:
 
-1. 返回错误或提示信息；
-2. 保持世界暂停；
-3. 允许玩家继续输入。
+1. Returning an error or hint message;
+2. Keeping the world paused;
+3. Allowing the player to continue entering input.
 
-如果模型生成了不可执行动作链，则走现有合法性过滤逻辑；若最终无有效动作，应回到等待状态，并给出更明确的失败提示。
+If the model generates a non-executable action chain, the existing legality filtering logic applies; if ultimately there is no valid action, it should return to the waiting state and give a clearer failure hint.
 
-## 8. 二期详细流程
+## 8. Phase 2 Detailed Flow
 
-二期不建议按“某个场景先临时补一个按钮入口”的方式逐个推进。  
-推荐先把 `single_choice` 重构为统一有限决策框架，再逐步迁移已有业务场景。
+Proceeding in Phase 2 by "temporarily adding a button entry point for one scenario first" one by one is not recommended.  
+It is recommended to first refactor `single_choice` into a unified finite decision framework, then gradually migrate existing business scenarios.
 
-### 8.1 二期总目标
+### 8.1 Overall Phase 2 Goals
 
-二期应先完成以下框架目标：
+Phase 2 should first complete the following framework goals:
 
-1. 统一 `build request -> resolve -> apply` 流程。
-2. 统一有限决策来源：
+1. Unify the `build request -> resolve -> apply` flow.
+2. Unify the finite decision sources:
    - LLM
-   - 玩家扮演
+   - Player roleplay
    - fallback
-3. 统一 runtime 中的 `choice` 挂起态。
-4. 统一前端 choice 请求显示和按钮提交流程。
-5. 统一 continuation / resume 机制。
+3. Unify the `choice` suspended state in the runtime.
+4. Unify the frontend choice request display and button submission flow.
+5. Unify the continuation / resume mechanism.
 
-### 8.2 `single_choice` 重构方向
+### 8.2 `single_choice` Refactor Direction
 
-当前 `single_choice` 已经具备两个良好基础：
+The current `single_choice` already has two good foundations:
 
-- request 模型清晰；
-- scenario 拥有 `build_request()` 与 `apply_decision()` 的天然两段式结构。
+- A clear request model;
+- The scenario has a natural two-stage structure of `build_request()` and `apply_decision()`.
 
-建议不要推翻现有结构，而是在其上升级：
+It is recommended not to tear down the existing structure, but to upgrade on top of it:
 
-#### 当前模型
+#### Current Model
 
 - `SingleChoiceScenario.build_request()`
 - `decide_single_choice(request)`
 - `resolve_single_choice(scenario) -> decision -> apply`
 
-#### 目标模型
+#### Target Model
 
 - `ChoiceScenario.build_request()`
 - `resolve_choice(request, runtime, scenario)`
-- `ChoiceResolver` 决定：
-  - 直接调用 LLM
-  - 转交玩家并挂起
-  - 使用 fallback
-- 在拿到 `ChoiceDecision` 后再统一调用 `scenario.apply_decision(...)`
+- `ChoiceResolver` decides to:
+  - Call the LLM directly
+  - Hand it to the player and suspend
+  - Use the fallback
+- After obtaining the `ChoiceDecision`, call `scenario.apply_decision(...)` uniformly
 
-也就是说，业务层保留“构建 request + 应用 decision”的职责，但不再负责“这次决策从哪来”。
+In other words, the business layer keeps the responsibility of "build request + apply decision", but is no longer responsible for "where this decision comes from".
 
-### 8.3 建议的统一入口
+### 8.3 Proposed Unified Entry Point
 
-建议新增一个统一入口，例如：
+It is recommended to add a unified entry point, for example:
 
 - `resolve_choice(scenario, runtime)`
 
-它的行为应为：
+Its behavior should be:
 
-1. 调用 `scenario.build_request()`
-2. 判断当前 request 的 avatar 是否是玩家扮演对象
-3. 若不是玩家扮演对象：
-   - 沿用当前 LLM/fallback 流程
-4. 若是玩家扮演对象：
-   - 创建 `RoleplayPromptRequest(type=choice)`
-   - 写入 runtime
-   - 进入等待态
-   - 通过 continuation token 挂起当前流程
-5. 玩家提交后：
-   - 恢复该流程
-   - 构造统一的 `ChoiceDecision`
-   - 调用 `scenario.apply_decision(...)`
+1. Call `scenario.build_request()`
+2. Determine whether the current request's avatar is the player's roleplay target
+3. If it is not the player's roleplay target:
+   - Keep using the current LLM/fallback flow
+4. If it is the player's roleplay target:
+   - Create `RoleplayPromptRequest(type=choice)`
+   - Write it into the runtime
+   - Enter the waiting state
+   - Suspend the current flow via the continuation token
+5. After the player submits:
+   - Resume that flow
+   - Construct a unified `ChoiceDecision`
+   - Call `scenario.apply_decision(...)`
 
-### 8.4 一次性选择
+### 8.4 One-Off Choices
 
-当扮演角色遇到一个有限选择场景时：
+When the roleplayed avatar encounters a finite choice scenario:
 
-当扮演角色遇到一个 `single_choice` 场景时：
+When the roleplayed avatar encounters a `single_choice` scenario:
 
-1. 若该角色未被玩家扮演，则维持现有自动逻辑。
-2. 若该角色正被玩家扮演，则由统一 `ChoiceResolver` 接管。
-3. Resolver 创建 `RoleplayPromptRequest(type=choice)`。
-4. 世界暂停，前端显示统一选项按钮。
-5. 玩家点击按钮后，系统恢复该 choice continuation。
-6. 恢复后统一调用 `scenario.apply_decision(...)`。
+1. If the avatar is not being roleplayed by the player, keep the existing automatic logic.
+2. If the avatar is being roleplayed by the player, the unified `ChoiceResolver` takes over.
+3. The Resolver creates `RoleplayPromptRequest(type=choice)`.
+4. The world pauses and the frontend shows unified option buttons.
+5. After the player clicks a button, the system resumes that choice continuation.
+6. After resuming, `scenario.apply_decision(...)` is called uniformly.
 
-### 8.5 双人邀约响应
+### 8.5 Two-Person Invitation Responses
 
-当扮演角色是某个 mutual action 的响应方时：
+When the roleplayed avatar is the responder of a mutual action:
 
-1. 若该动作暴露有限 `RESPONSE_ACTIONS`；
-2. 则应优先把这些响应包装成统一的 `ChoiceRequest`；
-3. 而不是直接在动作类里硬编码“玩家模式显示哪些按钮”；
-4. 玩家选中后，仍通过统一 resolver -> continuation -> apply 流程恢复。
+1. If the action exposes finite `RESPONSE_ACTIONS`;
+2. Then those responses should preferably be wrapped into a unified `ChoiceRequest`;
+3. Rather than hardcoding "which buttons to show in player mode" directly in the action class;
+4. After the player selects, resume still goes through the unified resolver -> continuation -> apply flow.
 
-### 8.6 现有场景迁移顺序建议
+### 8.6 Recommended Migration Order for Existing Scenarios
 
-不建议一次性迁移所有有限选择场景。建议按以下顺序推进：
+Migrating all finite choice scenarios at once is not recommended. The following order is recommended:
 
 1. `item_exchange`
-   - 炼丹、奇遇、战利品等获得新物品后的“保留还是卖出/替换”
-   - 原因：现有 `single_choice` 结构最完整、验证价值最高
+   - "Keep or sell/replace" after obtaining a new item from alchemy, fortunes, spoils, etc.
+   - Reason: the existing `single_choice` structure is the most complete and has the highest validation value
 2. `sect_recruitment`
-   - 语义明确、按钮稳定
-3. mutual action 的有限响应
+   - Clear semantics, stable buttons
+3. Finite responses of mutual actions
    - `Accept / Reject`
    - `Yield / Reject`
    - `Talk / Reject`
 
-### 8.7 二期与一期的关系
+### 8.7 Relationship Between Phase 2 and Phase 1
 
-二期不是替代一期，而是新增另一种请求类型：
+Phase 2 does not replace Phase 1; it adds another request type:
 
-- 文本决策继续用于开放式意图；
-- 选项按钮用于有限响应。
+- Text decisions continue to be used for open-ended intentions;
+- Option buttons are used for finite responses.
 
-二者共享：
+The two share:
 
-- roleplay session；
-- pause reason；
-- prompt request；
-- 前端强提示容器。
+- roleplay session;
+- pause reason;
+- prompt request;
+- The frontend prominent prompt container.
 
-二者在更高层上都属于：
+At a higher level, both belong to:
 
-- “统一角色决策请求”
+- "Unified avatar decision request"
 
-只是：
+It is just that:
 
-- 一期是开放式文本决策；
-- 二期是有限选项决策。
+- Phase 1 is open-ended text decision;
+- Phase 2 is finite-option decision.
 
-## 9. 三期详细流程
+## 9. Phase 3 Detailed Flow
 
-### 9.1 触发原则
+### 9.1 Trigger Principle
 
-三期对话必须依附现有 `Conversation` 动作触发。
+Phase 3 dialogue must be triggered by attaching to the existing `Conversation` action.
 
-不建议新增“玩家点一个按钮就和任意角色自由聊天”的独立入口。  
-原因：
+Adding a standalone entry point where "the player clicks a button to chat freely with any avatar" is not recommended.  
+Reasons:
 
-1. `Conversation` 已经是世界中的正式动作语义；
-2. 这样可以保持动作链、事件、关系变化、故事系统语义一致；
-3. 可以避免“UI 上发生了聊天，但世界里并没有对应动作”的割裂。
+1. `Conversation` is already a formal action semantic in the world;
+2. This keeps the semantics of action chains, events, relationship changes, and the story system consistent;
+3. It avoids the disconnect of "a chat happened in the UI, but there is no corresponding action in the world".
 
-因此推荐路径是：
+Therefore the recommended path is:
 
-1. 玩家通过一期文本决策或二期有限响应，让角色执行 `Talk` / `Conversation` 相关动作；
-2. 当动作链推进到 `Conversation` 时：
-   - 若当前不是玩家扮演：沿用现有 AI 对话逻辑；
-   - 若当前是玩家扮演：进入三期 `conversation` 型 request；
-3. 对话结束后，`Conversation` 动作完成并进入结算。
+1. Through a Phase 1 text decision or Phase 2 finite response, the player has the avatar execute a `Talk` / `Conversation` related action;
+2. When the action chain advances to `Conversation`:
+   - If not currently roleplayed by the player: keep using the existing AI dialogue logic;
+   - If currently roleplayed by the player: enter a Phase 3 `conversation`-type request;
+3. After the dialogue ends, the `Conversation` action completes and enters settlement.
 
-### 9.2 对话会话启动
+### 9.2 Conversation Session Start
 
-当 `Conversation` 动作检测到“当前对话主体是玩家扮演角色”时：
+When the `Conversation` action detects that "the current dialogue subject is the player-roleplayed avatar":
 
-1. 创建 `RoleplayPromptRequest(type=conversation)`；
-2. 构建 `conversation_session`；
-3. 进入 `conversing` 状态；
-4. 世界暂停；
-5. 底部 dock 切换为 chat 界面。
+1. Create `RoleplayPromptRequest(type=conversation)`;
+2. Build the `conversation_session`;
+3. Enter the `conversing` state;
+4. Pause the world;
+5. Switch the bottom dock to the chat interface.
 
-### 9.3 多轮聊天
+### 9.3 Multi-Turn Chat
 
-多轮对话期间采用“玩家一侧输入，目标角色由 LLM 回复”的单边接管模式。
+During multi-turn dialogue, a one-sided takeover mode of "the player inputs one side, the target avatar is answered by the LLM" is used.
 
-这意味着：
+This means:
 
-- 玩家只控制当前扮演角色的发言；
-- 对方角色不由玩家代打，不支持双边手动输入；
-- 每次玩家发送一句，系统生成目标角色一句回复；
-- 逐轮追加到 runtime `messages`；
-- 原始消息不直接写入正式事件系统。
+- The player only controls the speech of the currently roleplayed avatar;
+- The other avatar is not played by the player, and two-sided manual input is not supported;
+- Each time the player sends a line, the system generates one reply line from the target avatar;
+- Turns are appended to the runtime `messages`;
+- Raw messages are not written directly into the formal event system.
 
-### 9.4 三期 prompt 设计
+### 9.4 Phase 3 Prompt Design
 
-三期需要单独的 conversation prompt，不建议复用一期开放式动作规划 prompt。
+Phase 3 needs a separate conversation prompt; reusing the Phase 1 open-ended action planning prompt is not recommended.
 
-建议 prompt 上下文至少分四段：
+It is recommended that the prompt context be split into at least four sections:
 
-1. 双方角色信息
-   - 姓名、境界、立场、关系、当前状态、近期目标
-2. 历史交互摘要
-   - 近期共同事件
-   - 关系变化
-   - 之前重要往来
-3. 本次对话上下文
-   - 谁发起
-   - 为什么开始
-   - 所在地点
-   - 当前时间
-4. 本轮前文
-   - 最近若干轮 message history
+1. Information about both avatars
+   - Name, realm, alignment, relationship, current state, recent goals
+2. Summary of historical interactions
+   - Recent shared events
+   - Relationship changes
+   - Important past exchanges
+3. Context of this conversation
+   - Who initiated it
+   - Why it started
+   - Location
+   - Current time
+4. Preceding text of this round
+   - The most recent several rounds of message history
 
-建议 LLM 输出固定结构：
+It is recommended that the LLM output a fixed structure:
 
 - `reply_content`
 - `speaker_thinking`
@@ -688,257 +688,257 @@
 - `summary_hint`
 - `relation_hint`
 
-额外约束：
+Additional constraints:
 
-- LLM 不能主动结束会话；
-- 会话结束权只属于玩家显式点击“结束对话”；
-- 若 LLM 认为话题已尽，可通过 `conversation_state` 或 `summary_hint` 表达“适合收尾”，但不得直接终止。
+- The LLM cannot end the session on its own;
+- The right to end the session belongs only to the player explicitly clicking "End Conversation";
+- If the LLM thinks the topic is exhausted, it can express "suitable to wrap up" via `conversation_state` or `summary_hint`, but must not terminate directly.
 
-### 9.5 结束对话
+### 9.5 Ending the Conversation
 
-结束权以玩家为准。
+The player has the final say on ending.
 
-允许的结束方式：
+Allowed ways to end:
 
-- 玩家主动点击“结束对话”；
-- 目标角色失效、死亡、离场等导致被迫中断。
+- The player actively clicks "End Conversation";
+- Forced interruption caused by the target avatar becoming invalid, dying, leaving, etc.
 
-不允许：
+Not allowed:
 
-- LLM 自主判定并结束对话。
+- The LLM autonomously deciding to end the conversation.
 
-结束后：
+After ending:
 
-1. 调用 summary 服务；
-2. 生成摘要事件；
-3. 可选生成关系变化 hint；
-4. 可选生成故事扩展事件；
-5. 清空临时对话缓存；
-6. 恢复 `observing` 或继续后续动作链。
+1. Call the summary service;
+2. Generate a summary event;
+3. Optionally generate a relationship change hint;
+4. Optionally generate a story extension event;
+5. Clear the temporary conversation cache;
+6. Return to `observing` or continue the subsequent action chain.
 
-### 9.6 Summary 设计
+### 9.6 Summary Design
 
-三期 summary 服务建议输出三层结果：
+It is recommended that the Phase 3 summary service output three layers of results:
 
 1. `conversation_brief_summary`
-   - 面向事件栏
-   - 一至两句叙述文本
+   - For the event panel
+   - One to two sentences of narrative text
 2. `conversation_relation_hint`
-   - 面向关系变化计算
-   - 可以是结构化 hint
+   - For relationship change calculation
+   - Can be a structured hint
 3. `conversation_story_hint`
-   - 面向后续小故事扩展
-   - 可选
+   - For subsequent story event extension
+   - Optional
 
-其中：
+Of these:
 
-- 正式事件流至少写入 `conversation_brief_summary`；
-- 原始聊天记录不进入长期事件存储；
-- summary 本身也不要求进存档，最终长期事实以入库后的事件和关系变化结果为准。
+- The formal event stream writes at least `conversation_brief_summary`;
+- The raw chat log does not enter long-term event storage;
+- The summary itself is also not required to go into the save; the final long-term facts are the events and relationship change results after they are stored.
 
-## 10. 后端架构建议
+## 10. Backend Architecture Recommendations
 
-## 10.1 新增 service 模块
+## 10.1 New Service Modules
 
-建议新增独立 service，而不是把逻辑继续堆回 `src/server/main.py`：
+It is recommended to add independent services rather than continuing to pile logic back into `src/server/main.py`:
 
 - `src/server/services/roleplay_service.py`
 - `src/server/services/roleplay_queries.py`
 - `src/server/services/choice_resolver.py`
 - `src/server/services/choice_continuation.py`
 
-职责建议：
+Proposed responsibilities:
 
-- 管理 `RoleplaySession` 生命周期；
-- 创建、读取、清除 `RoleplayPromptRequest`；
-- 执行玩家提交；
-- 处理失效 avatar、退出、冲突检测；
-- 提供运行时查询 DTO。
+- Manage the `RoleplaySession` lifecycle;
+- Create, read, and clear `RoleplayPromptRequest`;
+- Execute player submissions;
+- Handle invalid avatars, exits, and conflict detection;
+- Provide runtime query DTOs.
 
-其中二期新增职责建议为：
+Of these, the proposed new Phase 2 responsibilities are:
 
 - `choice_resolver.py`
-  - 决定某次有限决策由 LLM、玩家还是 fallback 完成
+  - Decide whether a given finite decision is completed by the LLM, the player, or a fallback
 - `choice_continuation.py`
-  - 管理被玩家接管时的挂起与恢复
+  - Manage suspension and resumption when taken over by the player
 
-## 10.2 Runtime 层扩展
+## 10.2 Runtime Layer Extensions
 
-建议在当前 runtime session 上扩展以下内容：
+It is recommended to extend the current runtime session with:
 
-- roleplay session 状态；
-- pause reasons；
-- 统一 pause 聚合逻辑。
+- roleplay session state;
+- pause reasons;
+- Unified pause aggregation logic.
 
-不要把这些状态分散保存在：
+Do not scatter this state across:
 
-- 前端本地 store 单边假设；
-- world 对象；
-- 模块级全局变量。
+- One-sided assumptions in a frontend local store;
+- The world object;
+- Module-level global variables.
 
-## 10.3 决策注入点
+## 10.3 Decision Injection Point
 
-一期的最佳注入点应在“角色需要补决策”的地方，而不是动作执行层内部。
+The best injection point for Phase 1 should be where "an avatar needs a decision filled in", not inside the action execution layer.
 
-推荐位置：
+Recommended locations:
 
-- 模拟器决策相位；
-- 或其上层调用的 service/adapter。
+- The simulator decision phase;
+- Or the service/adapter called from above it.
 
-目标是做到：
+The goal is to achieve:
 
-- 对扮演角色：转为创建 `pending_request`；
-- 对非扮演角色：维持现有 `llm_ai.decide(...)`。
+- For the roleplayed avatar: switch to creating a `pending_request`;
+- For non-roleplayed avatars: keep the existing `llm_ai.decide(...)`.
 
-### 10.4 二期的有限决策注入点
+### 10.4 Phase 2 Finite Decision Injection Point
 
-二期的注入点不应散落在每个业务场景中各写一套 `if roleplay then ...`。
+Phase 2 injection points should not be scattered across each business scenario, each with its own `if roleplay then ...`.
 
-建议统一在：
+It is recommended to unify them in:
 
-- `single_choice` 的统一入口 resolver
+- The unified entry-point resolver of `single_choice`
 
-也就是说：
+In other words:
 
-- 业务只负责 `build_request` 与 `apply_decision`
-- resolver 负责判断是否转为玩家 choice request
-- continuation 负责恢复原流程
+- Business logic is only responsible for `build_request` and `apply_decision`
+- The resolver is responsible for deciding whether to switch to a player choice request
+- The continuation is responsible for resuming the original flow
 
-## 10.5 三期 summary 服务
+## 10.5 Phase 3 Summary Service
 
-三期建议额外新增：
+For Phase 3 it is recommended to additionally add:
 
 - `src/server/services/roleplay_conversation_summary.py`
 - `src/server/services/roleplay_conversation_service.py`
 
-职责：
+Responsibilities:
 
 - `roleplay_conversation_service.py`
-  - 创建 / 读取 / 推进 `conversation_session`
-  - 处理玩家发送发言
-  - 调用 LLM 生成目标角色回复
-  - 在结束时触发 summary
+  - Create / read / advance the `conversation_session`
+  - Handle the player sending a line
+  - Call the LLM to generate the target avatar's reply
+  - Trigger the summary on end
 - `roleplay_conversation_summary.py`
-  - 接收临时对话轮次
-  - 输出叙述型事件文本
-  - 控制摘要长度与风格
-  - 提供关系 / 故事 hint
-  - 不直接耦合 UI 层
+  - Receive temporary conversation turns
+  - Output narrative event text
+  - Control summary length and style
+  - Provide relationship / story hints
+  - Not directly coupled to the UI layer
 
-## 11. API 设计建议
+## 11. API Design Recommendations
 
-本功能应遵循现有 public v1 query/command 分层。
+This feature should follow the existing public v1 query/command layering.
 
 ## 11.1 Query
 
-建议新增：
+Proposed additions:
 
 ### `GET /api/v1/query/roleplay/session`
 
-返回当前扮演会话：
+Returns the current roleplay session:
 
-- 当前扮演角色；
-- 当前状态；
-- 当前 pending request；
-- 当前 pause reason；
-- 是否允许提交；
-- 最近角色事件过滤参数。
+- The currently roleplayed avatar;
+- The current status;
+- The current pending request;
+- The current pause reason;
+- Whether submission is allowed;
+- Recent avatar event filter parameters.
 
-### 扩展 `GET /api/v1/query/runtime/status`
+### Extending `GET /api/v1/query/runtime/status`
 
-建议补充：
+Proposed additions:
 
 - `pause_reason`
 - `pause_reason_detail`
 - `roleplay_status`
 - `roleplay_avatar_id`
 
-这样前端顶部状态栏和强提示层可以直接复用 runtime status，而不是额外拼接多个接口结果。
+This way the frontend top status bar and prominent prompt layer can directly reuse runtime status, instead of stitching together results from multiple interfaces.
 
 ## 11.2 Command
 
-建议新增：
+Proposed additions:
 
 ### `POST /api/v1/command/roleplay/start`
 
-请求：
+Request:
 
 - `avatar_id`
 
-行为：
+Behavior:
 
-- 开始扮演指定角色；
-- 若已有其他角色正在扮演，则返回冲突错误。
+- Start roleplaying the specified avatar;
+- If another avatar is already being roleplayed, return a conflict error.
 
 ### `POST /api/v1/command/roleplay/stop`
 
-请求：
+Request:
 
-- 可为空，或带 `avatar_id` 作一致性校验。
+- Can be empty, or include `avatar_id` for a consistency check.
 
-行为：
+Behavior:
 
-- 结束当前扮演；
-- 清空 pending request；
-- 清除 roleplay pause reason。
+- End the current roleplay;
+- Clear the pending request;
+- Clear the roleplay pause reason.
 
 ### `POST /api/v1/command/roleplay/submit-decision`
 
-请求：
+Request:
 
 - `request_id`
 - `avatar_id`
 - `command_text`
 
-行为：
+Behavior:
 
-- 将玩家文本转为动作链并装载。
+- Convert the player's text into an action chain and load it.
 
 ### `POST /api/v1/command/roleplay/submit-choice`
 
-二期使用：
+Used in Phase 2:
 
 - `request_id`
 - `avatar_id`
 - `selected_key`
 
-说明：
+Notes:
 
-- 该接口不应直接承载业务语义；
-- 它只负责把“玩家选择了哪个 key”交回统一 continuation；
-- 由 continuation 恢复原流程并调用对应场景的 `apply_decision(...)`。
+- This interface should not carry business semantics directly;
+- It is only responsible for handing "which key the player selected" back to the unified continuation;
+- The continuation resumes the original flow and calls the corresponding scenario's `apply_decision(...)`.
 
 ### `POST /api/v1/command/roleplay/conversation/send`
 
-三期使用：
+Used in Phase 3:
 
 - `request_id`
 - `avatar_id`
 - `message`
 
-行为：
+Behavior:
 
-- 将玩家本轮发言追加到 `conversation_session`
-- 调用 conversation prompt 生成目标角色回复
-- 返回最新消息列表或最新增量消息
-- 维持世界暂停
+- Append the player's line for this turn to the `conversation_session`
+- Call the conversation prompt to generate the target avatar's reply
+- Return the latest message list or the latest incremental messages
+- Keep the world paused
 
 ### `POST /api/v1/command/roleplay/conversation/end`
 
-三期使用：
+Used in Phase 3:
 
-- 主动结束对话并触发 summary。
+- Actively end the conversation and trigger the summary.
 
-行为：
+Behavior:
 
-- 仅允许玩家显式触发；
-- 触发 summary；
-- 完成 `Conversation` 动作；
-- 清空 runtime 对话缓存。
+- Only allowed to be triggered explicitly by the player;
+- Trigger the summary;
+- Complete the `Conversation` action;
+- Clear the runtime conversation cache.
 
-## 11.3 错误码建议
+## 11.3 Error Code Recommendations
 
-建议显式定义若干稳定错误：
+It is recommended to explicitly define several stable errors:
 
 - `ROLEPLAY_ALREADY_ACTIVE`
 - `ROLEPLAY_AVATAR_NOT_FOUND`
@@ -948,361 +948,361 @@
 - `ROLEPLAY_SUBMIT_NOT_ALLOWED`
 - `ROLEPLAY_CONVERSATION_NOT_ACTIVE`
 
-## 12. 前端设计建议
+## 12. Frontend Design Recommendations
 
-## 12.1 信息面板挂载点
+## 12.1 Info Panel Mount Point
 
-挂载点建议放在 avatar info panel 内，但作为独立子组件，而不是把逻辑全部塞进当前 detail 组件。
+The mount point is recommended to be inside the avatar info panel, but as an independent child component, rather than stuffing all the logic into the current detail component.
 
-建议新增：
+Proposed addition:
 
 - `web/src/components/game/panels/info/components/RoleplayPanel.vue`
 
-主要职责：
+Main responsibilities:
 
-- 显示当前是否可进入扮演；
-- 显示进入/退出按钮。
+- Show whether roleplay can currently be entered;
+- Show the enter/exit buttons.
 
-三期的主要交互面不再放在 avatar info panel 内，而是继续使用主界面底部 dock。
+The main interaction surface for Phase 3 is no longer inside the avatar info panel, but continues to use the bottom dock of the main interface.
 
 ## 12.2 Store
 
-建议新增：
+Proposed addition:
 
 - `web/src/stores/roleplay.ts`
 
-职责：
+Responsibilities:
 
-- 拉取/缓存当前 roleplay session；
-- 负责 start/stop/submit；
-- 管理正在提交、错误提示、局部 UI loading；
-- 与 runtime status 联动。
+- Fetch/cache the current roleplay session;
+- Handle start/stop/submit;
+- Manage in-progress submission, error hints, and local UI loading;
+- Stay in sync with runtime status.
 
-## 12.3 事件流展示
+## 12.3 Event Stream Display
 
-不要单独造一套 roleplay event backend。
+Do not build a separate roleplay event backend.
 
-应复用现有事件接口，通过 `avatar_id` 过滤加载该角色事件流。
+Reuse the existing event interface, filtering by `avatar_id` to load the avatar's event stream.
 
-实现建议：
+Implementation recommendations:
 
-- 右侧全局事件栏继续保留；
-- RoleplayPanel 内复用同一套事件渲染逻辑；
-- 最好提取共享的 `EventTimelineList` 组件，避免维护两套 event item UI。
+- Keep the right-side global event panel;
+- Reuse the same event rendering logic inside RoleplayPanel;
+- Ideally extract a shared `EventTimelineList` component to avoid maintaining two sets of event item UI.
 
-## 12.4 强提示
+## 12.4 Prominent Prompt
 
-当世界因为 roleplay 请求而暂停时，需要明显提示。
+When the world is paused because of a roleplay request, a clear prompt is needed.
 
-建议至少包含：
+It is recommended to include at least:
 
-- 当前是哪个角色正在等待玩家；
-- 当前等待类型：文本决策 / 选项选择 / 对话输入；
-- “世界已暂停，等待你的操作”；
-- 明确的提交入口。
+- Which avatar is currently waiting on the player;
+- The current wait type: text decision / option choice / conversation input;
+- "The world is paused, waiting for your action";
+- A clear submission entry point.
 
-一期二期可用 dock 顶部状态栏承担强提示；三期对话期间则由 chat 头部承担。
+Phases 1 and 2 can use the dock's top status bar for the prominent prompt; during Phase 3 conversations the chat header takes on this role.
 
-### 12.5 三期对话 UI
+### 12.5 Phase 3 Conversation UI
 
-三期不建议新开弹窗或独立页面，继续复用当前底部 `RoleplayDock`。
+For Phase 3, opening a new modal or standalone page is not recommended; keep reusing the current bottom `RoleplayDock`.
 
-建议在 dock 中新增第三种模式：
+It is recommended to add a third mode to the dock:
 
 - `decision`
 - `choice`
 - `conversation`
 
-其中 `conversation` 模式建议采用 chat 布局：
+The `conversation` mode is recommended to use a chat layout:
 
-1. 顶部一行
-   - 当前角色
-   - 对话对象
-   - 当前状态
-   - “结束对话”按钮
-2. 中部主区
-   - 消息流
-   - 左右区分说话双方
-3. 底部输入区
-   - 输入框
-   - 发送按钮
+1. Top row
+   - Current avatar
+   - Conversation partner
+   - Current status
+   - "End Conversation" button
+2. Middle main area
+   - Message stream
+   - Left/right distinction between the two speakers
+3. Bottom input area
+   - Input box
+   - Send button
 
-界面约束：
+Interface constraints:
 
-- 信息密度优先，不做大面积空白区；
-- 顶部工具栏保持紧凑；
-- 对话进行中可以同时显示 chat 与事件摘要区，但 chat 是主内容区；
-- 会话结束后 dock 恢复普通事件流视图。
+- Information density first, no large blank areas;
+- Keep the top toolbar compact;
+- While a conversation is in progress, the chat and an event summary area can be shown at the same time, but the chat is the main content area;
+- After the session ends, the dock returns to the normal event stream view.
 
-## 13. 读档、存档与生命周期
+## 13. Loading, Saving, and Lifecycle
 
-## 13.1 存档
+## 13.1 Saving
 
-扮演态不写入存档。
+The roleplay state is not written into the save.
 
-原因：
+Reasons:
 
-- 它不是世界长期状态；
-- 恢复成本高；
-- 容易引入“读档后请求上下文已失效”的一致性问题。
+- It is not long-term world state;
+- Restoring it is costly;
+- It easily introduces consistency problems like "the request context is invalid after loading".
 
-## 13.2 读档
+## 13.2 Loading
 
-每次 load game 后应：
+After every load game:
 
-1. 清空 roleplay session；
-2. 清空所有 roleplay pause reason；
-3. 清空 pending request；
-4. 前端收到新运行时状态后重置 roleplay store。
+1. Clear the roleplay session;
+2. Clear all roleplay pause reasons;
+3. Clear the pending request;
+4. The frontend resets the roleplay store after receiving the new runtime state.
 
-## 13.3 其他生命周期节点
+## 13.3 Other Lifecycle Points
 
-以下操作后也应执行相同清理：
+The same cleanup should also be performed after the following operations:
 
 - start game
 - reinit game
 - reset game
 
-## 14. 边界情况与兜底
+## 14. Edge Cases and Fallbacks
 
-至少需要覆盖以下边界情况：
+At least the following edge cases need to be covered:
 
-### 14.1 被扮演角色死亡
+### 14.1 The Roleplayed Avatar Dies
 
-若扮演角色死亡：
+If the roleplayed avatar dies:
 
-- 自动退出扮演；
-- 清空 pending request；
-- 广播 toast 或提示。
+- Automatically exit roleplay;
+- Clear the pending request;
+- Broadcast a toast or hint.
 
-### 14.2 被扮演角色被删除或不存在
+### 14.2 The Roleplayed Avatar Is Deleted or Does Not Exist
 
-若角色失效：
+If the avatar becomes invalid:
 
-- roleplay session 自动失效；
-- 不允许继续提交旧请求。
+- The roleplay session automatically becomes invalid;
+- Old requests may no longer be submitted.
 
-### 14.3 玩家提交过慢
+### 14.3 The Player Submits Too Slowly
 
-本设计允许无限等待，不做超时自动 AI 接管。
+This design allows waiting indefinitely, with no timeout-based automatic AI takeover.
 
-但请求对象仍应具备版本或 request_id，以防：
+But the request object should still carry a version or request_id, to guard against:
 
-- 玩家页面滞后；
-- 重复提交旧请求；
-- 读档后旧前端仍在提交。
+- The player's page lagging behind;
+- Repeated submission of old requests;
+- An old frontend still submitting after a load.
 
-### 14.4 退出时正处于等待输入
+### 14.4 Exiting While Waiting for Input
 
-建议行为：
+Recommended behavior:
 
-- 弹确认；
-- 确认后结束扮演并交还 AI 接管；
-- 不保留旧请求。
+- Show a confirmation;
+- After confirmation, end roleplay and hand control back to the AI;
+- Do not keep the old request.
 
-### 14.5 扮演期间切换查看其他角色
+### 14.5 Switching to View Other Avatars During Roleplay
 
-允许。
+Allowed.
 
-这是“上帝视角下局部接管”的核心设计要求，不应限制玩家只能看当前角色。
+This is a core design requirement of "local takeover under the god's-eye view"; the player should not be restricted to viewing only the current avatar.
 
-### 14.6 挂起中的 choice 在存档/重置/读档后失效
+### 14.6 Suspended Choices Become Invalid After Save/Reset/Load
 
-由于扮演态与 continuation 都不进存档，因此：
+Since neither the roleplay state nor continuations go into the save:
 
-- 所有挂起中的 `choice` continuation 在 load/reinit/reset 后都必须失效；
-- 前端提交旧 `request_id` 时应收到稳定错误；
-- 不允许在读档后尝试恢复旧 continuation。
+- All suspended `choice` continuations must become invalid after load/reinit/reset;
+- The frontend should receive a stable error when submitting an old `request_id`;
+- Attempting to restore an old continuation after loading is not allowed.
 
-### 14.7 同一时间仅允许一个挂起中的 roleplay continuation
+### 14.7 Only One Suspended Roleplay Continuation Is Allowed at a Time
 
-二期仍维持“最多扮演一个角色”的约束，因此：
+Phase 2 still maintains the constraint of "roleplaying at most one avatar", therefore:
 
-- 同一时刻只允许一个活跃中的 roleplay continuation；
-- 不支持多个 choice 同时等待；
-- 若某流程已在等待 choice，不允许新的 roleplay request 覆盖旧 request。
+- Only one active roleplay continuation is allowed at any moment;
+- Multiple choices waiting at the same time is not supported;
+- If a flow is already waiting on a choice, a new roleplay request is not allowed to overwrite the old request.
 
-## 15. 对现有系统的影响
+## 15. Impact on Existing Systems
 
-## 15.1 动作系统
+## 15.1 Action System
 
-影响较小。
+Small impact.
 
-原因：
+Reasons:
 
-- 现有动作链本就支持“链条执行完后再补新决策”；
-- 扮演模式只是在补决策的入口处替换决策来源。
+- The existing action chain already supports "fill in a new decision after the chain finishes executing";
+- Roleplay mode only replaces the decision source at the entry point for filling in decisions.
 
 ## 15.2 single_choice
 
-二期需要做结构性重构，但不是推翻重写。
+Phase 2 requires a structural refactor, but not a tear-down rewrite.
 
-建议改造目标：
+Proposed refactor goals:
 
-1. 保留现有 `request / decision / scenario` 思路；
-2. 新增统一 resolver；
-3. 新增 continuation；
-4. 让业务层停止直接关心“决策来自 LLM 还是玩家”。
+1. Keep the existing `request / decision / scenario` approach;
+2. Add a unified resolver;
+3. Add continuation;
+4. Make the business layer stop caring directly about "whether the decision comes from the LLM or the player".
 
-这是二期最关键的基础设施变更。
+This is the most critical infrastructure change in Phase 2.
 
 ## 15.3 mutual action
 
-二期需要把部分 `RESPONSE_ACTIONS` 暴露为玩家选项，但底层响应落地逻辑仍应复用原实现。
+Phase 2 needs to expose some `RESPONSE_ACTIONS` as player options, but the underlying response application logic should still reuse the original implementation.
 
-## 15.4 事件系统
+## 15.4 Event System
 
-一期和二期影响较小，只是新增局部展示。
+Phases 1 and 2 have a small impact, only adding local display.
 
-三期会引入：
+Phase 3 will introduce:
 
-- 对话 summary 生成；
-- summary 写入事件系统；
-- 原始对话不上正式事件流。
+- Conversation summary generation;
+- Writing the summary into the event system;
+- Raw dialogue not going onto the formal event stream.
 
-## 16. 测试建议
+## 16. Testing Recommendations
 
-## 16.1 后端
+## 16.1 Backend
 
-建议新增以下测试方向：
+The following test directions are recommended:
 
-1. 进入扮演后，同一时刻不可扮演第二个角色。
-2. 扮演角色有动作链时不会立刻暂停。
-3. 扮演角色动作链结束时会创建 pending request。
-4. pending request 存在时世界暂停且不会继续推进。
-5. 提交有效文本后会装载计划并恢复运行。
-6. 提交无效 request_id 会返回稳定错误。
-7. load/reinit/reset 后 roleplay session 被清空。
-8. 角色死亡后自动退出扮演。
-9. 二期 choice 提交会复用原有选择应用逻辑。
-10. 三期对话结束后只写入 summary 事件。
+1. After entering roleplay, a second avatar cannot be roleplayed at the same time.
+2. The roleplayed avatar does not pause immediately while it has an action chain.
+3. A pending request is created when the roleplayed avatar's action chain ends.
+4. While a pending request exists, the world is paused and does not continue advancing.
+5. Submitting valid text loads the plan and resumes running.
+6. Submitting an invalid request_id returns a stable error.
+7. The roleplay session is cleared after load/reinit/reset.
+8. Roleplay is exited automatically after the avatar dies.
+9. Phase 2 choice submission reuses the original choice application logic.
+10. After a Phase 3 conversation ends, only the summary event is written.
 
-二期还应新增以下专项测试：
+Phase 2 should also add the following dedicated tests:
 
-11. `single_choice` 在非 roleplay 模式下仍保持原有 LLM/fallback 行为。
-12. `single_choice` 在 roleplay 模式下会创建统一 `choice` request，而不是立即返回 LLM decision。
-13. 玩家提交 `selected_key` 后会恢复 continuation，并调用对应场景的 `apply_decision(...)`。
-14. continuation 在 load/reset/reinit 后自动失效。
+11. `single_choice` still keeps the original LLM/fallback behavior in non-roleplay mode.
+12. In roleplay mode, `single_choice` creates a unified `choice` request instead of immediately returning an LLM decision.
+13. After the player submits `selected_key`, the continuation is resumed and the corresponding scenario's `apply_decision(...)` is called.
+14. Continuations automatically become invalid after load/reset/reinit.
 
-## 16.2 前端
+## 16.2 Frontend
 
-建议新增以下测试方向：
+The following test directions are recommended:
 
-1. AvatarDetail 中正确显示进入/退出扮演按钮。
-2. 正在扮演其他角色时，当前面板显示不可接管状态。
-3. roleplay session 为等待状态时显示强提示。
-4. 文本提交成功后输入框清空并收起等待态。
-5. roleplay 局部事件流正确按 avatar_id 加载。
-6. load game 后 roleplay store 自动重置。
-7. 三期 conversation request 能正确渲染 chat UI。
-8. 玩家发送一轮消息后会出现 LLM 回复。
-9. 点击结束对话后会关闭 conversation 状态并恢复普通事件流。
+1. AvatarDetail correctly shows the enter/exit roleplay buttons.
+2. While another avatar is being roleplayed, the current panel shows a cannot-take-over state.
+3. A prominent prompt is shown when the roleplay session is in a waiting state.
+4. After a successful text submission, the input box is cleared and the waiting state is collapsed.
+5. The roleplay local event stream is loaded correctly by avatar_id.
+6. The roleplay store resets automatically after load game.
+7. A Phase 3 conversation request correctly renders the chat UI.
+8. An LLM reply appears after the player sends one round of messages.
+9. Clicking End Conversation closes the conversation state and restores the normal event stream.
 
-## 17. 分期落地建议
+## 17. Phased Delivery Recommendations
 
-建议按以下顺序实施：
+The following implementation order is recommended:
 
-### 第一步
+### Step 1
 
-先做 runtime 扩展：
+First do the runtime extensions:
 
 - roleplay session
 - pause reasons
-- runtime status/query 扩展
+- runtime status/query extensions
 
-### 第二步
+### Step 2
 
-做一期最小闭环：
+Do the Phase 1 minimal closed loop:
 
 - start/stop/submit-decision API
-- 决策注入点
-- 前端 RoleplayPanel
-- 强提示
+- Decision injection point
+- Frontend RoleplayPanel
+- Prominent prompt
 
-### 第三步
+### Step 3
 
-做二期第一阶段：
+Do the first stage of Phase 2:
 
-- 重构 `single_choice` 统一入口
-- 引入 `ChoiceResolver`
-- 引入 continuation / resume token
-- 前端统一 `choice` request UI
+- Refactor the unified `single_choice` entry point
+- Introduce `ChoiceResolver`
+- Introduce continuation / resume token
+- Unified frontend `choice` request UI
 
-### 第四步
+### Step 4
 
-做二期第二阶段：
+Do the second stage of Phase 2:
 
-- 先迁移 `item_exchange`
-- 再迁移 `sect_recruitment`
-- 最后迁移 mutual action 响应
+- Migrate `item_exchange` first
+- Then migrate `sect_recruitment`
+- Finally migrate mutual action responses
 
-### 第五步
+### Step 5
 
-做三期：
+Do Phase 3:
 
-- 以 `Conversation` 动作为唯一触发入口接入玩家对话
+- Hook up player dialogue with the `Conversation` action as the only trigger entry point
 - conversation session
 - conversation prompt
 - conversation summary service
-- 对话 UI
-- 关系 / 故事 hint 结算
+- Conversation UI
+- Relationship / story hint settlement
 
-## 18. 结论
+## 18. Conclusion
 
-“个人模式”最合理的落地方式不是新建一个与上帝模式并列的全局模式，而是：
+The most reasonable way to deliver "personal mode" is not to build a new global mode parallel to god mode, but to:
 
-- 默认始终是上帝视角；
-- 允许玩家在上帝视角下接管一个角色；
-- 只在决策边界暂停世界等待玩家；
-- 一期做文本决策；
-- 二期先做通用有限决策框架，再在其上承载选项与邀约响应；
-- 三期继续依附 `Conversation` 动作实现玩家自由对话，并以 summary 入事件。
+- Always default to the god's-eye view;
+- Allow the player to take over one avatar under the god's-eye view;
+- Pause the world to wait for the player only at decision boundaries;
+- Do text decisions in Phase 1;
+- In Phase 2, first build the general finite decision framework, then carry options and invitation responses on top of it;
+- In Phase 3, continue attaching to the `Conversation` action to implement player free-form dialogue, with the summary entering the events.
 
-这条路线对现有架构最友好，也最符合当前仓库已经成型的 runtime / public v1 API / 事件系统 / 动作链体系。
+This route is the friendliest to the existing architecture and best fits the runtime / public v1 API / event system / action chain system already established in the current repository.
 
-## 19. 三期最终拍板结论
+## 19. Final Phase 3 Decisions
 
-本轮需求确认后，三期按以下结论执行：
+After requirements confirmation in this round, Phase 3 is executed according to the following decisions:
 
-1. 对话必须依附现有 `Conversation` 动作触发，不新增独立自由聊天入口。
-2. 对话采用“玩家说一句，目标角色由 LLM 回一句”的单边接管模式。
-3. 结束权以玩家为准，LLM 不能主动结束对话。
-4. 原始聊天记录不进存档；对话会话态完全属于 runtime。
-5. Summary 可以输出“摘要事件 + 关系 hint + 可选故事扩展”三层结果。
-6. 底部 dock 在对话进行中允许同时展示 chat 与事件区域，但应以 chat 为主。
+1. Dialogue must be triggered by attaching to the existing `Conversation` action; no standalone free chat entry point is added.
+2. Dialogue uses the one-sided takeover mode of "the player says one line, the target avatar replies with one line via the LLM".
+3. The player has the final say on ending; the LLM cannot end the conversation on its own.
+4. Raw chat logs do not go into the save; the conversation session state belongs entirely to the runtime.
+5. The summary can output a three-layer result of "summary event + relationship hint + optional story extension".
+6. While a conversation is in progress, the bottom dock may show the chat and event area at the same time, but the chat should be primary.
 
-## 20. 三期实现计划
+## 20. Phase 3 Implementation Plan
 
-建议按以下顺序落地：
+The following delivery order is recommended:
 
-### 20.1 后端 runtime 与协议层
+### 20.1 Backend Runtime and Protocol Layer
 
-- 扩展 `RoleplaySession` 支持 `conversation_session`
-- 扩展 `RoleplayPromptRequest(type=conversation)`
-- 扩展 runtime status / query DTO
-- 新增 conversation send / end command
+- Extend `RoleplaySession` to support `conversation_session`
+- Extend `RoleplayPromptRequest(type=conversation)`
+- Extend runtime status / query DTOs
+- Add conversation send / end commands
 
-### 20.2 动作层接入
+### 20.2 Action Layer Integration
 
-- 以 `Conversation` 动作为唯一入口
-- 非扮演角色继续走现有自动对话逻辑
-- 扮演角色进入 `conversation_session`
+- Use the `Conversation` action as the only entry point
+- Non-roleplayed avatars continue using the existing automatic dialogue logic
+- The roleplayed avatar enters the `conversation_session`
 
-### 20.3 LLM 层
+### 20.3 LLM Layer
 
-- 新增 conversation prompt
-- 新增 conversation summary prompt
-- 先实现稳定的“玩家一句 -> LLM 一句 -> 玩家决定是否继续”
+- Add a conversation prompt
+- Add a conversation summary prompt
+- First implement a stable "player line -> LLM line -> player decides whether to continue"
 
-### 20.4 前端层
+### 20.4 Frontend Layer
 
-- 在 `RoleplayDock` 中新增 `conversation` 模式
-- 实现消息流、发送、结束对话
-- 对话结束后回切普通事件流
+- Add a `conversation` mode to `RoleplayDock`
+- Implement the message stream, sending, and ending the conversation
+- Switch back to the normal event stream after the conversation ends
 
-### 20.5 测试层
+### 20.5 Testing Layer
 
-- 后端会话创建、推进、结束、失效
-- summary 入事件
-- reset/load/stop 后会话清空
-- 前端 dock chat 模式渲染与交互
+- Backend session creation, advancement, ending, and invalidation
+- Summary entering events
+- Session cleared after reset/load/stop
+- Frontend dock chat mode rendering and interaction

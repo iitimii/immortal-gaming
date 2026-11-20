@@ -1,289 +1,289 @@
-# 前端架构与开发指南 (Frontend Architecture Guide)
+# Frontend Architecture Guide
 
-本文档旨在帮助开发者（及 AI 助手）快速理解 `web/` 目录下的前端架构、文件职责及核心数据流。在进行 Vibe Coding 或重构时，请参考此文档。
+This document helps developers (and AI assistants) quickly understand the frontend architecture under `web/`, file responsibilities, and core data flow. Refer to it when vibe coding or refactoring.
 
-## 1. 技术栈概览 (Tech Stack)
+## 1. Tech Stack
 
-*   **核心框架**: Vue 3 (Composition API + `<script setup>`) + TypeScript
-*   **构建工具**: Vite
-*   **状态管理**: Pinia (模块化 Store)
-*   **UI 组件库**: Naive UI (用于系统菜单、面板等常规 UI)
-*   **游戏渲染**: Vue3-Pixi (基于 Pixi.js 的 2D 渲染引擎，处理地图、角色动画)
-*   **网络请求**: 基于 `fetch` 的轻量封装（`web/src/api/http.ts`）
-*   **国际化**: Vue I18n
+*   **Core framework**: Vue 3 (Composition API + `<script setup>`) + TypeScript
+*   **Build tool**: Vite
+*   **State management**: Pinia (modular stores)
+*   **UI library**: Naive UI (system menu, panels, and other conventional UI)
+*   **Game rendering**: Vue3-Pixi (2D rendering on Pixi.js for the map and avatar animation)
+*   **Networking**: a lightweight `fetch` wrapper (`web/src/api/http.ts`)
+*   **Internationalization**: Vue I18n (see `docs/frontend-i18n.md`)
 
-## 2. 目录结构详解 (Directory Structure)
+## 2. Directory Structure
 
-根目录: `web/src/`
+Root: `web/src/`
 
-### 2.1 API 层 (`src/api/`)
-封装所有与后端的 HTTP 交互。
-*   `index.ts`: 统一导出点。
+### 2.1 API Layer (`src/api/`)
+Wraps all HTTP interaction with the backend.
+*   `index.ts`: single export point.
 *   `modules/`:
-    *   `system.ts`: 系统级控制（启动、暂停、重置、存档）。
-    *   `world.ts`: 获取地图数据、初始状态、天象信息。
-    *   `event.ts`: 事件日志的分页拉取。
-    *   `avatar.ts` / `llm.ts` 等：角色详情、LLM 配置和其他垂直领域接口。
+    *   `system.ts`: system-level control (start, pause, reset, saves).
+    *   `world.ts`: map data, initial state, celestial phenomena.
+    *   `event.ts`: paginated event log fetching.
+    *   `avatar.ts` / `llm.ts`, etc.: avatar details, LLM configuration, and other domain-specific endpoints.
 *   `mappers/`:
-    *   `event.ts`: `EventDTO -> GameEvent` 的转换与时间线顺序规范化。
-    *   `world.ts`: `rankings/config` 的响应归一化，减少组件和 store 内散乱兼容逻辑。
-    *   新增接口若有结构转换，应优先在此处归一化，再交给 store / composable。
+    *   `event.ts`: `EventDTO -> GameEvent` conversion and timeline order normalization.
+    *   `world.ts`: normalization of `rankings/config` responses, reducing scattered compatibility logic in components and stores.
+    *   New endpoints that need structural conversion should be normalized here first, then handed to stores / composables.
 
-### 2.2 组件层 (`src/components/`)
-*   **`game/` (核心游戏画面)**
-    *   `GameCanvas.vue`: Pixi.js 应用入口，管理视口 (`Viewport`) 和图层顺序。
-    *   `MapLayer.vue`: 地图渲染的模板壳层；Pixi 生命周期、瓦片构建、动态水面、区域标注等集中在 `components/game/composables/useMapLayerRenderer.ts`。
-    *   `EntityLayer.vue`: 负责角色 (Avatar) 的渲染、移动动画插值。
-    *   `CloudLayer.vue`: 战争迷雾或装饰性云层。
-    *   `panels/`: 游戏内悬浮面板。
-        *   `EventPanel.vue`: 左侧事件日志展示层；滚动、筛选和加载状态集中在 `composables/useEventPanel.ts`。
-        *   `info/`: 选中对象（角色/地块）的详细信息面板容器。
-        *   `system/`: 系统菜单内的子面板（存档、设置、LLM配置、创建角色）。
-*   **`layout/`**: 全局布局组件。
-    *   `StatusBar.vue`: 顶部状态栏（显示年份、资源等）。
-*   **`common/`**: 通用 UI 组件（如自定义按钮、加载条）。
+### 2.2 Component Layer (`src/components/`)
+*   **`game/` (core game view)**
+    *   `GameCanvas.vue`: Pixi.js application entry; manages the `Viewport` and layer order.
+    *   `MapLayer.vue`: template shell for map rendering; Pixi lifecycle, tile building, animated water, region labels, etc. are in `components/game/composables/useMapLayerRenderer.ts`.
+    *   `EntityLayer.vue`: renders avatars and interpolates movement animation.
+    *   `CloudLayer.vue`: fog of war or decorative cloud layer.
+    *   `panels/`: in-game floating panels.
+        *   `EventPanel.vue`: left-side event log view; scrolling, filtering, and loading state are in `composables/useEventPanel.ts`.
+        *   `info/`: container for detail panels of the selected object (avatar/tile).
+        *   `system/`: sub-panels inside the system menu (saves, settings, LLM config, avatar creation).
+*   **`layout/`**: global layout components.
+    *   `StatusBar.vue`: top status bar (year, resources, etc.).
+*   **`common/`**: shared UI components (custom buttons, progress bars, etc.).
 *   **`settings/`**:
-    *   `SettingsPanel.vue`: 可复用设置面板。负责语言、音量、自动保存等设置项，不承担菜单壳层职责。
+    *   `SettingsPanel.vue`: reusable settings panel. Owns settings such as language, volume, and autosave; it does not own the menu shell.
 *   **`system-menu/`**:
-    *   `SystemMenuShell.vue`: 系统菜单壳层。负责 modal 外框、header、tab bar 与内容槽位。
-    *   `tabs/`: 各个菜单 tab 的薄包装组件。
-        *   `SystemMenuSettingsTab.vue`: 挂载 `SettingsPanel`。
-        *   `SystemMenuAboutTab.vue` / `SystemMenuOtherTab.vue`: 静态 tab 内容。
-        *   其余 tab 组件主要负责挂载现有 `panels/system/` 子面板。
-*   `SystemMenu.vue`: 系统菜单装配入口。组合 `SystemMenuShell` 与各 tab 内容，不直接承载大段业务 UI。
-*   `SplashLayer.vue`: 游戏启动时的封面/开始界面。
+    *   `tabs/`: thin wrapper components for each menu tab.
+        *   `SystemMenuSettingsTab.vue`: mounts `SettingsPanel`.
+        *   `SystemMenuAboutTab.vue` / `SystemMenuOtherTab.vue`: static tab content.
+        *   Other tab components mainly mount existing `panels/system/` sub-panels.
+*   `SystemMenuShell.vue`: system menu shell. Owns the modal frame, header, tab bar, and content slot.
+*   `SystemMenu.vue`: system menu assembly entry. Combines `SystemMenuShell` with each tab's content and does not hold large chunks of business UI itself.
+*   `SplashLayer.vue`: cover/start screen shown at launch.
 
-### 2.3 逻辑复用层 (`src/composables/`)
-封装复杂的业务逻辑，使组件保持轻量。
-*   `useAppShell.ts`: 应用壳层状态机。统一管理 `boot / splash / initializing / game` 场景，以及系统菜单、LoadingOverlay 等 overlay 的挂载时机。
-*   `useGameInit.ts`: 负责游戏启动流程检查、后端心跳检测。
-*   `useSystemMenuFlow.ts`: 系统菜单流程层。负责菜单 tab、上下文（`splash/game`）、可关闭状态、LLM 启动检查与菜单打开关闭。
-*   `useGameControl.ts`: 负责纯游戏控制逻辑，如暂停/继续、ESC 输入处理、与菜单可见性的联动暂停恢复。
-*   `useSidebarResize.ts`: 负责侧边栏（事件面板）的拖拽调整宽度逻辑。
-*   `useAudio.ts` / `useBgm.ts`: 音效与背景音乐管理。
-*   `useEventPanel.ts`: 事件面板的数据加载、筛选、滚动和可见状态。
-*   `useLoadingOverlayState.ts`: 启动遮罩的进度文案、阶段状态与展示派生逻辑。
-*   `useRankingModal.ts` / `useDynastyOverviewModal.ts` / `useMortalOverviewModal.ts` / `useTimeOverviewModal.ts` / `useSectRelationsModal.ts` / `useHiddenDomainOverviewModal.ts`: 状态栏弹窗的数据加载和派生字段。
-*   `useRegionDetailPanel.ts` / `useSectDetailPanel.ts` / `useAvatarPortraitPanel.ts`: 详情页与头像换图的局部业务状态。
-*   `components/game/composables/useTextures.ts`: Pixi 纹理的预加载与缓存管理。
-*   `components/game/composables/useMapLayerRenderer.ts`: 地图 Pixi 对象生命周期、静态瓦片构建、水面 ticker、区域标签与交互。
+### 2.3 Composables (`src/composables/`)
+Encapsulate complex business logic to keep components light.
+*   `useAppShell.ts`: app shell state machine. Manages the `boot / splash / initializing / game` scenes and when overlays such as the system menu and `LoadingOverlay` are mounted.
+*   `useGameInit.ts`: game startup checks and backend heartbeat.
+*   `useSystemMenuFlow.ts`: system menu flow layer. Owns menu tabs, context (`splash/game`), closability, the LLM startup check, and opening/closing the menu.
+*   `useGameControl.ts`: pure game control logic, e.g. pause/resume, ESC handling, and pausing/resuming in step with menu visibility.
+*   `useSidebarResize.ts`: drag-to-resize logic for the sidebar (event panel).
+*   `useAudio.ts` / `useBgm.ts`: sound effects and background music.
+*   `useEventPanel.ts`: event panel data loading, filtering, scrolling, and visibility.
+*   `useLoadingOverlayState.ts`: progress text, phase state, and derived display state for the loading overlay.
+*   `useRankingModal.ts` / `useDynastyOverviewModal.ts` / `useMortalOverviewModal.ts` / `useTimeOverviewModal.ts` / `useSectRelationsModal.ts` / `useHiddenDomainOverviewModal.ts`: data loading and derived fields for status-bar modals.
+*   `useRegionDetailPanel.ts` / `useSectDetailPanel.ts` / `useAvatarPortraitPanel.ts`: local business state for detail pages and portrait swapping.
+*   `components/game/composables/useTextures.ts`: Pixi texture preloading and cache management.
+*   `components/game/composables/useMapLayerRenderer.ts`: map Pixi object lifecycle, static tile building, water ticker, region labels, and interaction.
 
-### 2.4 状态管理层 (`src/stores/`)
-基于 Pinia 的状态管理。
-*   **`world.ts` (聚合层)**: **核心 Store**。
-    *   职责：管理全局时间 (Year/Month)、天象、秘境。
-    *   作用：作为 Facade 模式入口，负责 world 级编排（`initialize/handleTick`）。  
-        说明：为平滑迁移，仍保留部分兼容代理字段；新代码应优先直接依赖子 Store（`map/avatar/event`）。
-*   **`map.ts`**: 存储地图矩阵 (`mapData`) 和区域数据 (`regions`)。
-*   **`avatar.ts`**: 存储所有角色数据 (`avatars`)，处理增量更新。
-*   **`event.ts`**: 存储事件日志 (`events`)，处理分页加载、筛选、实时推送。
-*   `ui.ts`: 管理当前选中对象与 UI 显隐状态；系统菜单的 tab、是否可关闭、菜单上下文（`splash/game`）也集中在此处。
-*   `setting.ts`: 管理前端设置及与后端配置的同步。
-*   `socket.ts`: 连接状态与订阅管理（轻业务）。
-*   `socketMessageRouter.ts`: Socket 消息分发与业务响应路由（`tick/toast/llm_config_required/...`）。
+### 2.4 State Management (`src/stores/`)
+Pinia-based state management.
+*   **`world.ts` (aggregation layer)**: **the core store**.
+    *   Responsibilities: global time (year/month), celestial phenomena, hidden domains.
+    *   Role: facade entry point for world-level orchestration (`initialize/handleTick`).
+        Note: some compatibility proxy fields remain for a smooth migration; new code should depend on the sub-stores (`map/avatar/event`) directly.
+*   **`map.ts`**: map matrix (`mapData`) and region data (`regions`).
+*   **`avatar.ts`**: all avatar data (`avatars`), with incremental updates.
+*   **`event.ts`**: event log (`events`), with paginated loading, filtering, and live pushes.
+*   `ui.ts`: current selection and UI visibility; the system menu tab, closability, and menu context (`splash/game`) also live here.
+*   `setting.ts`: frontend settings and their sync with backend configuration.
+*   `socket.ts`: connection state and subscription management (light business logic).
+*   `socketMessageRouter.ts`: socket message dispatch and business response routing (`tick/toast/llm_config_required/...`).
 
-### 2.5 类型定义 (`src/types/`)
-*   `core.ts`: 前端核心领域模型（如 `AvatarSummary`, `RegionSummary`, `GameEvent`）。
-*   `api.ts`: 后端接口返回的数据结构 (DTO)。
+### 2.5 Types (`src/types/`)
+*   `core.ts`: core frontend domain models (e.g. `AvatarSummary`, `RegionSummary`, `GameEvent`).
+*   `api.ts`: data structures returned by backend endpoints (DTOs).
 
-## 3. 核心机制与数据流 (Core Architecture)
+## 3. Core Architecture and Data Flow
 
-### 3.1 游戏初始化流程
-1.  **Entry**: `App.vue` 挂载。
-2.  **Check**: 调用 `useGameInit` 检查后端服务状态（Idle/Ready/Running）。
-3.  **Load**: 用户点击 "Start" -> 触发 `worldStore.initialize()`。
-    *   并行加载地图数据 (`mapStore.preloadMap`) 和初始状态 (`worldApi.fetchInitialState`)。
-    *   重置事件列表 (`eventStore.resetEvents`)。
-4.  **Render**: 数据就绪 (`isLoaded = true`) -> `GameCanvas` 和 `MapLayer` 开始渲染。
+### 3.1 Game Initialization
+1.  **Entry**: `App.vue` mounts.
+2.  **Check**: `useGameInit` checks backend status (Idle/Ready/Running).
+3.  **Load**: the user clicks "Start" -> triggers `worldStore.initialize()`.
+    *   Loads map data (`mapStore.preloadMap`) and initial state (`worldApi.fetchInitialState`) in parallel.
+    *   Resets the event list (`eventStore.resetEvents`).
+4.  **Render**: data is ready (`isLoaded = true`) -> `GameCanvas` and `MapLayer` start rendering.
 
-### 3.2 游戏循环 (Tick Loop)
-游戏采用后端驱动模式（Server-Authoritative）。
-1.  **Source**: 后端通过 WebSocket 或轮询接口推送 `TickPayloadDTO`。
-2.  **Store Update**: `worldStore.handleTick(payload)` 接收数据。
-    *   更新时间 (`year`, `month`)。
-    *   调用 `avatarStore.updateAvatars` 进行角色状态增量合并。
-    *   调用 `eventStore.addEvents` 将新事件插入日志流。
-    *   更新天象 (`currentPhenomenon`)。
-3.  **Reactivity**: Vue 响应式系统检测到 Store 变化。
-    *   `EntityLayer` 检测到坐标变化 -> 触发平滑移动动画。
-    *   `EventPanel` 检测到新事件 -> 自动滚动到底部。
-    *   `InfoPanel` 检测到选中角色属性变化 -> 实时刷新数值。
+### 3.2 Tick Loop
+The game is server-authoritative.
+1.  **Source**: the backend pushes a `TickPayloadDTO` over WebSocket or a polling endpoint.
+2.  **Store update**: `worldStore.handleTick(payload)` receives the data.
+    *   Updates time (`year`, `month`).
+    *   Calls `avatarStore.updateAvatars` to merge avatar state incrementally.
+    *   Calls `eventStore.addEvents` to insert new events into the log stream.
+    *   Updates the celestial phenomenon (`currentPhenomenon`).
+3.  **Reactivity**: Vue's reactivity system detects the store changes.
+    *   `EntityLayer` sees coordinate changes -> triggers smooth movement animation.
+    *   `EventPanel` sees new events -> auto-scrolls to the bottom.
+    *   `InfoPanel` sees attribute changes on the selected avatar -> refreshes values live.
 
-### 3.3 应用壳层状态机 (App Shell)
-当前根层页面编排由 `useAppShell` 统一管理，`App.vue` 只负责根据场景装配视图。
-1. `useGameInit` 轮询 `initStatus`，并在 `ready` 且未初始化时触发一次前端初始化。
-2. `useAppShell` 将根层场景收敛为四种：
-    * `boot`: 设置或第一次 `initStatus` 尚未准备好，只显示纯黑壳层。
-    * `splash`: 应用已准备好，但尚未进入一局游戏，底层显示 `SplashLayer`。
-    * `initializing`: 玩家已触发开始/读档，但前后端初始化尚未完成，底层保持黑壳层，`LoadingOverlay` 作为 overlay 展示。
-    * `game`: 前后端均完成初始化，才允许渲染 `StatusBar / GameCanvas / EventPanel` 等游戏 UI。
-3. 系统菜单与 Loading 不再决定底层场景，而是作为 overlay 挂载在当前场景之上。
-4. `useSystemMenuFlow` 负责菜单流程：打开/关闭菜单、LLM 校验、菜单上下文与 tab 跳转。
-5. `useGameControl` 只处理游戏控制，不再承担 splash <-> game 的根层场景切换职责，也不直接持有菜单业务流程。
+### 3.3 App Shell State Machine
+Root-level page orchestration is managed centrally by `useAppShell`; `App.vue` only assembles views by scene.
+1. `useGameInit` polls `initStatus` and triggers frontend initialization once when the backend is `ready` and the frontend is not yet initialized.
+2. `useAppShell` reduces the root scene to four states:
+    * `boot`: settings or the first `initStatus` are not ready yet; only a plain black shell is shown.
+    * `splash`: the app is ready but no game has been entered; `SplashLayer` is shown underneath.
+    * `initializing`: the player has started a new game or loaded a save, but frontend/backend initialization has not finished; the black shell stays underneath and `LoadingOverlay` is shown as an overlay.
+    * `game`: only once both frontend and backend have finished initializing may the game UI (`StatusBar / GameCanvas / EventPanel`, etc.) render.
+3. The system menu and loading screen no longer decide the underlying scene; they are mounted as overlays on top of the current scene.
+4. `useSystemMenuFlow` owns the menu flow: opening/closing the menu, LLM validation, menu context, and tab navigation.
+5. `useGameControl` handles only game control; it no longer switches root scenes between splash and game, nor does it hold menu business flow.
 
-### 3.4 Scene + Overlay 约束
-为了避免出现“菜单打开但底下渲染了错误页面”的非法组合，根层视图必须遵守以下约束：
-1. `App.vue` 不应再通过 `showSplash/showMenu/showLoading` 多个布尔值拼装页面。
-2. 游戏主界面只能由 `scene === 'game'` 驱动，不能通过 “`!showSplash`” 之类的反向条件推断。
-3. 从 `SplashLayer` 打开 `settings/load/about` 时，底层场景仍然是 `splash`，只是额外叠加 `SystemMenu` overlay。
-4. `SystemMenu` 必须显式记录上下文（`splash` 或 `game`），用于关闭行为、返回主界面与后续扩展。
+### 3.4 Scene + Overlay Constraints
+To prevent invalid combinations such as "menu open with the wrong page rendered underneath", root views must follow these constraints:
+1. `App.vue` must not assemble pages from multiple booleans like `showSplash/showMenu/showLoading`.
+2. The main game UI may only be driven by `scene === 'game'`, never inferred from inverted conditions like "`!showSplash`".
+3. When `settings/load/about` is opened from `SplashLayer`, the underlying scene is still `splash`; only a `SystemMenu` overlay is added.
+4. `SystemMenu` must record its context explicitly (`splash` or `game`) for close behavior, returning to the main screen, and future extensions.
 
-### 3.5 菜单与设置分层 (Menu / Settings Layering)
-系统菜单与设置相关 UI 采用“壳层 + 内容层 + 流程层”拆分：
-1. `SystemMenuShell` 只负责 modal 容器、tab bar 与内容槽位。
-2. `SystemMenu.vue` 只负责把 tab key 路由到对应内容组件。
-3. `SettingsPanel` 只负责设置项本身，不感知自己处于系统菜单、Splash 还是未来的独立设置页。
-4. `useSystemMenuFlow` 作为菜单流程层，负责：
-    * 菜单打开/关闭
-    * tab 默认值与切换
-    * `splash/game` 菜单上下文
-    * LLM 启动检查与强制跳转 `llm` tab
-5. `useGameControl` 不应再承担“菜单打开后跳到哪个 tab”这类菜单业务决策。
+### 3.5 Menu / Settings Layering
+System menu and settings UI are split into "shell + content + flow" layers:
+1. `SystemMenuShell` only owns the modal container, tab bar, and content slot.
+2. `SystemMenu.vue` only routes tab keys to the corresponding content components.
+3. `SettingsPanel` only owns the settings themselves and doesn't know whether it lives in the system menu, the splash screen, or a future standalone settings page.
+4. `useSystemMenuFlow` is the menu flow layer and owns:
+    * opening/closing the menu
+    * default tab and tab switching
+    * the `splash/game` menu context
+    * the LLM startup check and forced navigation to the `llm` tab
+5. `useGameControl` must not make menu business decisions such as "which tab to jump to after opening the menu".
 
-### 3.6 Socket 消息流 (Transport -> Router -> Store/UI)
-1. `api/socket.ts` 只负责 WebSocket 连接/重连/订阅。
-2. `stores/socket.ts` 维护连接状态并把消息交给 `socketMessageRouter`。
-3. `stores/socketMessageRouter.ts` 按消息类型分发到 world/ui/message 相关动作。
-4. 新增消息类型时，优先修改 router 和 DTO，不在组件层做消息分支。
+### 3.6 Socket Message Flow (Transport -> Router -> Store/UI)
+1. `api/socket.ts` only handles WebSocket connect/reconnect/subscribe.
+2. `stores/socket.ts` maintains connection state and hands messages to `socketMessageRouter`.
+3. `stores/socketMessageRouter.ts` dispatches by message type to world/ui/message actions.
+4. When adding a message type, change the router and DTOs first; don't branch on messages in components.
 
-### 3.7 渲染架构
-*   **Vue3-Pixi**: 使用 Vue 组件声明式地编写 Pixi 对象；复杂 Pixi 生命周期放入局部 composable，组件负责挂载点和事件转发。
-*   **性能优化与避坑 (Gotchas)**:
-    *   **严禁将 PIXI 原生对象 (如 `Sprite`, `Container`) 放入 Vue 的深层响应式对象 (`ref`, `reactive`) 中**。这会导致 PIXI 内部严格相等 (`===`) 比较失败（如 `removeChild` 失效），引发内存泄漏和逻辑堆积 Bug。若需在组件中保存实例引用，请使用普通变量或 `shallowRef`。
-    *   地图使用 `shallowRef` 存储，避免 Vue 深度监听 100x100 的地图数组。
-    *   地块渲染由 `useMapLayerRenderer` 在挂载后一次性构建 Pixi Sprite，静态地块不参与响应式更新，仅在地图数据重载时重建。
-    *   动态效果（如水面流动）使用 `PIXI.Ticker` 独立驱动，不依赖 Vue 渲染循环。
-    *   地图区域名（`MapLayer` / `utils/mapLabels.ts`）默认应采用“碰撞避让”而非“重叠即隐藏”。避让策略必须兼容 `static/locales/registry.json` 中当前启用语言（如 `zh-CN / zh-TW / en-US / vi-VN / ja-JP / fr-FR`）：紧凑脚本（中文、日文）与拉丁脚本（英文、越南文、法文等）分别使用各自的文字尺寸估算与换行策略。
-    *   地图区域名避让逻辑必须保持轻量。优先使用固定数量候选位置 + 邻域碰撞检测（如空间桶 / 网格索引），避免引入全局两两比较、力导向模拟、逐帧布局或其他会随区域数量快速退化的算法。
+### 3.7 Rendering Architecture
+*   **Vue3-Pixi**: Pixi objects are written declaratively as Vue components; complex Pixi lifecycles go into local composables, and components own the mount point and event forwarding.
+*   **Performance and gotchas**:
+    *   **Never put native PIXI objects (such as `Sprite`, `Container`) into Vue deep-reactive objects (`ref`, `reactive`).** This breaks PIXI's internal strict-equality (`===`) checks (e.g. `removeChild` stops working), causing memory leaks and accumulating logic bugs. To keep instance references in a component, use plain variables or `shallowRef`.
+    *   The map is stored in a `shallowRef` so Vue doesn't deep-watch the 100x100 map array.
+    *   Tile rendering is built once by `useMapLayerRenderer` after mount as Pixi sprites; static tiles don't take part in reactive updates and are rebuilt only when map data reloads.
+    *   Dynamic effects (such as flowing water) are driven independently by `PIXI.Ticker`, not by Vue's render loop.
+    *   Map region names (`MapLayer` / `utils/mapLabels.ts`) should use collision avoidance by default rather than "hide on overlap". The avoidance strategy must work for every locale enabled in `static/locales/registry.json`: compact scripts (CJK) and Latin scripts each use their own text-size estimation and line-wrapping strategy.
+    *   Region-name avoidance must stay lightweight. Prefer a fixed number of candidate positions plus neighborhood collision checks (e.g. spatial buckets / grid index); avoid global pairwise comparison, force-directed simulation, per-frame layout, or any other algorithm that degrades quickly as the number of regions grows.
 
-### 3.8 组件 / Composable 边界
-前端大型组件的默认方向是“模板展示层 + composable 业务层”。
-1. 面板、弹窗、详情页组件只保留 DOM 结构、样式、事件绑定和少量展示判断。
-2. 数据加载、派生字段、跳转、提交、timer、Pixi 生命周期等逻辑优先放到 `web/src/composables/*` 或局部 `components/**/composables/*`。
-3. 状态栏弹窗若使用 `defineAsyncComponent + v-if` 懒加载，并依赖 `props.show` 触发请求，watcher 必须使用 `{ immediate: true }`，否则“首次挂载即打开”的场景会跳过拉取数据。
-4. 王朝、排行/天下武道会、凡人、宗门关系、时间、已故角色等弹窗都应保留“初始 `show=true` 仍会请求数据”的回归测试。
+### 3.8 Component / Composable Boundary
+The default direction for large frontend components is "template presentation layer + composable business layer".
+1. Panels, modals, and detail pages keep only DOM structure, styles, event bindings, and minor display conditions.
+2. Data loading, derived fields, navigation, submission, timers, Pixi lifecycles, and similar logic go into `web/src/composables/*` or local `components/**/composables/*` first.
+3. If a status-bar modal is lazy-loaded with `defineAsyncComponent + v-if` and relies on `props.show` to trigger requests, the watcher must use `{ immediate: true }`; otherwise the "open on first mount" case skips fetching data.
+4. The dynasty, rankings/World Martial Tournament, mortals, sect relations, time, and deceased-avatar modals should all keep regression tests for "initial `show=true` still fetches data".
 
-## 4. 关键文件索引 (Critical Files Index)
+## 4. Critical Files Index
 
-| 文件路径 | 职责描述 | 修改频率 |
+| File path | Responsibility | Change frequency |
 | :--- | :--- | :--- |
-| `web/src/composables/useAppShell.ts` | 应用壳层状态机核心。统一管理 `scene + overlay`、菜单上下文与 Splash/Game 场景切换。 | 高 |
-| `web/src/composables/useSystemMenuFlow.ts` | 系统菜单流程层。负责 tab、closable、菜单上下文与 LLM 启动检查。 | 高 |
-| `web/src/App.vue` | 根组件装配层。只按 `scene` 渲染底层页面，并挂载菜单/Loading overlay。 | 高 |
-| `web/src/components/SystemMenuShell.vue` | 菜单壳层组件。负责 modal/header/tab bar，不承载具体 tab 内容。 | 中 |
-| `web/src/components/settings/SettingsPanel.vue` | 可复用设置内容面板。负责语言、音量、自动保存等设置项。 | 中 |
-| `web/src/stores/world.ts` | world 级编排与时间/天象状态。 | 高 |
-| `web/src/stores/socketMessageRouter.ts` | Socket 业务消息路由中心。新增消息类型时优先修改此处。 | 高 |
-| `web/src/components/layout/StatusBarPanels.vue` | 状态栏弹窗装配层。负责按需加载和打开状态，不承载弹窗数据逻辑。 | 中 |
-| `web/src/components/game/panels/EventPanel.vue` | 事件日志展示层。数据、筛选、滚动逻辑在 `useEventPanel.ts`。 | 中 |
-| `web/src/composables/useEventPanel.ts` | 事件日志面板逻辑。负责加载、筛选、滚动和可见状态。 | 中 |
-| `web/src/components/game/MapLayer.vue` | 地图渲染模板壳层。负责挂载容器与事件转发。 | 中 |
-| `web/src/components/game/composables/useMapLayerRenderer.ts` | 地图 Pixi 渲染核心。涉及纹理、Sprite 生命周期、Ticker、标签与交互。 | 中 |
-| `web/src/composables/useLoadingOverlayState.ts` | LoadingOverlay 展示状态和进度文案派生。 | 低 |
-| `web/src/composables/useGameControl.ts` | 游戏控制层。负责暂停恢复、ESC 输入、菜单显隐联动暂停恢复。 | 低 |
-| `web/src/api/modules/*.ts` + `web/src/api/mappers/*.ts` | API 请求与 DTO 归一化。新增接口建议同步补 mapper。 | 中 |
-| `web/src/locales/*.json` | 多语言文本。修改 UI 文字时必改。 | 高 |
+| `web/src/composables/useAppShell.ts` | Core of the app shell state machine. Manages `scene + overlay`, menu context, and splash/game scene switching. | High |
+| `web/src/composables/useSystemMenuFlow.ts` | System menu flow layer. Owns tabs, closability, menu context, and the LLM startup check. | High |
+| `web/src/App.vue` | Root assembly layer. Renders the underlying page by `scene` only and mounts the menu/loading overlays. | High |
+| `web/src/components/SystemMenuShell.vue` | Menu shell component. Owns the modal/header/tab bar, not the tab content. | Medium |
+| `web/src/components/settings/SettingsPanel.vue` | Reusable settings content panel. Owns language, volume, autosave, and similar settings. | Medium |
+| `web/src/stores/world.ts` | World-level orchestration and time/phenomenon state. | High |
+| `web/src/stores/socketMessageRouter.ts` | Socket business message routing hub. Change this first when adding message types. | High |
+| `web/src/components/layout/StatusBarPanels.vue` | Status-bar modal assembly layer. Owns lazy loading and open state, not modal data logic. | Medium |
+| `web/src/components/game/panels/EventPanel.vue` | Event log view. Data, filtering, and scrolling logic are in `useEventPanel.ts`. | Medium |
+| `web/src/composables/useEventPanel.ts` | Event log panel logic. Owns loading, filtering, scrolling, and visibility. | Medium |
+| `web/src/components/game/MapLayer.vue` | Map rendering template shell. Owns the mount container and event forwarding. | Medium |
+| `web/src/components/game/composables/useMapLayerRenderer.ts` | Core of map Pixi rendering: textures, sprite lifecycle, ticker, labels, and interaction. | Medium |
+| `web/src/composables/useLoadingOverlayState.ts` | Loading overlay display state and derived progress text. | Low |
+| `web/src/composables/useGameControl.ts` | Game control layer. Owns pause/resume, ESC input, and pausing in step with menu visibility. | Low |
+| `web/src/api/modules/*.ts` + `web/src/api/mappers/*.ts` | API requests and DTO normalization. Add a mapper alongside new endpoints. | Medium |
+| `web/src/locales/en-US/*.json` | UI text. Must be updated whenever UI wording changes. | High |
 
 ---
 
-**Vibe Coding 提示**:
-*   修改 UI 时，优先检查 `stores/ui.ts`、`useAppShell.ts`、`useSystemMenuFlow.ts` 和对应的 Panel 组件。
-*   修改数据逻辑时，先看 `stores/world.ts` 及其拆分出的子 Store。
-*   涉及 Pixi 渲染问题时，优先关注 `web/src/components/game/composables/useMapLayerRenderer.ts` 与 `components/game/composables/useTextures.ts`。
-*   状态栏弹窗首次打开为空时，优先检查是否是 `defineAsyncComponent + v-if` 首次挂载，相关 `props.show` watcher 是否设置了 `{ immediate: true }`。
-*   Socket 消息逻辑优先改 `stores/socketMessageRouter.ts`，不要把消息分支散到组件中。
-*   新增后端响应字段时，优先在 `types/api.ts` 和 `api/mappers/` 收敛转换。
-*   修改地图文字显示时，优先检查 `web/src/components/game/utils/mapLabels.ts` 和 `web/src/utils/mapStyles.ts`，不要在 `MapLayer.vue` 内临时堆叠随机偏移或硬编码语言分支。
-*   修改设置项时，优先改 `SettingsPanel.vue`；除非是菜单容器行为，不要把设置 UI 直接塞回 `SystemMenu.vue`。
+**Vibe coding tips**:
+*   When changing UI, check `stores/ui.ts`, `useAppShell.ts`, `useSystemMenuFlow.ts`, and the relevant panel component first.
+*   When changing data logic, start with `stores/world.ts` and its sub-stores.
+*   For Pixi rendering issues, focus on `web/src/components/game/composables/useMapLayerRenderer.ts` and `components/game/composables/useTextures.ts`.
+*   If a status-bar modal is empty on first open, check whether it is a first mount via `defineAsyncComponent + v-if` and whether the `props.show` watcher has `{ immediate: true }`.
+*   Change socket message logic in `stores/socketMessageRouter.ts`; don't scatter message branches across components.
+*   When adding backend response fields, consolidate conversion in `types/api.ts` and `api/mappers/`.
+*   When changing map text display, check `web/src/components/game/utils/mapLabels.ts` and `web/src/utils/mapStyles.ts` first; don't pile up random offsets or hardcoded locale branches in `MapLayer.vue`.
+*   When changing settings, edit `SettingsPanel.vue`; unless it is menu container behavior, don't put settings UI back into `SystemMenu.vue`.
 
-## 5. 桌面版与商店发布适配 (Desktop Distribution)
+## 5. Desktop Distribution
 
-当前仓库有两条桌面/发布路径，需要分开理解。
+There are currently two desktop/release paths, which should be understood separately.
 
-1.  **GitHub / 源码浏览器模式**:
-    *   `src/server/main.py` 的 `start()` 会先计算目标 URL，再按配置决定是否调用 `webbrowser.open()` 打开系统默认浏览器。
-    *   `uvicorn` 后端服务继续在当前 Python 进程中运行。
-    *   在开发模式下，前端仍会以子进程方式启动 `npm run dev`，HMR 依然有效。
+1.  **GitHub / source browser mode**:
+    *   `start()` in `src/server/main.py` computes the target URL first, then decides from configuration whether to call `webbrowser.open()` to open the system default browser.
+    *   The `uvicorn` backend keeps running in the current Python process.
+    *   In development mode, the frontend is still started as a child process with `npm run dev`, so HMR keeps working.
 
-2.  **Desktop Electron 模式**:
-    *   `desktop/` 是独立 Electron 宿主工程。
-    *   Electron 主进程负责启动 packaged 后端、等待 `/api/health`、再加载本地 HTTP UI。
-    *   通用桌面打包入口是 `tools/package/pack_desktop.ps1`，最终 content root 会写入 `tmp/desktop_content_root.txt`。
-    *   Electron 模式通过环境变量控制后端行为，例如禁止自动打开系统浏览器。
+2.  **Desktop Electron mode**:
+    *   `desktop/` is a standalone Electron host project.
+    *   The Electron main process starts the packaged backend, waits for `/api/health`, then loads the local HTTP UI.
+    *   The general desktop packaging entry is `tools/package/pack_desktop.ps1`; the final content root is written to `tmp/desktop_content_root.txt`.
+    *   Electron mode controls backend behavior through environment variables, e.g. disabling automatic browser launch.
 
-3.  **打包与发布**:
-    *   普通开源包仍可走本地服务 + 系统浏览器体验。
-    *   商店发布统一基于 Electron desktop content root；具体平台发布脚本在 `tools/package/<platform>/publish.ps1` 中分层维护。
-    *   Steam 发布入口是 `tools/package/publish_steam.ps1`，Epic 发布入口是 `tools/package/publish_epic.ps1`，真实上传需显式传入 `-RequireUpload`。
-    *   旧 PyInstaller Steam 包脚本已经删除；Steam 只作为平台发布层复用通用 desktop 构建结果。
+3.  **Packaging and release**:
+    *   The regular open-source package can still use the local server + system browser experience.
+    *   Store releases are all based on the Electron desktop content root; per-platform publish scripts are maintained in layers under `tools/package/<platform>/publish.ps1`.
+    *   The Steam publish entry is `tools/package/publish_steam.ps1` and the Epic entry is `tools/package/publish_epic.ps1`; a real upload requires passing `-RequireUpload` explicitly.
+    *   The old PyInstaller Steam packaging scripts have been removed; Steam only reuses the general desktop build output as a platform publishing layer.
 
-4.  **画布尺寸原则**:
-    *   **不要**使用 `useWindowSize()`（依赖 `window.resize` 事件）来驱动 PIXI 画布尺寸。
-    *   **应使用** `useElementSize(container)`（基于 `ResizeObserver`），让画布尺寸直接跟随容器变化。
-    *   当前实现（`GameCanvas.vue`）：`width/height` 和 `Viewport` 的 `screenWidth/screenHeight` 均直接来自 `useElementSize`，与 `resizeTo="container"` 指向同一数据源，无冲突。
+4.  **Canvas sizing principle**:
+    *   **Do not** use `useWindowSize()` (which depends on `window.resize`) to drive the PIXI canvas size.
+    *   **Use** `useElementSize(container)` (based on `ResizeObserver`) so the canvas size follows the container directly.
+    *   Current implementation (`GameCanvas.vue`): `width/height` and the `Viewport`'s `screenWidth/screenHeight` all come straight from `useElementSize`, the same source as `resizeTo="container"`, so there is no conflict.
 
-## 6. 启动渲染保护与场景边界 (Startup Rendering Guard)
+## 6. Startup Rendering Guard and Scene Boundaries
 
-为了避免前端刚接管页面时出现闪烁，同时避免未开局时误渲染游戏壳层，应用保留了一层启动阶段的渲染保护与场景边界。
+To avoid flicker when the frontend first takes over the page, and to avoid accidentally rendering the game shell before a game has started, the app keeps a startup rendering guard and scene boundaries.
 
-1.  **`boot` 防闪烁设计**:
-    *   在页面刚加载、还未完成 settings hydrate 或还未收到后端 `initStatus` 第一次响应前，根层场景保持 `boot`，页面显示纯黑壳层。
-2.  **`splash` 与 `game` 的硬边界**:
-    *   收到后端 `idle` 且前端未初始化时，场景进入 `splash`。
-    *   只有当前后端准备完毕并且前端 `gameInitialized === true` 后，场景才允许进入 `game`。
-    *   打开菜单、设置、关于页等 overlay 不得隐式切换到底层 `game` 场景。
-3.  **`initializing` 过渡场景**:
-    *   玩家开始开局/读档后，到真正完成前端装载前，根层应进入 `initializing`，底层维持黑壳层，`LoadingOverlay` 负责向用户表达进度。
+1.  **`boot` anti-flicker design**:
+    *   While the page has just loaded and settings have not finished hydrating, or the first backend `initStatus` response has not arrived, the root scene stays `boot` and shows a plain black shell.
+2.  **Hard boundary between `splash` and `game`**:
+    *   When the backend reports `idle` and the frontend is not initialized, the scene enters `splash`.
+    *   The scene may enter `game` only after both frontend and backend are ready and the frontend has `gameInitialized === true`.
+    *   Opening overlays such as the menu, settings, or about page must not implicitly switch the underlying scene to `game`.
+3.  **`initializing` transition scene**:
+    *   After the player starts a new game or loads a save, and until frontend loading truly completes, the root enters `initializing`; the black shell stays underneath and `LoadingOverlay` communicates progress to the user.
 
-## 7. 前端资源预加载策略 (Preloading Strategy)
+## 7. Preloading Strategy
 
-在游戏开局初始化过程中，后端部分阶段（如调用 LLM 生成角色身世）需要消耗数秒乃至十几秒的时间。为了避免这段时间白白浪费，以及防止后端到达 100% 后前端还需要耗时加载图片而导致进度条“卡 100%”的临门一脚顿挫感，前端实现了一套异步预加载机制。
+During game initialization, some backend phases (such as calling the LLM to generate avatar backstories) take several to a dozen-plus seconds. To put that time to use, and to avoid the jarring "stuck at 100%" moment where the frontend still has to load images after the backend reaches 100%, the frontend implements an asynchronous preloading mechanism.
 
-1. **阶段监听**: 前端通过 `useGameInit` 持续轮询 `/api/v1/query/runtime/status` 接口，不仅获取总体进度，还监听当前所处的 `phase_name`。
-2. **常量映射 (`GAME_PHASES`)**: 在 `constants/game.ts` 中，我们维护了不同资源可以开始加载的最小后端阶段要求：
-   *   `MAP_READY`: 当后端排布完宗门或生成完角色时，地图数据已经就绪。
-   *   `AVATAR_READY`: 当后端进入检查 LLM 或生成初始事件时，所有角色的基础信息（含头像 ID）已经完全确定。
-   *   `TEXTURES_READY`: 与角色就绪同步，此时可以拉取到所有相关角色的头像、以及对应的地块纹理等，直接执行 PixiJS 的 Assets 预加载。
-3. **“白嫖”等待时间**: 在轮询过程中，一旦后端状态进入 `TEXTURES_READY` 阶段（通常对应后端的长时间 LLM 阻塞操作），前端的 `useGameInit` 就会无阻塞地触发 `loadBaseTextures()`。
-4. **无缝进入**: 利用 PixiJS `Assets` 的内置缓存机制，当后端最终发出 `ready` 并将控制权交还给前端 `initializeGame()` 时，再次调用的 `await loadBaseTextures()` 会瞬间命中缓存，耗时降至 0 毫秒，从而实现 Loading 结束后画面的无缝秒进。
+1. **Phase monitoring**: through `useGameInit`, the frontend keeps polling `/api/v1/query/runtime/status`, reading not only the overall progress but also the current `phase_name`.
+2. **Constant mapping (`GAME_PHASES`)**: `constants/game.ts` maintains the minimum backend phase at which each resource can start loading:
+   *   `MAP_READY`: once the backend has placed sects or generated avatars, the map data is ready.
+   *   `AVATAR_READY`: once the backend enters the LLM check or initial event generation, all avatars' basic info (including portrait IDs) is final.
+   *   `TEXTURES_READY`: in step with avatar readiness; at this point all relevant avatar portraits and tile textures can be fetched and PixiJS `Assets` preloading can run.
+3. **Using the wait for free**: while polling, as soon as the backend enters the `TEXTURES_READY` phase (usually corresponding to the backend's long blocking LLM operations), `useGameInit` triggers `loadBaseTextures()` without blocking.
+4. **Seamless entry**: thanks to PixiJS `Assets`' built-in cache, when the backend finally reports `ready` and control returns to the frontend's `initializeGame()`, the second `await loadBaseTextures()` hits the cache instantly (near 0 ms), so the view appears seamlessly once loading ends.
 
-## 8. 错误处理与性能基线 (Error Policy & Baseline)
+## 8. Error Policy & Performance Baseline
 
-### 8.1 错误处理规范
-*   统一使用 `utils/appError.ts` 中的 `logError/logWarn` 记录上下文，不直接散落 `console.error/warn`。
-*   用户可见提示通过 `message` 统一出口，避免重复提示和风格不一致。
+### 8.1 Error handling
+*   Always use `logError/logWarn` from `utils/appError.ts` to record context; don't scatter raw `console.error/warn` calls.
+*   User-visible notices go through the single `message` outlet to avoid duplicate notices and inconsistent styling.
 
-### 8.2 性能基线指标（轻量）
-*   `useGameInit.ts`:  
-    *   `initializeDurationMs`：一次初始化耗时。  
-    *   `lastPollDurationMs`：最近一次状态轮询耗时。
-*   `stores/event.ts`:  
-    *   `lastMergeDurationMs`：tick 事件合并耗时。  
-    *   `lastLoadDurationMs`：历史事件加载耗时。
+### 8.2 Performance baseline metrics (lightweight)
+*   `useGameInit.ts`:
+    *   `initializeDurationMs`: duration of one initialization.
+    *   `lastPollDurationMs`: duration of the most recent status poll.
+*   `stores/event.ts`:
+    *   `lastMergeDurationMs`: tick event merge duration.
+    *   `lastLoadDurationMs`: historical event load duration.
 
-这些指标用于回归比较，不用于线上用户可见展示。
+These metrics are for regression comparison, not for user-visible display.
 
-## 9. UI Icon 约定 (UI Icon Guidelines)
+## 9. UI Icon Guidelines
 
-当前前端已收敛出一套统一的 UI icon 方案，后续新增系统级 icon 时应优先复用，而不是重新从不同站点混搭。
+The frontend has converged on a single UI icon approach. New system-level icons should reuse it rather than mixing icons from different sources.
 
-1. **单一来源**:
-   * 当前统一使用 `Lucide` outline SVG。
-   * 本地图标目录：`web/src/assets/icons/ui/lucide/`
-   * 来源与当前映射说明：`web/src/assets/icons/ui/lucide/README.md`
-2. **使用范围**:
-   * 顶部悬浮控制按钮
-   * 系统菜单 tab
-   * 顶部状态栏入口
-   * 设置页、存档页、关于/其他等系统级面板
-3. **风格约束**:
-   * 不要在同一 UI 区域混用多个 icon 家族。
-   * 默认使用 outline 风格，不与 filled / emoji / 彩色拟物图标混搭。
-   * icon 只作为辅助识别，不替代多语言文案；关键入口旁必须保留文字。
-4. **技术形态**:
-   * 优先通过 `import xxxIcon from '@/assets/icons/ui/lucide/*.svg'` 模块导入。
-   * 优先使用 `currentColor + mask-image` 渲染，让 hover / active / disabled 状态与文字颜色保持一致。
-   * 不要为同类按钮分别内嵌手写 SVG，除非现有 icon 库确实没有合适素材。
-5. **增量维护**:
-   * 新增 icon 前先检查 `web/src/assets/icons/ui/lucide/` 是否已有可复用图标。
-   * 若需下载新图标，优先补到同一目录，并同步更新该目录下 README 的来源与建议映射。
+1. **Single source**:
+   * Use `Lucide` outline SVGs throughout.
+   * Local icon directory: `web/src/assets/icons/ui/lucide/`
+   * Source and current mapping notes: `web/src/assets/icons/ui/lucide/README.md`
+2. **Scope**:
+   * Top floating control buttons
+   * System menu tabs
+   * Top status-bar entries
+   * Settings, saves, about/other, and other system-level panels
+3. **Style constraints**:
+   * Don't mix multiple icon families in the same UI area.
+   * Default to outline style; don't mix with filled, emoji, or colorful skeuomorphic icons.
+   * Icons are only a recognition aid and do not replace text labels; key entry points must keep their text.
+4. **Technical form**:
+   * Prefer module imports via `import xxxIcon from '@/assets/icons/ui/lucide/*.svg'`.
+   * Prefer rendering with `currentColor + mask-image` so hover / active / disabled states match the text color.
+   * Don't inline hand-written SVGs for similar buttons unless the existing icon library genuinely lacks a suitable asset.
+5. **Incremental maintenance**:
+   * Before adding an icon, check whether `web/src/assets/icons/ui/lucide/` already has a reusable one.
+   * If a new icon must be downloaded, add it to the same directory and update that directory's README with its source and suggested mapping.

@@ -1,68 +1,111 @@
 ---
 name: i18n-development
-description: 国际化 (i18n) 开发指南。在添加新文本、创建物品/事件、修改翻译或管理 PO/MO 文件时使用。
+description: Internationalization (i18n) development guide for the English-only (en-US) game. Use when adding new text, creating items/events, editing strings or LLM prompt templates, or managing PO/MO files.
 ---
 
-# I18n 国际化开发指南
+# I18n Development Guide
 
-## ⭐ 核心日常操作 (最重要)
+The game is English-only. `static/locales/registry.json` lists `en-US` as the single locale, and it is the default, fallback, schema, and source-of-truth locale. Long-term constraints live in `.cursor/rules/i18n.mdc`.
 
-### 1. 如何添加新消息
-将新条目追加到 `static/locales/{lang}/modules/` 或 `game_configs_modules/` 中相应的 `.po` 文件里。
+## Where Text Lives
 
-**格式要求:**
-- 条目之间保持 **一个空行**。
-- `msgid` 必须是准确的英文字符串。
-- `msgstr` 是翻译内容。
+| Kind of text | Source to edit |
+|---|---|
+| Backend messages (`t()` in Python) | `static/locales/en-US/modules/*.po` |
+| Game config names/descriptions (CSV `name_id` / `desc_id`, effects) | `static/locales/en-US/game_configs_modules/*.po` |
+| Locale-specific game config data (e.g. name lists) | `static/locales/en-US/game_configs/*.csv` |
+| LLM prompt templates | `static/locales/en-US/templates/*.txt` |
+| Frontend UI strings | `web/src/locales/en-US/*.json` |
+
+Build products, never edited directly:
+
+- `static/locales/en-US/LC_MESSAGES/messages.po` and `static/locales/en-US/LC_MESSAGES/game_configs.po` are merged from the split modules.
+- The `.mo` files next to them are compiled from those.
+
+## Core Daily Operations
+
+### 1. Adding a new message
+
+Append the entry to the matching `.po` file in `static/locales/en-US/modules/` or `static/locales/en-US/game_configs_modules/`.
+
+**Format requirements:**
+- Keep **one blank line** between entries.
+- `msgid` is the English source text or a stable key (e.g. `attack_description`).
+- `msgstr` is the final English text shown to players. For source-text msgids it is usually identical to `msgid`.
 
 ```po
 msgid "Found {amount} spirit stone"
-msgstr "发现了 {amount} 块灵石"
+msgstr "Found {amount} spirit stone"
+
+msgid "attack_description"
+msgstr "Attack the target with your weapon and techniques."
 ```
 
-### 2. 如何添加新的 PO 文件
-如果正在开发新功能，请创建一个新的 `.po` 文件（例如，`modules/new_feature.po`）。
-- **规则**: **不要**向这些拆分的模块文件添加 PO 头部信息（如 `Project-Id-Version`）。构建脚本会处理头部信息。直接开始编写 `msgid` 即可。
+### 2. Adding a new PO file
 
-### 2.1 语言注册表
-仓库中的语言列表单一真相源位于 `static/locales/registry.json`。
+When developing a new feature, create a new `.po` file (for example `modules/new_feature.po`).
+- **Rule**: do **not** add PO headers (such as `Project-Id-Version`) to these split module files. The build script handles headers. Start directly with `msgid` entries.
 
-- Python 侧 i18n 工具、校验脚本和新增语言流程应优先读取该文件。
-- 如果未来需要新增语言，请先更新该文件，再补目录和资源骨架。
-- 不要在新脚本里重新写死 `zh-CN / zh-TW / en-US / vi-VN / ja-JP / fr-FR`。
+### 3. Key design: short slots vs. long text
 
-### 3. ⚠️ 关键: 始终重新构建
-`.po` 或 `.csv` 文件中的更改在编译为 `.mo` 文件之前 **不会** 在游戏中生效。
-**在任何翻译更改后，始终运行构建脚本:**
+- Short-slot keys (`title`, `label`, `tab`, `button`, `badge`, `status`, `*_short`, menu items, status bar entries, card titles) must be concise and natural.
+- Full explanations go into `*_desc`, `help`, tooltip, or body keys. If one string would have to serve both a narrow button and a dialog explanation, split it into separate short/long keys.
+
+### 4. Critical: always rebuild
+
+Changes to `.po` or `.csv` files do **not** take effect in game until they are merged and compiled to `.mo`.
+**Always run the build script after any string change:**
+
 ```bash
 python tools/i18n/build_mo.py
 ```
 
 ---
 
-## 🔴 关键规则 (简述)
+## Critical Rules (summary)
 
-- **绝对不要**在 Windows PowerShell 中使用重定向 (`>>`) 追加内容到 PO 文件（这会导致 UTF-16LE 编码和 `\x00` 损坏）。
-- **编码**: 必须使用无 BOM 的 UTF-8。
-- **不要直接编辑** `LC_MESSAGES/messages.po`。请编辑 `modules/` 或 `game_configs_modules/` 中拆分的 `.po` 文件。
-- **语言列表**: 优先从 `static/locales/registry.json` 读取，不要在工具或测试里重新维护一份手写语言列表。
-- **设置页语言入口**: `web/src/components/SystemMenu.vue` 中的语言设置项，对非英语 UI 必须保留可见的 `Language` 英文提示（例如 `语言 / Language`、`言語 / Language`），不要在后续润色或本地化时去掉这个 `Language`。
+- **Never** use redirection (`>>`) in Windows PowerShell to append to PO files (it produces UTF-16LE encoding and `\x00` corruption).
+- **Encoding**: UTF-8 without BOM.
+- **Do not edit** `LC_MESSAGES/messages.po` or `LC_MESSAGES/game_configs.po` directly. Edit the split `.po` files in `modules/` or `game_configs_modules/`, then run `build_mo.py`.
+- **Locale list**: always read it from `static/locales/registry.json` (Python: `src/i18n/locale_registry.py`, re-exported by `tools/i18n/locale_registry.py`; frontend: `web/src/locales/registry.ts`). Never maintain a handwritten locale list in tools or tests.
+- **No hardcoded player-facing text in logic**: put user-visible strings behind `t()` keys, frontend locale keys, or templates. LLM/runtime-generated text constraints and prompt fragments belong in `static/locales/en-US/templates/` or translation keys, not in Python string literals.
+- **Backend-driven labels**: for configuration-type selectors (races, yao race action/effect keys, avatar creation options, etc.) the backend provides localized structured DTOs; the frontend must not hardcode those labels.
 
-## 🧩 工作流与模式 (简述)
+## Workflows and Patterns (summary)
 
-### Python 动态文本
-使用 `src.i18n` 中的 `t()`。
+### Python dynamic text
+Use `t()` from `src.i18n`.
+
 ```python
 from src.i18n import t
 msg = t("{actor} performs action", actor=self.avatar.name)
 ```
 
-### CSV 游戏配置
-1. 编辑 CSV（添加 `name_id` 和 `desc_id`）。
-2. 提取 POT: `python tools/i18n/extract_csv.py`
-3. 在 `game_configs_modules/{category}.po` 中进行翻译。
-4. 重新构建: `python tools/i18n/build_mo.py`
+### CSV game configs
+1. Edit the CSV (add `name_id` and `desc_id`).
+2. Extract the POT: `python tools/i18n/extract_csv.py`
+3. Add the English text in `static/locales/en-US/game_configs_modules/{category}.po`.
+4. Rebuild: `python tools/i18n/build_mo.py`
 
-### 效果 (JSON) & 角色信息
-- **JSON**: 使用 `_desc` 和 `when_desc` 通过翻译键覆盖描述。
-- **字典**: 直接翻译键（例如，`t("Name"): self.name`）。
+### Effects (JSON) & avatar info
+- **JSON**: use `_desc` and `when_desc` to override descriptions via translation keys.
+- **Dictionaries**: translate keys directly (for example `t("Name"): self.name`).
+
+### Frontend strings
+Add keys to the matching file in `web/src/locales/en-US/` (e.g. `common.json`, `game.json`). Keep JSON valid and follow the same short-slot vs. `*_desc` split.
+
+### Validation
+
+```bash
+pytest tests/test_backend_locales.py tests/test_frontend_locales.py
+```
+
+Other helpers in `tools/i18n/` (use as needed): `split_po.py`, `cleanup_po_comments.py` / `preview_po_cleanup.py`, `split_action_module.py` / `preview_action_split.py`, `generate_missing_report.py`.
+
+## Adding a Language Later
+
+1. Register the locale in `static/locales/registry.json` first.
+2. Then scaffold its directories and resources: `static/locales/<lang>/modules/`, `game_configs_modules/`, `game_configs/`, `templates/`, and `web/src/locales/<lang>/`.
+3. Tools under `tools/i18n/` and the locale tests read the registry; never hardcode a locale list in scripts.
+4. `.po` `msgid`s stay as English source text or stable keys; non-English locales must never use copied English (or any other language's) `msgstr` as placeholder translations.
+5. If non-English UI languages are added, the language entry in `web/src/components/SystemMenu.vue` must keep a visible English `Language` hint (e.g. `<localized word> / Language`).

@@ -1,40 +1,40 @@
 ---
 name: external-control-api
-description: 规划或实现面向外部 agent / Claw 的稳定控制 API，优先做底层分层、query/command 收口、runtime 串行化与契约文档，而不是零散补接口
+description: Plan or implement a stable control API for external agents / Claw, prioritizing underlying layering, query/command consolidation, runtime serialization, and contract docs rather than patching in scattered endpoints
 ---
 
-## 适用场景
+## When to Use
 
-当任务涉及以下任一方向时使用本技能：
+Use this skill when a task involves any of the following:
 
-- 设计或重构外接控制 API
-- 让项目更适合被 Claw / agent / 自动化脚本调用
-- 把现有前端私有接口收口为稳定公共契约
-- 规划 query / command 分层
-- 规划 runtime/session 抽象与 mutation 串行化
+- Designing or refactoring the external control API
+- Making the project easier to drive from Claw / agents / automation scripts
+- Consolidating existing frontend-private endpoints into a stable public contract
+- Planning query / command layering
+- Planning runtime/session abstractions and mutation serialization
 
-## 目标
+## Goals
 
-本技能的目标不是“快补几个 endpoint”，而是确保 API 方向具备长期可演进性：
+The goal of this skill is not to "quickly add a few endpoints" but to make sure the API direction can evolve over the long term:
 
-1. 明确 Query 与 Command 边界
-2. 明确 Runtime / Service / API 三层职责
-3. 建立统一的 mutation 串行化模型
-4. 形成稳定 DTO、错误码和文档
+1. Clear Query vs. Command boundaries
+2. Clear responsibilities for the Runtime / Service / API layers
+3. A unified mutation serialization model
+4. Stable DTOs, error codes, and documentation
 
-## 首先检查什么
+## What to Check First
 
-1. 当前能力是不是其实已经存在，只是散落在旧接口里？
-2. 这次任务是“补接口”，还是“给之后打基础”？
-3. 是否涉及 `src/server/main.py` 中直接读写 `game_instance` 的路径？
-4. 是否会与 `game_loop()` / `sim.step()` 产生并发写 world 风险？
-5. 前端当前是否依赖旧 JSON 结构？如果重构会影响哪些 store / mapper？
+1. Does the capability already exist, just scattered across old endpoints?
+2. Is this task "add an endpoint" or "lay groundwork for what comes next"?
+3. Does it touch paths in `src/server/main.py` that read/write `game_instance` directly?
+4. Does it risk concurrent world writes with `game_loop()` / `sim.step()`?
+5. Does the frontend currently depend on the old JSON shape? Which stores / mappers would a refactor affect?
 
-## 推荐工作流
+## Recommended Workflow
 
-### 1. 先梳理现状
+### 1. Map the current state first
 
-优先查看：
+Look at these first:
 
 - `src/server/main.py`
 - `src/server/services/*.py`
@@ -44,39 +44,39 @@ description: 规划或实现面向外部 agent / Claw 的稳定控制 API，优�
 - `docs/specs/external-control-api.md`
 - `.cursor/rules/external-control-api.mdc`
 
-目标：
+Goals:
 
-- 列出现有 Query API
-- 列出现有 Command API
-- 标出哪些接口是“前端私有历史接口”
-- 标出哪些逻辑应该抽到 service/runtime
+- List the existing Query APIs
+- List the existing Command APIs
+- Mark which endpoints are "frontend-private legacy endpoints"
+- Mark which logic should be extracted into service/runtime
 
-### 2. 再定边界
+### 2. Then define the boundaries
 
-在改代码前先明确：
+Before changing code, settle:
 
-- 新接口命名空间是什么
-- 哪些属于 Query，哪些属于 Command
-- 哪些旧接口这次可以直接替换，不做兼容
-- 哪些字段要进入稳定 DTO
+- What the new endpoint namespace is
+- Which operations are Queries and which are Commands
+- Which old endpoints can be replaced outright this time, without compatibility
+- Which fields go into the stable DTO
 
-### 3. 先做底盘，再做接口
+### 3. Build the foundation first, then the endpoints
 
-如果任务范围足够大，优先顺序应是：
+If the task is large enough, the priority order should be:
 
-1. runtime/session 抽象
-2. mutation 锁 / 串行化
-3. service 收口
+1. runtime/session abstraction
+2. mutation lock / serialization
+3. service consolidation
 4. public v1 query
 5. public v1 command
-6. 前端适配
-7. 文档与 README
+6. frontend adaptation
+7. docs and README
 
-不要反过来先加一堆 endpoint，再回头补底盘。
+Do not do it the other way around, adding a pile of endpoints first and backfilling the foundation later.
 
-### 4. 保持“有语义的命令”设计
+### 4. Keep commands semantic
 
-优先：
+Prefer:
 
 - `set_long_term_objective`
 - `set_world_phenomenon`
@@ -84,62 +84,62 @@ description: 规划或实现面向外部 agent / Claw 的稳定控制 API，优�
 - `delete_avatar`
 - `update_avatar_adjustment`
 
-避免直接引入：
+Avoid introducing:
 
-- 任意对象通用 patch
-- 任意字段透传写入
-- 没有明确副作用边界的“万能控制接口”
+- Generic patch on arbitrary objects
+- Pass-through writes of arbitrary fields
+- "Do-everything control endpoints" without clear side-effect boundaries
 
-## 代码改动建议
+## Code Change Guidelines
 
-### 路由层
+### Route layer
 
-- 路由层只做参数解析与响应包装
-- 不在路由中直接写复杂 world 逻辑
+- The route layer only parses parameters and wraps responses
+- Do not write complex world logic directly in routes
 
-### Service 层
+### Service layer
 
-- 把角色控制、世界控制、生命周期控制分开
-- 复用已有 service，不要重复实现
-- 对未来可能被测试 patch、运行时 reload 或继续拆模块的依赖，优先注入 getter，例如：
+- Keep avatar control, world control, and lifecycle control separate
+- Reuse existing services; do not reimplement them
+- For dependencies that may be patched in tests, reloaded at runtime, or split into further modules later, prefer injecting getters, for example:
   - `get_load_game`
   - `get_generate_custom_content_draft`
   - `get_generate_custom_goldfinger_draft`
   - `get_apply_runtime_content_locale`
   - `get_config`
 
-### Runtime 层
+### Runtime layer
 
-- 任何会修改 world/sim 的操作都优先接入统一 runtime
-- 如果新增的 command 绕过 runtime，通常说明设计有问题
+- Any operation that modifies world/sim should go through the unified runtime
+- If a new command bypasses the runtime, that usually signals a design problem
 
-### 配置与存档目录
+### Config and save directories
 
-- 配置真源可能在测试中被 reload 或被 patch；不要默认某个模块级 `CONFIG` 一直是最新对象。
-- 读写存档时优先在调用时解析当前 saves dir；如果是基础设施层 helper，可以考虑同时兼容 `main.CONFIG` 与当前配置模块中的最新 `CONFIG`，避免全量测试或数据根切换时读错目录。
-- 这类动态读取主要是为了“底盘稳”，不是为了保留旧 public API。
+- The config source of truth may be reloaded or patched in tests; do not assume a module-level `CONFIG` is always the latest object.
+- When reading/writing saves, prefer resolving the current saves dir at call time; for infrastructure-level helpers, consider supporting both `main.CONFIG` and the latest `CONFIG` in the current config module, to avoid reading the wrong directory during full test runs or data root switches.
+- This kind of dynamic reading is mainly about "a stable foundation", not about preserving old public APIs.
 
-## 文档要求
+## Documentation Requirements
 
-改动外接控制 API 时，优先同步：
+When changing the external control API, sync these first:
 
 - `docs/specs/external-control-api.md`
-- `README.md`
+- `README.md` (the only README; there are no translated READMEs to sync)
 - `AGENTS.md`
 
-如果引入新规则或新的长期约束，记得同步 `.cursor/rules/*.mdc` 和仓库根 `AGENTS.md`。
+If you introduce new rules or new long-term constraints, remember to sync `.cursor/rules/*.mdc` and the repository root `AGENTS.md`.
 
-## 测试建议
+## Testing Guidelines
 
-至少考虑：
+At minimum, consider:
 
-- query 契约测试
-- command 契约测试
-- 状态守卫测试
-- runtime 串行化测试
-- 初始化/读档/事件查询的回归测试
+- query contract tests
+- command contract tests
+- state guard tests
+- runtime serialization tests
+- regression tests for initialization / loading saves / event queries
 
-若涉及前端同步迁移，还应运行：
+If the frontend is migrated alongside, also run:
 
 ```bash
 pytest
@@ -147,35 +147,35 @@ cd web && npm run test
 cd web && npm run type-check
 ```
 
-## Claw 最小模板
+## Minimal Claw Template
 
-如果目标是尽快做出一个可用的 Claw / agent 控制 skill，优先按下面套路实现：
+If the goal is to ship a usable Claw / agent control skill quickly, follow this pattern:
 
-1. 每轮先查 `GET /api/v1/query/runtime/status`
-2. 若未 ready：
-   - 未开局就调用 `POST /api/v1/command/game/start`
-   - 初始化中就继续轮询
-   - 错误态就读取错误信息并考虑 `reinit`
-3. ready 后再查：
+1. Each round, first query `GET /api/v1/query/runtime/status`
+2. If not ready:
+   - If no game has started, call `POST /api/v1/command/game/start`
+   - If initializing, keep polling
+   - If in an error state, read the error info and consider `reinit`
+3. Once ready, query:
    - `GET /api/v1/query/world/state`
    - `GET /api/v1/query/events`
-   - 必要时 `GET /api/v1/query/detail`
-4. 只调用“有语义的 command”，例如：
+   - `GET /api/v1/query/detail` when needed
+4. Only call "semantic commands", for example:
    - `avatar/set-long-term-objective`
    - `world/set-phenomenon`
    - `avatar/create`
    - `avatar/update-adjustment`
-5. command 之后重新 query，不要假设本地缓存一定正确
+5. Query again after a command; do not assume the local cache is correct
 
-## 新增接口时怎么落
+## Where New Endpoints Go
 
-- 新 query：
-  - 先看是否已有 service 可复用
-  - 再接到 `src/server/public_query_builders.py`
-  - 最后挂到 `src/server/api/public_v1/query.py`
-- 新 command：
-  - 业务逻辑优先落 service
-  - 编排接到 `src/server/command_handlers.py`
-  - 最后挂到 `src/server/api/public_v1/command.py`
-- 会修改 world / sim 的接口：
-  - 必须经过统一 runtime mutation 入口
+- New query:
+  - First check whether an existing service can be reused
+  - Then wire it into `src/server/public_query_builders.py`
+  - Finally mount it on `src/server/api/public_v1/query.py`
+- New command:
+  - Put business logic in a service first
+  - Wire orchestration into `src/server/command_handlers.py`
+  - Finally mount it on `src/server/api/public_v1/command.py`
+- Endpoints that modify world / sim:
+  - Must go through the unified runtime mutation entry point

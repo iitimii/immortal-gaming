@@ -1,71 +1,71 @@
-# 配置架构重构说明
+# Config Architecture Refactor Notes
 
-本文档记录 2026-04 的配置系统重构结果，作为后续开发时的单一设计参考。
+This document records the results of the 2026-04 config system refactor and serves as the single design reference for subsequent development.
 
-## 目标
+## Goals
 
-本次重构的目标不是兼容旧结构，而是把配置边界重新拉直：
+The goal of this refactor was not to stay compatible with the old structure, but to straighten out the config boundaries:
 
-1. `static/config.yml` 只保留版本内置静态配置。
-2. 用户设置和敏感信息统一由 `SettingsService` 管理。
-3. 开局参数统一由 `RunConfig` 表达，并随存档保存。
-4. 清除历史废弃配置，不再保留旧字段兜底。
+1. `static/config.yml` only keeps the static config built into the release.
+2. User settings and sensitive information are managed uniformly by `SettingsService`.
+3. New-game parameters are expressed uniformly by `RunConfig` and saved with the save file.
+4. Historically deprecated config is removed, with no fallback for old fields.
 
-## 最终分层
+## Final Layering
 
-### 1. 静态配置
+### 1. Static Config
 
-文件：
+Files:
 
 - `static/config.yml`
 - `src/utils/config.py`
 
-职责：
+Responsibilities:
 
-- 版本号
-- 静态资源目录
-- 游戏平衡参数
-- 世界规则和故事概率
-- LLM 任务级默认模式
-- 前端内置默认表现参数
+- Version number
+- Static resource directories
+- Game balance parameters
+- World rules and story probabilities
+- Default modes per LLM task
+- Built-in frontend default presentation parameters
 
-限制：
+Restrictions:
 
-- 不承载用户偏好
-- 不承载 API Key
-- 不承载本局启动参数
-- 不承载部署地址和端口
+- Does not hold user preferences
+- Does not hold API keys
+- Does not hold current-run startup parameters
+- Does not hold deployment addresses and ports
 
-### 2. 应用设置
+### 2. Application Settings
 
-文件：
+Files:
 
 - `settings.json`
 - `secrets.json`
 - `src/config/settings_schema.py`
 - `src/config/settings_service.py`
 
-职责：
+Responsibilities:
 
-- UI 语言
-- 音量
-- 自动存档设置
+- UI language
+- Volume
+- Autosave settings
 - LLM profile
-- 新开局默认参数
-- API Key
+- New-game default parameters
+- API key
 
-限制：
+Restrictions:
 
-- 不写回 `static/config.yml`
-- 前端正式真源统一是 `/api/settings`
+- Never written back to `static/config.yml`
+- The frontend's single source of truth is `/api/settings`
 
-### 3. 本局运行配置
+### 3. Current-Run Config
 
-类型：
+Type:
 
 - `RunConfig`
 
-职责：
+Responsibilities:
 
 - `content_locale`
 - `init_npc_num`
@@ -73,78 +73,78 @@
 - `npc_awakening_rate_per_month`
 - `world_lore`
 
-规则：
+Rules:
 
-1. 新开局时由前端请求生成。
-2. 服务端将快照写入 `game_instance["run_config"]`。
-3. 世界对象将其保存到 `world.run_config_snapshot`。
-4. 存档必须序列化 `run_config`。
-5. 读档恢复时优先恢复该快照，而不是回退到静态配置。
+1. Generated from the frontend request when starting a new game.
+2. The server writes the snapshot into `game_instance["run_config"]`.
+3. The world object stores it in `world.run_config_snapshot`.
+4. Saves must serialize `run_config`.
+5. When loading, this snapshot is restored first instead of falling back to static config.
 
-### 4. 部署环境配置
+### 4. Deployment Environment Config
 
-来源：
+Sources:
 
 - `SERVER_HOST`
 - `SERVER_PORT`
 - `CWS_DATA_DIR`
 
-职责：
+Responsibilities:
 
-- 服务监听地址
-- 服务端口
-- 用户数据根目录
+- Server listen address
+- Server port
+- User data root directory
 
-限制：
+Restrictions:
 
-- 不再通过 `static/config.yml` 承载
+- No longer carried by `static/config.yml`
 
-## 前端配置边界
+## Frontend Config Boundaries
 
-前端当前有两条不同的配置链路，必须分开理解：
+The frontend currently has two distinct config chains, which must be understood separately:
 
-### 1. 应用设置链路
+### 1. Application Settings Chain
 
-来源：
+Sources:
 
 - `/api/settings`
 - `useSettingStore`
 
-职责：
+Responsibilities:
 
-- UI 语言
-- 音量
-- 自动存档
-- LLM 设置
-- 新开局默认参数
+- UI language
+- Volume
+- Autosave
+- LLM settings
+- New-game default parameters
 
-约束：
+Constraints:
 
-- `ui.locale` 与 `new_game_defaults.content_locale` 是两条独立链路
-- 前端不得在切换 UI 语言时自动覆盖内容语言
-- 启动新游戏时提交的 `RunConfig` 应直接来自当前 draft
+- `ui.locale` and `new_game_defaults.content_locale` are two independent chains
+- The frontend must not automatically overwrite the content language when the UI language is switched
+- The `RunConfig` submitted when starting a new game should come directly from the current draft
 
-### 2. 地图渲染默认链路
+### 2. Map Render Defaults Chain
 
-来源：
+Sources:
 
 - `/api/v1/query/world/map -> render_config`
 - `useMapStore`
 
-职责：
+Responsibilities:
 
 - `water_speed`
 - `cloud_frequency`
 
-约束：
+Constraints:
 
-- 这组参数表示静态地图表现默认值，不属于用户设置
-- 命名上统一使用 `render_config` / `renderConfig` / `MapRenderConfigDTO`
-- 不再使用过于宽泛的 `config` / `frontendConfig` 命名
+- These parameters represent static map presentation defaults and are not user settings
+- Naming uniformly uses `render_config` / `renderConfig` / `MapRenderConfigDTO`
+- Overly broad names like `config` / `frontendConfig` are no longer used
 
-## 当前静态配置结构
+## Current Static Config Structure
 
-`static/config.yml` 目前采用以下顶层结构：
+`static/config.yml` currently uses the following top-level structure:
 
 - `meta`
 - `resources`
@@ -160,66 +160,66 @@
 - `df`
 - `play`
 
-其中：
+Of these:
 
-- `resources` 只描述静态资源根目录
-- `world` 只描述世界规则，不再包含新开局默认值
-- `frontend_defaults` 表示前端内置默认表现，不是用户设置
+- `resources` only describes the static resource root directory
+- `world` only describes world rules and no longer contains new-game defaults
+- `frontend_defaults` represents built-in frontend default presentation, not user settings
 
-## 已删除的废弃配置
+## Removed Deprecated Config
 
-以下配置已从静态配置中彻底删除：
+The following config has been completely removed from static config:
 
 - `system.language`
 - `system.host`
 - `system.port`
 - `paths.saves`
 - `ai.max_concurrent_requests`
-- 注释形式保留的旧 `templates/game_configs` 路径残留
+- Leftover old `templates/game_configs` paths kept as comments
 
-这些字段不再有兼容 alias，也不再有回退逻辑。
+These fields no longer have compatibility aliases or fallback logic.
 
-## 核心设计约束
+## Core Design Constraints
 
-### 1. `CONFIG` 不是万能真源
+### 1. `CONFIG` Is Not a Universal Source of Truth
 
-`src.utils.config.CONFIG` 现在只代表静态配置���运行期派生出的资源路径。
+`src.utils.config.CONFIG` now only represents static config and the resource paths derived from it at runtime.
 
-禁止：
+Forbidden:
 
-- 从 `CONFIG` 读取用户设置
-- 从 `CONFIG` 读取本局启动参数
-- 从 `CONFIG` 读取 host/port
+- Reading user settings from `CONFIG`
+- Reading current-run startup parameters from `CONFIG`
+- Reading host/port from `CONFIG`
 
-### 2. `RunConfig` 是开局参数唯一真源
+### 2. `RunConfig` Is the Only Source of Truth for New-Game Parameters
 
-服务端 `get_runtime_run_config()` 只允许：
+The server's `get_runtime_run_config()` is only allowed to:
 
-1. 返回当前运行中的 `game_instance["run_config"]`
-2. 否则返回 `SettingsService.get_default_run_config()`
+1. Return the currently running `game_instance["run_config"]`
+2. Otherwise return `SettingsService.get_default_run_config()`
 
-禁止再从 `CONFIG.world` 回退读取开局参数。
+Falling back to reading new-game parameters from `CONFIG.world` is forbidden.
 
-### 3. 用户数据目录统一由 `data_paths` 决定
+### 3. The User Data Directory Is Determined Uniformly by `data_paths`
 
-运行时的 `CONFIG.paths.saves` 只是 `data_paths` 注入后的派生结果。
+The runtime `CONFIG.paths.saves` is only a derived result injected by `data_paths`.
 
-它不是静态配置字段，不允许在 `static/config.yml` 中重新定义。
+It is not a static config field and may not be redefined in `static/config.yml`.
 
-### 4. 语言资源路径必须显式切换
+### 4. Language Resource Paths Must Be Switched Explicitly
 
-`update_paths_for_language()` 的职责是“给定语言后切换静态资源路径”，
-而不是“从静态配置猜测当前用户语言”。
+The responsibility of `update_paths_for_language()` is "switch the static resource paths for a given language",
+not "guess the current user language from static config".
 
-因此默认语言选择属于 settings / runtime 层，不属于静态配置层。
+Therefore default language selection belongs to the settings / runtime layer, not the static config layer.
 
-## 后续新增配置时的放置规则
+## Placement Rules for New Config
 
-新增字段前先判断它属于哪一层：
+Before adding a field, first determine which layer it belongs to:
 
-1. 如果它跟版本一起发布、主要用于平衡或静态规则，放 `static/config.yml`。
-2. 如果它是用户偏好、可在设置页修改，放 `settings.json`。
-3. 如果它只在这一局开始时确定，并需要随存档保存，放 `RunConfig`。
-4. 如果它跟部署环境有关，放环境变量。
+1. If it ships with the release and is mainly used for balance or static rules, put it in `static/config.yml`.
+2. If it is a user preference that can be changed on the settings page, put it in `settings.json`.
+3. If it is determined only at the start of this run and must be saved with the save file, put it in `RunConfig`.
+4. If it relates to the deployment environment, put it in an environment variable.
 
-若一个字段同时想放进两层，通常说明职责划分有问题，应先重新建模。
+If a field seems to belong in two layers at once, it usually means the responsibility split is wrong and it should be remodeled first.

@@ -1,19 +1,18 @@
 ---
 name: Bug Report 🐛
-about: 报告一个问题 (Report a bug)
+about: Report a bug
 title: "[Bug] "
 labels: bug
 assignees: ''
 ---
 
-**问题描述**
-简要描述你遇到的问题。
+**Description**
+Briefly describe the problem you ran into.
 
-**复现步骤**
+**Steps to Reproduce**
 1. 
 2. 
 
-**环境信息**
+**Environment**
 - OS: 
-- 报错信息 (如有):
-
+- Error message (if any):

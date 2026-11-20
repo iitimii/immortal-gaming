@@ -1,35 +1,35 @@
-当用户调用此命令时，请同步并更新仓库根目录 `CONTRIBUTORS.md` 以及 `README.md` 中的贡献者部分，来源为 GitHub 仓库贡献者列表。
+When the user invokes this command, sync and update the repository root `CONTRIBUTORS.md` and the contributors section of `README.md`, using the GitHub repository contributor list as the source. The whole flow is driven by `tools/github/sync_contributors.py`.
 
-请严格执行以下流程：
+Strictly follow this flow:
 
-1. **确认目标仓库**：
-   - 默认仓库为 `4thfever/cultivation-world-simulator`
-   - 若用户明确指定其他仓库，再按用户要求覆盖
-2. **执行同步脚本**：
-   - 运行 `python tools/github/sync_contributors.py`
-   - 若需指定仓库，使用 `python tools/github/sync_contributors.py --repo owner/name`
-3. **生成文档要求**：
-   - 输出目标为仓库根目录 `CONTRIBUTORS.md`
-   - 文档顶部保留感谢开源贡献者的说明文字
-   - 贡献者列表使用 Markdown 表格
-   - 表格仅保留三列：`Name`、`Avatar`、`GitHub`
-   - 不要补充“每个人做了什么”的说明
-   - 表格数据以 GitHub contributors API 返回结果为准
-4. **同步更新 README.md**：
-   - 脚本会自动更新 `README.md` 中的 `## 👥 贡献者` 章节
-   - `README.md` 贡献者头像必须与 GitHub contributors API 结果一一对应（数量与身份一致）
-   - 不要仅依赖第三方聚合图（如 contrib.rocks）作为唯一展示来源，避免缓存/过滤导致头像缺失
-   - 若使用头像墙或网格，应由 API 返回列表直接渲染，并保持链接指向正确 GitHub 主页
-5. **失败处理**：
-   - 若 GitHub API 请求失败，明确说明失败原因
-   - 不要在请求失败时写入伪造或手填的贡献者数据
-6. **完成后自检**：
-   - 检查 `CONTRIBUTORS.md` 是否已更新
-   - 检查 `README.md` 的贡献者部分是否已同步
-   - 检查表格是否可读、链接是否指向正确 GitHub 主页
-   - 输出本次同步的贡献者总数
+1. **Confirm the target repository**:
+   - The default repository is `4thfever/cultivation-world-simulator`
+   - Only override it when the user explicitly specifies another repository
+2. **Run the sync script**:
+   - Run `python tools/github/sync_contributors.py`
+   - To specify a repository, use `python tools/github/sync_contributors.py --repo owner/name`
+3. **Generated document requirements**:
+   - The output target is the repository root `CONTRIBUTORS.md`
+   - Keep the note thanking open-source contributors at the top of the document
+   - Render the contributor list as a Markdown table
+   - The table keeps only three columns: `Name`, `Avatar`, `GitHub`
+   - Do not add descriptions of "what each person did"
+   - The table data must follow the GitHub contributors API response
+4. **Sync `README.md`**:
+   - The script automatically updates the contributors section of `README.md` (the section heading it matches is defined in `tools/github/sync_contributors.py`)
+   - The contributor avatars in `README.md` must map one-to-one to the GitHub contributors API result (same count and identities)
+   - Do not rely solely on third-party aggregate images (such as contrib.rocks) as the only display source, to avoid missing avatars caused by caching/filtering
+   - If an avatar wall or grid is used, render it directly from the list returned by the API, and keep links pointing to the correct GitHub profiles
+5. **Failure handling**:
+   - If the GitHub API request fails, state the failure reason clearly
+   - Never write fabricated or hand-filled contributor data when the request fails
+6. **Self-check when done**:
+   - Check that `CONTRIBUTORS.md` was updated
+   - Check that the contributors section of `README.md` was synced
+   - Check that the table is readable and links point to the correct GitHub profiles
+   - Output the total number of contributors synced this run
 
-注意：
+Notes:
 
-- 仅更新 `CONTRIBUTORS.md`、`README.md` 与必要脚本，不要顺带修改其他业务文件。
-- 若新增或修改了 `.cursor/commands`，建议随后执行一次 `/sync_agents`，保持 `AGENTS.md` 索引同步。
+- Only update `CONTRIBUTORS.md`, `README.md`, and the necessary script; do not touch other business files along the way.
+- If you added or modified `.cursor/commands`, consider running `/sync_agents` afterwards to keep the `AGENTS.md` index in sync.

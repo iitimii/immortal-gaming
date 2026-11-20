@@ -1,65 +1,65 @@
-# 外接控制 API 基础重构方案
+# External Control API Foundation Refactor Plan
 
-本文档记录“外接控制 API”方向的整体设计与落地计划，目标不是零散补几个接口，而是把服务端重构成一个适合长期演进、方便外部 agent 接入、方便后续继续 vibe coding 的稳定底盘。
+This document records the overall design and rollout plan for the "external control API" direction. The goal is not to patch in a few scattered endpoints, but to refactor the server into a stable foundation that is suited to long-term evolution, easy for external agents to integrate with, and easy to keep vibe coding on.
 
-## 1. 背景与目标
+## 1. Background and Goals
 
-当前项目已经具备一批可用的只读查询 API 和少量控制 API：
+The project already has a set of usable read-only query APIs and a small number of control APIs:
 
-- 只读侧：世界快照、地图、详情、事件分页、榜单、宗门关系、王朝/凡人概览。
-- 写入侧：开局、暂停/恢复、重置、设置长期目标、设置天地灵机、创建/删除角色、角色调整、存档读档。
+- Read side: world snapshot, map, detail, paginated events, rankings, sect relations, dynasty/mortal overview.
+- Write side: start game, pause/resume, reset, set long-term objective, set celestial phenomenon, create/delete avatar, avatar adjustment, save/load.
 
-这些能力已经足够支撑外部工具做“观察世界”，也已经有第三方 skill 基于现有 API 成功接入。
+These capabilities are already enough for external tools to "observe the world", and a third-party skill has already integrated successfully on top of the existing APIs.
 
-但当前架构仍有以下问题：
+However, the current architecture still has the following problems:
 
-1. 路由层过厚，`src/server/main.py` 直接承担了大量领域读写。
-2. 运行时状态集中在全局 `game_instance` 字典，边界不清晰。
-3. 写接口没有统一的串行化入口，未来外部 agent 高频调用时会有状态竞争风险。
-4. 现有接口更多是“前端内部契约”，并非“外部稳定契约”。
-5. 成功/失败响应风格不统一，不利于 README、doc、skill 和第三方接入。
+1. The routing layer is too thick: `src/server/main.py` directly handles a large amount of domain reads and writes.
+2. Runtime state is concentrated in the global `game_instance` dict, with unclear boundaries.
+3. Write endpoints have no unified serialization entry point, which creates a risk of state races once external agents call them at high frequency.
+4. Existing endpoints are more of an "internal frontend contract" than a "stable external contract".
+5. Success/failure response styles are inconsistent, which is bad for the README, docs, skills, and third-party integrations.
 
-本次重构的核心目标：
+Core goals of this refactor:
 
-1. 明确对外 API 的稳定边界。
-2. 让“查询世界”和“干预世界”成为两个清晰模型。
-3. 让后续新增接口只是在既有框架中增加 query/command，而不是继续堆逻辑。
-4. 支持通过 Claw 等外部 agent 进行游玩、观察和有限控制。
+1. Define a clear stable boundary for the external API.
+2. Make "querying the world" and "intervening in the world" two clearly separate models.
+3. Make adding future endpoints a matter of adding a query/command inside the existing framework, rather than piling on more logic.
+4. Support playing, observing, and limited control through external agents such as Claw.
 
-## 2. 重构原则
+## 2. Refactor Principles
 
-### 2.1 不追求向前兼容
+### 2.1 No forward compatibility required
 
-本次允许不兼容旧的内部接口命名与响应格式。
+This refactor is allowed to break the old internal endpoint names and response formats.
 
-原则：
+Principles:
 
-- 优先把结构拉直。
-- 不为了兼容继续扩散旧命名、旧返回格式、旧职责混杂。
-- 若前端需要适配，优先让前端跟随新契约调整。
+- Prioritize straightening out the structure.
+- Do not keep spreading old names, old response formats, or old mixed responsibilities for the sake of compatibility.
+- If the frontend needs to adapt, prefer having the frontend follow the new contract.
 
-### 2.2 以“外部集成”而不是“前端私有接口”作为第一视角
+### 2.2 Take "external integration", not "private frontend endpoints", as the primary perspective
 
-新 API 的第一使用者假设为：
+The primary consumers of the new API are assumed to be:
 
-- 外部 AI skill
-- Claw / agent
-- 自动化脚本
-- 调试工具
+- External AI skills
+- Claw / agents
+- Automation scripts
+- Debugging tools
 
-因此接口应具备：
+Therefore the endpoints should have:
 
-- 明确命名
-- 明确 DTO
-- 稳定错误返回
-- 明确只读/写入边界
-- 明确副作用
+- Clear naming
+- Clear DTOs
+- Stable error responses
+- A clear read-only/write boundary
+- Clearly stated side effects
 
-### 2.3 不做“万能 patch API”
+### 2.3 No "universal patch API"
 
-本次不建议设计成“任意对象任意字段可 patch”的通用写接口。
+This refactor does not recommend designing a generic write endpoint along the lines of "patch any field on any object".
 
-应优先采用“有语义的 command”模型，例如：
+Prefer a "semantic command" model instead, for example:
 
 - `set_long_term_objective`
 - `set_world_phenomenon`
@@ -70,157 +70,157 @@
 - `change_avatar_sect`
 - `modify_avatar_relation`
 
-这样可以保持：
+This keeps:
 
-- 约束清晰
-- 验证逻辑集中
-- 文档可读
-- 测试容易落地
+- Constraints clear
+- Validation logic centralized
+- Documentation readable
+- Tests easy to write
 
-## 3. 目标架构
+## 3. Target Architecture
 
-### 3.1 分层
+### 3.1 Layering
 
-建议拆为四层：
+Recommended split into four layers:
 
-#### A. Runtime / Session 层
+#### A. Runtime / Session layer
 
-建议新建模块，例如：
+Suggested new modules, for example:
 
 - `src/server/runtime/session.py`
 - `src/server/runtime/locks.py`
 
-职责：
+Responsibilities:
 
-- 统一持有当前运行时状态
-- 替代散落在 `main.py` 中的 `game_instance` 直接读写
-- 暴露当前 `world / sim / run_config / init_status / llm_status`
-- 提供统一的 pause/resume/reset/start/load/save 生命周期入口
-- 提供 mutation 串行化锁
+- Hold the current runtime state in one place
+- Replace the direct reads/writes of `game_instance` scattered across `main.py`
+- Expose the current `world / sim / run_config / init_status / llm_status`
+- Provide unified pause/resume/reset/start/load/save lifecycle entry points
+- Provide the mutation serialization lock
 
-建议的核心对象：
+Suggested core objects:
 
 - `GameSessionState`
 - `GameSessionRuntime`
 
-#### B. Application Services 层
+#### B. Application Services layer
 
-建议新建模块，例如：
+Suggested new modules, for example:
 
 - `src/server/services/game_queries.py`
 - `src/server/services/game_lifecycle.py`
 - `src/server/services/world_control.py`
 - `src/server/services/avatar_control.py`
 
-职责：
+Responsibilities:
 
-- 接收路由参数对应的业务意图
-- 调用 runtime 和领域对象
-- 返回明确的 DTO 或结果对象
+- Receive the business intent corresponding to route parameters
+- Call the runtime and domain objects
+- Return explicit DTOs or result objects
 
-要求：
+Requirements:
 
-- service 可以依赖 runtime、assembler、领域层
-- service 不直接依赖 FastAPI request/response 对象
+- Services may depend on the runtime, assemblers, and the domain layer
+- Services do not depend directly on FastAPI request/response objects
 
-#### C. API / DTO / Assembler 层
+#### C. API / DTO / Assembler layer
 
-建议新建模块，例如：
+Suggested new modules, for example:
 
 - `src/server/api/public_v1/*.py`
 - `src/server/schemas/public_api.py`
 - `src/server/assemblers/*.py`
 
-职责：
+Responsibilities:
 
-- 参数校验
-- DTO 定义
-- 统一成功/失败响应格式
-- 路由挂载
+- Parameter validation
+- DTO definitions
+- Unified success/failure response format
+- Route mounting
 
-要求：
+Requirements:
 
-- 路由层只做“校验 -> 调 service -> 返回 DTO”
-- 不在路由层散落手写业务逻辑
+- The routing layer only does "validate -> call service -> return DTO"
+- No hand-written business logic scattered across the routing layer
 
-#### D. Domain 层
+#### D. Domain layer
 
-现有 `src/classes/**`, `src/sim/**`, `src/systems/**`
+Existing `src/classes/**`, `src/sim/**`, `src/systems/**`
 
-职责不变：
+Responsibilities unchanged:
 
-- 保持规则、状态、模拟器步进、领域行为
+- Maintain rules, state, simulator stepping, and domain behavior
 
-约束：
+Constraints:
 
-- 领域层不反向依赖 `server/main.py`
-- 领域层不感知“HTTP 接口长什么样”
+- The domain layer does not depend back on `server/main.py`
+- The domain layer is unaware of "what the HTTP endpoints look like"
 
-### 3.4 当前落地后的服务端模块地图
+### 3.4 Server module map after the current rollout
 
-截至当前重构落地，`src/server` 侧已经形成如下职责划分：
+As of the current refactor rollout, the `src/server` side has the following division of responsibilities:
 
 - `src/server/main.py`
-  - 仓库默认入口与 composition root
-  - 负责组装 runtime、service、app 与启动入口
+  - The repository's default entry point and composition root
+  - Assembles the runtime, services, app, and startup entry point
 - `src/server/services/game_query_service.py`
-  - 聚合 public v1 query 与 DTO 组装
-  - 统一承接 runtime、assembler、serializer 与静态数据依赖
+  - Aggregates public v1 queries and DTO assembly
+  - Owns the runtime, assembler, serializer, and static data dependencies
 - `src/server/services/game_command_service.py`
-  - 聚合 public v1 command 编排
-  - 统一承接 lifecycle / avatar / save-load / custom content 等写操作
+  - Aggregates public v1 command orchestration
+  - Owns write operations such as lifecycle / avatar / save-load / custom content
 - `src/server/init_flow.py`
-  - 聚合开局初始化流程
-  - 包含资源扫描、地图加载、世界创建、世界观应用、宗门/NPC 初始化、LLM 检测与首步事件生成
+  - Aggregates the game-start initialization flow
+  - Includes resource scanning, map loading, world creation, applying the world setting, sect/NPC initialization, LLM checks, and first-step event generation
 - `src/server/loop_runtime.py`
-  - 聚合后台 game loop、tick 载荷拼装与自动存档触发逻辑
+  - Aggregates the background game loop, tick payload assembly, and autosave triggering logic
 - `src/server/host_app.py`
-  - 聚合 FastAPI app / lifespan / router / mounts / 启动入口宿主逻辑
+  - Aggregates the FastAPI app / lifespan / router / mounts / startup entry host logic
 - `src/server/bootstrap.py`
-  - 聚合 runtime 路径解析、host/port 解析与浏览器目标地址准备
+  - Aggregates runtime path resolution, host/port resolution, and browser target address preparation
 - `src/server/serialization.py`
-  - 聚合公共序列化函数，如事件、天地灵机、秘境状态
+  - Aggregates shared serialization functions, such as events, celestial phenomena, and hidden domain state
 - `src/server/public_helpers.py`
-  - 聚合运行时通用 helper，如头像资源扫描、存档名校验、运行时 locale 应用
+  - Aggregates general runtime helpers, such as avatar asset scanning, save name validation, and applying the runtime locale
 
-这意味着后续新增外接能力时，应优先遵循：
+This means that when adding new external capabilities, you should prefer to:
 
-- 新只读接口先考虑落到 `GameQueryService` 及对应 assembler。
-- 新写接口先考虑落到 `GameCommandService`。
-- 新初始化步骤优先扩展 `init_flow.py`，不要把 phase 逻辑重新塞回 `main.py`。
-- 新宿主/启动行为优先扩展 `host_app.py` / `bootstrap.py`。
+- Consider placing new read-only endpoints in `GameQueryService` and the corresponding assembler first.
+- Consider placing new write endpoints in `GameCommandService` first.
+- Extend `init_flow.py` for new initialization steps first; do not stuff phase logic back into `main.py`.
+- Extend `host_app.py` / `bootstrap.py` for new host/startup behavior first.
 
-### 3.2 命名空间
+### 3.2 Namespaces
 
-建议新接口统一放在稳定前缀下：
+Suggested stable prefixes for all new endpoints:
 
 - `/api/v1/system/*`
 - `/api/v1/query/*`
 - `/api/v1/command/*`
 
-或者更偏资源风格的替代方案：
+Or a more resource-style alternative:
 
 - `/api/v1/runtime/*`
 - `/api/v1/world/*`
 - `/api/v1/avatars/*`
 - `/api/v1/events/*`
 
-本项目更推荐第一种，因为它天然区分 query / command，便于外部 agent 理解副作用。
+This project recommends the first option, because it naturally separates query / command and makes side effects easy for external agents to understand.
 
-建议划分：
+Suggested split:
 
 - `query`
-  - 只读、无副作用
-  - 可安全被 skill 和 agent 高频调用
+  - Read-only, no side effects
+  - Safe for skills and agents to call at high frequency
 - `command`
-  - 有副作用
-  - 必须经过统一锁和统一校验
+  - Has side effects
+  - Must go through the unified lock and unified validation
 
-### 3.3 响应格式
+### 3.3 Response format
 
-建议统一为：
+Suggested unified format:
 
-成功：
+Success:
 
 ```json
 {
@@ -229,7 +229,7 @@
 }
 ```
 
-失败：
+Failure:
 
 ```json
 {
@@ -242,67 +242,67 @@
 }
 ```
 
-约束：
+Constraints:
 
-- 不再混用 `200 + {"error": ...}` 与 `HTTPException(detail=...)` 两套语义。
-- 内部仍可用 HTTP 状态码区分错误类别，但响应体结构应稳定。
-- `error.code` 必须是稳定字符串，方便 skill 做程序判断。
+- No more mixing the two semantics of `200 + {"error": ...}` and `HTTPException(detail=...)`.
+- HTTP status codes may still be used internally to distinguish error categories, but the response body structure should be stable.
+- `error.code` must be a stable string so that skills can make programmatic decisions.
 
-## 4. 并发与健壮性基础
+## 4. Concurrency and Robustness Foundations
 
-### 4.1 Mutation 串行化
+### 4.1 Mutation serialization
 
-本次必须建立统一 mutation 入口。
+This refactor must establish a unified mutation entry point.
 
-建议：
+Recommendations:
 
-- Runtime 持有一把统一的 `asyncio.Lock`
-- 所有写操作经由 `runtime.run_mutation(...)`
-- `Simulator.step()` 也通过同一执行通道运行
+- The runtime holds a single unified `asyncio.Lock`
+- All write operations go through `runtime.run_mutation(...)`
+- `Simulator.step()` also runs through the same execution channel
 
-目标：
+Goals:
 
-- 避免 HTTP mutation 与 `sim.step()` 并发改 world
-- 避免多个外部 command 同时写世界
+- Avoid HTTP mutations and `sim.step()` modifying the world concurrently
+- Avoid multiple external commands writing to the world at the same time
 
-### 4.2 修为阶层别名与稳定 ID
+### 4.2 Cultivation realm aliases and stable IDs
 
-修为阶层在查询结果中可能同时出现两类字段：
+Cultivation realms may appear in query results as two kinds of fields at once:
 
-- 稳定 ID：`realm`、`stage`、`realm_id`、`stage_id`，值来自领域枚举，例如 `FOUNDATION_ESTABLISHMENT`、`EARLY_STAGE`。
-- 展示别名：`cultivation.display_full_name`、`cultivation_display`，会随角色道统或种族变化，例如同一标准境界可显示为“筑基前期”“易筋初成”“明理初境”“化形前期”。
+- Stable IDs: `realm`, `stage`, `realm_id`, `stage_id`, with values from the domain enums, e.g. `FOUNDATION_ESTABLISHMENT`, `EARLY_STAGE`.
+- Display aliases: `cultivation.display_full_name`, `cultivation_display`, which vary with the avatar's orthodoxy or race. For example, the same standard realm may be displayed as "Foundation Establishment Early Stage", "Tendon-Tempering, Initial Attainment", "Principle Illumination, Early Realm", or "Form Transformation Early Stage".
 
-对外 API 约束：
+External API constraints:
 
-- 所有 command、action params、脚本自动化输入必须使用稳定 ID。
-- query 返回的展示别名只用于 UI、日志、叙事或给 agent 读懂世界，不得反向作为命令参数。
-- 如果同一响应同时给出 `realm` 与 `cultivation`，`realm` 保持稳定 ID 语义，`cultivation` 承担显示语义。
+- All commands, action params, and script automation input must use stable IDs.
+- Display aliases returned by queries are only for UI, logs, narrative, or helping agents understand the world; they must not be fed back as command parameters.
+- If the same response includes both `realm` and `cultivation`, `realm` keeps the stable ID semantics and `cultivation` carries the display semantics.
 
-### 4.3 Query 的快照语义
+### 4.3 Snapshot semantics of queries
 
-query 不应直接暴露“半更新中”的临时状态。
+Queries should not directly expose "mid-update" temporary state.
 
-建议：
+Recommendations:
 
-- 简单查询可直接读取当前状态
-- 对体量较大或涉及多对象拼装的查询，优先通过 service 封装，保证同一次返回内部字段语义一致
+- Simple queries may read the current state directly
+- For large queries or queries that assemble multiple objects, prefer encapsulating them in a service so that fields within a single response are semantically consistent
 
-### 4.4 生命周期守卫
+### 4.4 Lifecycle guards
 
-所有 command 必须统一校验：
+All commands must uniformly validate:
 
-- 世界是否已初始化
-- 当前是否允许 mutation
-- 当前是否处于加载/初始化中
-- 目标对象是否存在
+- Whether the world has been initialized
+- Whether mutations are currently allowed
+- Whether a load/initialization is currently in progress
+- Whether the target object exists
 
-避免每个 endpoint 自己重复判断。
+Avoid having each endpoint repeat these checks on its own.
 
-## 5. 第一批 v1 API 范围
+## 5. Scope of the First Batch of v1 APIs
 
 ### 5.1 Query API
 
-第一批稳定开放：
+First batch opened as stable:
 
 1. `GET /api/v1/query/runtime/status`
 2. `GET /api/v1/query/world/state`
@@ -325,7 +325,7 @@ query 不应直接暴露“半更新中”的临时状态。
 
 ### 5.2 Command API
 
-第一批稳定开放：
+First batch opened as stable:
 
 1. `POST /api/v1/command/game/start`
 2. `POST /api/v1/command/game/pause`
@@ -347,19 +347,19 @@ query 不应直接暴露“半更新中”的临时状态。
 18. `POST /api/v1/command/avatar/generate-custom-content`
 19. `POST /api/v1/command/avatar/create-custom-content`
 
-### 5.3 暂缓到第二批
+### 5.3 Deferred to the second batch
 
-这些能力适合放到底盘稳定之后：
+These capabilities are better added once the foundation is stable:
 
-1. 修改角色位置
-2. 修改角色宗门归属
-3. 修改角色关系
-4. 触发特定世界事件
-5. 直接写世界数值
-6. 多会话 / 多实例
-7. 鉴权与权限分级
+1. Change avatar location
+2. Change avatar sect membership
+3. Change avatar relations
+4. Trigger specific world events
+5. Write world values directly
+6. Multiple sessions / multiple instances
+7. Authentication and permission levels
 
-## 6. 推荐目录结构
+## 6. Recommended Directory Structure
 
 ```text
 src/server/
@@ -384,169 +384,169 @@ src/server/
     avatar_control.py
 ```
 
-说明：
+Notes:
 
-- 不要求一次把所有文件都拆完。
-- 第一阶段可以先抽 runtime 和核心 service，再把路由渐进迁移到 `public_v1`。
+- It is not required to split out all files at once.
+- The first stage can extract the runtime and core services first, then gradually migrate routes to `public_v1`.
 
-## 7. 分阶段实施计划
+## 7. Phased Implementation Plan
 
-### Phase 0: 设计冻结
+### Phase 0: Design freeze
 
-目标：
+Goals:
 
-- 定义命名空间
-- 定义统一响应格式
-- 定义 runtime/service 分层
-- 确认第一批 v1 API 范围
+- Define the namespaces
+- Define the unified response format
+- Define the runtime/service layering
+- Confirm the scope of the first batch of v1 APIs
 
-交付物：
+Deliverables:
 
-- 本文档
-- `.cursor` 规则与 skill
-- `AGENTS.md` 摘要
+- This document
+- `.cursor` rules and skill
+- `AGENTS.md` summary
 
-### Phase 1: Runtime 底盘重构
+### Phase 1: Runtime foundation refactor
 
-目标：
+Goals:
 
-- 引入 `GameSessionRuntime`
-- 收口 `game_instance`
-- 提供统一读写入口
-- 建立 mutation 锁
+- Introduce `GameSessionRuntime`
+- Consolidate `game_instance`
+- Provide unified read/write entry points
+- Establish the mutation lock
 
-建议任务：
+Suggested tasks:
 
-1. 新建 runtime 模块
-2. 将 `world/sim/run_config/init_status/is_paused` 封装到 runtime
-3. 将 `start/reinit/reset/pause/resume` 迁移到 lifecycle service
-4. 让 `game_loop` 和 HTTP mutation 共用统一串行化机制
+1. Create the runtime module
+2. Encapsulate `world/sim/run_config/init_status/is_paused` in the runtime
+3. Migrate `start/reinit/reset/pause/resume` to the lifecycle service
+4. Make `game_loop` and HTTP mutations share a unified serialization mechanism
 
-完成标准：
+Done criteria:
 
-- 路由不再直接散落操作 `game_instance`
-- `sim.step()` 与 mutation 不并发写世界
+- Routes no longer operate on `game_instance` directly in scattered places
+- `sim.step()` and mutations do not write to the world concurrently
 
-### Phase 2: Query Service 与 Public Query API
+### Phase 2: Query Service and Public Query API
 
-目标：
+Goals:
 
-- 把主要只读接口整理为稳定查询契约
+- Organize the main read-only endpoints into a stable query contract
 
-建议任务：
+Suggested tasks:
 
-1. 抽出 `GameQueryService`
-2. 将 `/state`、`/map`、`/detail`、`/events` 等迁移到 query service
-3. 新建 `/api/v1/query/*`
-4. 统一返回 `ok/data`
+1. Extract `GameQueryService`
+2. Migrate `/state`, `/map`, `/detail`, `/events`, etc. to the query service
+3. Create `/api/v1/query/*`
+4. Return `ok/data` uniformly
 
-完成标准：
+Done criteria:
 
-- 只读接口有稳定前缀、稳定 DTO、稳定错误格式
+- Read-only endpoints have a stable prefix, stable DTOs, and a stable error format
 
-### Phase 3: Command Service 与 Public Command API
+### Phase 3: Command Service and Public Command API
 
-目标：
+Goals:
 
-- 把现有控制接口迁移到 command 模型
+- Migrate existing control endpoints to the command model
 
-建议任务：
+Suggested tasks:
 
-1. 抽出 `AvatarControlService`
-2. 抽出 `WorldControlService`
-3. 抽出 `GameLifecycleService`
-4. 新建 `/api/v1/command/*`
+1. Extract `AvatarControlService`
+2. Extract `WorldControlService`
+3. Extract `GameLifecycleService`
+4. Create `/api/v1/command/*`
 
-完成标准：
+Done criteria:
 
-- command 全部走统一 runtime mutation 入口
-- command 不再在路由层直接改 world
+- All commands go through the unified runtime mutation entry point
+- Commands no longer modify the world directly in the routing layer
 
-### Phase 4: 前端与文档跟随
+### Phase 4: Frontend and documentation follow-up
 
-目标：
+Goals:
 
-- 前端改用 v1 契约
-- README / docs / skill 补齐
+- Switch the frontend to the v1 contract
+- Complete the README / docs / skill
 
-建议任务：
+Suggested tasks:
 
-1. 前端 `web/src/api/**` 切到新接口
-2. README 增加“支持外部 agent / Claw 接入”说明
-3. 增加外接 API 使用文档
-4. 补充示例请求与错误码说明
+1. Switch frontend `web/src/api/**` to the new endpoints
+2. Add a "supports external agent / Claw integration" section to the README
+3. Add external API usage documentation
+4. Add example requests and error code descriptions
 
-### Phase 5: 第二批控制能力
+### Phase 5: Second batch of control capabilities
 
-在基础稳定后再继续加：
+Once the foundation is stable, continue adding:
 
-- 位置控制
-- 宗门归属修改
-- 关系控制
-- 世界干预类命令
+- Location control
+- Sect membership changes
+- Relation control
+- World intervention commands
 
-## 8. 测试策略
+## 8. Testing Strategy
 
-本次重构必须补足以下测试：
+This refactor must add the following tests:
 
-### 8.1 Runtime 测试
+### 8.1 Runtime tests
 
-- 生命周期状态流转测试
-- mutation 锁行为测试
-- 初始化中 / 未初始化 / ready 状态守卫测试
+- Lifecycle state transition tests
+- Mutation lock behavior tests
+- Initializing / uninitialized / ready state guard tests
 
-### 8.2 Query API 测试
+### 8.2 Query API tests
 
-- `/api/v1/query/*` 成功返回格式
-- 空世界 / 未初始化时的统一错误格式
-- 事件分页契约不回退
+- Success response format for `/api/v1/query/*`
+- Unified error format for an empty world / uninitialized state
+- Event pagination contract does not regress
 
-### 8.3 Command API 测试
+### 8.3 Command API tests
 
-- 所有 command 在 world ready 时的 happy path
-- 非法参数、目标不存在、状态不允许时的错误码
-- command 与 runtime 的串行化行为
+- Happy path for all commands when the world is ready
+- Error codes for invalid parameters, missing targets, and disallowed states
+- Serialization behavior between commands and the runtime
 
-### 8.4 回归测试
+### 8.4 Regression tests
 
-- 初始化流程
-- 存档/读档
+- Initialization flow
+- Save/load
 - WebSocket tick
-- 角色调整
-- 事件查询
+- Avatar adjustment
+- Event queries
 
-## 9. Vibe Coding 检查清单
+## 9. Vibe Coding Checklist
 
-后续任何人继续扩展外接控制 API 时，都应先检查：
+Anyone who continues extending the external control API should first check:
 
-1. 这是 query 还是 command？
-2. 是否应该放进已有 service，而不是继续写进 `main.py`？
-3. 是否复用了统一 runtime，而不是直接碰全局状态？
-4. 如果是 command，是否走统一 mutation 锁？
-5. 返回是否符合统一 `ok/data` 或 `ok/error` 契约？
-6. 是否补了 API 测试，而不是只测领域逻辑？
-7. README / docs / skill 是否需要同步更新？
+1. Is this a query or a command?
+2. Should it go into an existing service rather than being written into `main.py` again?
+3. Does it reuse the unified runtime rather than touching global state directly?
+4. If it is a command, does it go through the unified mutation lock?
+5. Does the response conform to the unified `ok/data` or `ok/error` contract?
+6. Did you add API tests, rather than only testing domain logic?
+7. Do the README / docs / skill need to be updated as well?
 
-## 10. 当前结论
+## 10. Current Conclusion
 
-本方向值得做，而且适合一次性做“底盘重构”。
+This direction is worth pursuing, and it is suitable for a one-time "foundation refactor".
 
-本次最重要的不是补多少接口，而是把以下四件事定住：
+The most important thing in this round is not how many endpoints get added, but locking down these four things:
 
-1. 稳定的 v1 命名空间
-2. runtime/service/API 三层边界
-3. query / command 分离
-4. mutation 串行化
+1. A stable v1 namespace
+2. The three-layer runtime/service/API boundary
+3. Query / command separation
+4. Mutation serialization
 
-只要这四件事立住，后续新增接口将会非常顺畅；届时无论是 README、Claw skill，还是后续继续 vibe coding，都会有统一抓手。
+Once these four are in place, adding new endpoints will go very smoothly; whether it is the README, the Claw skill, or further vibe coding, there will be a single consistent handle to work from.
 
-## 11. 兼容层现状与移除顺序
+## 11. Compatibility Layer Status and Removal Order
 
-截至当前阶段，`/api/v1/*` 已经是前端运行时与外接 agent 的主路径；旧 `/api/*` 路由更多承担兼容层职责。
+As of the current stage, `/api/v1/*` is already the main path for both the frontend runtime and external agents; the old `/api/*` routes mostly serve as a compatibility layer.
 
-### 11.1 已移除的旧命名空间
+### 11.1 Removed legacy namespaces
 
-第一批与最后一批旧查询兼容层现已全部移除，包括：
+The first and final batches of legacy query compatibility layers have now all been removed, including:
 
 - `/api/meta/*`
 - `/api/events`
@@ -562,100 +562,100 @@ src/server/
 - `/api/game/*`
 - `/api/saves`
 
-### 11.2 当前依赖分布
+### 11.2 Current dependency distribution
 
-- `web/src` 前端运行时代码：
-  - 业务接口已基本切到 `/api/v1/*`
-  - 例外是设置真源 `/api/settings*` 与 `/api/settings/llm*`，这些属于应用设置面，不属于外接控制兼容层
-- `tests/*`：
-  - 外接控制相关测试已全部迁到 `/api/v1/*`
-- Docker / 部署契约：
-  - Docker 健康检查已迁到 `/api/v1/query/runtime/status`
-  - Docker smoke 已迁到 `/api/v1/query/world/state`、`/api/v1/command/game/*` 与 `/api/v1/query/saves`
-- 仓库文档与规则：
-  - 若仍出现旧路径引用，应视为待清理历史文档，而非兼容承诺
+- `web/src` frontend runtime code:
+  - Business endpoints have essentially all switched to `/api/v1/*`
+  - The exceptions are the settings source of truth `/api/settings*` and `/api/settings/llm*`, which belong to the application settings surface, not the external control compatibility layer
+- `tests/*`:
+  - External-control-related tests have all been migrated to `/api/v1/*`
+- Docker / deployment contracts:
+  - The Docker health check has been migrated to `/api/v1/query/runtime/status`
+  - The Docker smoke test has been migrated to `/api/v1/query/world/state`, `/api/v1/command/game/*`, and `/api/v1/query/saves`
+- Repository docs and rules:
+  - Any remaining references to old paths should be treated as historical docs pending cleanup, not as a compatibility promise
 
-### 11.3 推荐移除顺序
+### 11.3 Recommended removal order
 
-第一批已完成移除：
+The first batch has been removed:
 
-1. 旧 `/api/meta/*`
-2. 旧 `/api/action/*`
-3. 旧 `/api/control/*`
-4. 旧 `/api/game/*`
-5. 旧 `/api/saves`
-6. 旧 `/api/events*`
-7. 旧 `/api/rankings`、`/api/sect-relations`、`/api/sects/territories`
-8. 旧 `/api/mortals/overview`、`/api/dynasty/*`
+1. Old `/api/meta/*`
+2. Old `/api/action/*`
+3. Old `/api/control/*`
+4. Old `/api/game/*`
+5. Old `/api/saves`
+6. Old `/api/events*`
+7. Old `/api/rankings`, `/api/sect-relations`, `/api/sects/territories`
+8. Old `/api/mortals/overview`, `/api/dynasty/*`
 
-当前阶段建议继续处理：
+Recommended next steps at the current stage:
 
-1. 新增 API 一律只挂 `/api/v1/query/*` 或 `/api/v1/command/*`
-2. 若文档、规则、测试中仍引用旧 `/api/*` 路径，继续做清理
-3. 将后续示例、skill 和 agent 指南统一基于 v1 契约编写
+1. All new APIs are mounted only under `/api/v1/query/*` or `/api/v1/command/*`
+2. If docs, rules, or tests still reference old `/api/*` paths, keep cleaning them up
+3. Write all future examples, skills, and agent guides against the v1 contract
 
-### 11.4 当前代码策略
+### 11.4 Current code policy
 
-旧 `/api/*` 兼容路由已经移除；当前约束如下：
+The old `/api/*` compatibility routes have been removed; the current constraints are:
 
-- 新功能禁止继续挂到旧命名空间
-- 外部控制、前端运行时、测试与文档统一以 `/api/v1/*` 为唯一稳定契约
-- `/api/settings*` 与 `/api/settings/llm*` 仍然保留，作为应用设置真源，不属于本兼容层讨论范围
+- New features must not be mounted on the old namespace
+- External control, the frontend runtime, tests, and docs all treat `/api/v1/*` as the only stable contract
+- `/api/settings*` and `/api/settings/llm*` are still kept as the application settings source of truth and are outside the scope of this compatibility layer discussion
 
-## 12. Claw / Agent 最小接入套路
+## 12. Minimal Claw / Agent Integration Pattern
 
-如果目标只是做一个“能观察、能决策、能干预”的控制 skill，推荐采用下面这套最小回路：
+If the goal is just to build a control skill that "can observe, decide, and intervene", the following minimal loop is recommended:
 
-### 12.1 每轮推荐顺序
+### 12.1 Recommended order per round
 
-1. 先查 `GET /api/v1/query/runtime/status`
-2. 若 `status` 不是 `ready`：
-   - 若是未开局，调用 `POST /api/v1/command/game/start`
-   - 若是初始化中，继续轮询 `runtime/status`
-   - 若是错误态，优先读取错误信息并决定是否 `reinit`
-3. 世界 ready 后，再查：
+1. First query `GET /api/v1/query/runtime/status`
+2. If `status` is not `ready`:
+   - If the game has not started, call `POST /api/v1/command/game/start`
+   - If it is initializing, keep polling `runtime/status`
+   - If it is in an error state, read the error information first and decide whether to `reinit`
+3. Once the world is ready, query:
    - `GET /api/v1/query/world/state`
    - `GET /api/v1/query/events`
-   - 必要时 `GET /api/v1/query/detail`
-4. 根据策略调用一个有语义的 command
-5. command 完成后重新回到 query，而不是假设本地状态一定正确
+   - `GET /api/v1/query/detail` when needed
+4. Call one semantic command according to your strategy
+5. After the command completes, go back to querying rather than assuming the local state is necessarily correct
 
-### 12.2 推荐的最小接口集合
+### 12.2 Recommended minimal endpoint set
 
-只做基础控制时，通常只需要这些：
+For basic control only, these are usually all you need:
 
-- 状态：
+- Status:
   - `GET /api/v1/query/runtime/status`
-- 观察：
+- Observation:
   - `GET /api/v1/query/world/state`
   - `GET /api/v1/query/events`
   - `GET /api/v1/query/detail`
-- 控制：
+- Control:
   - `POST /api/v1/command/game/start`
   - `POST /api/v1/command/game/pause`
   - `POST /api/v1/command/game/resume`
   - `POST /api/v1/command/avatar/set-long-term-objective`
   - `POST /api/v1/command/world/set-phenomenon`
 
-### 12.3 新增接口时的最小模板
+### 12.3 Minimal template for adding a new endpoint
 
-如果后续要新增一个接口，推荐按下面判断：
+When adding a new endpoint later, decide as follows:
 
-- 新只读能力：
-  - service / assembler 准备好后，接到 `src/server/services/game_query_service.py`
-  - 再挂到 `src/server/api/public_v1/query.py`
-- 新写能力：
-  - 业务逻辑优先落 service
-  - command 编排接到 `src/server/services/game_command_service.py`
-  - 再挂到 `src/server/api/public_v1/command.py`
-- 若会改 world / sim：
-  - 必须走 runtime mutation 串行化
-- 若前端也要消费：
-  - 同步更新 `web/src/types/api.ts` 与对应 mapper
+- New read-only capability:
+  - Once the service / assembler is ready, wire it into `src/server/services/game_query_service.py`
+  - Then mount it on `src/server/api/public_v1/query.py`
+- New write capability:
+  - Put business logic in a service first
+  - Wire the command orchestration into `src/server/services/game_command_service.py`
+  - Then mount it on `src/server/api/public_v1/command.py`
+- If it modifies world / sim:
+  - It must go through runtime mutation serialization
+- If the frontend also consumes it:
+  - Update `web/src/types/api.ts` and the corresponding mapper as well
 
-### 12.4 不建议的做法
+### 12.4 Discouraged practices
 
-- 不要从 skill 里依赖旧 `/api/*` 路径
-- 不要假设一次 command 后本地缓存就是真相，优先重新 query
-- 不要新增“万能 patch”式写接口
-- 不要把新公共接口逻辑重新堆回 `src/server/main.py`
+- Do not depend on old `/api/*` paths from a skill
+- Do not assume the local cache is the truth after a command; prefer querying again
+- Do not add "universal patch" style write endpoints
+- Do not pile new public endpoint logic back into `src/server/main.py`

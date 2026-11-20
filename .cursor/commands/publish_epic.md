@@ -1,16 +1,16 @@
-当用户调用此命令时，请执行桌面 Electron 构建，并进入 Epic BuildPatchTool 上传流程。
+When the user invokes this command, run the desktop Electron build and then enter the Epic BuildPatchTool upload flow.
 
-Epic 上传通过 `tools/package/epic/publish.ps1` 调用官方 `BuildPatchTool.exe -mode=UploadBinary`。默认不执行真实上传；只有显式传入 `-RequireUpload` 时才会调用 Epic 服务。
+Epic uploads go through `tools/package/epic/publish.ps1`, which calls the official `BuildPatchTool.exe -mode=UploadBinary`. By default no real upload happens; Epic services are only called when `-RequireUpload` is passed explicitly.
 
-1. **编译、打包并进入 Epic 上传预览**：
-   运行命令 `powershell ./tools/package/publish_epic.ps1 -RequireEosRuntime`，等待完成。
-   该脚本会自动执行 `pack_desktop.ps1`、读取 `tmp/desktop_content_root.txt`，再调用 `epic/publish.ps1 -ContentRoot ... -BuildVersion <当前git tag>-desktop`。
-   没有 `-RequireUpload` 时，最后一步只校验配置并打印脱敏后的 BuildPatchTool 命令。
-   若需要正式上传，可手动运行 `powershell ./tools/package/publish_epic.ps1 -RequireEosRuntime -RequireUpload`，并确保当前终端已设置 `EPIC_CLIENT_SECRET`。
+1. **Build, package, and enter the Epic upload preview**:
+   Run `powershell ./tools/package/publish_epic.ps1 -RequireEosRuntime` and wait for it to finish.
+   The script automatically runs `pack_desktop.ps1`, reads `tmp/desktop_content_root.txt`, then calls `epic/publish.ps1 -ContentRoot ... -BuildVersion <current git tag>-desktop`.
+   Without `-RequireUpload`, the last step only validates the configuration and prints a redacted BuildPatchTool command.
+   For a real upload, manually run `powershell ./tools/package/publish_epic.ps1 -RequireEosRuntime -RequireUpload`, and make sure `EPIC_CLIENT_SECRET` is set in the current terminal.
 
-注意：
+Notes:
 
-1. 如果桌面构建失败，请立即停止后续步骤并向用户报告错误。
-2. 不要在对话中回显 `CWS_DEFAULT_LLM_API_KEY`、Epic client secret 或任何 key 原文。
-3. 如果未传 `-RequireUpload`，Epic 上传跳过属于预期行为；仍需向用户报告已经生成的 content root。
-4. Epic EOS 默认使用 Live deployment。只有进行隔离 Dev 测试时才添加 `-EosEnv dev`。
+1. If the desktop build fails, stop immediately and report the error to the user.
+2. Never echo `CWS_DEFAULT_LLM_API_KEY`, the Epic client secret, or any raw key in the conversation.
+3. Without `-RequireUpload`, skipping the Epic upload is expected behavior; still report the generated content root to the user.
+4. Epic EOS uses the Live deployment by default. Add `-EosEnv dev` only for isolated Dev testing.

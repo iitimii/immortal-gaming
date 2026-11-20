@@ -1,61 +1,61 @@
-# 墓碑与 POI 系统 Spec
+# Grave and POI System Spec
 
-本文档描述“修士死亡后生成墓碑”以及由此引出的点位兴趣点（Point of Interest, POI）系统设计。
+This document describes the design for "generating a grave after a cultivator dies" and the point-level Point of Interest (POI) system that follows from it.
 
-当前状态：待实现设计。本文档不是已落地系统说明。实现时应优先遵守本 spec，并在落地后把“代码地图”和测试命令补齐为真实入口。
+Current status: design pending implementation. This document is not a description of a shipped system. Implementation should follow this spec first, and after landing, the "code map" and test commands should be filled in with the real entry points.
 
-## 背景
+## Background
 
-现有地图系统以 region 为主语义，region 代表一个区域，占据多个 tile；地图上当前可点击对象主要是 region 与存活角色。
+The existing map system uses region as its primary semantic unit. A region represents an area and occupies multiple tiles; the clickable objects on the map are currently mainly regions and living avatars.
 
-墓碑与 region 不同：
+Graves are different from regions:
 
-1. 墓碑绑定具体坐标点 `x/y`，不是绑定 region。
-2. 任意地点死亡都应留下墓碑，包括荒野、无 region tile、城市、洞府、宗门、普通野外。
-3. 墓碑有运行时生命周期，会过期、被发现、被掘墓、被挖空。
-4. 墓碑只是第一种 POI；未来可能还有古碑、阵眼、临时秘境入口、遗落法器、任务线索等。
+1. A grave is bound to a specific coordinate point `x/y`, not to a region.
+2. Death anywhere should leave a grave, including wilderness, tiles without a region, cities, cave dwellings, sects, and ordinary outdoor areas.
+3. A grave has a runtime lifecycle: it expires, gets discovered, gets dug up, and gets emptied.
+4. The grave is only the first kind of POI; in the future there may be ancient steles, formation eyes, temporary hidden domain entrances, lost magic artifacts, quest clues, and so on.
 
-因此不应把墓碑做成：
+Therefore the grave should not be built as:
 
-1. 死者 Avatar 的另一种地图表现。
-2. 某个 region 的附属字段。
-3. 只服务墓碑的一次性列表。
+1. Another map representation of the deceased Avatar.
+2. An attached field of some region.
+3. A one-off list that only serves graves.
 
-应建立通用 POI 系统，墓碑作为 `grave` 类型接入。
+A general POI system should be established, with the grave plugged in as the `grave` type.
 
-## 目标
+## Goals
 
-1. 修士角色死亡后，在死亡坐标生成墓碑 POI。
-2. 墓碑保留 50 年；对应死者信息也在 50 年后消失。
-3. 墓碑可以点击，点击展示对应死者信息与墓碑状态。
-4. 墓碑中只可能保留死者死亡时仍持有的武器与辅助装备；功法不进入墓碑。
-5. 若死者在战斗中被杀人夺宝，墓碑只保留夺宝后剩下的装备。
-6. 知悉 POI 的角色可以执行移动到 POI 的动作。
-7. 墓碑在角色交互范围内时必定被发现。
-8. 角色可以掘墓；掘墓可能成功、失败、空手而归，甚至受伤。
-9. 掘墓会扣少量气运；正派微微不愿意掘墓，反派不受行为倾向惩罚，但仍扣气运。
-10. 第一阶段先完成墓碑图片资产，不接入运行时逻辑。
+1. After a cultivator avatar dies, generate a grave POI at the death coordinate.
+2. The grave is retained for 50 years; the corresponding deceased information also disappears after 50 years.
+3. The grave is clickable; clicking shows the corresponding deceased information and the grave status.
+4. A grave can only retain the weapon and auxiliary equipment the deceased still held at the time of death; techniques do not go into the grave.
+5. If the deceased was killed and looted in battle, the grave only retains the equipment left after looting.
+6. Avatars that know of a POI can perform an action to move to the POI.
+7. A grave within an avatar's interaction range is always discovered.
+8. Avatars can dig graves; digging may succeed, fail, come back empty-handed, or even cause injury.
+9. Digging a grave deducts a small amount of luck; righteous avatars are slightly reluctant to dig graves, evil avatars receive no behavioral-tendency penalty but still lose luck.
+10. Phase 1 only completes the grave image assets and does not wire in runtime logic.
 
-## 非目标
+## Non-goals
 
-1. 第一版不做同 tile 多墓碑聚合展示。
-2. 第一版墓碑不阻挡移动。
-3. 第一版不做“亲友发现墓被掘后产生仇恨”等复杂社交后果。
-4. 第一版不做墓碑作为地形、region overlay 或可占领对象。
-5. 第一版不要求向前兼容旧存档；开发阶段以新结构清晰为先。
-6. 第一版不做角色扮演模式下的视野隔离；上帝视角前端可展示当前有效 POI，角色行动参数只展示该角色已知 POI。
+1. The first version does not aggregate multiple graves on the same tile for display.
+2. In the first version, graves do not block movement.
+3. The first version does not include complex social consequences such as "friends and family discover the grave was dug and develop hatred".
+4. The first version does not make graves terrain, a region overlay, or an occupiable object.
+5. The first version does not require forward compatibility with old saves; during development, clarity of the new structure comes first.
+6. The first version does not implement vision isolation in roleplay mode; the god's-eye view frontend can show all currently valid POIs, while avatar action parameters only show POIs known to that avatar.
 
-## Phase 规划
+## Phase Plan
 
-### Phase 1：墓碑图片资产
+### Phase 1: Grave image assets
 
-目标：建立墓碑图标资产，不接入后端和前端运行时。
+Goal: establish grave icon assets, without wiring into backend or frontend runtime.
 
-产物：
+Deliverables:
 
-1. 生成 3x3 墓碑图标预览图。
-2. 人工挑选并切分为 9 个独立墓碑图标。
-3. 放入前端资产目录，例如：
+1. Generate a 3x3 grave icon preview image.
+2. Manually pick and slice it into 9 independent grave icons.
+3. Put them in the frontend asset directory, for example:
 
 ```text
 web/src/assets/icons/pois/
@@ -71,12 +71,12 @@ web/src/assets/icons/pois/
   fallback_poi.png
 ```
 
-4. 建立 POI 图标解析 helper，例如 `web/src/utils/poiIcons.ts`，但可以先不被运行时使用。
-5. 墓碑图标风格应与现有物品 icon 协调：像素化、低细节、清晰轮廓、可在 32x32 与 64x64 下识别。
+4. Create a POI icon resolution helper, for example `web/src/utils/poiIcons.ts`, which may initially be unused by the runtime.
+5. The grave icon style should match existing item icons: pixelated, low detail, clean outlines, recognizable at 32x32 and 64x64.
 
-当前 image API 不可用时，先保存 prompt，由人工运行图片生成工具，再把结果贴回仓库处理。
+When the image API is currently unavailable, save the prompt first, have a human run the image generation tool, and then paste the result back into the repo for processing.
 
-推荐 prompt：
+Recommended prompt:
 
 ```text
 Create a 3x3 sprite sheet of nine different tombstone icons for a pixel-art xianxia cultivation world game.
@@ -105,39 +105,39 @@ Output:
 - One square image containing the 3x3 sheet.
 ```
 
-Negative prompt：
+Negative prompt:
 
 ```text
 photorealistic, high detail, 3D render, anime character, corpse, skull, blood, horror, modern graveyard, large background scene, blurry, soft gradients, vector logo, text, watermark
 ```
 
-### Phase 2：POI 领域模型与存读档
+### Phase 2: POI domain model and save/load
 
-目标：建立后端 POI 抽象、墓碑 POI、POIManager，并纳入存档。
+Goal: establish the backend POI abstraction, the grave POI, and POIManager, and include them in saves.
 
-不接前端地图渲染也可以，但应能在测试中创建、保存、读取、过期清理。
+Frontend map rendering need not be wired in, but tests should be able to create, save, load, and clean up expired POIs.
 
-### Phase 3：死亡生成墓碑与 50 年清理
+### Phase 3: Grave generation on death and 50-year cleanup
 
-目标：所有死亡入口统一生成墓碑，并统一死者、墓碑生命周期。
+Goal: all death entry points uniformly generate graves, and the lifecycles of the deceased and the grave are unified.
 
-### Phase 4：发现、移动到 POI 与 API
+### Phase 4: Discovery, moving to POI, and API
 
-目标：角色能发现墓碑，行动参数能选择已知 POI，地图/detail API 能返回 POI 数据。
+Goal: avatars can discover graves, action parameters can select known POIs, and the map/detail API can return POI data.
 
-### Phase 5：前端点击与墓碑详情
+### Phase 5: Frontend click and grave detail
 
-目标：地图渲染墓碑，点击墓碑打开详情。
+Goal: render graves on the map, and clicking a grave opens its detail.
 
-### Phase 6：掘墓动作
+### Phase 6: Dig grave action
 
-目标：实现掘墓、装备获取、失败/受伤、气运扣减、事件记录。
+Goal: implement grave digging, equipment acquisition, failure/injury, luck deduction, and event recording.
 
-## 领域模型
+## Domain Model
 
-### PointOfInterest 抽象
+### PointOfInterest abstraction
 
-建议新增包：
+Suggested new package:
 
 ```text
 src/classes/poi/
@@ -148,7 +148,7 @@ src/classes/poi/
   serialization.py
 ```
 
-基础抽象建议：
+Suggested base abstraction:
 
 ```python
 from __future__ import annotations
@@ -201,17 +201,17 @@ class PointOfInterest(ABC):
         ...
 ```
 
-说明：
+Notes:
 
-1. `id` 是稳定 ID，不使用名称解析。
-2. `kind` 用于区分 `grave`、未来古碑、阵眼等。
-3. `x/y` 是 tile 坐标。
-4. `discovered_by` 保存知道该 POI 的角色 ID。
-5. 第一版可以只在 POI 上保存发现关系，不必同步维护 `avatar.known_poi_ids`，避免双写不一致。
+1. `id` is a stable ID; names are not used for resolution.
+2. `kind` distinguishes `grave` from future ancient steles, formation eyes, etc.
+3. `x/y` are tile coordinates.
+4. `discovered_by` stores the IDs of avatars that know of this POI.
+5. The first version can store the discovery relationship only on the POI, without also maintaining `avatar.known_poi_ids`, to avoid double-write inconsistency.
 
 ### GravePOI
 
-墓碑字段建议：
+Suggested grave fields:
 
 ```python
 @dataclass
@@ -233,44 +233,44 @@ class GravePOI(PointOfInterest):
     dig_attempt_count: int = 0
 ```
 
-墓碑应保存轻量死者快照，避免 50 年内因为 Avatar 对象被清理或索引变化导致墓碑详情无法展示。
+The grave should store a lightweight snapshot of the deceased, so that within the 50 years the grave detail can still be displayed even if the Avatar object is cleaned up or indexes change.
 
-装备 payload 只保存 JSON 基础类型：
+Equipment payloads only store basic JSON types:
 
 ```json
 {
   "kind": "weapon",
   "item_id": 1001,
-  "name": "练气剑",
+  "name": "Qi Refinement Sword",
   "realm": "Qi_Refinement",
   "special_data": {}
 }
 ```
 
-辅助装备同理：
+Auxiliary equipment likewise:
 
 ```json
 {
   "kind": "auxiliary",
   "item_id": 2001,
-  "name": "聚灵珠",
+  "name": "Spirit Gathering Pearl",
   "realm": "Qi_Refinement",
   "special_data": {}
 }
 ```
 
-墓碑不保存：
+The grave does not store:
 
-1. 功法。
-2. 材料。
-3. 灵石。
-4. 丹药。
-5. 复杂 Avatar 对象引用。
-6. Weapon / Auxiliary 对象引用。
+1. Techniques.
+2. Materials.
+3. Spirit stones.
+4. Elixirs.
+5. Complex Avatar object references.
+6. Weapon / Auxiliary object references.
 
 ## POIManager
 
-建议挂在 `World` 上：
+Suggested to be attached to `World`:
 
 ```python
 @dataclass
@@ -279,13 +279,13 @@ class World:
     poi_manager: POIManager = field(default_factory=POIManager)
 ```
 
-原因：
+Reasons:
 
-1. POI 是运行时世界状态，不是静态地图配置。
-2. POI 依赖世界时间、死亡、事件、存档。
-3. `Map` 应继续主要负责 tile、region、landmark、formation 等地图结构。
+1. POIs are runtime world state, not static map configuration.
+2. POIs depend on world time, death, events, and saves.
+3. `Map` should continue to be mainly responsible for map structure such as tiles, regions, landmarks, and formations.
 
-`POIManager` 建议职责：
+Suggested `POIManager` responsibilities:
 
 ```python
 @dataclass
@@ -305,11 +305,11 @@ class POIManager:
     def load_from_list(self, data: list[dict[str, Any]]) -> None: ...
 ```
 
-## 墓碑生成
+## Grave Generation
 
-统一入口应在 `src/classes/death.py -> handle_death(...)`。
+The unified entry point should be `src/classes/death.py -> handle_death(...)`.
 
-推荐顺序：
+Recommended order:
 
 ```python
 def handle_death(world: World, avatar: Avatar, reason: Union[str, DeathReason]) -> None:
@@ -320,67 +320,67 @@ def handle_death(world: World, avatar: Avatar, reason: Union[str, DeathReason]) 
     world.deceased_manager.record_death(avatar)
 ```
 
-顺序说明：
+Order notes:
 
-1. `avatar.set_dead(...)` 会记录 `death_info`，包括死亡时间、死因、死亡坐标、宗门快照、阵营快照。
-2. 墓碑生成必须使用 `avatar.pos_x/pos_y` 或 `death_info.location`，不要使用 `avatar.tile`。
-3. `avatar_manager.handle_death(...)` 会把死者移入 `dead_avatars`，并将 `avatar.tile = None`。
-4. 战斗中的杀人夺宝当前发生在 `handle_death(...)` 之前，因此墓碑生成时 `avatar.weapon/auxiliary` 已经是夺宝后的剩余装备。
+1. `avatar.set_dead(...)` records `death_info`, including death time, cause of death, death coordinates, sect snapshot, and alignment snapshot.
+2. Grave generation must use `avatar.pos_x/pos_y` or `death_info.location`, not `avatar.tile`.
+3. `avatar_manager.handle_death(...)` moves the deceased into `dead_avatars` and sets `avatar.tile = None`.
+4. Killing and looting in battle currently happens before `handle_death(...)`, so when the grave is generated, `avatar.weapon/auxiliary` is already the equipment remaining after looting.
 
-墓碑 ID 建议：
+Suggested grave ID:
 
 ```text
 grave:<avatar_id>:<death_month>
 ```
 
-墓碑名称建议：
+Suggested grave name:
 
 ```text
-{deceased_name}之墓
+Grave of {deceased_name}
 ```
 
-墓碑图标：
+Grave icon:
 
-1. 从 `grave_01` 到 `grave_09` 随机选一个。
-2. 选中后写入 `grave_icon_id` 并随存档保存。
-3. 读档后不重新随机，确保视觉稳定。
+1. Randomly pick one from `grave_01` to `grave_09`.
+2. Once selected, write it to `grave_icon_id` and save it with the save file.
+3. Do not re-randomize after loading, to keep the visuals stable.
 
-## 发现机制
+## Discovery Mechanism
 
-角色交互范围沿用现有观察范围：
+Avatar interaction range reuses the existing observation range:
 
 1. `src/classes/observe.py -> get_avatar_observation_radius(...)`
-2. 曼哈顿距离：`abs(poi.x - avatar.pos_x) + abs(poi.y - avatar.pos_y)`
+2. Manhattan distance: `abs(poi.x - avatar.pos_x) + abs(poi.y - avatar.pos_y)`
 
-规则：
+Rules:
 
-1. POI 在角色交互范围内时必定发现。
-2. 已发现的 POI 写入 `poi.discovered_by`。
-3. 过期 POI 不再被发现。
-4. 第一版不做隐藏难度、陷阱感知、传闻发现、情报传播。
+1. A POI within an avatar's interaction range is always discovered.
+2. Discovered POIs are written into `poi.discovered_by`.
+3. Expired POIs are no longer discovered.
+4. The first version does not include hidden difficulty, trap perception, rumor-based discovery, or intelligence propagation.
 
-建议新增模拟器相位：
+Suggested new simulator phase:
 
 ```text
 src/sim/simulator_engine/phases/poi.py
 ```
 
-放在角色行动推进之后、年度维护之前，使角色移动后能在同一 tick 发现附近墓碑。
+Place it after avatar action progression and before annual maintenance, so that an avatar can discover nearby graves in the same tick after moving.
 
-发现事件：
+Discovery events:
 
-1. 普通发现墓碑为小事件。
-2. 如果未来 POI 稀有度更高，可按 POI 类型决定 `is_major`。
-3. 事件 `related_avatars` 包含发现者；墓碑死者是否进入 `related_avatars` 可暂不加入，避免 50 年后事件 subject 退化影响过大。
+1. Ordinary grave discovery is a minor event.
+2. If future POIs have higher rarity, `is_major` can be decided by POI type.
+3. The event's `related_avatars` includes the discoverer; whether the grave's deceased goes into `related_avatars` can be left out for now, to avoid too much impact from event subjects degrading after 50 years.
 
-## 移动到 POI
+## Moving to a POI
 
-建议新增两个动作：
+Two new actions are suggested:
 
-1. `MoveToPoint`：底层动作，按 `x/y` 移动，不一定暴露给 AI。
-2. `MoveToPOI`：实际暴露动作，参数为 `poi_id`。
+1. `MoveToPoint`: a low-level action that moves by `x/y`, not necessarily exposed to the AI.
+2. `MoveToPOI`: the actually exposed action, with parameter `poi_id`.
 
-`MoveToPOI`：
+`MoveToPOI`:
 
 ```python
 class MoveToPOI(DefineAction, ActualActionMixin):
@@ -392,19 +392,19 @@ class MoveToPOI(DefineAction, ActualActionMixin):
     PARAM_OPTION_SOURCES = {"poi_id": ParamOptionSource.KNOWN_POI_ID}
 ```
 
-参数设计：
+Parameter design:
 
-1. `value` 必须是 `poi.id`。
-2. 不使用名称作为执行参数。
-3. `param_options` 可展示 `name`、`kind`、`x/y`、距离。
+1. `value` must be `poi.id`.
+2. Names are not used as execution parameters.
+3. `param_options` can show `name`, `kind`, `x/y`, and distance.
 
-示例：
+Example:
 
 ```json
 {
   "value": "grave:avatar-123:600",
   "id": "grave:avatar-123:600",
-  "name": "李青之墓",
+  "name": "Grave of Li Qing",
   "type": "grave",
   "x": 12,
   "y": 8,
@@ -412,30 +412,30 @@ class MoveToPOI(DefineAction, ActualActionMixin):
 }
 ```
 
-`can_start(...)` 检查：
+`can_start(...)` checks:
 
-1. POI 存在。
-2. POI 未过期。
-3. 角色已知该 POI。
-4. 目标坐标在地图范围内。
+1. The POI exists.
+2. The POI has not expired.
+3. The avatar knows the POI.
+4. The target coordinate is within map bounds.
 
-执行逻辑可参考 `MoveToRegion`，但目标点固定为 `poi.x/poi.y`。
+Execution logic can reference `MoveToRegion`, but the target point is fixed to `poi.x/poi.y`.
 
-完成条件：
+Completion condition:
 
 ```python
 avatar.pos_x == poi.x and avatar.pos_y == poi.y
 ```
 
-## 掘墓动作
+## Dig Grave Action
 
-建议新增动作：
+Suggested new action:
 
 ```text
 src/classes/action/dig_grave.py
 ```
 
-动作定义：
+Action definition:
 
 ```python
 class DigGrave(InstantAction):
@@ -447,16 +447,16 @@ class DigGrave(InstantAction):
     PARAM_OPTION_SOURCES = {"poi_id": ParamOptionSource.KNOWN_GRAVE_POI_ID}
 ```
 
-`can_start(...)`：
+`can_start(...)`:
 
-1. `poi_id` 必须指向存在的 POI。
-2. POI 必须是 `grave`。
-3. 墓碑未过期。
-4. 角色必须知道该墓碑。
-5. 角色必须在墓碑交互范围内，或更严格地要求处于同 tile。第一版建议要求同 tile，行动链由 `MoveToPOI -> DigGrave` 完成。
-6. 无装备墓碑也允许启动，但结果必定不会成功获得物品。
+1. `poi_id` must point to an existing POI.
+2. The POI must be a `grave`.
+3. The grave has not expired.
+4. The avatar must know of the grave.
+5. The avatar must be within the grave's interaction range, or more strictly be on the same tile. The first version suggests requiring the same tile, with the action chain `MoveToPOI -> DigGrave` completing the flow.
+6. A grave without equipment can also be started, but the result will never successfully obtain an item.
 
-成功率建议：
+Suggested success rate:
 
 ```text
 base_success = 0.45
@@ -465,47 +465,47 @@ success_rate = clamp(base_success + realm_delta * 0.15, 0.05, 0.85)
 injury_rate = clamp(0.10 - realm_delta * 0.05, 0.02, 0.50)
 ```
 
-说明：
+Notes:
 
-1. 掘墓者境界越高，相对越容易成功。
-2. 死者境界越高，墓中残留禁制越危险。
-3. 没有武器/辅助时，不进行成功掉落，只生成空墓结果。
-4. 可以多次掘墓；每次增加 `dig_attempt_count`。
-5. 每件装备只能被挖走一次；挖走后对应 payload 置空或 looted 标记为 True。
+1. The higher the digger's realm, the relatively easier it is to succeed.
+2. The higher the deceased's realm, the more dangerous the residual restrictions in the grave.
+3. When there is no weapon/auxiliary, no successful drop is performed; only an empty-grave result is generated.
+4. A grave can be dug multiple times; each attempt increments `dig_attempt_count`.
+5. Each piece of equipment can only be dug out once; after being taken, the corresponding payload is cleared or its looted flag is set to True.
 
-物品选择：
+Item selection:
 
-1. 若武器与辅助都存在，优先选择境界更高的装备。
-2. 同境界随机。
-3. 成功后复用 `resolve_item_exchange(...)`，让角色决定是否替换已有装备。
-4. 如果玩家/AI 拒绝新装备，视为本次未取走，墓碑装备仍保留；若实现复杂，第一版也可以按 `auto_accept_when_empty` 仅在空装备槽自动接受，有旧装备时事件说明“未能带走”。
+1. If both a weapon and an auxiliary exist, prefer the equipment with the higher realm.
+2. Random among the same realm.
+3. On success, reuse `resolve_item_exchange(...)` so the avatar decides whether to replace existing equipment.
+4. If the player/AI rejects the new equipment, it is treated as not taken this time and the grave equipment remains; if this is complex to implement, the first version can also auto-accept only into an empty equipment slot via `auto_accept_when_empty`, and when old equipment exists, the event states that it "could not be carried away".
 
-气运：
+Luck:
 
-1. 每次掘墓都扣少量气运，例如 `luck_base -= 0.2` 或配置化为 `game.grave.dig_luck_penalty`。
-2. 正派与反派都扣。
-3. 正派的“微微不愿意”体现在 AI 行为倾向、prompt 描述或行动评分上，不体现在 `can_start` 禁止。
-4. 反派不受行为倾向惩罚，但仍扣气运。
+1. Every grave dig deducts a small amount of luck, e.g. `luck_base -= 0.2`, or configurable as `game.grave.dig_luck_penalty`.
+2. Both righteous and evil avatars lose luck.
+3. The "slight reluctance" of righteous avatars is expressed in AI behavioral tendency, prompt description, or action scoring, not as a `can_start` prohibition.
+4. Evil avatars receive no behavioral-tendency penalty but still lose luck.
 
-受伤：
+Injury:
 
-1. 失败时可能受伤。
-2. 受伤量按死者境界与掘墓者境界差决定。
-3. 受伤导致 HP 降至 0 以下时，走现有死亡结算，不在掘墓动作内手写死亡归档。
+1. Failure may cause injury.
+2. Injury amount is determined by the realm difference between the deceased and the digger.
+3. When injury reduces HP below 0, go through the existing death resolution; do not hand-write death archiving inside the dig action.
 
-事件：
+Events:
 
-1. 掘墓成功获得装备：`is_major=True`。
-2. 掘墓失败但受伤：`is_major=True` 或按伤害严重程度决定。
-3. 空墓、普通失败：`is_major=False`。
-4. 事件 `related_avatars` 至少包含掘墓者。
-5. 第一版不把死者亲友关系纳入事件影响。
+1. Successfully digging out equipment: `is_major=True`.
+2. Failing to dig but getting injured: `is_major=True`, or decided by injury severity.
+3. Empty grave, ordinary failure: `is_major=False`.
+4. The event's `related_avatars` includes at least the digger.
+5. The first version does not factor the deceased's friend/family relationships into event impact.
 
-## 前端接口与渲染
+## Frontend Interface and Rendering
 
 ### Map API
 
-扩展 `/api/v1/query/world/map`，增加 `pois`：
+Extend `/api/v1/query/world/map` with `pois`:
 
 ```json
 {
@@ -513,7 +513,7 @@ injury_rate = clamp(0.10 - realm_delta * 0.05, 0.02, 0.50)
     {
       "id": "grave:avatar-123:600",
       "kind": "grave",
-      "name": "李青之墓",
+      "name": "Grave of Li Qing",
       "x": 12,
       "y": 8,
       "icon_key": "grave_01",
@@ -523,49 +523,49 @@ injury_rate = clamp(0.10 - realm_delta * 0.05, 0.02, 0.50)
 }
 ```
 
-第一版上帝视角可以返回所有未过期 POI。角色动作参数仍按角色已知 POI 过滤。
+In the first version, the god's-eye view can return all non-expired POIs. Avatar action parameters are still filtered by POIs known to the avatar.
 
 ### Detail API
 
-扩展现有 detail 查询：
+Extend the existing detail query:
 
 ```text
 GET /api/v1/query/detail?type=poi&id=<poi_id>
 ```
 
-`target_type == "poi"` 时：
+When `target_type == "poi"`:
 
-1. 从 `world.poi_manager.get(target_id)` 读取 POI。
-2. 不存在或过期时返回 404。
-3. 调用 `poi.get_detail_payload(world)`。
+1. Read the POI from `world.poi_manager.get(target_id)`.
+2. Return 404 if it does not exist or has expired.
+3. Call `poi.get_detail_payload(world)`.
 
-墓碑详情 payload 示例：
+Grave detail payload example:
 
 ```json
 {
   "id": "grave:avatar-123:600",
   "kind": "grave",
-  "name": "李青之墓",
-  "desc": "一方古旧墓碑，碑面仍残留淡淡灵光。",
+  "name": "Grave of Li Qing",
+  "desc": "An old, weathered grave; a faint spiritual glow still lingers on its face.",
   "x": 12,
   "y": 8,
   "icon_key": "grave_01",
   "deceased": {
     "id": "avatar-123",
-    "name": "李青",
+    "name": "Li Qing",
     "age_at_death": 73,
     "realm_at_death": "Foundation_Establishment",
     "stage_at_death": "Middle_Stage",
-    "death_reason": "被王五杀害",
+    "death_reason": "Killed by Wang Wu",
     "death_time": 600,
-    "sect_name_at_death": "青云宗",
-    "alignment_at_death": "正派"
+    "sect_name_at_death": "Azure Cloud Sect",
+    "alignment_at_death": "Righteous"
   },
   "grave_goods": {
     "weapon": null,
     "auxiliary": {
       "id": 2001,
-      "name": "聚灵珠",
+      "name": "Spirit Gathering Pearl",
       "realm": "Qi_Refinement"
     }
   },
@@ -573,9 +573,9 @@ GET /api/v1/query/detail?type=poi&id=<poi_id>
 }
 ```
 
-### WebSocket 增量
+### WebSocket increments
 
-为了避免“死亡后墓碑要刷新页面才出现”，tick payload 建议增加 POI 增量：
+To avoid "the grave only appears after refreshing the page following a death", the tick payload should add POI increments:
 
 ```json
 {
@@ -586,11 +586,11 @@ GET /api/v1/query/detail?type=poi&id=<poi_id>
 }
 ```
 
-若第一版暂不做增量，也必须在死亡后让前端能触发重新拉取 map/pois，避免墓碑不同步。
+If the first version does not do increments yet, it must still let the frontend trigger a re-fetch of map/pois after a death, to avoid graves being out of sync.
 
-### 前端类型与 Store
+### Frontend types and Store
 
-新增类型：
+New type:
 
 ```ts
 export interface POISummary extends EntityBase, Coordinates {
@@ -600,7 +600,7 @@ export interface POISummary extends EntityBase, Coordinates {
 }
 ```
 
-`MapResponseDTO` 增加：
+Add to `MapResponseDTO`:
 
 ```ts
 pois?: Array<{
@@ -614,17 +614,17 @@ pois?: Array<{
 }>
 ```
 
-`map` store 增加 `pois = shallowRef<Map<string, POISummary>>(new Map())`。
+Add `pois = shallowRef<Map<string, POISummary>>(new Map())` to the `map` store.
 
 ### POILayer
 
-建议新增：
+Suggested new file:
 
 ```text
 web/src/components/game/POILayer.vue
 ```
 
-并在 `GameCanvas.vue` 中插入：
+And insert it in `GameCanvas.vue`:
 
 ```text
 MapLayer
@@ -635,27 +635,27 @@ PerceptionLayer
 CloudLayer
 ```
 
-点击事件：
+Click event:
 
 ```ts
 (e: 'poiSelected', payload: { type: 'poi'; id: string; kind: string; name?: string }): void
 ```
 
-墓碑详情显示建议新增：
+For grave detail display, suggested new file:
 
 ```text
 web/src/components/game/panels/info/POIDetail.vue
 ```
 
-由 `InfoPanelContainer` 按 `type === 'poi'` 分发。
+Dispatched by `InfoPanelContainer` on `type === 'poi'`.
 
-## 存档与读档
+## Save and Load
 
-开发阶段不要求向前兼容旧存档，可以直接新增字段并让新代码以清晰结构读取。
+During development, forward compatibility with old saves is not required; new fields can be added directly and the new code can read them with a clear structure.
 
-### World 存档字段
+### World save fields
 
-建议在 world section 中新增：
+Suggested addition to the world section:
 
 ```json
 {
@@ -666,27 +666,27 @@ web/src/components/game/panels/info/POIDetail.vue
       "kind": "grave",
       "x": 12,
       "y": 8,
-      "name": "李青之墓",
-      "desc": "一方古旧墓碑，碑面仍残留淡淡灵光。",
+      "name": "Grave of Li Qing",
+      "desc": "An old, weathered grave; a faint spiritual glow still lingers on its face.",
       "created_month": 600,
       "expires_month": 1200,
       "discovered_by": ["avatar-456"],
       "icon_key": "grave_01",
       "is_clickable": true,
       "deceased_avatar_id": "avatar-123",
-      "deceased_name": "李青",
-      "death_reason": "被王五杀害",
+      "deceased_name": "Li Qing",
+      "death_reason": "Killed by Wang Wu",
       "death_month": 600,
       "realm_at_death": "Foundation_Establishment",
       "stage_at_death": "Middle_Stage",
-      "sect_name_at_death": "青云宗",
-      "alignment_at_death": "正派",
+      "sect_name_at_death": "Azure Cloud Sect",
+      "alignment_at_death": "Righteous",
       "grave_icon_id": "grave_01",
       "weapon_payload": null,
       "auxiliary_payload": {
         "kind": "auxiliary",
         "item_id": 2001,
-        "name": "聚灵珠",
+        "name": "Spirit Gathering Pearl",
         "realm": "Qi_Refinement",
         "special_data": {}
       },
@@ -698,40 +698,40 @@ web/src/components/game/panels/info/POIDetail.vue
 }
 ```
 
-### 序列化约束
+### Serialization constraints
 
-1. 只保存 JSON 基础类型。
-2. 跨对象引用只保存 ID。
-3. 装备保存 `item_id + special_data`，读档时从全局 registry 恢复实例。
-4. `discovered_by` 保存字符串列表，读档时转回 set。
-5. 读档后 `grave_icon_id/icon_key` 保持不变，不重新随机。
+1. Only store basic JSON types.
+2. Cross-object references only store IDs.
+3. Equipment stores `item_id + special_data`; on load, instances are restored from the global registry.
+4. `discovered_by` is stored as a list of strings and converted back to a set on load.
+5. After loading, `grave_icon_id/icon_key` stay unchanged and are not re-randomized.
 
-### 读档恢复
+### Load restoration
 
-读档时：
+On load:
 
-1. 创建 `world.poi_manager`。
-2. 从 `world_data["pois"]` 恢复所有 POI。
-3. 根据 `kind` 分发到具体类，例如 `GravePOI.from_save_dict(...)`。
-4. 恢复后不依赖死者 Avatar 对象存在。
-5. 恢复后可通过 `world.deceased_manager.get_record(...)` 补充死者详情；若记录不存在，使用墓碑内置快照。
+1. Create `world.poi_manager`.
+2. Restore all POIs from `world_data["pois"]`.
+3. Dispatch to the concrete class by `kind`, e.g. `GravePOI.from_save_dict(...)`.
+4. After restoration, do not depend on the deceased Avatar object existing.
+5. After restoration, deceased details can be supplemented via `world.deceased_manager.get_record(...)`; if the record does not exist, use the grave's built-in snapshot.
 
-### 清理
+### Cleanup
 
-年度维护时同步清理：
+Clean up together during annual maintenance:
 
 1. `world.avatar_manager.cleanup_long_dead_avatars(..., threshold_years=50)`
 2. `world.deceased_manager.cleanup_expired_records(..., threshold_years=50)`
 3. `world.poi_manager.cleanup_expired(current_month)`
 
-配置：
+Configuration:
 
 ```yaml
 world:
   long_dead_cleanup_years: 50
 ```
 
-可以新增：
+Optionally add:
 
 ```yaml
 game:
@@ -740,64 +740,66 @@ game:
     dig_luck_penalty: 0.2
 ```
 
-但第一版也可以先复用 `world.long_dead_cleanup_years`，保证死者与墓碑生命周期一致。
+But the first version can also reuse `world.long_dead_cleanup_years` first, ensuring the lifecycles of the deceased and the grave stay consistent.
 
 ## i18n
 
-当前日常开发仍按 Phase 1，只需保证 `zh-CN` 可用。
+The game is English-only; `en-US` is the sole and source locale.
 
-需要新增的 key 归属：
+Where new keys belong:
 
-1. 后端 action 文案：`static/locales/zh-CN/modules/action.po` 或相关 action 模块。
-2. 后端事件文案：按现有事件/动作模块放置。
-3. 前端 UI 文案：`web/src/locales/zh-CN/game.json` 或新增 `poi.json`。
+1. Backend action text: `static/locales/en-US/modules/action.po` or the relevant action module.
+2. Backend event text: placed in the existing event/action modules.
+3. Frontend UI text: `web/src/locales/en-US/game.json` or a new `poi.json`.
 
-`.po` 中 `msgid` 不得直接写中文；中文只放 `msgstr`。
+The split source `.po` files under `modules/` and `game_configs_modules/` are the source of truth; `LC_MESSAGES/*.po` are merged artifacts and should not be edited directly. After editing, run `python tools/i18n/build_mo.py`.
 
-短槽位建议：
+In `.po` files, `msgid` uses an English source string or a stable key; the display text goes in `msgstr`.
 
-1. `poi.grave.title_short`: `墓碑`
-2. `poi.grave.goods`: `墓中遗物`
-3. `poi.grave.dig`: `掘墓`
-4. `poi.grave.empty`: `墓中已无可取之物`
+Short-slot suggestions:
 
-## 测试策略
+1. `poi.grave.title_short`: `Grave`
+2. `poi.grave.goods`: `Grave Goods`
+3. `poi.grave.dig`: `Dig Grave`
+4. `poi.grave.empty`: `Nothing left to take`
 
-### 后端单元与集成
+## Test Strategy
 
-1. POIManager 增删查、过期清理。
-2. GravePOI `to_save_dict/from_save_dict` 保持字段完整。
-3. `handle_death()` 生成墓碑，坐标等于死亡坐标。
-4. 任意地点死亡都生成墓碑，包括无 region tile。
-5. 战斗杀死并夺宝后，墓碑只保存剩余装备。
-6. 非战斗死亡时，墓碑保存武器与辅助装备，不保存功法。
-7. 墓碑图标随机后随存档保存，读档不变化。
-8. 死者、墓碑、已故档案 49 年仍在，50 年被清理。
-9. 清理死者后，墓碑详情在 50 年内仍可依赖自身快照展示。
-10. `discover_nearby()`：范围内必发现，范围外不发现。
-11. `MoveToPOI`：只能移动到已知、未过期 POI。
-12. `MoveToPOI` 参数选项 value 是 poi id，不是名称。
-13. `DigGrave`：未知 POI、非墓碑、过期墓碑、距离不满足时不能开始。
-14. `DigGrave`：空墓可执行但不会成功获得装备。
-15. `DigGrave`：成功后对应装备从墓碑详情消失。
-16. `DigGrave`：每次执行扣气运；正派/反派都扣。
-17. `DigGrave`：失败可能受伤，HP 变化正确。
-18. `DigGrave`：受伤致死时走现有死亡结算。
+### Backend unit and integration
 
-### 前端
+1. POIManager add/remove/query and expiry cleanup.
+2. GravePOI `to_save_dict/from_save_dict` keep all fields intact.
+3. `handle_death()` generates a grave whose coordinates equal the death coordinates.
+4. Death anywhere generates a grave, including tiles without a region.
+5. After being killed and looted in battle, the grave only stores the remaining equipment.
+6. On non-battle death, the grave stores the weapon and auxiliary equipment, but not techniques.
+7. The randomized grave icon is saved with the save file and does not change on load.
+8. The deceased, the grave, and the deceased record still exist at 49 years and are cleaned up at 50 years.
+9. After the deceased is cleaned up, the grave detail can still be displayed within the 50 years using its own snapshot.
+10. `discover_nearby()`: always discovers within range, does not discover outside range.
+11. `MoveToPOI`: can only move to known, non-expired POIs.
+12. `MoveToPOI` parameter option value is the poi id, not the name.
+13. `DigGrave`: cannot start for unknown POIs, non-graves, expired graves, or when the distance requirement is not met.
+14. `DigGrave`: an empty grave can be executed but will not successfully obtain equipment.
+15. `DigGrave`: after success, the corresponding equipment disappears from the grave detail.
+16. `DigGrave`: each execution deducts luck; both righteous and evil avatars lose luck.
+17. `DigGrave`: failure may cause injury, and the HP change is correct.
+18. `DigGrave`: when injury causes death, go through the existing death resolution.
 
-1. `MapResponseDTO` 与 mapper 正确接收 `pois`。
-2. map store 使用 `shallowRef` 保存 POI 集合。
-3. `POILayer` 渲染墓碑图标并 emit `poiSelected`。
-4. `GameCanvas` 透传 `poiSelected`。
-5. `InfoPanelContainer` 能打开 `POIDetail`。
-6. 墓碑详情展示死者信息、死亡时间、死因、墓中遗物。
-7. 装备被挖走后，对应信息不再展示。
-8. 墓碑图标缺失时使用 fallback。
+### Frontend
 
-## 需要修改的代码区域
+1. `MapResponseDTO` and the mapper correctly receive `pois`.
+2. The map store uses `shallowRef` to hold the POI collection.
+3. `POILayer` renders grave icons and emits `poiSelected`.
+4. `GameCanvas` forwards `poiSelected`.
+5. `InfoPanelContainer` can open `POIDetail`.
+6. The grave detail shows deceased information, death time, cause of death, and grave goods.
+7. After equipment is dug out, the corresponding information is no longer shown.
+8. When a grave icon is missing, the fallback is used.
 
-预计涉及：
+## Code Areas to Modify
+
+Expected to involve:
 
 ```text
 src/classes/death.py
@@ -821,21 +823,21 @@ web/src/components/game/panels/info/**
 web/src/utils/poiIcons.ts
 web/src/assets/icons/pois/**
 static/config.yml
-static/locales/zh-CN/modules/**
-web/src/locales/zh-CN/**
+static/locales/en-US/modules/**
+web/src/locales/en-US/**
 tests/**
 web/src/__tests__/**
 ```
 
-新增动作必须：
+New actions must:
 
-1. 在 `src/classes/action/__init__.py` 导入并注册。
-2. 补 `can_possibly_start` 测试，尤其是无已知墓碑、范围内墓碑、空墓碑等分支。
-3. 补参数选项测试，确保 `param_options.value` 可被动作执行层解析。
+1. Be imported and registered in `src/classes/action/__init__.py`.
+2. Add `can_possibly_start` tests, especially for the branches with no known grave, a grave within range, an empty grave, etc.
+3. Add parameter option tests, ensuring `param_options.value` can be parsed by the action execution layer.
 
-## 验证命令
+## Verification Commands
 
-后端按改动范围运行：
+Backend, run according to the scope of changes:
 
 ```powershell
 pytest tests/test_death.py tests/test_save_load_death.py tests/test_deceased_manager.py
@@ -843,48 +845,48 @@ pytest tests/test_action_param_options.py tests/test_action_can_possibly_start.p
 pytest tests/test_public_api_v1.py tests/test_websocket_handlers.py
 ```
 
-新增 POI 测试后可单独运行：
+After adding POI tests, they can be run separately:
 
 ```powershell
 pytest tests/test_poi_system.py tests/test_grave_poi.py tests/test_action_dig_grave.py tests/test_action_move_to_poi.py
 ```
 
-前端按改动范围运行：
+Frontend, run according to the scope of changes:
 
 ```powershell
 cd web; npm run type-check
 cd web; npm run test -- --run
 ```
 
-如果只做 Phase 1 图片资产，至少人工检查：
+If only doing the Phase 1 image assets, at least manually check:
 
-1. PNG 文件尺寸一致。
-2. 墓碑主体非空。
-3. 小尺寸下仍可辨识。
-4. 背景透明或与现有图标系统一致。
-5. 文件名与 `poiIcons.ts` 映射一致。
+1. PNG file sizes are consistent.
+2. The grave body is not empty.
+3. Still recognizable at small sizes.
+4. Background is transparent or consistent with the existing icon system.
+5. File names match the `poiIcons.ts` mapping.
 
-## 设计取舍记录
+## Design Trade-off Record
 
-1. 掘墓仍扣气运，正派/反派都扣。
-2. 反派不受“微微不愿意掘墓”的行为倾向惩罚。
-3. 第一版不做多墓碑聚合。
-4. 第一版允许重复掘墓，但装备只能被挖走一次。
-5. 掘墓成功或严重失败可作为重大事件。
-6. 墓碑不阻挡移动。
-7. 第一版不做亲友复仇、宗门声望惩罚等复杂后果。
-8. 任意地图点死亡都生成墓碑。
-9. 死者信息 50 年后消失，旧事件 subject 可能退化为 ID，这是可接受结果。
+1. Digging a grave still deducts luck; both righteous and evil avatars lose luck.
+2. Evil avatars receive no "slight reluctance to dig graves" behavioral-tendency penalty.
+3. The first version does not aggregate multiple graves.
+4. The first version allows repeated digging, but each piece of equipment can only be dug out once.
+5. A successful dig or a severe failure can be a major event.
+6. Graves do not block movement.
+7. The first version does not include complex consequences such as revenge by friends and family or sect reputation penalties.
+8. Death at any map point generates a grave.
+9. Deceased information disappears after 50 years; old event subjects may degrade to IDs, which is an acceptable result.
 
-## 后续留白
+## Future Extensions
 
-未来可以扩展：
+Possible future extensions:
 
-1. 同 tile 多 POI 聚合显示。
-2. 墓碑被掘后的社交传播和仇恨。
-3. 墓碑风水、气运、怨气、尸变等特殊事件。
-4. 高境界墓碑的禁制、阵法、守墓灵。
-5. POI 情报交易、传闻发现、地图标记分享。
-6. 角色扮演模式下按受控角色过滤可见 POI。
-7. 外接控制 API 查询与命令接口，例如 `query/poi/list`、`command/avatar/move-to-poi`。
-8. 其他 POI 类型：古碑、阵眼、秘境入口、遗落法器、战场遗迹。
+1. Aggregated display of multiple POIs on the same tile.
+2. Social propagation and hatred after a grave is dug.
+3. Special events such as grave feng shui, luck, resentment, and corpse transformation.
+4. Restrictions, formations, and grave-guarding spirits in high-realm graves.
+5. POI intelligence trading, rumor-based discovery, and map marker sharing.
+6. Filtering visible POIs by the controlled avatar in roleplay mode.
+7. External control API query and command interfaces, e.g. `query/poi/list`, `command/avatar/move-to-poi`.
+8. Other POI types: ancient steles, formation eyes, hidden domain entrances, lost magic artifacts, battlefield ruins.

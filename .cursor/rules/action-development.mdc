@@ -1,52 +1,52 @@
 ---
-description: 动作(Action)与互动动作(Mutual Action)的开发规范与说明
+description: Development rules and notes for Actions and Mutual Actions
 globs: src/classes/action/**/*.py, src/classes/mutual_action/**/*.py
 ---
-# 动作与互动动作开发规范 (Action & Mutual Action Development Guide)
+# Action & Mutual Action Development Guide
 
-在本项目中开发新的角色动作 (Action) 或互动动作 (MutualAction) 时，必须遵循以下规范，确保多语言支持、AI 决策正常工作，并顺利整合进游戏循环。
+When developing a new avatar action (Action) or mutual action (MutualAction) in this project, follow these rules so that i18n works, AI decision-making works, and the action integrates cleanly into the game loop.
 
-## 1. 核心概念分类
+## 1. Core Concepts
 
-*   **单人动作 (Action)**: 继承自 `InstantAction`（瞬时动作，一次执行完毕）或 `TimedAction`（长态动作，持续数个月）。位于 `src/classes/action/`。
-*   **互动动作 (MutualAction)**: 继承自 `MutualAction`。表示角色 A 对角色 B 发起的交互（如双修、切磋、送礼等），必定需要目标角色做出反馈。位于 `src/classes/mutual_action/`。
+*   **Single-avatar action (Action)**: inherits from `InstantAction` (instant action, completes in one execution) or `TimedAction` (long-running action lasting several months). Located in `src/classes/action/`.
+*   **Mutual action (MutualAction)**: inherits from `MutualAction`. Represents an interaction initiated by avatar A toward avatar B (e.g. dual cultivation, sparring, gift giving), which always requires feedback from the target avatar. Located in `src/classes/mutual_action/`.
 
-## 2. 通用属性与方法 (所有 Action 必填)
+## 2. Common Attributes and Methods (Required for All Actions)
 
-所有的动作（含单人和互动）类必须实现以下类变量，用于前端展示与多语言 (i18n)：
+Every action class (single-avatar and mutual) must define the following class variables, used for frontend display and i18n:
 
-*   **`ACTION_NAME_ID: str`**: 动作名称的多语言 key（例如 `"meditate_action_name"`）。
-*   **`DESC_ID: str`**: 动作具体描述的多语言 key（例如 `"meditate_description"`）。
-*   **`REQUIREMENTS_ID: str`**: 动作执行条件的多语言 key（例如 `"meditate_requirements"`）。
-*   **`EMOJI: str`**: 动作对应的 Emoji 图标（无需翻译，例如 `"🧘"`）。
-*   **`PARAMS: dict`**: 执行此动作需要的参数格式定义（例如 `{"target_realm": "str"}`。若无参数填 `{}`）。
-*   **`PARAM_OPTION_SOURCES: dict`** (按需必填): 如果 `PARAMS` 中包含需要从当前世界状态选择的参数（角色、地区、物品、境界、方向等），必须声明该参数的候选来源，供 `get_action_infos(avatar)` 生成 `param_options`。可用来源定义在 `src/classes/action/param_options.py::ParamOptionSource`。
+*   **`ACTION_NAME_ID: str`**: i18n key for the action name (e.g. `"meditate_action_name"`).
+*   **`DESC_ID: str`**: i18n key for the action description (e.g. `"meditate_description"`).
+*   **`REQUIREMENTS_ID: str`**: i18n key for the action's requirements (e.g. `"meditate_requirements"`).
+*   **`EMOJI: str`**: emoji icon for the action (not translated, e.g. `"🧘"`).
+*   **`PARAMS: dict`**: definition of the parameter format required to execute the action (e.g. `{"target_realm": "str"}`; use `{}` if there are no parameters).
+*   **`PARAM_OPTION_SOURCES: dict`** (required when applicable): if `PARAMS` contains parameters that must be chosen from the current world state (avatars, regions, items, realms, directions, etc.), you must declare the candidate source for each such parameter so that `get_action_infos(avatar)` can generate `param_options`. Available sources are defined in `src/classes/action/param_options.py::ParamOptionSource`.
 
-### 生命周期方法
+### Lifecycle Methods
 
 *   **`can_start(self, **kwargs) -> tuple[bool, str]`**:
-    *   检查动作此时能否开始。返回 `(True, "")` 或 `(False, "失败原因的翻译字符串")`。
+    *   Checks whether the action can start right now. Returns `(True, "")` or `(False, "translated failure reason string")`.
 *   **`start(self, **kwargs) -> Event | None`**:
-    *   启动动作，通常在此创建并返回一个开始执行动作的世界 `Event`。
-*   **`_execute(self, **kwargs) -> None`** (单人动作):
-    *   具体的底层执行逻辑（如增加修为、扣除灵石、增减繁荣度等）。
-*   **`finish(self, **kwargs) -> list[Event]`** (异步):
-    *   动作执行结束时调用，返回执行结果相关的 `Event` 列表。
-*   **`can_possibly_start(self) -> bool`** (可选):
-    *   **非常重要**：用于前置过滤掉对于特定角色**绝对不可能**执行的动作（如正道绝对不搜刮百姓）。
-    *   这有助于大大缩短传给 LLM 的 `action_infos` prompt 长度。如果可能执行，返回 `True`；绝对不可能返回 `False`。默认返回 `True`。
+    *   Starts the action; usually creates and returns a world `Event` marking that the action has begun.
+*   **`_execute(self, **kwargs) -> None`** (single-avatar actions):
+    *   The concrete low-level execution logic (e.g. adding cultivation progress, deducting spirit stones, changing prosperity).
+*   **`finish(self, **kwargs) -> list[Event]`** (async):
+    *   Called when the action finishes; returns the list of `Event`s describing the result.
+*   **`can_possibly_start(self) -> bool`** (optional):
+    *   **Very important**: used to pre-filter actions that a given avatar can **never** perform (e.g. a righteous cultivator would never plunder commoners).
+    *   This greatly shortens the `action_infos` prompt sent to the LLM. Return `True` if the action is possible, `False` if it is absolutely impossible. Defaults to `True`.
 
-### 时间管理 (TimedAction)
+### Time Management (TimedAction)
 
-*   如果是 `TimedAction`，必须设置类变量 **`duration_months: int`** 来表示该动作默认耗时几个月。
+*   For a `TimedAction`, you must set the class variable **`duration_months: int`** to the action's default duration in months.
 
-## 3. 参数候选项规范
+## 3. Parameter Option Rules
 
-LLM 决策动作参数时会读取 `get_action_infos(avatar)` 中的 `param_options`。新增或修改动作时，必须保证动作 schema 与执行层参数解析一致。
+When the LLM decides action parameters, it reads `param_options` from `get_action_infos(avatar)`. When adding or modifying an action, make sure the action schema matches how the execution layer parses parameters.
 
-### 需要声明 `PARAM_OPTION_SOURCES` 的参数
+### Parameters That Need `PARAM_OPTION_SOURCES`
 
-如果参数不是自由文本或纯数值，而是需要从当前世界状态中选择，必须声明来源。例如：
+If a parameter is not free text or a plain number but must be chosen from the current world state, you must declare its source. For example:
 
 ```python
 from src.classes.action.param_options import ParamOptionSource
@@ -58,47 +58,47 @@ class Buy(InstantAction):
     }
 ```
 
-常见来源：
+Common sources:
 
-*   `CURRENT_CITY_STORE_ITEM_NAME`: 当前城市商店物品名，用于购买。
-*   `SELLABLE_ITEM_NAME`: 当前可出售材料/装备名，用于出售。
-*   `GIFTABLE_ITEM_ID`: 当前可赠送物品 ID 或 `SPIRIT_STONE`，用于赠送。
-*   `OBSERVABLE_AVATAR_NAME`: 当前可观察角色名，用于互动、攻击、移动到角色等。
-*   `KNOWN_REGION_NAME`: 当前已知地区名，用于移动到/离开地区。
-*   `KNOWN_CULTIVATE_REGION_NAME`: 当前已知修炼地区名，用于占据洞府。
-*   `MATERIAL_REALM_VALUE`: 当前材料足够的境界值，用于铸造/炼丹。
-*   `CARDINAL_DIRECTION`: `north/south/east/west`，用于方向移动。
+*   `CURRENT_CITY_STORE_ITEM_NAME`: item names in the current city's store, for buying.
+*   `SELLABLE_ITEM_NAME`: names of currently sellable materials/equipment, for selling.
+*   `GIFTABLE_ITEM_ID`: IDs of currently giftable items or `SPIRIT_STONE`, for gifting.
+*   `OBSERVABLE_AVATAR_NAME`: names of currently observable avatars, for interactions, attacks, moving to an avatar, etc.
+*   `KNOWN_REGION_NAME`: names of currently known regions, for moving to/leaving a region.
+*   `KNOWN_CULTIVATE_REGION_NAME`: names of currently known cultivation regions, for occupying a cave dwelling.
+*   `MATERIAL_REALM_VALUE`: realm values for which the avatar has enough materials, for forging/elixir refining.
+*   `CARDINAL_DIRECTION`: `north/south/east/west`, for directional movement.
 
-### `param_options.value` 约定
+### `param_options.value` Convention
 
-每个候选项中的 `value` 是 LLM 应填入该参数的值；`id`、`name` 等字段只作为上下文。新增来源时必须保证 `value` 与对应动作执行层真实接受的参数格式一致。
+The `value` in each option is the value the LLM should fill into the parameter; fields such as `id` and `name` are context only. When adding a source, make sure `value` matches the parameter format the corresponding action's execution layer actually accepts.
 
-### 测试要求
+### Test Requirements
 
-新增或修改世界状态参数时，必须补充测试：
+When adding or modifying world-state parameters, you must add tests covering:
 
-*   该动作的 `PARAM_OPTION_SOURCES` 声明。
-*   `get_action_infos(avatar)` 中对应参数存在合理的 `param_options`。
-*   option 的 `value` 能被动作执行层解析。
-*   候选范围符合角色视角（如可观察角色、已知地区），不能把不可见/不可操作对象暴露给 LLM。
+*   The action's `PARAM_OPTION_SOURCES` declaration.
+*   Sensible `param_options` for the parameter in `get_action_infos(avatar)`.
+*   That each option's `value` can be parsed by the action's execution layer.
+*   That the candidate range matches the avatar's perspective (e.g. observable avatars, known regions); invisible/non-actionable objects must not be exposed to the LLM.
 
-## 4. MutualAction 特有规范
+## 4. MutualAction-Specific Rules
 
-互动动作继承自 `MutualAction`，除上述通用规范外，还需遵循：
+Mutual actions inherit from `MutualAction`. In addition to the common rules above, they must follow:
 
-*   **`PARAMS`**: 必须包含 `"target_avatar": "Avatar"` 或类似定义。
-    *   `MutualAction` 基类已声明 `"target_avatar": ParamOptionSource.OBSERVABLE_AVATAR_NAME`；子类如新增 `item_id`、`region_name` 等额外世界状态参数，仍需补充自身的 `PARAM_OPTION_SOURCES`。
-*   **`FEEDBACK_ACTIONS: list[str]`**: 目标角色可选的反馈动作名称列表（如 `["Accept", "Reject"]`）。
-*   **`STORY_PROMPT_ID: str`** (可选): 如果该互动动作在结束后要生成一段小故事（如双修），应提供对应的 Prompt 多语言 key。
+*   **`PARAMS`**: must include `"target_avatar": "Avatar"` or an equivalent definition.
+    *   The `MutualAction` base class already declares `"target_avatar": ParamOptionSource.OBSERVABLE_AVATAR_NAME`; if a subclass adds extra world-state parameters such as `item_id` or `region_name`, it must still add its own `PARAM_OPTION_SOURCES`.
+*   **`FEEDBACK_ACTIONS: list[str]`**: list of feedback action names available to the target avatar (e.g. `["Accept", "Reject"]`).
+*   **`STORY_PROMPT_ID: str`** (optional): if the mutual action should generate a story event when it ends (e.g. dual cultivation), provide the corresponding prompt i18n key.
 *   **`_can_start(self, target: "Avatar") -> tuple[bool, str]`**:
-    *   MutualAction 中应重写此方法来进行启动条件判断（基类已经处理了目标不存在、目标是自己、目标死亡等基础检查）。
+    *   MutualActions should override this method to check start conditions (the base class already handles basic checks such as the target not existing, the target being yourself, or the target being dead).
 *   **`_settle_feedback(self, target_avatar: "Avatar", feedback_name: str) -> None`**:
-    *   核心结算逻辑。根据目标给出的 `feedback_name`（如 `"Accept"`），在此处应用具体的数值/状态变化。
+    *   Core settlement logic. Based on the target's `feedback_name` (e.g. `"Accept"`), apply the concrete stat/state changes here.
 
-## 5. 注册与测试要求
+## 5. Registration and Test Requirements
 
-*   **注册装饰器**: 必须在类定义上方添加 `@register_action(actual=True)` 装饰器。
-*   **模块导出**: **必须**在当前目录的 `__init__.py` 中 `from .your_file import YourAction`，否则注册将无效！详细请参考 `.cursor/rules/python-registry.mdc`。
-*   **测试覆盖**:
-    *   新增动作必须在 `tests/` 中添加对应的测试（如 `test_action_my_action.py`）。
-    *   如果重写了 `can_possibly_start`，必须在 `tests/test_action_can_possibly_start.py` 中补充相关分支的测试。
+*   **Registration decorator**: you must add the `@register_action(actual=True)` decorator above the class definition.
+*   **Module export**: you **must** add `from .your_file import YourAction` to the `__init__.py` in the current directory, otherwise registration has no effect! See `.cursor/rules/python-registry.mdc` for details.
+*   **Test coverage**:
+    *   Every new action must have a corresponding test in `tests/` (e.g. `test_action_my_action.py`).
+    *   If you override `can_possibly_start`, you must add tests for the relevant branches in `tests/test_action_can_possibly_start.py`.

@@ -1,71 +1,70 @@
 ---
-description: 前端架构与开发规范指南
+description: Frontend architecture and development guidelines
 globs: web/src/**/*.{vue,ts,js}
 ---
-# 前端架构与开发指南 (Frontend Architecture & Performance Guide)
+# Frontend Architecture & Performance Guide
 
-在修改 `web/src/` 目录下的代码时，必须严格遵循以下架构规范和性能最佳实践。
+When modifying code under `web/src/`, strictly follow the architecture rules and performance best practices below.
 
-## 1. 架构与数据流 (Architecture & Data Flow)
-- **Server-Authoritative (后端驱动)**: 游戏状态由后端驱动。前端通过接收 `TickPayloadDTO` 来更新状态。
-- **Store 职责划分**:
-  - 必须遵循 Pinia Store 的职责划分。
-  - `world.ts` 负责 world 级编排（初始化、tick、时间/天象状态），不应继续膨胀为 God Store。
-  - **新代码优先直接使用子 Store (`map/avatar/event/ui/system`)**；`world` 的代理字段视为兼容层。
-- **启动状态机**:
-  - `App.vue` 应保持“装配层”职责。
-  - 根层场景编排必须收敛在 `useAppShell`，避免在根组件散落多个 watcher/布尔条件分支。
-  - 应用壳层必须采用 `scene + overlay` 思路：底层场景至少区分 `boot / splash / initializing / game`，`SystemMenu` 与 `LoadingOverlay` 作为 overlay 叠加。
-  - 游戏主界面只能由 `scene === 'game'` 驱动，禁止通过 `!showSplash`、`!showLoading` 等反向布尔组合推断“已经进入游戏”。
-  - 从 `SplashLayer` 打开的设置/读档/关于页仍属于 `splash` 上下文；打开菜单不得隐式暴露地图、状态栏或其他游戏内 UI。
-  - `SplashLayer` 的主标题/按钮主标签可以本地化，但标题下副标题与按钮下小字辅文必须始终保持英文，用于帮助多语言用户快速识别功能；相关 i18n key 应显式使用英文语义命名（如 `splash.tagline_en`、`splash.subtitle_*_en`），后续本地化时不得把这些 key 再翻译成各语言版本。
-  - 系统菜单应采用“壳层 + 内容层 + 流程层”拆分：`SystemMenuShell` 负责容器，`SettingsPanel` 负责设置内容，`useSystemMenuFlow` 负责菜单业务流程；不要把三者重新揉回 `SystemMenu.vue` 巨石组件。
-- **Socket 分层约束**:
-  - `api/socket.ts` 只负责 transport（连接、重连、消息订阅）。
-  - 消息分发必须通过 `stores/socketMessageRouter.ts`，禁止在组件内直接按消息类型分支。
-- **组件 / Composable 边界**:
-  - 大型面板、状态栏弹窗、详情页组件应优先保持“模板展示层”职责；数据加载、派生字段、跳转、提交、timer、Pixi 生命周期等业务状态应下沉到 `web/src/composables/*` 或局部 `components/**/composables/*`。
-  - 已拆出的边界包括：系统启动遮罩、地图 Pixi 渲染、宗门/区域详情、头像换图、排行/王朝/凡人/时间/宗门关系/秘境概览等；后续修改应优先延续现有 composable，不要把逻辑重新堆回 `.vue`。
-  - `web/src/components/game/composables/*` 用于游戏渲染域的局部 composable（如 Pixi/地图生命周期）；跨面板复用的状态逻辑放 `web/src/composables/*`。
-- **状态栏弹窗与懒加载**:
-  - 非首屏状态栏弹窗可使用 `defineAsyncComponent` + `v-if` 按需加载；高频且测试/交互依赖同步挂载的弹窗可保留静态 import。
-  - 如果弹窗组件在 `props.show === true` 时才被 `v-if` 首次挂载，内部依赖 `show` 触发 API 请求的 watcher 必须使用 `{ immediate: true }`，否则首次打开不会拉数据。
-  - 这类弹窗必须补“初始挂载即 `show=true` 仍会请求数据”的回归测试，典型例子是王朝、排行/天下武道会、凡人总览、宗门关系、时间总览、已故角色列表。
+## 1. Architecture & Data Flow
+- **Server-Authoritative**: game state is driven by the backend. The frontend updates its state by receiving `TickPayloadDTO`.
+- **Store responsibilities**:
+  - Follow the Pinia store responsibility split.
+  - `world.ts` handles world-level orchestration (initialization, tick, time/celestial-phenomenon state) and must not keep growing into a God Store.
+  - **New code should use the sub-stores (`map/avatar/event/ui/system`) directly**; the proxy fields on `world` are a compatibility layer.
+- **Startup state machine**:
+  - `App.vue` should stay an "assembly layer".
+  - Root-level scene orchestration must be consolidated in `useAppShell`; avoid scattering multiple watchers/boolean branches across the root component.
+  - The app shell must use a `scene + overlay` model: the underlying scene distinguishes at least `boot / splash / initializing / game`, and `SystemMenu` and `LoadingOverlay` are stacked on top as overlays.
+  - The main game UI may only be driven by `scene === 'game'`; never infer "already in game" from inverted boolean combinations such as `!showSplash` or `!showLoading`.
+  - Settings/load/about pages opened from `SplashLayer` still belong to the `splash` context; opening a menu must not implicitly expose the map, status bar, or other in-game UI.
+  - The system menu uses a "shell + content + flow" split: `SystemMenuShell` owns the container, `SettingsPanel` owns the settings content, and `useSystemMenuFlow` owns the menu business flow; do not merge the three back into a monolithic `SystemMenu.vue`.
+- **Socket layering**:
+  - `api/socket.ts` is responsible for transport only (connect, reconnect, message subscription).
+  - Message dispatch must go through `stores/socketMessageRouter.ts`; never branch on message type directly inside components.
+- **Component / composable boundary**:
+  - Large panels, status bar dialogs, and detail page components should stay "template presentation layers"; business state such as data loading, derived fields, navigation, submission, timers, and Pixi lifecycle should move down into `web/src/composables/*` or local `components/**/composables/*`.
+  - Boundaries already extracted include: system startup overlay, map Pixi rendering, sect/region details, avatar portrait swapping, and the rankings/dynasty/mortals/time/sect relations/secret realm overviews; later changes should extend the existing composables rather than piling logic back into `.vue` files.
+  - `web/src/components/game/composables/*` is for local composables in the game rendering domain (e.g. Pixi/map lifecycle); state logic reused across panels goes in `web/src/composables/*`.
+- **Status bar dialogs and lazy loading**:
+  - Non-first-screen status bar dialogs may be loaded on demand with `defineAsyncComponent` + `v-if`; high-frequency dialogs whose tests/interactions rely on synchronous mounting may keep a static import.
+  - If a dialog component is first mounted by `v-if` only when `props.show === true`, any internal watcher that triggers API requests from `show` must use `{ immediate: true }`; otherwise the first open will not fetch data.
+  - Such dialogs must have a regression test for "initial mount with `show=true` still requests data"; typical examples are the dynasty, rankings/World Martial Tournament, mortals overview, sect relations, time overview, and deceased avatars list dialogs.
 
-## 2. Vue 3 性能最佳实践 (Performance Best Practices)
-- **强制约束 (MUST)**: 对于从后端接收的大型只读对象（如 `AvatarDetail`, 游戏状态快照，地图数据），**必须使用 `shallowRef`** 而不是 `ref` 或 `reactive`。这能避免深层 Proxy 转换导致的性能卡顿 (10ms-100ms+ UI freezes)。
-- **长列表渲染**: 对于长列表（如事件日志、实体列表），优先使用“分页 + 增量加载”或“虚拟滚动”。当单次渲染节点数持续增长时，必须引入虚拟滚动方案。
-- **Memoization**: 使用 `computed` 处理昂贵的派生状态，避免在模板中使用内联表达式或方法。
-- **性能基线**: 对关键链路（初始化、事件合并/加载）保留可观测耗时指标，重构前后需比较并确保不退化。
+## 2. Vue 3 Performance Best Practices
+- **MUST**: for large read-only objects received from the backend (e.g. `AvatarDetail`, game state snapshots, map data), **you must use `shallowRef`** instead of `ref` or `reactive`. This avoids deep Proxy conversion and the resulting jank (10ms-100ms+ UI freezes).
+- **Long list rendering**: for long lists (e.g. event logs, entity lists), prefer "pagination + incremental loading" or virtual scrolling. When the number of nodes rendered at once keeps growing, virtual scrolling is mandatory.
+- **Memoization**: use `computed` for expensive derived state; avoid inline expressions or method calls in templates.
+- **Performance baseline**: keep observable timing metrics for critical paths (initialization, event merging/loading); compare before and after refactors and make sure there is no regression.
 
-## 3. 桌面版与浏览器适配 (Desktop & Browser)
-- **强制约束 (MUST)**: 前后端共享同一套前端代码，监听画布/容器尺寸变化时，**严禁使用 `useWindowSize()`**（它会把窗口尺寸当成真源，容易与实际容器尺寸脱节）。
-- **必须统一使用 `useElementSize(container)`**（基于 `ResizeObserver`），以确保尺寸变化始终以实际容器为准。
+## 3. Desktop & Browser
+- **MUST**: the desktop and browser builds share the same frontend code. When watching canvas/container size changes, **never use `useWindowSize()`** (it treats the window size as the source of truth and easily drifts from the actual container size).
+- **Always use `useElementSize(container)`** (based on `ResizeObserver`) so size changes always follow the actual container.
 
-## 4. 异常恢复与渲染 (Error Recovery & Rendering)
-- **防闪烁设计**: 依赖 `boot` 场景保护。在完成 settings hydrate 且收到后端 `initStatus` 第一次响应前，前端界面必须保持纯黑壳层以防闪烁。
-- **错误处理统一出口**:
-  - 记录日志优先使用 `utils/appError.ts`（`logError/logWarn`），避免裸 `console.error/warn` 分散在业务代码中。
-  - 用户提示统一通过 `message`，避免重复弹窗或风格不一致。
-- **Pixi 渲染优化**: 
-  - **强制约束 (MUST)**: **严禁将 PIXI 原生对象 (如 `Sprite`, `Container`) 放入 Vue 的深层响应式对象 (`ref`, `reactive`) 中**。这会导致 PIXI 内部严格相等 (`===`) 比较失败（如 `removeChild` 失效），引发内存泄漏和逻辑 Bug。若需保存实例引用，请使用普通变量或 `shallowRef`。
-  - 动态效果（如水面流动）必须使用 `PIXI.Ticker` 独立驱动，不依赖 Vue 渲染循环。
-  - 地图使用 `shallowRef` 存储。地块渲染使用 `onMounted` 一次性构建 Pixi Sprite，静态地块不参与响应式更新。
-  - 地图区域名布局（`MapLayer` / `utils/mapLabels.ts`）默认采用**碰撞避让**而不是“重叠即隐藏”。若必须取舍，优先保持标签可见，再通过有限候选位避让。
-  - 地图区域名布局必须兼容 `static/locales/registry.json` 中当前启用语言（如 `zh-CN`、`zh-TW`、`en-US`、`vi-VN`、`ja-JP`、`fr-FR`）。紧凑脚本与拉丁脚本必须分别按对应文字尺寸和换行规则估算包围盒，禁止只按中文或只按英文做单语言近似。
-  - 地图区域名避让实现必须保持轻量：优先使用固定候选位 + 邻域索引（如空间桶）进行局部碰撞检测，禁止引入逐帧求解、全局物理模拟或会明显增加初始化/重绘开销的重型算法。
+## 4. Error Recovery & Rendering
+- **Anti-flicker design**: rely on the `boot` scene guard. Until settings hydration completes and the first backend `initStatus` response arrives, the frontend must stay on a pure black shell to prevent flicker.
+- **Single exit for error handling**:
+  - Use `utils/appError.ts` (`logError/logWarn`) for logging; avoid bare `console.error/warn` scattered through business code.
+  - Show user-facing notices through `message` to avoid duplicate popups or inconsistent styles.
+- **Pixi rendering optimization**:
+  - **MUST**: **never put native PIXI objects (e.g. `Sprite`, `Container`) inside Vue deep reactive objects (`ref`, `reactive`)**. This breaks PIXI's internal strict equality (`===`) checks (e.g. `removeChild` stops working), causing memory leaks and logic bugs. To keep an instance reference, use a plain variable or `shallowRef`.
+  - Dynamic effects (e.g. flowing water) must be driven independently by `PIXI.Ticker`, not by the Vue render loop.
+  - The map is stored in a `shallowRef`. Tile rendering builds Pixi Sprites once in `onMounted`; static tiles do not take part in reactive updates.
+  - Map region name layout (`MapLayer` / `utils/mapLabels.ts`) uses **collision avoidance** by default rather than "hide when overlapping". If a trade-off is required, keep labels visible first, then avoid collisions via a limited set of candidate positions.
+  - Map region name layout must work for the locales enabled in `static/locales/registry.json` (currently `en-US`). Estimate bounding boxes from the actual text size and wrapping rules of the script in use; do not rely on a hardcoded single-script approximation.
+  - The region name avoidance implementation must stay lightweight: prefer fixed candidate positions + a neighborhood index (e.g. spatial buckets) for local collision detection; never introduce per-frame solving, global physics simulation, or heavy algorithms that noticeably increase initialization/redraw cost.
 
-## 5. 类型与 DTO 规范 (Type & DTO Policy)
-- **新增接口字段时**，必须先更新 `types/api.ts`，再在 `api/mappers/*` 做 DTO -> Domain 归一化。
-- **禁止扩散 `any`**: 新增代码中不得引入无必要 `any`；确需过渡时必须标注用途和后续收敛点。
+## 5. Type & DTO Policy
+- **When adding API fields**, update `types/api.ts` first, then normalize DTO -> Domain in `api/mappers/*`.
+- **Do not spread `any`**: new code must not introduce unnecessary `any`; when a transition truly requires it, annotate its purpose and the point where it will be removed.
 
-## 6. 静态资源路径约定 (Static Asset Paths)
-- **前端自带静态资源**（`web/public/*`）禁止直接写死站点根绝对路径（如 `/icons/x.png`、`/sfx/x.ogg`、`/bgm/x.mp3`）。
-- 运行时拼接路径的 `public` 资源必须通过统一 helper 基于 `import.meta.env.BASE_URL` 生成 URL。
-- 组件内固定图片、图标优先放入 `web/src/assets/*` 并使用模块导入，让 Vite 负责产物路径和部署前缀。
-- **游戏运行资源**（后端或代理提供的 `/assets/*`）与前端 `public` 资源分开管理，不要混用目录和 URL 生成方式。
+## 6. Static Asset Paths
+- **Frontend-bundled static assets** (`web/public/*`) must never hardcode site-root absolute paths (e.g. `/icons/x.png`, `/sfx/x.ogg`, `/bgm/x.mp3`).
+- Runtime-built paths to `public` assets must be generated by a shared helper based on `import.meta.env.BASE_URL`.
+- Fixed images and icons inside components should go in `web/src/assets/*` and be imported as modules, letting Vite handle output paths and deployment prefixes.
+- **Game runtime assets** (`/assets/*` served by the backend or proxy) are managed separately from frontend `public` assets; do not mix their directories or URL generation.
 
-## 7. 系统级状态栏配色 (System Status Bar Colors)
-- 状态栏/系统级导航颜色必须区分“模块基础色”和“状态覆盖色”；基础色负责表达栏目归属，状态色只用于激活、可用、稀有度等动态变化。
-- 避免把黄橙色同时大量用于模块身份、奖励感和激活态；同一色相带若承担多个职责，必须先收敛语义再加新入口。
-- 同一世界观簇的入口应共享相近色系：信息/知识偏冷蓝，关系/组织偏靛蓝，凡俗/生民偏青绿，王朝/礼制偏赭金，竞技/荣誉偏金色。
+## 7. System Status Bar Colors
+- Status bar / system-level navigation colors must separate "module base colors" from "state overlay colors"; base colors express which module an entry belongs to, while state colors are used only for dynamic changes such as active, available, or rarity.
+- Avoid using yellow-orange heavily for module identity, reward feel, and active state at the same time; if one hue band carries multiple responsibilities, consolidate its meaning before adding new entries.
+- Entries in the same lore cluster should share similar color families: information/knowledge leans cool blue, relations/organizations lean indigo, mortals/common folk lean teal-green, dynasty/rites lean ochre-gold, competition/honor leans gold.

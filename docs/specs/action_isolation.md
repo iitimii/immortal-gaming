@@ -1,23 +1,23 @@
-# Action Isolation Strategy (动作隔离策略)
+# Action Isolation Strategy
 
-本文档描述的策略已经落地；以下内容按当前仓库实现更新路径与默认规则。
+The strategy described in this document has been implemented; the content below reflects the paths and default rules of the current repository implementation.
 
-## 背景
+## Background
 
-在修仙世界模拟中，角色会执行各种持续性动作（如闭关、战斗、移动等）。同时，系统存在各种全局机制（如拍卖会、大比、奇遇、霉运等）会尝试与角色互动。
+In the cultivation world simulation, avatars perform various long-running actions (such as retreat, battle, movement, etc.). At the same time, the system has various global mechanisms (such as auctions, tournaments, fortunes, misfortunes, etc.) that try to interact with avatars.
 
-此前存在的问题是：全局机制无视角色当前状态，导致“正在闭关的角色跑去参加拍卖会”或“闭关时路边捡到神兵”等逻辑违和现象。
+The previous problem was that global mechanisms ignored the avatar's current state, leading to logically jarring situations such as "an avatar in closed-door retreat running off to join an auction" or "picking up a divine weapon by the roadside while in retreat".
 
-## 解决方案：Trait-based Declarative Control
+## Solution: Trait-based Declarative Control
 
-我们采用“基于特性的声明式控制”方案，将“是否允许被打扰”的定义权下放给 `Action` 类本身。
+We adopt a "trait-based declarative control" approach, delegating the authority to define "whether interruption is allowed" to the `Action` class itself.
 
-### 1. Action 基类定义
+### 1. Action Base Class Definition
 
-在 `src/classes/action/action.py` 中，动作是否允许被外部系统打断遵循以下规则：
+In `src/classes/action/action.py`, whether an action may be interrupted by external systems follows these rules:
 
-- 若显式设置了 `ALLOW_GATHERING` / `ALLOW_WORLD_EVENTS`，优先使用显式值。
-- 若未显式设置，则由 `IS_MAJOR` 决定：重大行为默认不允许，非重大行为默认允许。
+- If `ALLOW_GATHERING` / `ALLOW_WORLD_EVENTS` is explicitly set, the explicit value takes precedence.
+- If not explicitly set, it is determined by `IS_MAJOR`: major actions are not allowed by default, non-major actions are allowed by default.
 
 ```python
 class Action(ABC):
@@ -31,33 +31,33 @@ class Action(ABC):
         return not getattr(cls, 'IS_MAJOR', False)
 ```
 
-### 2. 特定动作重写策略
+### 2. Overriding the Strategy in Specific Actions
 
-例如 `Retreat` (闭关) 动作 (`src/classes/action/retreat.py`) 需要与世隔绝：
+For example, the `Retreat` action (`src/classes/action/retreat.py`) needs to be cut off from the world:
 
 ```python
 class Retreat(TimedAction):
     # ...
-    # 闭关期间，不问世事，不染因果
+    # During retreat, ignore worldly affairs and stay free of karmic entanglement
     ALLOW_GATHERING = False
     ALLOW_WORLD_EVENTS = False
 ```
 
-### 3. Avatar 状态检查接口
+### 3. Avatar State Check Interface
 
-在 `Avatar` (`src/classes/core/avatar/action_mixin.py`) 中封装了状态检查属性：
+`Avatar` (`src/classes/core/avatar/action_mixin.py`) encapsulates state check properties:
 
-- `avatar.can_join_gathering`: 检查当前动作是否允许参加聚会。
-- `avatar.can_trigger_world_event`: 检查当前动作是否允许触发奇遇/霉运。
+- `avatar.can_join_gathering`: checks whether the current action allows joining a gathering.
+- `avatar.can_trigger_world_event`: checks whether the current action allows triggering fortune/misfortune.
 
-### 4. 外部调用规范
+### 4. External Call Conventions
 
-- **Gathering (如 Auction)**: 在获取参与者列表时，必须过滤 `can_join_gathering` 为 True 的角色。
-- **Passive Effects (Fortune/Misfortune)**: 在触发前，必须检查 `can_trigger_world_event` 为 True。
+- **Gathering (e.g. Auction)**: when getting the participant list, avatars must be filtered to those with `can_join_gathering` set to True.
+- **Passive Effects (Fortune/Misfortune)**: before triggering, `can_trigger_world_event` must be checked to be True.
 
-## 扩展指南
+## Extension Guide
 
-当你创建一个新的 Action 时：
-- 如果该动作需要角色全神贯注（如“突破”、“炼丹”），应考虑将 `ALLOW_GATHERING` 设为 `False`。
-- 如果该动作处于特殊空间或心流状态（如“心魔劫”、“顿悟”），应考虑将 `ALLOW_WORLD_EVENTS` 设为 `False`。
-- 默认情况下不需要做任何修改。
+When you create a new Action:
+- If the action requires the avatar's full concentration (such as "breakthrough" or "alchemy"), consider setting `ALLOW_GATHERING` to `False`.
+- If the action takes place in a special space or a flow state (such as "inner demon tribulation" or "epiphany"), consider setting `ALLOW_WORLD_EVENTS` to `False`.
+- By default, no changes are needed.

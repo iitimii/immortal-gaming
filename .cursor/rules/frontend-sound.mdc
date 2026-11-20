@@ -1,29 +1,29 @@
 ---
-description: 前端音效开发规范 (Sound Effect Guidelines)
+description: Frontend sound effect guidelines
 globs: ["web/src/**/*.vue", "web/src/**/*.ts", "web/src/**/*.tsx"]
 ---
-# 前端音效开发规范 (Sound Effect Guidelines)
+# Frontend Sound Effect Guidelines
 
-在编写或修改前端组件（Vue/TS）时，必须严格遵守以下音效集成规范，确保用户体验的一致性，并降低开发成本。
+When writing or modifying frontend components (Vue/TS), strictly follow these sound integration rules to keep the user experience consistent and reduce development cost.
 
-## 1. 自动音效 (默认行为)
-- 系统已实现全局事件委托。**绝不要**给标准的 `<button>`、`<a>`、`role="button"` 或带有 `.n-button`, `.btn`, `.clickable` 类的元素手动添加点击音效逻辑。它们会自动播放 `click` 音效。
+## 1. Automatic Sound (Default Behavior)
+- The system implements global event delegation. **Never** manually add click sound logic to standard `<button>`, `<a>`, `role="button"` elements or elements with the `.n-button`, `.btn`, or `.clickable` classes. They play the `click` sound automatically.
 
-## 2. 特殊音效控制 (v-sound)
-- 如果需要非默认音效，使用 `v-sound` 指令，**不要**在 `@click` 中混入音效逻辑。全局监听器会自动检测该指令并避让，不会导致双重音效。
-- 可选值：
-  - `v-sound:cancel`：用于关闭、取消、删除、退出按钮。
-  - `v-sound:select`：用于确认、保存、重要选择、开始游戏按钮。
-  - `v-sound="'open'"`：用于打开新界面、跳转链接、查看详情的元素。
-- 对于非标准交互元素（如普通的 `div` 或 `li`），如果需要交互音效，必须添加 `v-sound` 指令或 `.clickable` 类名。
+## 2. Special Sound Control (v-sound)
+- If a non-default sound is needed, use the `v-sound` directive; **do not** mix sound logic into `@click`. The global listener detects the directive and yields to it, so no double sound occurs.
+- Available values:
+  - `v-sound:cancel`: for close, cancel, delete, and exit buttons.
+  - `v-sound:select`: for confirm, save, important choice, and start game buttons.
+  - `v-sound="'open'"`: for elements that open a new screen, follow a link, or view details.
+- For non-standard interactive elements (e.g. a plain `div` or `li`), if an interaction sound is needed you must add the `v-sound` directive or the `.clickable` class.
 
-## 3. 禁用音效 (data-no-sound)
-- 如果一个按钮或交互元素**不应该**发声（例如仅作展示，或由父/子元素处理音效），必须添加 `data-no-sound` 属性。
-  - 示例：`<button data-no-sound>Mute</button>`
+## 3. Disabling Sound (data-no-sound)
+- If a button or interactive element **should not** make a sound (e.g. display-only, or the sound is handled by a parent/child element), you must add the `data-no-sound` attribute.
+  - Example: `<button data-no-sound>Mute</button>`
 
-## 4. 编程式播放 (仅限特殊场景)
-- 只有在无法使用 DOM 事件的场景（如 Canvas 内部交互、键盘事件、自动触发的反馈）下，才允许引入并使用 `useAudio`。
-  - 示例：
+## 4. Programmatic Playback (Special Cases Only)
+- `useAudio` may be imported and used only where DOM events cannot be used (e.g. interactions inside a Canvas, keyboard events, automatically triggered feedback).
+  - Example:
     ```typescript
     import { useAudio } from '@/composables/useAudio'
     const { play } = useAudio()
