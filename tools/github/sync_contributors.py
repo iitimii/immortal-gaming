@@ -93,9 +93,6 @@ def render_markdown(repo: str, contributors: list[dict[str, Any]]) -> str:
     lines = [
         "# Contributors",
         "",
-        "感谢每一位为这个开源项目贡献代码、创意、反馈与时间的朋友。",
-        "每一个 Pull Request、Issue、讨论和评审，都在帮助 `Cultivation World Simulator` 变得更完整、更有生命力。",
-        "",
         "Thanks to everyone who has contributed code, ideas, feedback, and time to this open source project.",
         "Every pull request, issue, discussion, and review helps `Cultivation World Simulator` grow into something better.",
         "",
@@ -134,7 +131,7 @@ def render_readme_contributors_section(
         )
 
     lines = [
-        "## 👥 贡献者",
+        "## 👥 Contributors",
         "",
         "<table>",
     ]
@@ -146,7 +143,7 @@ def render_readme_contributors_section(
         [
             "</table>",
             "",
-            "更多贡献细节请查看 [CONTRIBUTORS.md](CONTRIBUTORS.md)。",
+            "For more contribution details, please check [CONTRIBUTORS.md](CONTRIBUTORS.md).",
             "",
         ]
     )
@@ -160,7 +157,7 @@ def update_readme(readme_path: Path, repo: str, contributors: list[dict[str, Any
 
     content = readme_path.read_text(encoding="utf-8")
     
-    pattern = re.compile(r"## 👥 贡献者\s*\n.*?(?=\n## |\Z)", re.DOTALL)
+    pattern = re.compile(r"## 👥 Contributors\s*\n.*?(?=\n## |\Z)", re.DOTALL)
     section = render_readme_contributors_section(repo, contributors)
     new_content, count = pattern.subn(section, content, count=1)
 

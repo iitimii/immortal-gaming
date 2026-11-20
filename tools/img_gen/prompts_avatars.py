@@ -3,36 +3,36 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 AVATAR_COMMON_PROMPT_BASE = (
-    "二次元漫画风格，略微Q版，正面看镜头。"
-    "纯白背景，背景必须干净无纹理、无阴影、无渐变、无雾气、无光晕、无边框。"
-    "角色完整居中，头发和发饰不要接触图片边缘，主体边缘清晰。"
-    "像素风格，细节别太多。"
+    "Anime manga style, slightly chibi, facing the camera head-on. "
+    "Pure white background; the background must be clean, with no texture, shadow, gradient, mist, glow or border. "
+    "The character is complete and centered; hair and hair ornaments must not touch the image edges; the subject has crisp edges. "
+    "Pixel art style, not too much detail."
 )
 
 AVATAR_REALMS = [
     (
         "qi_refining",
-        "练气",
-        "练气阶段外观：整体更朴素青涩，装饰简化，衣领素净，眼神带一点稚嫩。"
-        "只弱化原有可见光效和纹样，不新增额外符纹、光环或大面积特效。",
+        "Qi Refinement",
+        "Qi Refinement stage look: overall plainer and more youthful, simplified ornaments, a plain collar, eyes with a touch of naivety. "
+        "Only tone down existing visible light effects and patterns; do not add extra runes, halos or large-area effects.",
     ),
     (
         "foundation",
-        "筑基",
-        "筑基阶段外观：整体更稳定清爽，眼神更沉稳，原有发饰和衣领略精致。"
-        "只让原有颜色、纹样、饰物和贴身光效更清晰，不改变主要外貌元素。",
+        "Foundation Establishment",
+        "Foundation Establishment stage look: overall steadier and fresher, calmer eyes, existing hair ornaments and collar slightly more refined. "
+        "Only make existing colors, patterns, accessories and close-fitting light effects clearer; do not change the main appearance elements.",
     ),
     (
         "golden_core",
-        "金丹",
-        "金丹阶段外观：整体更凝练明亮，五官边缘更利落，瞳孔高光更明显。"
-        "原有发饰、额印、眼妆、衣领或灵光的质感提升，细节更精致但仍然克制。",
+        "Golden Core",
+        "Golden Core stage look: overall more condensed and brighter, crisper facial features, more visible pupil highlights. "
+        "Existing hair ornaments, forehead marks, eye makeup, collar or spiritual light gain finer texture; details are more refined but still restrained.",
     ),
     (
         "nascent_soul",
-        "元婴",
-        "元婴阶段外观：整体更通透空灵，神情安静，发丝和原有饰物更轻盈。"
-        "原有光效变得清透柔和，原有纹样更优雅，不新增夸张背景或大面积特效。",
+        "Nascent Soul",
+        "Nascent Soul stage look: overall more translucent and ethereal, a quiet expression, hair strands and existing ornaments lighter and airier. "
+        "Existing light effects become clear and soft, existing patterns more elegant; do not add exaggerated backgrounds or large-area effects.",
     ),
 ]
 
@@ -52,115 +52,115 @@ class AvatarPromptRecord:
         return f"{self.gender}_{self.index:03d}_{self.realm_slug}"
 
 FEMALE_PROMPT_BASE = (
-    "一个仙侠女性角色头像，只露出完整头部、面部和少量肩颈。"
+    "A xianxia female character avatar showing only the complete head, face and a little of the shoulders and neck. "
     f"{AVATAR_COMMON_PROMPT_BASE}"
 )
 
 FEMALE_AFFIXES = [
-    "墨黑长发，眼神清澈，嘴角微扬，白花发簪，浅绿色灵光。",
-    "银灰卷发，神情慵懒，眼角泪痣，水晶耳坠，雾气微绕。",
-    "酒红短发，眉眼英气，剑眉入鬓，金色额饰，火纹眼影。",
-    "浅紫双马尾，笑眼弯弯，铃铛发带，脸颊微红，灵光轻快。",
-    "青色长直发，面容清冷，表情淡漠，玉簪挽发，冰蓝瞳色。",
-    "金棕波浪发，温柔微笑，珍珠步摇，琥珀眼眸，暖色柔光。",
-    "深蓝盘发，端庄沉稳，凤凰发冠，细长眼型，金色轮廓光。",
-    "纯白长发，异色双瞳，银链额饰，星点灵光，神情淡然。",
-    "粉色丸子头，天真笑容，桃花发卡，脸颊红晕，花瓣微光。",
-    "亚麻色碎发，眼神坚毅，嘴角紧抿，简约发带，浅色肩领。",
-    "橙红长发，笑容灿烂，火焰纹额饰，琥珀眼眸，发梢微亮。",
-    "墨绿麻花辫，恬静表情，木质发簪，浅绿色眼眸，草叶发饰。",
-    "灰白短发，目光凌厉，左脸淡金刺青，金属耳环，冷色阴影。",
-    "栗色长卷发，妩媚眼神，玫瑰发饰，红唇，眼尾红妆。",
-    "藏蓝束发，干练利落，黑色头巾，目光如炬，暗蓝灵光。",
-    "浅黄披发，面色苍白，素色发带，浅淡眉眼，药雾般淡绿光。",
-    "七彩流光发，双眸含光，云雾缭绕，轮廓柔和，发丝发亮。",
-    "乌黑姬发式，乖巧文静，丝绸蝴蝶结，低眉浅笑，浅粉眼影。",
-    "浅褐盘发，娇俏笑容，红绳发饰，明亮圆眼，小巧耳坠。",
-    "银白长辫，闭目祈祷，柔和光环，月白眉心印，神情安静。",
-    "深紫直发，冷艳高傲，紫晶皇冠，下巴微扬，紫色瞳光。",
-    "翠绿双环髻，灵动笑容，翡翠流苏，眼尾上挑，风状灵光。",
-    "铂金长发，神情疏离，冰凌耳饰，浅蓝唇色，发梢结霜。",
-    "蓬松红发，野性眼神，骨牙耳饰，兽纹脸颊，眉眼张扬。",
-    "靛青垂鬟，温柔眼神，书卷纹发簪，细眉，淡金眼眸。",
-    "绯红长发，傲娇神情，猫耳发箍，眼尾上挑，小虎牙。",
-    "墨蓝狼尾短发，锐利眼神，剑形耳坠，眉骨高挺，冷白高光。",
-    "米色散发，睡眼惺忪，云纹发带，半眯眼，柔软发丝。",
-    "黛青盘发，成熟稳重，祥云发簪，慈眉善目，浅金耳环。",
-    "碧绿长发，面色苍白，幽蓝鬼火眼影，阴郁目光，冷色灵焰。",
-    "玫瑰金长发，甜美微笑，蕾丝发带，粉白瞳光，细碎亮片。",
-    "漆黑长直发，遮住单眼，骷髅发夹，阴影眼神，暗紫雾气。",
-    "黑白渐变短发，表情冷静，棋子耳坠，额间太极纹，黑白灵光。",
-    "湖蓝卷发，水滴额饰，透明耳坠，柔和微笑，水波高光。",
-    "玄色高马尾，眉间红印，脸颊小疤，坚毅目光，深色衣领。",
-    "淡金齐刘海，浅色眼瞳，莲花头冠，神情空灵，白金光晕。",
-    "孔雀蓝长发，羽形步摇，骄傲笑容，眼尾彩妆，彩色发梢。",
-    "烟灰色低马尾，半透明面纱，冷淡眼神，暗绿色雾光。",
-    "暗红盘发，黑金发冠，凤眼威严，深红眼影，暗金耳饰。",
-    "白金短发，机械透镜单眼饰，精明微笑，银色发夹。",
-    "淡绿短卷发，圆框琉璃眼镜，专注表情，浅绿瞳色。",
-    "紫黑双丸子头，符纸发饰，坏笑表情，紫色眼影。",
-    "苍蓝长辫，雪花发饰，睫毛挂霜，沉静表情，冰晶耳坠。",
-    "铜棕短发，麦色皮肤，爽朗笑容，兽皮发绳，金棕眼眸。",
-    "乌金挑染长发，金色竖瞳，鳞片耳饰，额角细小金纹。",
-    "浅粉披肩发，泪眼朦胧，贝壳耳坠，水蓝眼眸，珍珠发夹。",
-    "银蓝姬发，额间月轮印，表情淡然，月白瞳光，银色发环。",
-    "墨紫蓬松短发，小虎牙，暗纹发带，顽劣笑容，紫黑灵雾。",
+    "Ink-black long hair, clear eyes, a slight smile, white flower hairpin, pale green spiritual glow.",
+    "Silver-gray curly hair, languid expression, beauty mark under the eye, crystal earrings, faint swirling mist.",
+    "Wine-red short hair, heroic brows and eyes, sharp sword-like brows sweeping to the temples, golden forehead ornament, flame-pattern eyeshadow.",
+    "Light purple twin tails, smiling crescent eyes, bell hair ribbon, slightly flushed cheeks, lively spiritual glow.",
+    "Cyan long straight hair, cool aloof face, indifferent expression, hair pinned up with a jade hairpin, icy blue eyes.",
+    "Golden-brown wavy hair, gentle smile, pearl dangling hairpin, amber eyes, warm soft light.",
+    "Deep blue updo, dignified and composed, phoenix hair crown, long narrow eyes, golden rim light.",
+    "Pure white long hair, heterochromatic eyes, silver chain forehead ornament, starry spiritual sparkles, calm expression.",
+    "Pink bun hairstyle, innocent smile, peach blossom hair clip, rosy cheeks, faint petal glow.",
+    "Flaxen choppy hair, determined eyes, tightly pressed lips, simple hair band, light-colored shoulder collar.",
+    "Orange-red long hair, radiant smile, flame-pattern forehead ornament, amber eyes, faintly glowing hair tips.",
+    "Dark green braid, serene expression, wooden hairpin, light green eyes, grass-leaf hair ornament.",
+    "Gray-white short hair, piercing gaze, faint gold tattoo on the left cheek, metal earrings, cool-toned shadows.",
+    "Chestnut long curly hair, alluring eyes, rose hair ornament, red lips, red makeup at the eye corners.",
+    "Navy blue tied-up hair, brisk and capable, black headscarf, blazing gaze, dark blue spiritual glow.",
+    "Light yellow loose hair, pale complexion, plain hair band, soft faint brows and eyes, pale green glow like medicinal mist.",
+    "Iridescent flowing hair, eyes shimmering with light, wreathed in clouds and mist, soft contours, glowing hair strands.",
+    "Jet-black hime cut, well-behaved and quiet, silk bow, lowered eyes with a slight smile, light pink eyeshadow.",
+    "Light brown updo, cute playful smile, red string hair ornament, bright round eyes, small earrings.",
+    "Silver-white long braid, eyes closed in prayer, soft halo, moon-white mark between the brows, quiet expression.",
+    "Deep purple straight hair, cold and proud beauty, amethyst crown, chin slightly raised, purple eye glow.",
+    "Emerald double-loop buns, lively smile, jade tassels, upturned eye corners, wind-like spiritual glow.",
+    "Platinum long hair, distant expression, icicle earrings, pale blue lips, frost on the hair tips.",
+    "Fluffy red hair, wild eyes, bone-fang earrings, beast-pattern cheek markings, bold brows and eyes.",
+    "Indigo hanging hair loops, gentle eyes, scroll-pattern hairpin, thin brows, pale gold eyes.",
+    "Crimson long hair, tsundere expression, cat-ear headband, upturned eye corners, small fang.",
+    "Dark blue wolf-cut short hair, sharp eyes, sword-shaped earrings, high brow bones, cool white highlights.",
+    "Beige loose hair, sleepy eyes, cloud-pattern hair band, half-closed eyes, soft hair strands.",
+    "Dark blue-green updo, mature and steady, auspicious cloud hairpin, kind brows and eyes, pale gold earrings.",
+    "Jade-green long hair, pale complexion, deep blue will-o'-wisp eyeshadow, gloomy gaze, cold-toned spirit flames.",
+    "Rose-gold long hair, sweet smile, lace hair band, pinkish-white eye glow, fine sparkles.",
+    "Pitch-black long straight hair covering one eye, skull hair clip, shadowed eyes, dark purple mist.",
+    "Black-to-white gradient short hair, calm expression, Go-stone earrings, taiji mark on the forehead, black-and-white spiritual glow.",
+    "Lake-blue curly hair, water-drop forehead ornament, transparent earrings, gentle smile, rippling water highlights.",
+    "Deep black high ponytail, red mark between the brows, small scar on the cheek, resolute gaze, dark collar.",
+    "Pale gold hair with straight bangs, light-colored irises, lotus headpiece, ethereal expression, white-gold glow.",
+    "Peacock-blue long hair, feather-shaped dangling hairpin, proud smile, colorful makeup at the eye corners, multicolored hair tips.",
+    "Smoke-gray low ponytail, translucent veil, cold eyes, dark green misty glow.",
+    "Dark red updo, black-gold hair crown, majestic phoenix eyes, deep red eyeshadow, dark gold earrings.",
+    "Platinum short hair, mechanical monocle lens ornament, shrewd smile, silver hair clip.",
+    "Pale green short curly hair, round-rimmed glazed-glass spectacles, focused expression, light green eyes.",
+    "Purple-black double buns, talisman-paper hair ornaments, mischievous grin, purple eyeshadow.",
+    "Azure long braid, snowflake hair ornament, frost on the eyelashes, calm expression, ice-crystal earrings.",
+    "Copper-brown short hair, wheat-toned skin, hearty smile, animal-hide hair tie, golden-brown eyes.",
+    "Long black hair with gold streaks, golden slit pupils, scale earrings, tiny gold markings at the corners of the forehead.",
+    "Light pink shoulder-length hair, misty teary eyes, seashell earrings, aqua-blue eyes, pearl hair clip.",
+    "Silver-blue hime cut, moon-disc mark on the forehead, calm expression, moon-white eye glow, silver hair ring.",
+    "Dark purple fluffy short hair, small fang, dark-patterned hair band, impish grin, purple-black spiritual mist.",
 ]
 
 MALE_PROMPT_BASE = (
-    "一个仙侠男性角色头像，只露出完整头部、面部和少量肩颈。"
+    "A xianxia male character avatar showing only the complete head, face and a little of the shoulders and neck. "
     f"{AVATAR_COMMON_PROMPT_BASE}"
 )
 
 MALE_AFFIXES = [
-    "墨黑长发，剑眉入鬓，眼神如电，束发金冠，冷白高光。",
-    "银白散发，短须微笑，木质道簪，眉目舒展，柔和雾光。",
-    "酒红短发，狂放眼神，嘴角轻挑，墨玉耳扣，火红瞳光。",
-    "深蓝马尾，表情冷峻，银色护额，目光锐利，冰蓝高光。",
-    "棕褐寸头，憨厚笑容，粗布领口，浓眉圆眼，暖色肤色。",
-    "金黄卷发，桃花眼，折扇纹发簪，轻佻微笑，金色耳坠。",
-    "灰白长发，面容枯槁，眼神阴鸷，骨质发饰，灰雾环绕。",
-    "纯黑碎发，少年面容，红色抹额，眼神清澈，脸颊微红。",
-    "紫发披肩，妖异俊美，蛇形耳坠，邪魅一笑，紫色眼影。",
-    "青丝半束，温文尔雅，玉冠，书卷眉眼，浅金瞳色。",
-    "赤发冲天，怒目圆睁，火焰眉纹，宽眉，红色轮廓光。",
-    "亚麻长发，忧郁神情，素色发带，低垂眼神，浅灰阴影。",
-    "墨绿短发，单片琉璃镜，干练表情，面无表情，绿色反光。",
-    "栗色微卷发，温柔眼神，宽松道袍领口，浅笑，柔光。",
-    "藏蓝长辫，古铜肤色，图腾面纹，深色瞳孔，蓝黑发绳。",
-    "浅灰中分，金边眼镜，嘴角冷笑，细长眼型，银色耳扣。",
-    "玄黑长发如瀑，琴形发冠，闭目浅笑，淡紫音波光纹。",
-    "乌黑背头，目光审视，龙纹额饰，宽肩领口，金色瞳光。",
-    "焦糖色蓬松短发，露齿大笑，锦织抹额，明亮圆眼。",
-    "银发遮眼，半脸面罩，嘴角微勾，灰蓝眼眸，冷色阴影。",
-    "深紫长直发，紫金皇冠，神情高傲，下巴微扬，紫晶耳饰。",
-    "翠绿短发，草叶形耳饰，灵动眼神，狡黠笑容，风状灵光。",
-    "铂金长发，玉石护符，目光正直，白色发带，浅蓝眼眸。",
-    "棕红乱发，胡渣唏嘘，酒葫芦耳饰，疲惫笑容，暖色阴影。",
-    "靛青束发，蒙面黑巾，只露锐利双眼，暗蓝高光。",
-    "绯红短发，脸颊伤痕，热血表情，握拳般的坚定眼神。",
-    "墨蓝狼尾，兽牙项链，眼神凶狠，浓眉，暗色衣领。",
-    "米白长卷发，丝绸发带，半眯眼神，慵懒微笑，柔和光泽。",
-    "黛青道髻，拂尘纹发簪，严肃表情，长眉，青灰衣领。",
-    "乱发蓬松，透镜护目额饰，机巧眼神，细碎金属发夹。",
-    "玫瑰金分头，桃花眼，玫瑰耳扣，轻浮笑容，粉金高光。",
-    "漆黑长发，双目赤红，魔纹额印，暗紫雾气，阴影脸颊。",
-    "黑白渐变短发，太极额纹，沉静表情，黑白灵光。",
-    "湖蓝卷发，水滴耳坠，温和笑容，水波高光，蓝色眼眸。",
-    "玄色高马尾，眉骨小疤，坚毅目光，深色肩领，红色发绳。",
-    "淡金齐肩发，莲花眉心印，慈悲神情，白金光晕。",
-    "孔雀蓝长发，羽冠，骄傲笑容，眼尾彩妆，彩色耳坠。",
-    "烟灰低马尾，半透明面罩，冷淡眼神，暗绿色雾光。",
-    "暗红盘发，黑金发冠，凤眼威严，深红眼影，暗金耳饰。",
-    "白金短发，机械单眼镜，精明微笑，银色发夹。",
-    "淡绿短卷发，圆框琉璃眼镜，专注表情，浅绿瞳色。",
-    "紫黑束发，符纸发带，坏笑表情，紫色眼影。",
-    "苍蓝长辫，雪花额饰，睫毛挂霜，沉静表情，冰晶耳坠。",
-    "铜棕短发，麦色皮肤，爽朗笑容，兽皮发绳，金棕眼眸。",
-    "乌金挑染长发，金色竖瞳，鳞片耳饰，额角细小金纹。",
-    "浅粉披肩发，贝壳耳坠，温柔眼神，水蓝眼眸，珍珠发夹。",
-    "银蓝姬发，额间月轮印，表情淡然，月白瞳光，银色发环。",
-    "墨紫蓬松短发，小虎牙，暗纹发带，顽劣笑容，紫黑灵雾。",
+    "Ink-black long hair, sharp sword-like brows sweeping to the temples, lightning-sharp eyes, golden crown holding the hair up, cool white highlights.",
+    "Silver-white loose hair, short beard and a smile, wooden Daoist hairpin, relaxed brows and eyes, soft misty glow.",
+    "Wine-red short hair, unrestrained wild eyes, a slight smirk, black jade ear stud, fiery red eye glow.",
+    "Deep blue ponytail, stern cold expression, silver forehead guard, sharp gaze, icy blue highlights.",
+    "Brown buzz cut, honest simple smile, coarse cloth collar, thick brows and round eyes, warm skin tone.",
+    "Golden curly hair, peach-blossom eyes, folding-fan-pattern hairpin, flirtatious smile, golden earrings.",
+    "Gray-white long hair, gaunt haggard face, sinister gaze, bone hair ornament, surrounded by gray mist.",
+    "Pure black choppy hair, youthful face, red headband, clear eyes, slightly flushed cheeks.",
+    "Purple shoulder-length hair, bewitchingly handsome, snake-shaped earrings, wicked charming smile, purple eyeshadow.",
+    "Black hair half tied up, refined and courteous, jade crown, scholarly brows and eyes, pale gold eyes.",
+    "Red hair spiking upward, glaring wide eyes, flame-pattern brow markings, broad brows, red rim light.",
+    "Flaxen long hair, melancholy expression, plain hair band, downcast eyes, light gray shadows.",
+    "Dark green short hair, glazed-glass monocle, brisk capable look, expressionless face, green reflections.",
+    "Chestnut slightly wavy hair, gentle eyes, loose Daoist robe collar, faint smile, soft light.",
+    "Navy blue long braid, bronze skin, totem face markings, dark pupils, blue-black hair cord.",
+    "Light gray center-parted hair, gold-rimmed glasses, cold sneer, long narrow eyes, silver ear stud.",
+    "Deep black long hair cascading like a waterfall, guqin-shaped hair crown, eyes closed with a faint smile, pale purple sound-wave light patterns.",
+    "Jet-black slicked-back hair, scrutinizing gaze, dragon-pattern forehead ornament, broad-shouldered collar, golden eye glow.",
+    "Caramel fluffy short hair, toothy grin, brocade headband, bright round eyes.",
+    "Silver hair covering the eyes, half-face mask, a slight smirk, gray-blue eyes, cool-toned shadows.",
+    "Deep purple long straight hair, purple-gold crown, haughty expression, chin slightly raised, amethyst earrings.",
+    "Emerald short hair, grass-leaf earrings, lively eyes, sly smile, wind-like spiritual glow.",
+    "Platinum long hair, jade amulet, upright gaze, white hair band, light blue eyes.",
+    "Messy reddish-brown hair, stubble, wine-gourd earrings, weary smile, warm-toned shadows.",
+    "Indigo tied-up hair, black cloth mask covering the face and showing only sharp eyes, dark blue highlights.",
+    "Crimson short hair, scar on the cheek, hot-blooded expression, eyes as determined as a clenched fist.",
+    "Dark blue wolf-cut hair, beast-fang necklace, fierce eyes, thick brows, dark collar.",
+    "Off-white long curly hair, silk hair band, half-closed eyes, lazy smile, soft sheen.",
+    "Dark blue-green Daoist topknot, horsetail-whisk-pattern hairpin, serious expression, long brows, blue-gray collar.",
+    "Messy fluffy hair, lens-goggle forehead ornament, ingenious eyes, small metal hair clips.",
+    "Rose-gold side-parted hair, peach-blossom eyes, rose ear stud, frivolous smile, pink-gold highlights.",
+    "Pitch-black long hair, blood-red eyes, demonic forehead mark, dark purple mist, shadowed cheeks.",
+    "Black-to-white gradient short hair, taiji mark on the forehead, calm expression, black-and-white spiritual glow.",
+    "Lake-blue curly hair, water-drop earrings, gentle smile, rippling water highlights, blue eyes.",
+    "Deep black high ponytail, small scar on the brow bone, resolute gaze, dark shoulder collar, red hair cord.",
+    "Pale gold shoulder-length hair, lotus mark between the brows, compassionate expression, white-gold glow.",
+    "Peacock-blue long hair, feather crown, proud smile, colorful makeup at the eye corners, colorful earrings.",
+    "Smoke-gray low ponytail, translucent face mask, cold eyes, dark green misty glow.",
+    "Dark red updo, black-gold hair crown, majestic phoenix eyes, deep red eyeshadow, dark gold earrings.",
+    "Platinum short hair, mechanical monocle, shrewd smile, silver hair clip.",
+    "Pale green short curly hair, round-rimmed glazed-glass spectacles, focused expression, light green eyes.",
+    "Purple-black tied-up hair, talisman-paper hair band, mischievous grin, purple eyeshadow.",
+    "Azure long braid, snowflake forehead ornament, frost on the eyelashes, calm expression, ice-crystal earrings.",
+    "Copper-brown short hair, wheat-toned skin, hearty smile, animal-hide hair tie, golden-brown eyes.",
+    "Long black hair with gold streaks, golden slit pupils, scale earrings, tiny gold markings at the corners of the forehead.",
+    "Light pink shoulder-length hair, seashell earrings, gentle eyes, aqua-blue eyes, pearl hair clip.",
+    "Silver-blue hime cut, moon-disc mark on the forehead, calm expression, moon-white eye glow, silver hair ring.",
+    "Dark purple fluffy short hair, small fang, dark-patterned hair band, impish grin, purple-black spiritual mist.",
 ]
 
 assert len(FEMALE_AFFIXES) == len(MALE_AFFIXES)
@@ -168,9 +168,9 @@ assert len(FEMALE_AFFIXES) == len(MALE_AFFIXES)
 
 def avatar_prompts(gender: str) -> list[str]:
     if gender == "female":
-        return [FEMALE_PROMPT_BASE + affix for affix in FEMALE_AFFIXES]
+        return [f"{FEMALE_PROMPT_BASE} {affix}" for affix in FEMALE_AFFIXES]
     if gender == "male":
-        return [MALE_PROMPT_BASE + affix for affix in MALE_AFFIXES]
+        return [f"{MALE_PROMPT_BASE} {affix}" for affix in MALE_AFFIXES]
     raise ValueError("gender must be 'female' or 'male'")
 
 
@@ -204,7 +204,7 @@ def avatar_realm_prompt_records(
             realm_name=realm_name,
             appearance_prompt=affix,
             realm_prompt=realm_prompt,
-            prompt=prompt_base + affix + realm_prompt,
+            prompt=f"{prompt_base} {affix} {realm_prompt}",
         )
         for index, affix in enumerate(affixes, start=1)
         for realm_slug, realm_name, realm_prompt in realms

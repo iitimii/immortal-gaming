@@ -21,12 +21,8 @@ CATEGORY_FILES = {
 def _read_rows(path: Path) -> list[dict[str, str]]:
     with path.open("r", encoding="utf-8-sig", newline="") as file:
         rows = list(csv.DictReader(file))
-    return [
-        row
-        for row in rows
-        if any((value or "").strip() for value in row.values())
-        and str(row.get("name", "")).strip() != "名称"
-    ]
+    # The column-description row (row 2) has an empty id and is skipped by the id check in build_manifest().
+    return [row for row in rows if any((value or "").strip() for value in row.values())]
 
 
 def _row_id(row: dict[str, str]) -> str:

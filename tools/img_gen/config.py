@@ -50,7 +50,7 @@ def load_config(env_path: str | Path = DEFAULT_ENV_PATH) -> ImageGenConfig:
     api_key = get("IMAGE_API_KEY", legacy_name="TABCODE_API_KEY")
     if not api_key:
         raise RuntimeError(
-            "请在 tools/img_gen/image_api.env 或环境变量中设置 IMAGE_API_KEY"
+            "Set IMAGE_API_KEY in tools/img_gen/image_api.env or as an environment variable"
         )
 
     return ImageGenConfig(

@@ -20,48 +20,48 @@ FALLBACK_ITEMS = [
         "icon_key": "fallback_weapon",
         "category": "fallback",
         "id": "weapon",
-        "name": "兵器兜底",
-        "desc": "通用武器图标。",
+        "name": "Fallback Weapon",
+        "desc": "Generic weapon icon.",
         "meta": "generic weapon",
     },
     {
         "icon_key": "fallback_elixir",
         "category": "fallback",
         "id": "elixir",
-        "name": "丹药兜底",
-        "desc": "通用丹药图标。",
+        "name": "Fallback Elixir",
+        "desc": "Generic elixir icon.",
         "meta": "generic pill bottle",
     },
     {
         "icon_key": "fallback_auxiliary",
         "category": "fallback",
         "id": "auxiliary",
-        "name": "辅助装备兜底",
-        "desc": "通用法器或辅助装备图标。",
+        "name": "Fallback Auxiliary",
+        "desc": "Generic magic artifact or auxiliary equipment icon.",
         "meta": "generic magic artifact",
     },
     {
         "icon_key": "fallback_technique",
         "category": "fallback",
         "id": "technique",
-        "name": "功法兜底",
-        "desc": "通用功法秘籍图标。",
+        "name": "Fallback Technique",
+        "desc": "Generic cultivation manual icon.",
         "meta": "generic cultivation manual",
     },
     {
         "icon_key": "fallback_goldfinger",
         "category": "fallback",
         "id": "goldfinger",
-        "name": "外挂兜底",
-        "desc": "通用天赋外挂图标。",
+        "name": "Fallback Goldfinger",
+        "desc": "Generic innate talent (goldfinger) icon.",
         "meta": "generic celestial token",
     },
     {
         "icon_key": "fallback_unknown",
         "category": "fallback",
         "id": "unknown",
-        "name": "未知物品兜底",
-        "desc": "通用未知物品图标。",
+        "name": "Fallback Unknown Item",
+        "desc": "Generic unknown item icon.",
         "meta": "mysterious item pouch",
     },
 ]
@@ -70,32 +70,32 @@ ECOLOGY_FALLBACK_ITEMS = [
         "icon_key": "fallback_animal",
         "category": "fallback",
         "id": "animal",
-        "name": "动物兜底",
-        "desc": "通用灵兽或妖兽图标。",
+        "name": "Fallback Animal",
+        "desc": "Generic spirit beast or demonic beast icon.",
         "meta": "generic spirit beast",
     },
     {
         "icon_key": "fallback_plant",
         "category": "fallback",
         "id": "plant",
-        "name": "植物兜底",
-        "desc": "通用灵草灵植图标。",
+        "name": "Fallback Plant",
+        "desc": "Generic spirit herb or spirit plant icon.",
         "meta": "generic spiritual herb",
     },
     {
         "icon_key": "fallback_lode",
         "category": "fallback",
         "id": "lode",
-        "name": "矿脉兜底",
-        "desc": "通用矿脉矿石图标。",
+        "name": "Fallback Lode",
+        "desc": "Generic ore vein icon.",
         "meta": "generic ore vein",
     },
     {
         "icon_key": "fallback_material",
         "category": "fallback",
         "id": "material",
-        "name": "材料兜底",
-        "desc": "通用掉落材料图标。",
+        "name": "Fallback Material",
+        "desc": "Generic dropped material icon.",
         "meta": "generic crafting material",
     },
 ]
@@ -104,7 +104,7 @@ ECOLOGY_FALLBACK_ITEMS = [
 def _load_fal_config() -> FalImageConfig:
     api_key = os.environ.get("FAL_KEY") or os.environ.get("ITEM_ICON_FAL_KEY")
     if not api_key:
-        raise RuntimeError("请通过 FAL_KEY 或 ITEM_ICON_FAL_KEY 设置 fal API key")
+        raise RuntimeError("Set the fal API key via FAL_KEY or ITEM_ICON_FAL_KEY")
     return FalImageConfig(
         api_key=api_key,
         model=os.environ.get("ITEM_ICON_FAL_MODEL", "openai/gpt-image-2"),
@@ -134,10 +134,11 @@ def _read_simple_config(category: str) -> list[dict[str, str]]:
     path = ROOT / "static" / "game_configs" / f"{category}.csv"
     rows: list[dict[str, str]] = []
     with path.open("r", encoding="utf-8-sig", newline="") as file:
+        # The column-description row (row 2) has an empty id and is skipped below.
         for row in csv.DictReader(file):
             item_id = str(row.get("id") or "").strip()
             name = str(row.get("name") or "").strip()
-            if not item_id or not name or name == "名称":
+            if not item_id or not name:
                 continue
             desc = str(row.get("desc") or "").strip()
             stage_id = str(row.get("stage_id") or "").strip()

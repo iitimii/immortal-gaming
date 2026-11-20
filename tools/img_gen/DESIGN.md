@@ -1,134 +1,154 @@
-# 图片生成设计说明
+# Image Generation Design Notes
 
-本文档沉淀 `tools/img_gen` 的图像生成思路，重点说明头像 prompt、境界变化、
-命名和后处理约定。
+This document captures the image generation approach used by `tools/img_gen`, focusing on avatar prompts,
+realm changes, naming and post-processing conventions.
 
-## 总体原则
+## General Principles
 
-1. 生图 prompt 优先描述可见内容，不写角色背景故事。
-2. 修仙感通过发冠、额印、眼妆、饰物、衣领纹样、贴身灵光等可见元素表达。
-3. 头像保持纯白背景，主体居中，头发和饰物不接触图片边缘，方便后续抠图。
-4. 不使用一张图生成四宫格；每个境界单独生成一张图。
-5. 练气头像用文生图生成，筑基、金丹、元婴都基于练气图走图片编辑，不做链式编辑。
-6. 文件名必须能追踪来源：性别、外貌 index、种族和境界都应进入文件名。
+1. Generation prompts describe visible content first; do not include character backstories.
+2. The cultivation feel is expressed through visible elements such as hair crowns, forehead marks, eye makeup,
+   ornaments, collar patterns and close-fitting spiritual glow.
+3. Avatars keep a pure white background with the subject centered; hair and ornaments must not touch the image
+   edges, which makes background removal easier.
+4. Do not generate a four-panel grid in one image; each realm is generated as a separate image.
+5. Qi Refinement avatars use text-to-image. Foundation Establishment, Golden Core and Nascent Soul are all image
+   edits based on the Qi Refinement image; no chained edits.
+6. Filenames must be traceable: gender, appearance index, race and realm all go into the filename.
 
-## Prompt 分层
+## Prompt Layers
 
-头像 prompt 采用分层拼接：
-
-```text
-基础头像约束
-+ 外貌描述
-+ 境界外观 modifier
-```
-
-基础头像约束负责稳定输出形态：
+Avatar prompts are composed in layers:
 
 ```text
-二次元漫画风格，略微Q版，正面看镜头。
-纯白背景，背景必须干净无纹理、无阴影、无渐变、无雾气、无光晕、无边框。
-角色完整居中，只露出完整头部、面部和少量肩颈，主体边缘清晰。
-像素风格，细节别太多。
+base avatar constraints
++ appearance description
++ realm appearance modifier
 ```
 
-外貌描述只写看得见的特征，例如：
+The base avatar constraints keep the output form stable:
 
 ```text
-浅黄披发，面色苍白，素色发带，浅淡眉眼，药雾般淡绿光。
+Anime manga style, slightly chibi, facing the camera head-on.
+Pure white background; the background must be clean, with no texture, shadow, gradient, mist, glow or border.
+The character is complete and centered, showing only the complete head, face and a little of the shoulders and neck; the subject has crisp edges.
+Pixel art style, not too much detail.
 ```
 
-不写“丹修、咒修、宗门、背景设定”之类不可见身份。
-
-## 境界设计
-
-四个境界是：
+Appearance descriptions only cover visible traits, for example:
 
 ```text
-qi_refining   练气
-foundation    筑基
-golden_core   金丹
-nascent_soul  元婴
+Light yellow loose hair, pale complexion, plain hair band, soft faint brows and eyes, pale green glow like medicinal mist.
 ```
 
-练气阶段使用文生图。筑基、金丹、元婴阶段使用 OpenAI-compatible Images edits 接口，
-以练气图作为输入图，不上传 mask。这样能比四张独立文生图更容易保留同一个角色的核心外观。
+Do not write invisible identity details such as "alchemist", "curse cultivator", "sect" or background lore.
 
-后三境界都直接基于练气图编辑，不采用 `练气 -> 筑基 -> 金丹 -> 元婴` 的链式编辑。
-这样可以减少连续编辑导致的画质衰减和外貌漂移。
+## Realm Design
 
-境界表现应遵循：
+The four realms are:
 
-1. 练气：更朴素、更青涩，装饰和光效弱。
-2. 筑基：更稳定、更清爽，原有饰物和纹样略精致。
-3. 金丹：更凝练、更明亮，原有特征质感提升。
-4. 元婴：更通透、更空灵，原有光效和纹样更柔和优雅。
+```text
+qi_refining   Qi Refinement
+foundation    Foundation Establishment
+golden_core   Golden Core
+nascent_soul  Nascent Soul
+```
 
-关键点是：境界 modifier 应增强“原有可见特征”，不要给所有头像统一追加同一种额间灵纹、
-金色光环或银白轮廓光。这样可以避免所有高境界头像看起来像同一套升级特效。
+The Qi Refinement stage uses text-to-image. Foundation Establishment, Golden Core and Nascent Soul use the
+OpenAI-compatible Images edits endpoint with the Qi Refinement image as input and no mask. This preserves the
+character's core appearance far better than four independent text-to-image generations.
 
-图片编辑 prompt 可以使用“保持输入头像的主要外貌、构图和纯白背景”这类约束，因为此时模型有
-输入图作为参考。文生图阶段则不依赖这种保持约束。
+All three higher realms are edited directly from the Qi Refinement image instead of chaining
+`Qi Refinement -> Foundation Establishment -> Golden Core -> Nascent Soul`. This reduces quality loss and
+appearance drift caused by successive edits.
 
-编辑阶段的保持项必须足够明确，否则模型容易在“境界升级”时把像素头像改成高清插画或重画成另一个角色。
-当前编辑 prompt 的保持优先级如下：
+Realm presentation should follow:
 
-1. 必须保持输入图的像素风格、低细节程度、Q 版二次元漫画风。
-2. 必须保持脸型、五官比例、肤色倾向、发型、发色、瞳色、瞳孔形状。
-3. 必须保持表情基调、原有面部标记的位置和基本形状、主要发饰或耳饰。
-4. 必须保持主体大小、头肩占比、正面头像构图、纯白背景。
-5. 妖族必须额外保持种族特征的位置和基本形状，例如狐耳、狼耳、耳羽、竖瞳、鳞纹、龟甲纹和脸颊纹样。
+1. Qi Refinement: plainer and more youthful, with weak ornaments and light effects.
+2. Foundation Establishment: steadier and fresher, existing ornaments and patterns slightly more refined.
+3. Golden Core: more condensed and brighter, existing features gain finer texture.
+4. Nascent Soul: more translucent and ethereal, existing light effects and patterns softer and more elegant.
 
-编辑阶段允许变化的内容集中在“升级感”上：眼神强度、瞳孔高光、衣领层次、饰物精致度、
-原有纹样清晰度和贴身微光。变化幅度可以较明显，但不能以牺牲像素风格或角色识别为代价。
+Key point: realm modifiers should enhance the character's *existing visible traits*. Do not append the same
+forehead spirit mark, golden halo or silver-white rim light to every avatar, otherwise every high-realm avatar
+looks like the same upgrade effect.
 
-明确禁止编辑阶段输出写实风、高清插画风、厚涂风、过度精细风、背景场景、光环、边框或大面积特效。
+Image edit prompts may use constraints like "keep the input avatar's main appearance, composition and pure white
+background" because the model has the input image as reference. The text-to-image stage does not rely on such
+preservation constraints.
 
-## 人族与妖族的差异
+Preservation requirements in the edit stage must be explicit, otherwise the model tends to turn the pixel avatar
+into an HD illustration or redraw a different character while "upgrading the realm". Current edit prompt
+preservation priorities:
 
-人族头像使用一套较抽象的境界规则，强调朴素度、精致度、眼神和原有特征增强。
+1. Must keep the input image's pixel art style, low level of detail and chibi anime manga style.
+2. Must keep face shape, facial proportions, skin tone, hairstyle, hair color, eye color and pupil shape.
+3. Must keep the base expression, the position and basic shape of existing facial marks, and the main hair
+   ornaments or earrings.
+4. Must keep subject size, head-and-shoulder ratio, front-facing portrait composition and pure white background.
+5. Yao must additionally keep the position and basic shape of race traits, such as fox ears, wolf ears, ear
+   plumes, slit pupils, scale patterns, tortoiseshell patterns and cheek markings.
 
-妖族头像不共用人族境界规则，也不在妖类之间共用同一套规则。每个种族有自己的境界表现材料：
+Allowed changes in the edit stage focus on the sense of advancement: gaze intensity, pupil highlights, collar
+layering, ornament refinement, clarity of existing patterns and close-fitting faint glow. Changes may be quite
+noticeable, but never at the cost of the pixel style or character recognizability.
 
-| 种族 | 境界变化主要依托 |
+The edit stage must not output realistic, HD illustration, thick-paint or overly detailed styles, background
+scenes, halos, borders or large-area effects.
+
+## Humans vs. Yao
+
+Human avatars use one fairly abstract set of realm rules, emphasizing plainness, refinement, gaze and the
+enhancement of existing traits.
+
+Yao avatars do not share the human realm rules, nor do different yao races share one set of rules. Each race has
+its own realm presentation material:
+
+| Race | Realm changes mainly rely on |
 |---|---|
-| 狐 | 狐耳、眼尾妆、狐形饰物、轻柔贴身光 |
-| 狼 | 狼耳、脸颊狼纹、护额或兽牙饰物、冷色高光 |
-| 鸟 | 羽冠、耳羽、眼尾彩纹、羽毛饰物 |
-| 蛇 | 竖瞳、细鳞纹、蛇形耳饰、冷色高光 |
-| 龟 | 龟甲纹饰、玉石饰物、厚重衣领、温润光泽 |
+| Fox | fox ears, eye-corner makeup, fox-shaped ornaments, soft close-fitting glow |
+| Wolf | wolf ears, wolf cheek markings, forehead guard or beast-fang ornaments, cool-toned highlights |
+| Bird | feather crest, ear plumes, colored eye-corner markings, feather ornaments |
+| Snake | slit pupils, fine scale patterns, snake-shaped earrings, cool-toned highlights |
+| Turtle | tortoiseshell patterns, jade ornaments, heavy collar, warm smooth luster |
 
-这样能保证妖族之间的境界变化各有侧重点，而不是统一套用“妖纹变亮”。
+This keeps realm changes distinct between yao races instead of uniformly applying "yao patterns get brighter".
 
-## 抠图友好约束
+## Background-Removal-Friendly Constraints
 
-当前后处理使用白底 flood fill 抠图，所以 prompt 必须帮助模型输出干净背景：
+Post-processing currently removes the background with a white flood fill, so prompts must help the model output a
+clean background:
 
-1. 明确要求纯白背景。
-2. 明确禁止背景纹理、阴影、渐变、雾气、光晕和边框。
-3. 光效应贴近角色本体，尽量写成眼眸高光、发梢微亮、饰物光泽、贴身微光。
-4. 避免“云雾缭绕、背后光环、背景法阵、展开翅膀”等会污染白底或扩大主体范围的描述。
-5. 白发、浅色发饰和浅色衣领容易被误抠，应让主体边缘清晰且不接触图片边缘。
+1. Explicitly require a pure white background.
+2. Explicitly forbid background texture, shadows, gradients, mist, glow and borders.
+3. Light effects should stay close to the character, written as eye highlights, glowing hair tips, ornament
+   sheen or close-fitting faint glow.
+4. Avoid descriptions like "wreathed in mist", "halo behind", "background magic circle" or "spread wings" that
+   pollute the white background or enlarge the subject area.
+5. White hair, light ornaments and light collars are easily removed by mistake; keep subject edges crisp and away
+   from the image edges.
 
-如果未来白底抠图不稳定，可以考虑改用纯绿色或品红背景，再换专用抠色算法。但当前设计先围绕白底流程优化。
+If white-background removal becomes unreliable, consider switching to a pure green or magenta background with a
+dedicated chroma-key algorithm. For now the design is optimized around the white-background pipeline.
 
-## 命名与 manifest
+## Naming and Manifests
 
-人族头像命名：
+Human avatar naming:
 
 ```text
 female_001_qi_refining.png
 male_001_nascent_soul.png
 ```
 
-妖族头像命名：
+Yao avatar naming:
 
 ```text
 fox_female_01_qi_refining.png
 snake_male_03_golden_core.png
 ```
 
-练气文生图生成目录会写 `manifest.json`。筑基、金丹、元婴图片编辑会写
-`realm_edit_manifest.json`。manifest 记录每张图的来源字段、源图和完整 prompt，是后续排查、
-重跑和资产接入的依据。
+The Qi Refinement text-to-image output directory gets a `manifest.json`. The Foundation Establishment, Golden Core
+and Nascent Soul image edits write `realm_edit_manifest.json`. Manifests record each image's source fields, source
+image and full prompt, and are the basis for later debugging, reruns and asset integration.
 
-后处理默认保留原文件名和目录结构，不丢失这些追踪信息。
+Post-processing keeps the original filenames and directory structure by default, so this tracking information is
+not lost.

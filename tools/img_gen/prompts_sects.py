@@ -1,14 +1,14 @@
 SECT_PROMPT_BASE = (
-    "像素化的仙侠宗门场景图片，极度像素化，颗粒感强，线条轮廓粗，"
-    "极简主义，二次元风格漫画图片。"
+    "A pixelated xianxia sect scene image, extremely pixelated, strongly grainy, thick line outlines, "
+    "minimalist, anime-style manga image. "
 )
 
 SECT_PROMPTS = [
-    ("妙化宗", "雅致园林，丝竹管弦，百花盛开，隐约音律符文，春意盎然。"),
-    ("回玄宗", "云雾缭绕山峰，无数阵法光阵层叠，晦暗不明，神秘莫测。"),
-    ("不夜城", "极光绚丽，万年寒冰城墙，流光溢彩，如梦似幻，不夜之城。"),
-    ("天行健宗", "雄奇山峰，紫气东来，浩然正气光柱冲天，书声琅琅幻象。"),
-    ("噬魔宗", "险恶山脉，血雾弥漫，怪石嶙峋，白骨累累，狂野血腥。"),
+    ("wondrous_transformation_sect", "Elegant gardens, string and wind instruments, a hundred flowers in full bloom, faint musical runes, full of spring."),
+    ("returning_mystery_sect", "Mist-shrouded mountain peaks, countless layered formation light arrays, dim and obscure, deeply mysterious."),
+    ("sleepless_city", "Dazzling aurora, city walls of ten-thousand-year ice, shimmering streams of light, dreamlike, a city that never sleeps."),
+    ("heavenly_vigor_sect", "Majestic peaks, purple qi arriving from the east, a pillar of righteous light soaring into the sky, visions of resounding recitation."),
+    ("demon_devouring_sect", "Treacherous mountain ranges, pervading blood mist, jagged rocks, piles of white bones, wild and gory."),
 ]
 
 

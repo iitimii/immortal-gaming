@@ -38,7 +38,7 @@ def generate_avatar_gender(
     for record in tqdm(records, desc=f"Generating {gender} qi-refining avatars"):
         output_path = target_dir / f"{record.filename_stem}.png"
         if output_path.exists() and not overwrite:
-            tqdm.write(f"已存在，跳过: {output_path}")
+            tqdm.write(f"Already exists, skipping: {output_path}")
             continue
         try:
             image_bytes = generate_image_bytes(
@@ -47,7 +47,7 @@ def generate_avatar_gender(
                 retry_delay=retry_delay,
             )
         except Exception as exc:
-            tqdm.write(f"生成失败，跳过: {output_path} ({type(exc).__name__}: {exc})")
+            tqdm.write(f"Generation failed, skipping: {output_path} ({type(exc).__name__}: {exc})")
             failures.append(
                 {
                     "gender": record.gender,
