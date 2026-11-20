@@ -1,4 +1,5 @@
 id,event_key,category,participants,tone,relation_hint,weight,desc_id
+,Event key,Category,Participants (solo/pair),Tone,Relation hint,Weight,Description ID
 1,inner_mood_shift,solo_inner,solo,neutral,none,1.0,minor_event_desc_inner_mood_shift
 2,inner_obsession,solo_inner,solo,neutral,none,0.8,minor_event_desc_inner_obsession
 3,daily_practice,solo_daily,solo,neutral,none,1.2,minor_event_desc_daily_practice

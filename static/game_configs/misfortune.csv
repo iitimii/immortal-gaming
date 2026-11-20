@@ -1,4 +1,5 @@
 id,kind,min_realm,max_realm,weight,title_id,title
+,Misfortune kind,Minimum realm,Maximum realm,Weight,Title ID,Title
 1,loss_spirit_stone,QI_REFINEMENT,NASCENT_SOUL,10,misfortune_title_loss_spirit_stone,Financial Loss
 2,injury,QI_REFINEMENT,NASCENT_SOUL,10,misfortune_title_injury,Accidental Injury
 3,backlash,QI_REFINEMENT,NASCENT_SOUL,10,misfortune_title_backlash,Cultivation Backlash
