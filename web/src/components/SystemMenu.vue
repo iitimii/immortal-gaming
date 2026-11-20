@@ -24,6 +24,7 @@ const emit = defineEmits<{
   (e: 'llm-ready'): void
   (e: 'return-to-main'): void
   (e: 'exit-game'): void
+  (e: 'show-shortcuts'): void
 }>()
 
 const activeTab = ref<SystemMenuTab>(props.defaultTab || 'load')
@@ -79,6 +80,7 @@ watch(() => props.visible, (val) => {
       v-else-if="activeTab === 'other'"
       @return-to-main="emit('return-to-main')"
       @exit-game="emit('exit-game')"
+      @show-shortcuts="emit('show-shortcuts')"
     />
   </SystemMenuShell>
 </template>

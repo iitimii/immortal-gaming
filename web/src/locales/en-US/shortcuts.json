@@ -1,0 +1,26 @@
+{
+  "title": "Keyboard Shortcuts",
+  "hint": "Press ? or Esc to close",
+  "close": "Close",
+  "menu_entry": "Keyboard Shortcuts",
+  "menu_entry_desc": "View the keys for pausing, speed and navigation",
+  "groups": {
+    "simulation": "Simulation",
+    "map": "Map",
+    "general": "General"
+  },
+  "actions": {
+    "toggle_pause": "Pause / resume",
+    "set_speed": "Set speed (1st to 4th option)",
+    "speed_up": "Speed up",
+    "speed_down": "Slow down",
+    "focus_avatar": "Focus selected character",
+    "escape": "Close panel / open menu",
+    "toggle_help": "Show / hide this help",
+    "close_help": "Close this help"
+  },
+  "keys": {
+    "space": "Space",
+    "escape": "Esc"
+  }
+}

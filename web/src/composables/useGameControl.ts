@@ -1,5 +1,4 @@
 import { computed, watch, type Ref } from 'vue'
-import { useUiStore } from '@/stores/ui'
 import { useSystemStore } from '@/stores/system'
 import { useSocketStore } from '@/stores/socket'
 import { useRoleplayStore } from '@/stores/roleplay'
@@ -9,13 +8,9 @@ import { storeToRefs } from 'pinia'
 interface UseGameControlOptions {
   gameInitialized: Ref<boolean>
   showMenu: Ref<boolean>
-  canCloseMenu: Ref<boolean>
-  openGameMenu: () => void
-  closeMenu: () => void
 }
 
 export function useGameControl(options: UseGameControlOptions) {
-  const uiStore = useUiStore()
   const systemStore = useSystemStore()
   const socketStore = useSocketStore()
   const roleplayStore = useRoleplayStore()
@@ -46,23 +41,6 @@ export function useGameControl(options: UseGameControlOptions) {
     systemStore.resume().catch((e) => logError('GameControl resume after reconnect', e))
   })
 
-  // Keyboard shortcuts
-  function handleKeydown(e: KeyboardEvent) {
-    if (e.key === 'Escape') {
-      if (uiStore.selectedTarget) {
-        uiStore.clearSelection()
-      } else {
-        if (options.showMenu.value) {
-          if (options.canCloseMenu.value) {
-            options.closeMenu()
-          }
-        } else {
-          options.openGameMenu()
-        }
-      }
-    }
-  }
-
   function toggleManualPause() {
     systemStore.togglePause()
   }
@@ -87,7 +65,6 @@ export function useGameControl(options: UseGameControlOptions) {
     isManualPaused,
     simulationSpeed,
     allowedSpeeds,
-    handleKeydown,
     toggleManualPause,
     setSimulationSpeed,
     isStepping,
