@@ -192,6 +192,64 @@ export interface SimpleAvatarDTO {
   race?: string;
 }
 
+export interface AvatarCompareLabelDTO {
+  id: string;
+  label: string;
+}
+
+export interface AvatarCompareItemDTO {
+  id: string;
+  name: string;
+  grade: string;
+  grade_rank: number;
+  attribute?: string;
+}
+
+export interface AvatarCompareSideDTO {
+  id: string;
+  name: string;
+  nickname?: string | null;
+  realm: AvatarCompareLabelDTO;
+  stage: AvatarCompareLabelDTO;
+  cultivation_display: string;
+  level: number;
+  age: number;
+  lifespan: number;
+  hp: { cur: number; max: number };
+  battle_strength: number;
+  root: AvatarCompareLabelDTO;
+  orthodoxy?: AvatarCompareLabelDTO | null;
+  alignment?: AvatarCompareLabelDTO | null;
+  sect?: { id: string; name: string; rank: string } | null;
+  technique?: AvatarCompareItemDTO | null;
+  weapon?: AvatarCompareItemDTO | null;
+  auxiliary?: AvatarCompareItemDTO | null;
+  spirit_stones: number;
+  relation_count: number;
+}
+
+export interface AvatarCompareRelationDTO {
+  labels: string[];
+  numeric_relation: string;
+  friendliness: number;
+}
+
+export interface AvatarCompareResponseDTO {
+  a: AvatarCompareSideDTO;
+  b: AvatarCompareSideDTO;
+  relation: {
+    a_to_b: AvatarCompareRelationDTO;
+    b_to_a: AvatarCompareRelationDTO;
+  };
+  battle: {
+    a_strength: number;
+    b_strength: number;
+    a_win_probability: number;
+    b_win_probability: number;
+    method: string;
+  };
+}
+
 export interface CreateAvatarParams {
   surname?: string;
   given_name?: string;

@@ -12,8 +12,10 @@ import type {
   CustomContentDraftDTO,
   CreateCustomContentParams,
   RoleplaySessionDTO,
+  AvatarCompareResponseDTO,
 } from '../../types/api';
 import type { AvatarSummary } from '../../types/core';
+import { normalizeAvatarComparison } from '../mappers/avatarCompare';
 
 const CUSTOM_CONTENT_GENERATION_TIMEOUT_MS = 120000;
 
@@ -52,6 +54,12 @@ export const avatarApi = {
   fetchAvatarList() {
     return httpClient.get<{ avatars: SimpleAvatarDTO[] }>('/api/v1/query/meta/avatar-list')
       .then((data) => data.avatars ?? []);
+  },
+
+  async fetchAvatarComparison(aId: string, bId: string) {
+    const query = new URLSearchParams({ a: aId, b: bId });
+    const data = await httpClient.get<AvatarCompareResponseDTO>(`/api/v1/query/avatars/compare?${query}`);
+    return normalizeAvatarComparison(data);
   },
 
   fetchAvatarAdjustOptions() {

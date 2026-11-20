@@ -19,6 +19,21 @@ vi.mock('@/api', () => ({
   },
 }))
 
+const compareModalSpy = vi.fn()
+
+vi.mock('@/components/game/panels/info/avatar-detail/AvatarCompareModal.vue', () => ({
+  __esModule: true,
+  default: defineComponent({
+    name: 'AvatarCompareModal',
+    props: ['show', 'avatarId', 'avatarName'],
+    emits: ['update:show'],
+    setup(props) {
+      compareModalSpy(props)
+      return () => h('div', { class: 'compare-modal-stub' }, props.avatarName)
+    },
+  }),
+}))
+
 vi.mock('@/components/game/panels/info/components/EntityRow.vue', () => ({
   default: defineComponent({
     name: 'EntityRow',
@@ -50,6 +65,10 @@ describe('AvatarDetail', () => {
               empty_short: '-',
               set_objective: 'Set Objective',
               clear_objective: 'Clear Objective',
+              compare: {
+                entry: 'Compare',
+                entry_desc: 'Compare this cultivator',
+              },
               long_term_objective: 'Long-term Objective',
               short_term_objective: 'Short-term Objective',
               backstory: 'Backstory',
@@ -204,6 +223,48 @@ describe('AvatarDetail', () => {
 
     expect(wrapper.find('.dead-banner').exists()).toBe(true)
     expect(wrapper.find('.actions-bar').exists()).toBe(false)
+    expect(wrapper.find('.compare-btn').exists()).toBe(false)
+  })
+
+  it('opens the lazily loaded compare modal from the compare action', async () => {
+    compareModalSpy.mockClear()
+    const wrapper = mount(AvatarDetail, {
+      props: {
+        data: mockAvatarData as any
+      },
+      global: {
+        plugins: [
+          createPinia(),
+          i18n
+        ],
+        stubs: {
+          StatItem: true,
+          RelationRow: true,
+          TagList: true,
+          SecondaryPopup: true,
+          AvatarAdjustPanel: true,
+          AvatarPortraitPanel: true,
+          RoleplayPanel: true,
+        }
+      }
+    })
+
+    expect(wrapper.find('.compare-modal-stub').exists()).toBe(false)
+    const button = wrapper.find('.compare-btn')
+    expect(button.text()).toBe('Compare')
+
+    await button.trigger('click')
+    for (let i = 0; i < 10; i += 1) {
+      await Promise.resolve()
+    }
+    await nextTick()
+
+    expect(wrapper.find('.compare-modal-stub').exists()).toBe(true)
+    expect(compareModalSpy).toHaveBeenLastCalledWith(expect.objectContaining({
+      show: true,
+      avatarId: 'avatar_1',
+      avatarName: 'Test Avatar',
+    }))
   })
 
   it('renders identity and non-stranger attitude on separate lines', () => {

@@ -281,6 +281,13 @@ def get_world_milestones(runtime) -> dict[str, Any]:
     return build_world_milestones_overview(world)
 
 
+def get_avatar_comparison(runtime, *, a_id: str | None, b_id: str | None) -> dict[str, Any]:
+    from src.server.services.avatar_compare import build_avatar_comparison
+
+    world = _require_world(runtime)
+    return build_avatar_comparison(world, a_id, b_id)
+
+
 def get_avatar_overview(runtime) -> dict[str, Any]:
     """Return the avatar overview summary and recently deceased avatars."""
     world = _require_world(runtime)
