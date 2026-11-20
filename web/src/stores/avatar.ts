@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { shallowRef, computed } from 'vue';
+import { ref, shallowRef, computed } from 'vue';
 import type { AvatarSummary } from '../types/core';
 import type { WorldStateSnapshot } from '../api/mappers/world';
 import { worldApi } from '../api';
@@ -10,6 +10,10 @@ export const useAvatarStore = defineStore('avatar', () => {
   const avatars = shallowRef<Map<string, AvatarSummary>>(new Map());
 
   const avatarList = computed(() => Array.from(avatars.value.values()));
+  // Bumped whenever the map is replaced by a full world snapshot (applied
+  // together with its run id), i.e. the living-avatar list is known to be
+  // complete. Deltas and preloads do not bump it.
+  const snapshotRevision = ref(0);
 
   function updateAvatars(list: Partial<AvatarSummary>[]) {
     const next = new Map(avatars.value);
@@ -71,6 +75,7 @@ export const useAvatarStore = defineStore('avatar', () => {
     const avatarMap = new Map<string, AvatarSummary>();
     stateRes.avatars.forEach(av => avatarMap.set(av.id, av));
     avatars.value = avatarMap;
+    snapshotRevision.value += 1;
   }
 
   function reset() {
@@ -80,6 +85,7 @@ export const useAvatarStore = defineStore('avatar', () => {
   return {
     avatars,
     avatarList,
+    snapshotRevision,
     updateAvatars,
     updateAvatarSummary,
     removeAvatar,

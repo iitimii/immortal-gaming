@@ -23,6 +23,9 @@ class EventMemoryScope(str, Enum):
 @dataclass(frozen=True, slots=True)
 class EventQuery:
     avatar_ids: tuple[str, ...] = ()
+    # Match events related to at least one of these avatars (direct audience
+    # only). Ignored when ``avatar_ids`` is set, which requires all of them.
+    any_avatar_ids: tuple[str, ...] = ()
     audience: EventAudience = EventAudience.DIRECT
     sect_id: int | None = None
     memory_scope: EventMemoryScope = EventMemoryScope.ALL

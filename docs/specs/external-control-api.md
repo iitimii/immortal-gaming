@@ -308,7 +308,7 @@ First batch opened as stable:
 2. `GET /api/v1/query/world/state`
 3. `GET /api/v1/query/world/map`
 4. `GET /api/v1/query/detail`
-5. `GET /api/v1/query/events`
+5. `GET /api/v1/query/events` (filters: `avatar_id`, `avatar_id_1` + `avatar_id_2`, `avatar_ids` comma-separated any-of list (max 200), `sect_id`, `major_scope`, `cursor`, `limit`)
 6. `GET /api/v1/query/rankings`
 7. `GET /api/v1/query/sect-relations`
 8. `GET /api/v1/query/sects/territories`

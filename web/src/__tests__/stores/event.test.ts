@@ -126,6 +126,22 @@ describe('useEventStore', () => {
     expect(store.events[0].id).toBe('e1')
   })
 
+  it('addEvents keeps live events touching any watched avatar when filter.avatar_ids is set', () => {
+    store.eventsFilter = { avatar_ids: ['a1', 'a3'] }
+    const base = { text: '', content: '', year: 1, month: 1, related_sects: [], is_major: false, is_story: false }
+    store.addEvents(
+      [
+        { ...base, id: 'e1', month_stamp: 13, related_avatar_ids: ['a1', 'a2'], created_at: 1 } as any,
+        { ...base, id: 'e2', month_stamp: 13, related_avatar_ids: ['a2'], created_at: 2 } as any,
+        { ...base, id: 'e3', month_stamp: 13, related_avatar_ids: ['a3'], created_at: 3 } as any,
+      ],
+      1,
+      1
+    )
+
+    expect(store.events.map(e => e.id)).toEqual(['e1', 'e3'])
+  })
+
   it('loadEvents passes major_scope to fetchEvents', async () => {
     vi.mocked(eventApi.fetchEvents).mockResolvedValue({
       events: [],

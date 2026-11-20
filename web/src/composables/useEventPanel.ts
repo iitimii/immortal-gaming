@@ -8,6 +8,7 @@ import { useRoleplayStore } from '@/stores/roleplay'
 import { useUiStore } from '@/stores/ui'
 import { useMapStore } from '@/stores/map'
 import { useSectStore } from '@/stores/sect'
+import { useWatchlistStore } from '@/stores/watchlist'
 import type { GameEvent } from '@/types/core'
 import type { FetchEventsParams } from '@/types/api'
 import {
@@ -27,8 +28,11 @@ export function useEventPanel() {
   const uiStore = useUiStore()
   const mapStore = useMapStore()
   const sectStore = useSectStore()
+  const watchlistStore = useWatchlistStore()
 
   const filterValue1 = ref('all')
+  // Watched-only is a server-side any-of avatar filter, so pagination stays exact.
+  const filterWatchedOnly = ref(false)
   const filterSectValue = ref<number | 'all'>('all')
   const filterMajorScope = ref<FetchEventsParams['major_scope']>('all')
   const eventListRef = ref<HTMLElement | null>(null)
@@ -37,6 +41,7 @@ export function useEventPanel() {
     avatar: string
     sect: number | 'all'
     majorScope: FetchEventsParams['major_scope']
+    watched: boolean
   } | null>(null)
   const suppressFilterWatch = ref(false)
   const roleplayAutoApplied = ref(false)
@@ -74,6 +79,12 @@ export function useEventPanel() {
 
   // Avatar the panel is filtered to, used to offer an avatar-scoped export.
   const exportAvatarId = computed(() => (filterValue1.value !== 'all' ? filterValue1.value : ''))
+  const canFilterWatched = computed(() => watchlistStore.watchedIds.length > 0)
+  const watchedFilterTitle = computed(() => (
+    canFilterWatched.value
+      ? t('game.event_panel.filter_watched_title')
+      : t('game.event_panel.filter_watched_disabled')
+  ))
 
   const panelTitle = computed(() => t('game.event_panel.title'))
   const displayEvents = computed(() => eventStore.events || [])
@@ -98,10 +109,13 @@ export function useEventPanel() {
 
   function buildFilter() {
     const params: FetchEventsParams = {}
-    if (filterValue1.value !== 'all') {
+    const watchedIds = watchlistStore.watchedIds
+    if (filterWatchedOnly.value && watchedIds.length > 0) {
+      params.avatar_ids = [...watchedIds]
+    } else if (filterValue1.value !== 'all') {
       params.avatar_id = filterValue1.value
     }
-    if (filterSectValue.value !== 'all') {
+    if (!params.avatar_ids && filterSectValue.value !== 'all') {
       params.sect_id = filterSectValue.value
     }
     if (filterMajorScope.value && filterMajorScope.value !== 'all') {
@@ -123,8 +137,12 @@ export function useEventPanel() {
     avatar?: string
     sect?: number | 'all'
     majorScope?: FetchEventsParams['major_scope']
+    watched?: boolean
   }) {
     suppressFilterWatch.value = true
+    if (params.watched !== undefined) {
+      filterWatchedOnly.value = params.watched
+    }
     if (params.avatar !== undefined) {
       filterValue1.value = params.avatar
     }
@@ -137,6 +155,16 @@ export function useEventPanel() {
     await nextTick()
     suppressFilterWatch.value = false
     await reloadEvents()
+  }
+
+  async function toggleWatchedOnly() {
+    const next = !filterWatchedOnly.value
+    if (next && !canFilterWatched.value) return
+    if (controlledAvatarId.value) {
+      roleplayAutoApplied.value = false
+    }
+    // Watched-only replaces the single-avatar and sect filters.
+    await setFiltersAndReload(next ? { watched: true, avatar: 'all', sect: 'all' } : { watched: false })
   }
 
   function handleScroll(e: Event) {
@@ -192,6 +220,7 @@ export function useEventPanel() {
     }
     if (newVal !== 'all') {
       filterValue1.value = 'all'
+      filterWatchedOnly.value = false
     }
     await reloadEvents()
   })
@@ -203,9 +232,21 @@ export function useEventPanel() {
     }
     if (newVal !== 'all') {
       filterSectValue.value = 'all'
+      filterWatchedOnly.value = false
     }
     await reloadEvents()
   })
+
+  watch(
+    () => watchlistStore.watchedIds.join('\u001f'),
+    async () => {
+      if (!filterWatchedOnly.value) return
+      if (watchlistStore.watchedIds.length === 0) {
+        filterWatchedOnly.value = false
+      }
+      await reloadEvents()
+    },
+  )
 
   watch(filterMajorScope, async () => {
     if (suppressFilterWatch.value) return
@@ -224,12 +265,14 @@ export function useEventPanel() {
             avatar: filterValue1.value,
             sect: filterSectValue.value,
             majorScope: filterMajorScope.value,
+            watched: filterWatchedOnly.value,
           }
         }
         roleplayAutoApplied.value = true
         await setFiltersAndReload({
           avatar: newAvatarId,
           sect: 'all',
+          watched: false,
         })
         return
       }
@@ -242,6 +285,7 @@ export function useEventPanel() {
           avatar: previous.avatar,
           sect: previous.sect,
           majorScope: previous.majorScope,
+          watched: previous.watched && canFilterWatched.value,
         })
         return
       }
@@ -272,6 +316,7 @@ export function useEventPanel() {
   })
 
   const emptyEventMessage = computed(() => {
+    if (filterWatchedOnly.value) return t('game.event_panel.empty_watched')
     if (filterValue1.value !== 'all') return t('game.event_panel.empty_single')
     return t('game.event_panel.empty_none')
   })
@@ -341,6 +386,10 @@ export function useEventPanel() {
     filterValue1,
     filterSectValue,
     filterMajorScope,
+    filterWatchedOnly,
+    canFilterWatched,
+    watchedFilterTitle,
+    toggleWatchedOnly,
     eventListRef,
     roleplayLockedAvatarName,
     filterOptions,

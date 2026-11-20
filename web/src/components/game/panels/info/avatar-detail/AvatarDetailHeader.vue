@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import pencilLineIcon from '@/assets/icons/ui/lucide/pencil-line.svg'
+import starIcon from '@/assets/icons/ui/lucide/star.svg'
 
 defineProps<{
   name: string
@@ -10,10 +11,13 @@ defineProps<{
   portraitTitle: string
   portraitAlt: string
   canonicalRealmLabel: string
+  watched?: boolean
+  watchLabel?: string
 }>()
 
 const emit = defineEmits<{
   (e: 'edit-portrait'): void
+  (e: 'toggle-watch'): void
 }>()
 </script>
 
@@ -38,7 +42,22 @@ const emit = defineEmits<{
       </div>
     </button>
     <div class="avatar-header-meta">
-      <div class="avatar-name">{{ name }}</div>
+      <div class="avatar-name-row">
+        <div class="avatar-name">{{ name }}</div>
+        <button
+          v-if="watchLabel"
+          class="watch-toggle"
+          :class="{ 'is-watched': watched }"
+          type="button"
+          data-testid="watch-toggle"
+          :title="watchLabel"
+          :aria-label="watchLabel"
+          :aria-pressed="watched ? 'true' : 'false'"
+          @click="emit('toggle-watch')"
+        >
+          <span class="watch-toggle-icon" :style="{ '--icon-url': `url(${starIcon})` }" aria-hidden="true"></span>
+        </button>
+      </div>
       <div class="avatar-realm">{{ realmText }}</div>
       <div v-if="canonicalRealmText" class="avatar-realm-canonical">
         {{ canonicalRealmLabel }}
@@ -162,6 +181,54 @@ const emit = defineEmits<{
 
 .avatar-header-meta {
   min-width: 0;
+}
+
+.avatar-name-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.watch-toggle {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #8a96a3;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.watch-toggle:hover {
+  color: #dce9f8;
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.watch-toggle.is-watched {
+  color: #f2c94c;
+  border-color: rgba(242, 201, 76, 0.42);
+  background: rgba(242, 201, 76, 0.12);
+}
+
+.watch-toggle-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-color: currentColor;
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 .avatar-name {

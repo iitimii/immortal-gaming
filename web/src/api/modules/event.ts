@@ -29,6 +29,7 @@ export const eventApi = {
     if (params.avatar_id) query.set('avatar_id', params.avatar_id);
     if (params.avatar_id_1) query.set('avatar_id_1', params.avatar_id_1);
     if (params.avatar_id_2) query.set('avatar_id_2', params.avatar_id_2);
+    if (params.avatar_ids?.length) query.set('avatar_ids', params.avatar_ids.join(','));
     if (params.sect_id != null) query.set('sect_id', String(params.sect_id));
     if (params.major_scope && params.major_scope !== 'all') query.set('major_scope', params.major_scope);
     if (params.cursor) query.set('cursor', params.cursor);

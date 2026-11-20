@@ -17,6 +17,7 @@ import AvatarEffectsSection from './avatar-detail/AvatarEffectsSection.vue';
 import { useUiStore } from '@/stores/ui';
 import { useI18n } from 'vue-i18n';
 import { useAvatarDetailPanel } from '@/composables/useAvatarDetailPanel';
+import { useAvatarWatchToggle } from '@/composables/useWatchlistPanel';
 import brainIcon from '@/assets/icons/ui/lucide/brain.svg';
 import heartHandshakeIcon from '@/assets/icons/ui/lucide/heart-handshake.svg';
 import messageCircleIcon from '@/assets/icons/ui/lucide/message-circle.svg';
@@ -63,6 +64,8 @@ const {
   handleSetObjective,
   handleClearObjective,
 } = useAvatarDetailPanel(() => props.data, t, uiStore);
+
+const { isWatched, toggleWatch } = useAvatarWatchToggle(() => props.data, () => avatarRealmText.value);
 </script>
 
 <template>
@@ -104,7 +107,10 @@ const {
         :portrait-title="t('game.info_panel.avatar.portrait.entry')"
         :portrait-alt="t('game.info_panel.avatar.portrait.preview_alt')"
         :canonical-realm-label="t('game.info_panel.avatar.stats.canonical_realm', { value: avatarCanonicalRealmText })"
+        :watched="isWatched"
+        :watch-label="isWatched ? t('game.info_panel.avatar.unwatch') : t('game.info_panel.avatar.watch')"
         @edit-portrait="showPortraitPanel = true"
+        @toggle-watch="toggleWatch"
       />
 
       <AvatarObjectivesBlock

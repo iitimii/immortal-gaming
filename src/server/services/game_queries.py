@@ -398,6 +398,7 @@ def get_world_state(
         "month": month,
         "avatar_count": len(world.avatar_manager.avatars),
         "world_revision": getattr(runtime, "world_revision", 0),
+        "playthrough_id": _playthrough_id(world),
         "avatars": avatars,
         "events": recent_events,
         "active_domains": serialize_active_domains(world),
@@ -528,6 +529,29 @@ def get_sect_territories_summary(runtime) -> dict[str, Any]:
     return {"sects": sects}
 
 
+def _playthrough_id(world) -> str:
+    """Stable per-run id (survives save/load) so clients can scope local preferences."""
+    value = getattr(world, "playthrough_id", "")
+    return value if isinstance(value, str) else ""
+
+
+MAX_EVENT_FILTER_AVATAR_IDS = 200
+
+
+def parse_avatar_id_list(raw: str | None) -> tuple[str, ...]:
+    """Parse a comma-separated avatar id filter into a de-duplicated tuple."""
+    if not raw:
+        return ()
+    ids = tuple(dict.fromkeys(item.strip() for item in raw.split(",") if item.strip()))
+    if len(ids) > MAX_EVENT_FILTER_AVATAR_IDS:
+        raise_public_error(
+            status_code=400,
+            code="TOO_MANY_AVATAR_IDS",
+            message=f"At most {MAX_EVENT_FILTER_AVATAR_IDS} avatar ids can be filtered at once",
+        )
+    return ids
+
+
 def get_events_page(
     runtime,
     *,
@@ -539,7 +563,9 @@ def get_events_page(
     major_scope: str,
     cursor: str | None,
     limit: int,
+    avatar_ids: str | None = None,
 ) -> dict[str, Any]:
+    any_avatar_ids = parse_avatar_id_list(avatar_ids)
     world = _require_world(runtime)
     event_manager = getattr(world, "event_manager", None)
     if event_manager is None:
@@ -553,6 +579,7 @@ def get_events_page(
     events, next_cursor, has_more = event_manager.get_events_paginated(
         avatar_id=avatar_id,
         avatar_id_pair=avatar_id_pair,
+        any_avatar_ids=any_avatar_ids,
         sect_id=sect_id,
         major_scope=major_scope,
         cursor=cursor,

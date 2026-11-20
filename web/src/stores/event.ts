@@ -39,6 +39,11 @@ export const useEventStore = defineStore('event', () => {
       newEvents = newEvents.filter(e =>
         e.relatedAvatarIds?.includes(filter.avatar_id!)
       );
+    } else if (filter.avatar_ids?.length) {
+      const wanted = new Set(filter.avatar_ids);
+      newEvents = newEvents.filter(e =>
+        e.relatedAvatarIds?.some(id => wanted.has(id))
+      );
     } else if (filter.avatar_id_1 && filter.avatar_id_2) {
       newEvents = newEvents.filter(e =>
         e.relatedAvatarIds?.includes(filter.avatar_id_1!) &&
