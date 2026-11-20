@@ -14,6 +14,7 @@ from src.classes.gathering.gathering import GatheringManager
 from src.classes.poi import POIManager
 from src.classes.world_lore import WorldLore
 from src.classes.world_secret import WorldSecretRuntime
+from src.classes.world_milestone import WorldMilestoneState
 from src.utils.df import game_configs
 from src.classes.language import language_manager
 from src.i18n import t
@@ -67,6 +68,8 @@ class World():
     sect_diplomacy: SectDiplomacyState = field(default_factory=SectDiplomacyState)
     # Opportunity manager: tracks per-avatar time-limited opportunity state and cooldowns.
     opportunity_manager: OpportunityManager = field(default_factory=OpportunityManager)
+    # Chronicle of world firsts (milestones) and the per-avatar baseline used to detect them
+    milestones: WorldMilestoneState = field(default_factory=WorldMilestoneState)
     # Sect context (lazily initialized), unifies the scope of sects enabled in this run
     _sect_context: Any = field(default=None, init=False, repr=False)
 

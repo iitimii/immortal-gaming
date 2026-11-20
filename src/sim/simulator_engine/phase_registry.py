@@ -128,6 +128,10 @@ async def annual_maintenance(simulator, ctx):
     await annual.run_annual_maintenance(simulator, ctx)
 
 
+def detect_world_milestones(simulator, ctx):
+    ctx.add_events(world_phases.phase_detect_world_milestones(simulator.world, ctx.living_avatars))
+
+
 def finalize_step_phase(_simulator, ctx):
     return finalize_step(ctx)
 
@@ -161,7 +165,8 @@ SIMULATION_PHASES: tuple[SimulationPhase, ...] = (
     SimulationPhase("handle_interactions_second", 26, "handle_interactions", handle_interactions),
     SimulationPhase("update_calculated_relations", 27, "update_calculated_relations", update_calculated_relations),
     SimulationPhase("annual_maintenance", 28, "annual_maintenance", annual_maintenance),
-    SimulationPhase("finalize_step", 29, "finalize_step", finalize_step_phase, reset_check_after=False),
+    SimulationPhase("detect_world_milestones", 29, "detect_world_milestones", detect_world_milestones),
+    SimulationPhase("finalize_step", 30, "finalize_step", finalize_step_phase, reset_check_after=False),
 )
 
 
