@@ -15,6 +15,7 @@ const WorldInfoModal = defineAsyncComponent(() => import('@/components/game/pane
 const TimeOverviewModal = defineAsyncComponent(() => import('@/components/game/panels/TimeOverviewModal.vue'))
 const AvatarOverviewModal = defineAsyncComponent(() => import('@/components/game/panels/AvatarOverviewModal.vue'))
 const WorldSecretModal = defineAsyncComponent(() => import('@/components/game/panels/WorldSecretModal.vue'))
+const WorldStatisticsModal = defineAsyncComponent(() => import('@/components/game/panels/WorldStatisticsModal.vue'))
 
 type StatusBarPanelKey =
   | 'time'
@@ -28,6 +29,7 @@ type StatusBarPanelKey =
   | 'phenomenonSelector'
   | 'avatarOverview'
   | 'worldSecret'
+  | 'worldStatistics'
 
 const avatarOverviewStore = useAvatarOverviewStore()
 
@@ -55,6 +57,7 @@ const panelRegistry: Record<StatusBarPanelKey, StatusBarPanelDefinition> = {
     },
   },
   worldSecret: { component: WorldSecretModal },
+  worldStatistics: { component: WorldStatisticsModal },
 }
 
 const activePanel = ref<StatusBarPanelKey | null>(null)

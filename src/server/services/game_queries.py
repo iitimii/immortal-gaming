@@ -267,6 +267,13 @@ def get_world_secret_overview(runtime) -> dict[str, Any]:
     return build_world_secret_overview(world)
 
 
+def get_world_statistics(runtime) -> dict[str, Any]:
+    from src.server.services.world_statistics import build_world_statistics
+
+    world = _require_world(runtime)
+    return build_world_statistics(world)
+
+
 def get_avatar_overview(runtime) -> dict[str, Any]:
     """Return the avatar overview summary and recently deceased avatars."""
     world = _require_world(runtime)

@@ -500,6 +500,45 @@ export interface AvatarOverview {
   realmDistribution: AvatarRealmDistributionItem[];
 }
 
+export interface WorldStatisticsBucket {
+  id: string;
+  label: string;
+  count: number;
+  /** Share of the bucket's population, 0-100. */
+  percent: number;
+}
+
+export interface WorldStatisticsRealm extends WorldStatisticsBucket {
+  stages: WorldStatisticsBucket[];
+}
+
+export interface WorldStatisticsAvatarRef {
+  id: string;
+  name: string;
+  value: number;
+}
+
+export type WorldStatisticsDistributionKey = 'sect' | 'race' | 'alignment' | 'gender' | 'orthodoxy';
+
+export interface WorldStatistics {
+  livingCount: number;
+  realms: WorldStatisticsRealm[];
+  distributions: Record<WorldStatisticsDistributionKey, WorldStatisticsBucket[]>;
+  age: {
+    average: number;
+    oldest: WorldStatisticsAvatarRef | null;
+  };
+  wealth: {
+    total: number;
+    average: number;
+    richest: WorldStatisticsAvatarRef | null;
+  };
+  deceased: {
+    total: number;
+    topReasons: WorldStatisticsBucket[];
+  };
+}
+
 // --- Events ---
 
 export type EventSubject =

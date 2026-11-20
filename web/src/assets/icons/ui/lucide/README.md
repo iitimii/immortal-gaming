@@ -69,3 +69,4 @@ Suggested mapping:
 - `crown.svg`: emperor, dynasty, or top ranking
 - `scale.svg`: rules, governance, or balance
 - `flag.svg`: sect, faction, or force marker
+- `chart-bar.svg`: world statistics

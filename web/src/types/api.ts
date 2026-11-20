@@ -757,6 +757,51 @@ export interface AvatarOverviewResponseDTO {
   realm_distribution: AvatarRealmDistributionItemDTO[];
 }
 
+/** One bar of a world statistics distribution; `label` is localized server-side. */
+export interface WorldStatisticsBucketDTO {
+  id: string;
+  label: string;
+  count: number;
+}
+
+/** Realm bucket; realms come in rank order with every stage listed (zero counts included). */
+export interface WorldStatisticsRealmDTO extends WorldStatisticsBucketDTO {
+  stages: WorldStatisticsBucketDTO[];
+}
+
+export interface WorldStatisticsAvatarRefDTO {
+  id: string;
+  name: string;
+  value: number;
+}
+
+/** GET /api/v1/query/world/statistics */
+export interface WorldStatisticsResponseDTO {
+  living_count: number;
+  realms: WorldStatisticsRealmDTO[];
+  /** Buckets are ordered by count desc; sect uses id `rogue` for rogue cultivators. */
+  distributions: {
+    race: WorldStatisticsBucketDTO[];
+    sect: WorldStatisticsBucketDTO[];
+    alignment: WorldStatisticsBucketDTO[];
+    gender: WorldStatisticsBucketDTO[];
+    orthodoxy: WorldStatisticsBucketDTO[];
+  };
+  age: {
+    average: number;
+    oldest: WorldStatisticsAvatarRefDTO | null;
+  };
+  wealth: {
+    total: number;
+    average: number;
+    richest: WorldStatisticsAvatarRefDTO | null;
+  };
+  deceased: {
+    total: number;
+    top_reasons: WorldStatisticsBucketDTO[];
+  };
+}
+
 export type ToastLevel = 'error' | 'warning' | 'success' | 'info' | string;
 export type AppLanguage = AppLocale | string;
 
