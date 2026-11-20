@@ -10,14 +10,13 @@ def split_image(image_path):
         img = Image.open(image_path)
         w, h = img.size
         
-        # 假设我们要切成 2x2
-        # 无论原图多大，都切成 4 份
-        # 或者强制 resize 到 128x128 (64*2) 再切？
-        # 用户之前的代码里 TILE_SIZE = 64。
-        # 最好保持原图比例，或者检查是否是正方形
+        # Split into a 2x2 grid:
+        # always cut into 4 pieces regardless of the source size
+        # (rather than forcing a resize to 128x128 = 64*2 first; TILE_SIZE used to be 64).
+        # Keep the source proportions; ideally the source is square.
         
-        # 为了保证清晰度，我们按照原图尺寸切分，前端显示时会自动缩放到 TILE_SIZE
-        # 只要是 2x2 的逻辑关系即可
+        # To preserve sharpness, split at the source resolution; the frontend scales to TILE_SIZE when rendering.
+        # Only the 2x2 logical layout matters.
         
         half_w = w // 2
         half_h = h // 2
@@ -38,13 +37,10 @@ def split_image(image_path):
             piece = img.crop(box)
             
             # Save as _0, _1, _2, _3
-            # 统一保存为 png 以支持透明度（虽然 jpg 源文件可能不支持，但统一输出比较好管理）
-            # 如果源文件是 jpg，切分后也存为 jpg 可能会丢失透明度信息（虽然 jpg 本身就没有），
-            # 但如果为了统一 web 加载逻辑，最好统一格式？
-            # 不，还是保持原扩展名或者统一 png。为了兼容性，统一存为 .png 比较稳妥（特别是 sects 都是 png）。
-            # 只有 cities 有 jpg。
+            # Always save as PNG to support transparency and keep outputs uniform
+            # (JPG sources have no alpha anyway; only cities are JPG, sects are already PNG).
             
-            # 决定：统一输出 .png，方便前端逻辑统一
+            # Decision: always output .png so the frontend loading logic stays uniform
             save_path = f"{base_name}_{i}.png"
             piece.save(save_path, "PNG")
             generated_files.append(save_path)
@@ -74,8 +70,8 @@ def main():
         split_image(f)
 
     # 3. Special Tiles (Cave, Ruin)
-    # cave.png, ruin.png (注意之前代码里有时候叫 ruins.png, 有时候叫 ruin.png, 现在统一处理)
-    # 检查 assets/tiles 下的文件
+    # cave.png, ruin.png (older code used both ruins.png and ruin.png; both are handled here)
+    # Check files under assets/tiles
     special_names = ['cave', 'ruin', 'ruins']
     for name in special_names:
         path = os.path.join(ASSETS_DIR, "tiles", f"{name}.png")

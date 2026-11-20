@@ -21,17 +21,17 @@ BASE_REALM_SLUG = "qi_refining"
 TARGET_REALM_SLUGS = ["foundation", "golden_core", "nascent_soul"]
 
 REALM_EDIT_STYLES = {
-    "筑基": (
-        "筑基的升级强度为中等：衣服、首饰和附件在原有色调体系下变得更整洁、更稳定、更精致，"
-        "妖族纹样更清晰但不要过度华丽，体现根基稳固。"
+    "Foundation Establishment": (
+        "Foundation Establishment upgrade intensity is moderate: clothing, jewelry and accessories become neater, steadier and more refined within the existing color scheme; "
+        "yao patterns become clearer but not overly ornate, conveying a solid foundation. "
     ),
-    "金丹": (
-        "金丹的升级强度为明显：衣服、首饰和附件在原有色调体系下变得更强大、更华丽、更有凝练质感，"
-        "妖族纹样、饰物材质和瞳孔高光可以更醒目。"
+    "Golden Core": (
+        "Golden Core upgrade intensity is pronounced: clothing, jewelry and accessories become more powerful, more ornate and more condensed in texture within the existing color scheme; "
+        "yao patterns, accessory materials and pupil highlights may be more striking. "
     ),
-    "元婴": (
-        "元婴的升级强度为最高但更空灵：衣服、首饰和附件在原有色调体系下变得更仙气、更通透、更华贵，"
-        "妖族纹样更优雅，材质更轻盈精美，整体强大但不厚重。"
+    "Nascent Soul": (
+        "Nascent Soul upgrade intensity is the highest but more ethereal: clothing, jewelry and accessories become more immortal-like, more translucent and more luxurious within the existing color scheme; "
+        "yao patterns are more elegant, materials lighter and more exquisite; powerful overall but not heavy. "
     ),
 }
 
@@ -43,17 +43,17 @@ def build_yaoguai_edit_prompt(
     realm_name: str,
 ) -> str:
     return (
-        f"基于输入妖族头像升级为{realm_name}阶段，变化幅度约55%，需要明显强于原图。"
-        "只需保持能认出是同一个妖族角色：输入图的像素风格、低细节程度、Q版二次元漫画风、脸型和五官大致比例、发型轮廓、发色、核心妖族种族特征、正面头像构图、纯白背景。"
-        "允许明显改变：表情、气质、年龄感、衣领服饰、发饰或耳饰复杂度、饰物材质、眼神强度、瞳孔高光、原有妖族纹样、贴身微光。"
-        "必须做出显著可见变化：眼神、服饰层次、饰物精致度、妖族纹样或贴身光效至少四项明显升级。"
+        f"Upgrade the input yao avatar to the {realm_name} stage with roughly 55% change; it must be clearly stronger than the original. "
+        "Keep only enough to recognize the same yao character: the input image's pixel art style, low level of detail, chibi anime manga style, face shape and rough facial proportions, hairstyle silhouette, hair color, core yao race traits, front-facing portrait composition, and pure white background. "
+        "Clearly allowed to change: expression, temperament, apparent age, collar and clothing, complexity of hair ornaments or earrings, accessory materials, gaze intensity, pupil highlights, existing yao patterns, close-fitting faint glow. "
+        "Must make significant visible changes: at least four of gaze, clothing layers, accessory refinement, yao patterns or close-fitting light effects must be clearly upgraded. "
         f"{REALM_EDIT_STYLES.get(realm_name, '')}"
-        "可以让妖族纹样更清晰、饰物材质更高级、衣领更华丽、贴身光效更强，但光效必须靠近角色本体。"
-        "不要只是轻微调色；需要一眼看出境界提升和妖力增强。"
-        "不要改变性别，不要改变核心种族特征，不要添加背景、边框、场景、光环、翅膀展开或大面积特效。"
-        "禁止改成写实风、高清插画风、厚涂风或过度精细风，必须仍然是像素头像。"
-        f"外貌参考：{appearance_prompt}"
-        f"境界变化：{realm_prompt}"
+        "You may make yao patterns clearer, accessory materials more premium, the collar more ornate and close-fitting light effects stronger, but light effects must stay close to the character's body. "
+        "Do not just slightly adjust colors; the realm advancement and increase in yao power must be obvious at a glance. "
+        "Do not change the gender; do not change the core race traits; do not add a background, border, scene, halo, spread wings or large-area effects. "
+        "Do not switch to a realistic, high-definition illustration, thick-paint or overly detailed style; it must remain a pixel avatar. "
+        f"Appearance reference: {appearance_prompt} "
+        f"Realm change: {realm_prompt}"
     )
 
 
@@ -90,13 +90,13 @@ def edit_yaoguai_avatar_realms(
         relative_parent = Path(record.species_slug) / record.gender
         source_path = source_dir / relative_parent / source_name
         if not source_path.exists():
-            tqdm.write(f"缺少练气原图，跳过: {source_path}")
+            tqdm.write(f"Missing Qi Refinement source image, skipping: {source_path}")
             continue
 
         output_path = target_dir / relative_parent / f"{record.filename_stem}.png"
         output_path.parent.mkdir(parents=True, exist_ok=True)
         if output_path.exists() and not overwrite:
-            tqdm.write(f"已存在，跳过: {output_path}")
+            tqdm.write(f"Already exists, skipping: {output_path}")
             continue
 
         edit_prompt = build_yaoguai_edit_prompt(
@@ -112,7 +112,7 @@ def edit_yaoguai_avatar_realms(
                 retry_delay=retry_delay,
             )
         except Exception as exc:
-            tqdm.write(f"编辑失败，跳过: {output_path} ({type(exc).__name__}: {exc})")
+            tqdm.write(f"Edit failed, skipping: {output_path} ({type(exc).__name__}: {exc})")
             failures.append(
                 {
                     "stage": "realm_edit",

@@ -36,7 +36,7 @@ def _with_retries(
             if attempt >= max_retries or not retryable:
                 raise
             delay = retry_delay * (2**attempt)
-            print(f"图像 API 请求失败，{delay:.1f}s 后重试 ({attempt + 1}/{max_retries})")
+            print(f"Image API request failed, retrying in {delay:.1f}s ({attempt + 1}/{max_retries})")
             time.sleep(delay)
             attempt += 1
 
@@ -97,10 +97,10 @@ def generate_image_b64(
 
         data = body.get("data")
         if not data:
-            raise ImageApiError(None, "响应中没有 data 图片数组")
+            raise ImageApiError(None, "No data image array in the response")
         image_b64 = data[0].get("b64_json") or data[0].get("b64")
         if not image_b64:
-            raise ImageApiError(None, "响应中没有 b64_json 图片数据")
+            raise ImageApiError(None, "No b64_json image data in the response")
         return str(image_b64)
 
     return _with_retries(

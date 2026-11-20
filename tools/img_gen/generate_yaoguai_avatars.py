@@ -47,7 +47,7 @@ def generate_yaoguai_avatars(
         output_path = target_dir / record.species_slug / record.gender / f"{record.filename_stem}.png"
         output_path.parent.mkdir(parents=True, exist_ok=True)
         if output_path.exists() and not overwrite:
-            tqdm.write(f"已存在，跳过: {output_path}")
+            tqdm.write(f"Already exists, skipping: {output_path}")
             continue
         try:
             image_bytes = generate_image_bytes(
@@ -56,7 +56,7 @@ def generate_yaoguai_avatars(
                 retry_delay=retry_delay,
             )
         except Exception as exc:
-            tqdm.write(f"生成失败，跳过: {output_path} ({type(exc).__name__}: {exc})")
+            tqdm.write(f"Generation failed, skipping: {output_path} ({type(exc).__name__}: {exc})")
             failures.append(
                 {
                     "species_slug": record.species_slug,

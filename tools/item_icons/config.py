@@ -39,7 +39,7 @@ def load_config(env_path: str | Path = DEFAULT_ENV_PATH) -> ItemIconConfig:
     api_key = get("ITEM_ICON_API_KEY")
     if not api_key:
         raise RuntimeError(
-            "请在 tools/item_icons/.env 或环境变量中设置 ITEM_ICON_API_KEY"
+            "Set ITEM_ICON_API_KEY in tools/item_icons/.env or as an environment variable"
         )
 
     return ItemIconConfig(

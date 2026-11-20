@@ -10,7 +10,7 @@
         {
           "icon_key": "weapon_1001",
           "category": "weapon",
-          "name": "练气剑",
+          "name": "Qi Refinement Sword",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_001\\batch_001_01.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_001\\weapon_1001.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_001\\weapon_1001.png",
@@ -19,7 +19,7 @@
         {
           "icon_key": "weapon_1002",
           "category": "weapon",
-          "name": "练气刀",
+          "name": "Qi Refinement Saber",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_001\\batch_001_02.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_001\\weapon_1002.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_001\\weapon_1002.png",
@@ -28,7 +28,7 @@
         {
           "icon_key": "weapon_1003",
           "category": "weapon",
-          "name": "练气枪",
+          "name": "Qi Refinement Spear",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_001\\batch_001_03.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_001\\weapon_1003.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_001\\weapon_1003.png",
@@ -37,7 +37,7 @@
         {
           "icon_key": "weapon_1004",
           "category": "weapon",
-          "name": "练气棍",
+          "name": "Qi Refinement Staff",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_001\\batch_001_04.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_001\\weapon_1004.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_001\\weapon_1004.png",
@@ -46,7 +46,7 @@
         {
           "icon_key": "weapon_1005",
           "category": "weapon",
-          "name": "练气扇",
+          "name": "Qi Refinement Fan",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_001\\batch_001_05.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_001\\weapon_1005.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_001\\weapon_1005.png",
@@ -55,7 +55,7 @@
         {
           "icon_key": "weapon_1006",
           "category": "weapon",
-          "name": "练气鞭",
+          "name": "Qi Refinement Whip",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_001\\batch_001_06.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_001\\weapon_1006.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_001\\weapon_1006.png",
@@ -64,7 +64,7 @@
         {
           "icon_key": "weapon_1007",
           "category": "weapon",
-          "name": "练气琴",
+          "name": "Qi Refinement Zither",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_001\\batch_001_07.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_001\\weapon_1007.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_001\\weapon_1007.png",
@@ -73,7 +73,7 @@
         {
           "icon_key": "weapon_1008",
           "category": "weapon",
-          "name": "练气笛",
+          "name": "Qi Refinement Flute",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_001\\batch_001_08.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_001\\weapon_1008.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_001\\weapon_1008.png",
@@ -82,14 +82,14 @@
         {
           "icon_key": "weapon_1009",
           "category": "weapon",
-          "name": "练气暗器",
+          "name": "Qi Refinement Hidden Weapon",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_001\\batch_001_09.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_001\\weapon_1009.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_001\\weapon_1009.png",
           "pixel": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\pixel\\weapon_1009.png"
         }
       ],
-      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. weapon: 练气剑 - 市井铁匠铺打造的铁剑，勉强能用。 SWORD QI_REFINEMENT\n2. weapon: 练气刀 - 厚背砍刀，寻常武夫的最爱。 SABER QI_REFINEMENT\n3. weapon: 练气枪 - 白蜡杆制成，枪头挂着红缨。 SPEAR QI_REFINEMENT\n4. weapon: 练气棍 - 普通的硬木棍，长与眉齐。 STAFF QI_REFINEMENT\n5. weapon: 练气扇 - 文人雅士常用的折扇，附庸风雅。 FAN QI_REFINEMENT\n6. weapon: 练气鞭 - 普通的皮鞭，多用于赶车或刑罚。 WHIP QI_REFINEMENT\n7. weapon: 练气琴 - 桐木制成的古琴，音色尚可。 ZITHER QI_REFINEMENT\n8. weapon: 练气笛 - 紫竹削制，声音清脆。 FLUTE QI_REFINEMENT\n9. weapon: 练气暗器 - 随处可见的铁制暗器。 HIDDEN_WEAPON QI_REFINEMENT\n"
+      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. weapon: Qi Refinement Sword - An iron sword forged by a local blacksmith, barely usable. SWORD QI_REFINEMENT\n2. weapon: Qi Refinement Saber - A thick-backed chopper, a favorite of ordinary martial artists. SABER QI_REFINEMENT\n3. weapon: Qi Refinement Spear - Made of white wax wood, with a red tassel on the spearhead. SPEAR QI_REFINEMENT\n4. weapon: Qi Refinement Staff - A common hardwood staff, as long as the eyebrows. STAFF QI_REFINEMENT\n5. weapon: Qi Refinement Fan - A folding fan commonly used by scholars and literati for elegance. FAN QI_REFINEMENT\n6. weapon: Qi Refinement Whip - A common leather whip, mostly used for driving carts or punishment. WHIP QI_REFINEMENT\n7. weapon: Qi Refinement Zither - An ancient zither made of paulownia wood, with fair sound quality. ZITHER QI_REFINEMENT\n8. weapon: Qi Refinement Flute - Carved from purple bamboo, with a crisp sound. FLUTE QI_REFINEMENT\n9. weapon: Qi Refinement Hidden Weapon - Commonly seen iron hidden weapons. HIDDEN_WEAPON QI_REFINEMENT\n"
     },
     {
       "ok": true,
@@ -101,7 +101,7 @@
         {
           "icon_key": "weapon_1021",
           "category": "weapon",
-          "name": "青霜剑",
+          "name": "Azure Frost Sword",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_002\\batch_002_01.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_002\\weapon_1021.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_002\\weapon_1021.png",
@@ -110,7 +110,7 @@
         {
           "icon_key": "weapon_1022",
           "category": "weapon",
-          "name": "水月刀",
+          "name": "Water Moon Saber",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_002\\batch_002_02.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_002\\weapon_1022.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_002\\weapon_1022.png",
@@ -119,7 +119,7 @@
         {
           "icon_key": "weapon_1023",
           "category": "weapon",
-          "name": "火尖枪",
+          "name": "Fire Tipped Spear",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_002\\batch_002_03.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_002\\weapon_1023.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_002\\weapon_1023.png",
@@ -128,7 +128,7 @@
         {
           "icon_key": "weapon_1024",
           "category": "weapon",
-          "name": "囚龙棒",
+          "name": "Dragon Capturing Rod",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_002\\batch_002_04.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_002\\weapon_1024.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_002\\weapon_1024.png",
@@ -137,7 +137,7 @@
         {
           "icon_key": "weapon_1025",
           "category": "weapon",
-          "name": "绯花扇",
+          "name": "Crimson Flower Fan",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_002\\batch_002_05.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_002\\weapon_1025.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_002\\weapon_1025.png",
@@ -146,7 +146,7 @@
         {
           "icon_key": "weapon_1026",
           "category": "weapon",
-          "name": "打神鞭",
+          "name": "God Striking Whip",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_002\\batch_002_06.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_002\\weapon_1026.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_002\\weapon_1026.png",
@@ -155,7 +155,7 @@
         {
           "icon_key": "weapon_1027",
           "category": "weapon",
-          "name": "天魔琴",
+          "name": "Heavenly Demonic Zither",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_002\\batch_002_07.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_002\\weapon_1027.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_002\\weapon_1027.png",
@@ -164,7 +164,7 @@
         {
           "icon_key": "weapon_1028",
           "category": "weapon",
-          "name": "御鬼笛",
+          "name": "Spirit Controlling Flute",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_002\\batch_002_08.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_002\\weapon_1028.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_002\\weapon_1028.png",
@@ -173,14 +173,14 @@
         {
           "icon_key": "weapon_1029",
           "category": "weapon",
-          "name": "无影针",
+          "name": "Shadowless Needle",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_002\\batch_002_09.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_002\\weapon_1029.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_002\\weapon_1029.png",
           "pixel": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\pixel\\weapon_1029.png"
         }
       ],
-      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. weapon: 青霜剑 - 剑气森寒。 SWORD FOUNDATION_ESTABLISHMENT\n2. weapon: 水月刀 - 刀身如水，映月无痕，虚实难辨，令对手捉摸不透。 SABER FOUNDATION_ESTABLISHMENT\n3. weapon: 火尖枪 - 枪头隐有火光，能引动凡火。 SPEAR FOUNDATION_ESTABLISHMENT\n4. weapon: 囚龙棒 - 精铁铸造，重达千斤，力大者可用。 STAFF FOUNDATION_ESTABLISHMENT\n5. weapon: 绯花扇 - 扇面绘有绯红花瓣，花影迷离，暗藏杀机，令人防不胜防。 FAN FOUNDATION_ESTABLISHMENT\n6. weapon: 打神鞭 - 仿品，虽无打神之能，却可伤人神魂。 WHIP FOUNDATION_ESTABLISHMENT\n7. weapon: 天魔琴 - 琴音魔性，扰乱心智。 ZITHER FOUNDATION_ESTABLISHMENT\n8. weapon: 御鬼笛 - 笛声凄厉，能以此笛操控尸傀，令人闻之色变。 FLUTE FOUNDATION_ESTABLISHMENT\n9. weapon: 无影针 - 细若牛毛，来去无影，防不胜防。 HIDDEN_WEAPON FOUNDATION_ESTABLISHMENT\n"
+      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. weapon: Azure Frost Sword - The sword qi is bone-chillingly cold. SWORD FOUNDATION_ESTABLISHMENT\n2. weapon: Water Moon Saber - The blade is like water, reflecting the moon without a trace. It is hard to distinguish between reality and illusion, making it unpredictable for opponents. SABER FOUNDATION_ESTABLISHMENT\n3. weapon: Fire Tipped Spear - Faint fire light on the spearhead, able to trigger common fire. SPEAR FOUNDATION_ESTABLISHMENT\n4. weapon: Dragon Capturing Rod - Forged from refined iron, weighing a thousand jin, usable by those with great strength. STAFF FOUNDATION_ESTABLISHMENT\n5. weapon: Crimson Flower Fan - The fan is painted with crimson petals. The flower shadows are blurred, hiding murderous intent, making it impossible to guard against. FAN FOUNDATION_ESTABLISHMENT\n6. weapon: God Striking Whip - An imitation; although lacking the power to strike gods, it can wound the soul. WHIP FOUNDATION_ESTABLISHMENT\n7. weapon: Heavenly Demonic Zither - The zither sound is demonic, disturbing the mind. ZITHER FOUNDATION_ESTABLISHMENT\n8. weapon: Spirit Controlling Flute - The sound of the flute is shrill and can control corpses, making people turn pale at the sound. FLUTE FOUNDATION_ESTABLISHMENT\n9. weapon: Shadowless Needle - Fine as a cow's hair, coming and going without a trace, impossible to guard against. HIDDEN_WEAPON FOUNDATION_ESTABLISHMENT\n"
     },
     {
       "ok": true,
@@ -192,7 +192,7 @@
         {
           "icon_key": "weapon_1030",
           "category": "weapon",
-          "name": "万兽笛",
+          "name": "Ten Thousand Beasts Flute",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_003\\batch_003_01.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_003\\weapon_1030.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_003\\weapon_1030.png",
@@ -201,7 +201,7 @@
         {
           "icon_key": "weapon_1031",
           "category": "weapon",
-          "name": "嗜血狂刀",
+          "name": "Bloodthirsty Saber",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_003\\batch_003_02.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_003\\weapon_1031.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_003\\weapon_1031.png",
@@ -210,7 +210,7 @@
         {
           "icon_key": "weapon_1032",
           "category": "weapon",
-          "name": "陨星重剑",
+          "name": "Meteor Heavy Sword",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_003\\batch_003_03.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_003\\weapon_1032.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_003\\weapon_1032.png",
@@ -219,7 +219,7 @@
         {
           "icon_key": "weapon_1033",
           "category": "weapon",
-          "name": "灵蛇软剑",
+          "name": "Spirit Snake Soft Sword",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_003\\batch_003_04.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_003\\weapon_1033.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_003\\weapon_1033.png",
@@ -228,7 +228,7 @@
         {
           "icon_key": "weapon_1034",
           "category": "weapon",
-          "name": "水火囚龙棍",
+          "name": "Water and Fire Dragon Capturing Staff",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_003\\batch_003_05.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_003\\weapon_1034.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_003\\weapon_1034.png",
@@ -237,7 +237,7 @@
         {
           "icon_key": "weapon_1051",
           "category": "weapon",
-          "name": "天雷竹剑",
+          "name": "Heavenly Thunder Bamboo Sword",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_003\\batch_003_06.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_003\\weapon_1051.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_003\\weapon_1051.png",
@@ -246,7 +246,7 @@
         {
           "icon_key": "weapon_1052",
           "category": "weapon",
-          "name": "随心铁杆兵",
+          "name": "As-You-Will Iron Rod",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_003\\batch_003_07.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_003\\weapon_1052.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_003\\weapon_1052.png",
@@ -255,7 +255,7 @@
         {
           "icon_key": "weapon_1053",
           "category": "weapon",
-          "name": "五火七禽扇",
+          "name": "Five Fires Seven Poultry Fan",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_003\\batch_003_08.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_003\\weapon_1053.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_003\\weapon_1053.png",
@@ -264,14 +264,14 @@
         {
           "icon_key": "weapon_1054",
           "category": "weapon",
-          "name": "弑神枪",
+          "name": "God Killer Spear",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_003\\batch_003_09.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_003\\weapon_1054.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_003\\weapon_1054.png",
           "pixel": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\pixel\\weapon_1054.png"
         }
       ],
-      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. weapon: 万兽笛 - 百兽宗秘制，笛声可安抚或激怒野兽。 FLUTE FOUNDATION_ESTABLISHMENT\n2. weapon: 嗜血狂刀 - 刀身赤红，似渴望饮血，杀性极重，非心志坚定者不可用。 SABER FOUNDATION_ESTABLISHMENT\n3. weapon: 陨星重剑 - 采天外陨铁铸造，重剑无锋，大巧不工，力破万法。 SWORD FOUNDATION_ESTABLISHMENT\n4. weapon: 灵蛇软剑 - 剑身柔软如绢，灌注灵气则动若灵蛇，诡异莫测。 SWORD FOUNDATION_ESTABLISHMENT\n5. weapon: 水火囚龙棍 - 镇魂宗制式兵器，水火相济，困敌锁魂。 STAFF FOUNDATION_ESTABLISHMENT\n6. weapon: 天雷竹剑 - 成套飞剑，由天雷竹炼制，内蕴辟邪神雷，克制天下邪祟。 SWORD CORE_FORMATION\n7. weapon: 随心铁杆兵 - 六耳猕猴的兵器，随心变化，大小如意。 STAFF CORE_FORMATION\n8. weapon: 五火七禽扇 - 扇面有空中火、石中火、木中火等五火，一扇灰飞烟灭。 FAN CORE_FORMATION\n9. weapon: 弑神枪 - 杀气滔天，曾染魔神之血，枪出无回。 SPEAR NASCENT_SOUL\n"
+      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. weapon: Ten Thousand Beasts Flute - Specially made by the Baishou Sect; the flute sound can soothe or provoke beasts. FLUTE FOUNDATION_ESTABLISHMENT\n2. weapon: Bloodthirsty Saber - The blade is crimson, seemingly thirsting for blood. It has a heavy killing intent and cannot be used by those with weak will. SABER FOUNDATION_ESTABLISHMENT\n3. weapon: Meteor Heavy Sword - Cast from extraterrestrial meteoric iron. The heavy sword has no sharp edge, but great skill requires no workmanship. It can break all techniques with force. SWORD FOUNDATION_ESTABLISHMENT\n4. weapon: Spirit Snake Soft Sword - The sword is as soft as silk, but when infused with spiritual energy, it moves like a spirit snake, strange and unpredictable. SWORD FOUNDATION_ESTABLISHMENT\n5. weapon: Water and Fire Dragon Capturing Staff - A standard weapon of the Zhenhun Sect, combining water and fire to trap enemies and lock souls. STAFF FOUNDATION_ESTABLISHMENT\n6. weapon: Heavenly Thunder Bamboo Sword - A set of flying swords refined from Heavenly Thunder Bamboo, containing the Evil-Warding Divine Thunder to suppress all evil in the world. SWORD CORE_FORMATION\n7. weapon: As-You-Will Iron Rod - The weapon of the Six-Eared Macaque, changing as desired, as large or small as one wishes. STAFF CORE_FORMATION\n8. weapon: Five Fires Seven Poultry Fan - The fan surface features five fires including air fire, stone fire, and wood fire, turning things to ashes in one wave. FAN CORE_FORMATION\n9. weapon: God Killer Spear - Surging killing intent, once stained with the blood of demon gods; the spear never returns once thrown. SPEAR NASCENT_SOUL\n"
     },
     {
       "ok": true,
@@ -283,7 +283,7 @@
         {
           "icon_key": "weapon_1055",
           "category": "weapon",
-          "name": "赤血战矛",
+          "name": "Crimson Blood War Spear",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_004\\batch_004_01.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_004\\weapon_1055.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_004\\weapon_1055.png",
@@ -292,7 +292,7 @@
         {
           "icon_key": "weapon_1056",
           "category": "weapon",
-          "name": "斩仙飞刀",
+          "name": "Immortal Slaying Flying Dagger",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_004\\batch_004_02.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_004\\weapon_1056.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_004\\weapon_1056.png",
@@ -301,7 +301,7 @@
         {
           "icon_key": "weapon_1057",
           "category": "weapon",
-          "name": "诛仙剑",
+          "name": "Immortal Slaying Sword",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_004\\batch_004_03.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_004\\weapon_1057.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_004\\weapon_1057.png",
@@ -310,7 +310,7 @@
         {
           "icon_key": "weapon_1058",
           "category": "weapon",
-          "name": "干将莫邪",
+          "name": "Gan Jiang and Mo Ye",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_004\\batch_004_04.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_004\\weapon_1058.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_004\\weapon_1058.png",
@@ -319,7 +319,7 @@
         {
           "icon_key": "weapon_1059",
           "category": "weapon",
-          "name": "芭蕉扇",
+          "name": "Plantain Fan",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_004\\batch_004_05.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_004\\weapon_1059.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_004\\weapon_1059.png",
@@ -328,7 +328,7 @@
         {
           "icon_key": "weapon_1060",
           "category": "weapon",
-          "name": "紫金降魔杵",
+          "name": "Purple Gold Demon Subduing Pestle",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_004\\batch_004_06.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_004\\weapon_1060.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_004\\weapon_1060.png",
@@ -337,7 +337,7 @@
         {
           "icon_key": "weapon_1061",
           "category": "weapon",
-          "name": "九环金背刀",
+          "name": "Nine-Ring Golden Saber",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_004\\batch_004_07.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_004\\weapon_1061.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_004\\weapon_1061.png",
@@ -346,7 +346,7 @@
         {
           "icon_key": "weapon_1062",
           "category": "weapon",
-          "name": "寒铁银枪",
+          "name": "Cold Iron Silver Spear",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_004\\batch_004_08.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_004\\weapon_1062.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_004\\weapon_1062.png",
@@ -355,14 +355,14 @@
         {
           "icon_key": "weapon_1063",
           "category": "weapon",
-          "name": "七节紫竹鞭",
+          "name": "Seven-Section Purple Bamboo Whip",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_004\\batch_004_09.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_004\\weapon_1063.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_004\\weapon_1063.png",
           "pixel": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\pixel\\weapon_1063.png"
         }
       ],
-      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. weapon: 赤血战矛 - 通体赤红，战气滔天，曾染无数强者之血，枪出无悔。 SPEAR NASCENT_SOUL\n2. weapon: 斩仙飞刀 - 红葫芦内藏一线毫光，有眉有目。请宝贝转身，神鬼难逃。 HIDDEN_WEAPON CORE_FORMATION\n3. weapon: 诛仙剑 - 非铜非铁亦非钢，曾在须弥山下藏。利气直透九重天。 SWORD NASCENT_SOUL\n4. weapon: 干将莫邪 - 挚情之剑，一雌一雄，分则为杀，合则为情。 SWORD CORE_FORMATION\n5. weapon: 芭蕉扇 - 太阴之精叶，一扇息火，二扇生风，三扇下雨。 FAN CORE_FORMATION\n6. weapon: 紫金降魔杵 - 韦护的兵器，虽然轻灵，打在人身却重如泰山。 STAFF CORE_FORMATION\n7. weapon: 九环金背刀 - 刀背嵌入九个金环，挥舞时金环碰撞，声若雷鸣，摄人心魄。 SABER CORE_FORMATION\n8. weapon: 寒铁银枪 - 通体由万年寒铁打造，枪身银白，触之冰冷刺骨。 SPEAR CORE_FORMATION\n9. weapon: 七节紫竹鞭 - 采自南海紫竹林，共七节，坚韧异常，不仅能伤敌，亦可缚妖。 WHIP CORE_FORMATION\n"
+      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. weapon: Crimson Blood War Spear - Crimson throughout, with overwhelming fighting spirit. It has been stained with the blood of countless strong men, and the spear strikes without regret. SPEAR NASCENT_SOUL\n2. weapon: Immortal Slaying Flying Dagger - A trace of light hidden in a red gourd, with eyebrows and eyes. Please turn around, treasure, for gods and ghosts cannot escape. HIDDEN_WEAPON CORE_FORMATION\n3. weapon: Immortal Slaying Sword - Neither copper, iron, nor steel, once hidden under Mount Sumeru. Sharp qi pierces directly into the nine heavens. SWORD NASCENT_SOUL\n4. weapon: Gan Jiang and Mo Ye - Swords of true love, one female and one male, killing when separated, amorous when together. SWORD CORE_FORMATION\n5. weapon: Plantain Fan - Essence leaf of Taiyin; one wave stops fire, two waves create wind, three waves bring rain. FAN CORE_FORMATION\n6. weapon: Purple Gold Demon Subduing Pestle - Wei Hu's weapon; although light and agile, it hits with the weight of Mount Tai. STAFF CORE_FORMATION\n7. weapon: Nine-Ring Golden Saber - The back of the saber is embedded with nine golden rings. When waved, the rings collide with a thunderous sound that strikes fear into the heart. SABER CORE_FORMATION\n8. weapon: Cold Iron Silver Spear - Made entirely of ten-thousand-year-old cold iron, the spear body is silvery white and bone-chilling to the touch. SPEAR CORE_FORMATION\n9. weapon: Seven-Section Purple Bamboo Whip - Harvested from the Purple Bamboo Forest in the South Sea, it has seven sections and is exceptionally tough. It can wound enemies and bind demons. WHIP CORE_FORMATION\n"
     },
     {
       "ok": true,
@@ -374,7 +374,7 @@
         {
           "icon_key": "weapon_1064",
           "category": "weapon",
-          "name": "玉琵琶",
+          "name": "Jade Pipa",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_005\\batch_005_01.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_005\\weapon_1064.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_005\\weapon_1064.png",
@@ -383,7 +383,7 @@
         {
           "icon_key": "weapon_1065",
           "category": "weapon",
-          "name": "沧海龙吟笛",
+          "name": "Ocean Dragon Flute",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_005\\batch_005_02.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_005\\weapon_1065.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_005\\weapon_1065.png",
@@ -392,7 +392,7 @@
         {
           "icon_key": "weapon_1071",
           "category": "weapon",
-          "name": "凶虎煞刃",
+          "name": "Fierce Tiger Evil Blade",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_005\\batch_005_03.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_005\\weapon_1071.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_005\\weapon_1071.png",
@@ -401,7 +401,7 @@
         {
           "icon_key": "weapon_1072",
           "category": "weapon",
-          "name": "擎天白玉柱",
+          "name": "Sky Optimus Pillar",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_005\\batch_005_04.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_005\\weapon_1072.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_005\\weapon_1072.png",
@@ -410,7 +410,7 @@
         {
           "icon_key": "weapon_1073",
           "category": "weapon",
-          "name": "阴阳扇",
+          "name": "Yin Yang Fan",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_005\\batch_005_05.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_005\\weapon_1073.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_005\\weapon_1073.png",
@@ -419,7 +419,7 @@
         {
           "icon_key": "weapon_1074",
           "category": "weapon",
-          "name": "龙骨鞭",
+          "name": "Dragon Spine Whip",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_005\\batch_005_06.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_005\\weapon_1074.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_005\\weapon_1074.png",
@@ -428,7 +428,7 @@
         {
           "icon_key": "weapon_1075",
           "category": "weapon",
-          "name": "伏羲琴",
+          "name": "Fuxi Zither",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_005\\batch_005_07.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_005\\weapon_1075.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_005\\weapon_1075.png",
@@ -437,7 +437,7 @@
         {
           "icon_key": "weapon_1076",
           "category": "weapon",
-          "name": "唤魔笛",
+          "name": "Demon Calling Flute",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_005\\batch_005_08.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_005\\weapon_1076.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_005\\weapon_1076.png",
@@ -446,14 +446,14 @@
         {
           "icon_key": "weapon_1077",
           "category": "weapon",
-          "name": "七彩雀羽",
+          "name": "Seven-Color Sparrow Feather",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_005\\batch_005_09.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_005\\weapon_1077.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_005\\weapon_1077.png",
           "pixel": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\pixel\\weapon_1077.png"
         }
       ],
-      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. weapon: 玉琵琶 - 白玉雕琢而成，弹奏时有金石之声，能洗涤心魔。 ZITHER CORE_FORMATION\n2. weapon: 沧海龙吟笛 - 采深海寒玉制成，吹奏时如龙吟沧海，声震四野。 FLUTE CORE_FORMATION\n3. weapon: 凶虎煞刃 - 上古凶兵，封印白虎凶魂，出鞘必见血，反噬其主。 SABER NASCENT_SOUL\n4. weapon: 擎天白玉柱 - 疑似上古天庭的柱石残片炼制，重如山岳，非大能者不能舞动。 STAFF NASCENT_SOUL\n5. weapon: 阴阳扇 - 一面纯白主生，一面漆黑主死。扇动间阴阳逆转，缩地成寸。 FAN NASCENT_SOUL\n6. weapon: 龙骨鞭 - 以上古真龙之脊骨炼制，挥动时隐有龙吟，对低阶生灵有天然压制。 WHIP NASCENT_SOUL\n7. weapon: 伏羲琴 - 上古十大神器之一的仿品，拥有支配万物心灵之神秘力量。 ZITHER NASCENT_SOUL\n8. weapon: 唤魔笛 - 魔界至宝，笛声诡谲，能驱使魔物与凶兽为己所用。 FLUTE NASCENT_SOUL\n9. weapon: 七彩雀羽 - 美艳不可方物，绚烂的光芒下隐藏着致命的杀机。 HIDDEN_WEAPON NASCENT_SOUL\n"
+      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. weapon: Jade Pipa - Carved from white jade, it produces the sound of metal and stone when played, cleansing inner demons. ZITHER CORE_FORMATION\n2. weapon: Ocean Dragon Flute - Made of deep-sea cold jade. When played, it sounds like a dragon chanting in the ocean, shaking the surroundings. FLUTE CORE_FORMATION\n3. weapon: Fierce Tiger Evil Blade - An ancient ominous weapon sealing the fierce soul of a White Tiger. It must drink blood when unsheathed and may backlash against its master. SABER NASCENT_SOUL\n4. weapon: Sky Optimus Pillar - Refined from fragments of pillars suspected to be from the Ancient Heavenly Court. It is as heavy as a mountain and cannot be wielded by those without great power. STAFF NASCENT_SOUL\n5. weapon: Yin Yang Fan - One side is pure white for life, the other pitch black for death. Waving it reverses Yin and Yang, shrinking the earth to inches. FAN NASCENT_SOUL\n6. weapon: Dragon Spine Whip - Refined from the spine of an ancient true dragon. When waved, there is a faint dragon roar, naturally suppressing lower-level beings. WHIP NASCENT_SOUL\n7. weapon: Fuxi Zither - An imitation of one of the Ten Great Ancient Artifacts, possessing the mysterious power to dominate the minds of all things. ZITHER NASCENT_SOUL\n8. weapon: Demon Calling Flute - A supreme treasure of the Demon Realm. The flute sound is treacherous and can drive monsters and fierce beasts for one's own use. FLUTE NASCENT_SOUL\n9. weapon: Seven-Color Sparrow Feather - Beautiful beyond words, but hidden under the brilliant light is a fatal murderous intent. HIDDEN_WEAPON NASCENT_SOUL\n"
     },
     {
       "ok": true,
@@ -465,7 +465,7 @@
         {
           "icon_key": "elixir_3001",
           "category": "elixir",
-          "name": "练气破境丹",
+          "name": "Qi Refinement Breakthrough Pill",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_006\\batch_006_01.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_006\\elixir_3001.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_006\\elixir_3001.png",
@@ -474,7 +474,7 @@
         {
           "icon_key": "elixir_3002",
           "category": "elixir",
-          "name": "筑基破境丹",
+          "name": "Foundation Establishment Breakthrough Pill",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_006\\batch_006_02.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_006\\elixir_3002.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_006\\elixir_3002.png",
@@ -483,7 +483,7 @@
         {
           "icon_key": "elixir_3003",
           "category": "elixir",
-          "name": "金丹破境丹",
+          "name": "Core Formation Breakthrough Pill",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_006\\batch_006_03.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_006\\elixir_3003.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_006\\elixir_3003.png",
@@ -492,7 +492,7 @@
         {
           "icon_key": "elixir_3005",
           "category": "elixir",
-          "name": "练气长生丹",
+          "name": "Qi Refinement Longevity Pill",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_006\\batch_006_04.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_006\\elixir_3005.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_006\\elixir_3005.png",
@@ -501,7 +501,7 @@
         {
           "icon_key": "elixir_3006",
           "category": "elixir",
-          "name": "筑基长生丹",
+          "name": "Foundation Establishment Longevity Pill",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_006\\batch_006_05.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_006\\elixir_3006.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_006\\elixir_3006.png",
@@ -510,7 +510,7 @@
         {
           "icon_key": "elixir_3007",
           "category": "elixir",
-          "name": "金丹长生丹",
+          "name": "Core Formation Longevity Pill",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_006\\batch_006_06.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_006\\elixir_3007.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_006\\elixir_3007.png",
@@ -519,7 +519,7 @@
         {
           "icon_key": "elixir_3008",
           "category": "elixir",
-          "name": "元婴长生丹",
+          "name": "Nascent Soul Longevity Pill",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_006\\batch_006_07.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_006\\elixir_3008.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_006\\elixir_3008.png",
@@ -528,7 +528,7 @@
         {
           "icon_key": "elixir_3009",
           "category": "elixir",
-          "name": "练气燃血丹",
+          "name": "Qi Refinement Blood Burning Pill",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_006\\batch_006_08.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_006\\elixir_3009.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_006\\elixir_3009.png",
@@ -537,14 +537,14 @@
         {
           "icon_key": "elixir_3010",
           "category": "elixir",
-          "name": "筑基燃血丹",
+          "name": "Foundation Establishment Blood Burning Pill",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_006\\batch_006_09.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_006\\elixir_3010.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_006\\elixir_3010.png",
           "pixel": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\pixel\\elixir_3010.png"
         }
       ],
-      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. elixir: 练气破境丹 - 凝聚灵气，辅助练气期修士突破瓶颈的丹药（药效5年）。 QI_REFINEMENT Breakthrough\n2. elixir: 筑基破境丹 - 蕴含筑基真意，辅助筑基期修士突破瓶颈的灵丹（药效5年）。 FOUNDATION_ESTABLISHMENT Breakthrough\n3. elixir: 金丹破境丹 - 凝结金丹之气，辅助金丹期修士碎丹成婴（药效5年）。 CORE_FORMATION Breakthrough\n4. elixir: 练气长生丹 - 采用凡间珍草炼制，略微延缓衰老（限服一颗）。 QI_REFINEMENT Lifespan\n5. elixir: 筑基长生丹 - 取天地灵草炼制，可延寿十载（限服一颗）。 FOUNDATION_ESTABLISHMENT Lifespan\n6. elixir: 金丹长生丹 - 夺天地造化，凡人服之立毙，金丹修士服之延寿半甲子（限服一颗）。 CORE_FORMATION Lifespan\n7. elixir: 元婴长生丹 - 蕴含一丝长生之气，元婴老怪以此续命（限服一颗）。 NASCENT_SOUL Lifespan\n8. elixir: 练气燃血丹 - 燃烧精血换取短暂爆发。3年内战力提升，但10年内经脉受损战力下降。 QI_REFINEMENT BurnBlood\n9. elixir: 筑基燃血丹 - 激发潜能的猛药。3年内战力大增，但10年内虚弱。 FOUNDATION_ESTABLISHMENT BurnBlood\n"
+      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. elixir: Qi Refinement Breakthrough Pill - A pill that condenses spiritual qi to help Qi Refinement stage cultivators break through bottlenecks (effect lasts 5 years). QI_REFINEMENT Breakthrough\n2. elixir: Foundation Establishment Breakthrough Pill - A spiritual pill containing the true intent of Foundation Establishment to help Foundation Establishment stage cultivators break through bottlenecks (effect lasts 5 years). FOUNDATION_ESTABLISHMENT Breakthrough\n3. elixir: Core Formation Breakthrough Pill - Condenses the qi of Core Formation to help Core Formation stage cultivators shatter the core and form the soul (effect lasts 5 years). CORE_FORMATION Breakthrough\n4. elixir: Qi Refinement Longevity Pill - Refined using common precious herbs QI_REFINEMENT Lifespan\n5. elixir: Foundation Establishment Longevity Pill - Refined from heavenly and earthly spiritual herbs FOUNDATION_ESTABLISHMENT Lifespan\n6. elixir: Core Formation Longevity Pill - Seizes the creation of heaven and earth; mortals die instantly upon consumption CORE_FORMATION Lifespan\n7. elixir: Nascent Soul Longevity Pill - Contains a trace of longevity qi NASCENT_SOUL Lifespan\n8. elixir: Qi Refinement Blood Burning Pill - Burns essence blood in exchange for a short burst of power. Combat power increases within 3 years, but meridians are damaged and combat power decreases within 10 years. QI_REFINEMENT BurnBlood\n9. elixir: Foundation Establishment Blood Burning Pill - A potent medicine to stimulate potential. Combat power increases greatly within 3 years, but weakens within 10 years. FOUNDATION_ESTABLISHMENT BurnBlood\n"
     },
     {
       "ok": true,
@@ -556,7 +556,7 @@
         {
           "icon_key": "elixir_3011",
           "category": "elixir",
-          "name": "金丹燃血丹",
+          "name": "Core Formation Blood Burning Pill",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_007\\batch_007_01.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_007\\elixir_3011.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_007\\elixir_3011.png",
@@ -565,7 +565,7 @@
         {
           "icon_key": "elixir_3012",
           "category": "elixir",
-          "name": "元婴燃血丹",
+          "name": "Nascent Soul Blood Burning Pill",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_007\\batch_007_02.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_007\\elixir_3012.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_007\\elixir_3012.png",
@@ -574,7 +574,7 @@
         {
           "icon_key": "elixir_3013",
           "category": "elixir",
-          "name": "练气回春丹",
+          "name": "Qi Refinement Rejuvenation Pill",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_007\\batch_007_03.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_007\\elixir_3013.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_007\\elixir_3013.png",
@@ -583,7 +583,7 @@
         {
           "icon_key": "elixir_3014",
           "category": "elixir",
-          "name": "筑基回春丹",
+          "name": "Foundation Establishment Rejuvenation Pill",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_007\\batch_007_04.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_007\\elixir_3014.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_007\\elixir_3014.png",
@@ -592,7 +592,7 @@
         {
           "icon_key": "elixir_3015",
           "category": "elixir",
-          "name": "金丹回春丹",
+          "name": "Core Formation Rejuvenation Pill",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_007\\batch_007_05.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_007\\elixir_3015.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_007\\elixir_3015.png",
@@ -601,7 +601,7 @@
         {
           "icon_key": "elixir_3016",
           "category": "elixir",
-          "name": "元婴回春丹",
+          "name": "Nascent Soul Rejuvenation Pill",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_007\\batch_007_06.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_007\\elixir_3016.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_007\\elixir_3016.png",
@@ -610,7 +610,7 @@
         {
           "icon_key": "elixir_3017",
           "category": "elixir",
-          "name": "练气驻颜丹",
+          "name": "Qi Refinement Beauty-Preserving Pill",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_007\\batch_007_07.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_007\\elixir_3017.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_007\\elixir_3017.png",
@@ -619,7 +619,7 @@
         {
           "icon_key": "elixir_3018",
           "category": "elixir",
-          "name": "筑基驻颜丹",
+          "name": "Foundation Establishment Beauty-Preserving Pill",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_007\\batch_007_08.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_007\\elixir_3018.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_007\\elixir_3018.png",
@@ -628,14 +628,14 @@
         {
           "icon_key": "elixir_3019",
           "category": "elixir",
-          "name": "金丹驻颜丹",
+          "name": "Core Formation Beauty-Preserving Pill",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_007\\batch_007_09.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_007\\elixir_3019.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_007\\elixir_3019.png",
           "pixel": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\pixel\\elixir_3019.png"
         }
       ],
-      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. elixir: 金丹燃血丹 - 金丹修士拼命时的选择。3年内战力暴涨，但10年内重伤。 CORE_FORMATION BurnBlood\n2. elixir: 元婴燃血丹 - 燃烧元婴本源。3年内获得毁天灭地的力量，但10年内几乎废人。 NASCENT_SOUL BurnBlood\n3. elixir: 练气回春丹 - 普通的疗伤丹药，可恢复练气期修士的伤势（持续5年）。 QI_REFINEMENT Heal\n4. elixir: 筑基回春丹 - 药力温和醇厚，能快速愈合筑基期修士的肉身损伤（持续5年）。 FOUNDATION_ESTABLISHMENT Heal\n5. elixir: 金丹回春丹 - 蕴含生机之力，疗伤圣药（持续5年）。 CORE_FORMATION Heal\n6. elixir: 元婴回春丹 - 蕴含造化生机，肉身修复极快（持续5年）。 NASCENT_SOUL Heal\n7. elixir: 练气驻颜丹 - 以花露与灵草炼成，可略微改善气色与容貌（限服一颗）。 QI_REFINEMENT Lifespan\n8. elixir: 筑基驻颜丹 - 药性更稳，可长期滋养肌骨神气，使容貌更显出众（限服一颗）。 FOUNDATION_ESTABLISHMENT Lifespan\n9. elixir: 金丹驻颜丹 - 融入金丹灵机，能长久定住巅峰容色，不易为岁月侵蚀（限服一颗）。 CORE_FORMATION Lifespan\n"
+      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. elixir: Core Formation Blood Burning Pill - The choice for Core Formation cultivators when fighting for their lives. Combat power surges within 3 years, but severe injury within 10 years. CORE_FORMATION BurnBlood\n2. elixir: Nascent Soul Blood Burning Pill - Burns the Nascent Soul origin. Gains world-destroying power within 3 years, but becomes almost a cripple within 10 years. NASCENT_SOUL BurnBlood\n3. elixir: Qi Refinement Rejuvenation Pill - A common healing pill that can restore the injuries of Qi Refinement stage cultivators (lasts 5 years). QI_REFINEMENT Heal\n4. elixir: Foundation Establishment Rejuvenation Pill - The medicinal power is gentle and mellow FOUNDATION_ESTABLISHMENT Heal\n5. elixir: Core Formation Rejuvenation Pill - A supreme healing medicine containing the power of vitality (lasts 5 years). CORE_FORMATION Heal\n6. elixir: Nascent Soul Rejuvenation Pill - Contains the creation of vitality NASCENT_SOUL Heal\n7. elixir: Qi Refinement Beauty-Preserving Pill - Refined from floral dew and spirit herbs, it can slightly improve complexion and appearance (limited to one pill). QI_REFINEMENT Lifespan\n8. elixir: Foundation Establishment Beauty-Preserving Pill - Its medicinal nature is steadier and can nourish flesh, bones, and vitality over time, making one's appearance stand out more (limited to one pill). FOUNDATION_ESTABLISHMENT Lifespan\n9. elixir: Core Formation Beauty-Preserving Pill - Infused with Core Formation spiritual essence, it can preserve one's peak looks for a long time and keep the years from wearing them down easily (limited to one pill). CORE_FORMATION Lifespan\n"
     },
     {
       "ok": true,
@@ -647,7 +647,7 @@
         {
           "icon_key": "elixir_3020",
           "category": "elixir",
-          "name": "元婴驻颜丹",
+          "name": "Nascent Soul Beauty-Preserving Pill",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_008\\batch_008_01.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_008\\elixir_3020.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_008\\elixir_3020.png",
@@ -656,7 +656,7 @@
         {
           "icon_key": "auxiliary_2001",
           "category": "auxiliary",
-          "name": "木灵甲",
+          "name": "Wood Spirit Armor",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_008\\batch_008_02.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_008\\auxiliary_2001.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_008\\auxiliary_2001.png",
@@ -665,7 +665,7 @@
         {
           "icon_key": "auxiliary_2002",
           "category": "auxiliary",
-          "name": "血精果",
+          "name": "Blood Essence Fruit",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_008\\batch_008_03.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_008\\auxiliary_2002.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_008\\auxiliary_2002.png",
@@ -674,7 +674,7 @@
         {
           "icon_key": "auxiliary_2003",
           "category": "auxiliary",
-          "name": "人参果(伪)",
+          "name": "Ginseng Fruit (Pseudo)",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_008\\batch_008_04.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_008\\auxiliary_2003.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_008\\auxiliary_2003.png",
@@ -683,7 +683,7 @@
         {
           "icon_key": "auxiliary_2004",
           "category": "auxiliary",
-          "name": "万宝令",
+          "name": "Wanbao Token",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_008\\batch_008_05.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_008\\auxiliary_2004.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_008\\auxiliary_2004.png",
@@ -692,7 +692,7 @@
         {
           "icon_key": "auxiliary_2005",
           "category": "auxiliary",
-          "name": "铁精",
+          "name": "Iron Essence",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_008\\batch_008_06.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_008\\auxiliary_2005.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_008\\auxiliary_2005.png",
@@ -701,7 +701,7 @@
         {
           "icon_key": "auxiliary_2006",
           "category": "auxiliary",
-          "name": "通天法眼",
+          "name": "Heaven-Reaching Dharma Eye",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_008\\batch_008_07.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_008\\auxiliary_2006.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_008\\auxiliary_2006.png",
@@ -710,7 +710,7 @@
         {
           "icon_key": "auxiliary_2007",
           "category": "auxiliary",
-          "name": "踏云靴",
+          "name": "Cloud Treading Boots",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_008\\batch_008_08.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_008\\auxiliary_2007.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_008\\auxiliary_2007.png",
@@ -719,14 +719,14 @@
         {
           "icon_key": "auxiliary_2008",
           "category": "auxiliary",
-          "name": "菩提子",
+          "name": "Bodhi Seed",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_008\\batch_008_09.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_008\\auxiliary_2008.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_008\\auxiliary_2008.png",
           "pixel": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\pixel\\auxiliary_2008.png"
         }
       ],
-      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. elixir: 元婴驻颜丹 - 蕴含造化之气，服之可使容貌若定格于最盛之时（限服一颗）。 NASCENT_SOUL Lifespan\n2. auxiliary: 木灵甲 - 以灵木纤维编织，生机盎然，防御尚可. 筑基\n3. auxiliary: 血精果 - 生于至阳之地，色泽如血，不仅治伤，更能增进功力。 筑基\n4. auxiliary: 人参果(伪) - 虽不及真品，闻一闻也能活三百六十岁. 筑基\n5. auxiliary: 万宝令 - 千帆城通用的高级商令。 筑基\n6. auxiliary: 铁精 - 提炼百斤凡铁才得一两，提升法器品质的基础材料. 筑基\n7. auxiliary: 通天法眼 - 可勘破虚妄，洞察本源，寻觅天地灵机，直视大道。 筑基\n8. auxiliary: 踏云靴 - 步履生云，身轻如燕，赶路必备. 筑基\n9. auxiliary: 菩提子 - 佛门至宝，持之可灵台清明，悟性大增. 筑基\n"
+      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. elixir: Nascent Soul Beauty-Preserving Pill - Contains a trace of creation qi; taking it can keep one's appearance as though fixed at its most radiant moment (limited to one pill). NASCENT_SOUL Lifespan\n2. auxiliary: Wood Spirit Armor - Woven with spiritual wood fibers FOUNDATION_ESTABLISHMENT\n3. auxiliary: Blood Essence Fruit - Born in the place of extreme yang, the color is like blood. It not only heals wounds but also improves cultivation. FOUNDATION_ESTABLISHMENT\n4. auxiliary: Ginseng Fruit (Pseudo) - Though not as good as the real thing FOUNDATION_ESTABLISHMENT\n5. auxiliary: Wanbao Token - A high-level commercial token commonly used in Thousand Sails City. FOUNDATION_ESTABLISHMENT\n6. auxiliary: Iron Essence - Refined from a hundred jin of common iron to get one tael FOUNDATION_ESTABLISHMENT\n7. auxiliary: Heaven-Reaching Dharma Eye - It can see through falsehoods, gain insight into the origin, seek the spiritual opportunities of heaven and earth, and look directly at the Great Dao. FOUNDATION_ESTABLISHMENT\n8. auxiliary: Cloud Treading Boots - Steps born on clouds FOUNDATION_ESTABLISHMENT\n9. auxiliary: Bodhi Seed - A supreme treasure of Buddhism FOUNDATION_ESTABLISHMENT\n"
     },
     {
       "ok": true,
@@ -738,7 +738,7 @@
         {
           "icon_key": "auxiliary_2009",
           "category": "auxiliary",
-          "name": "金丝软甲",
+          "name": "Golden Thread Soft Armor",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_009\\batch_009_01.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_009\\auxiliary_2009.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_009\\auxiliary_2009.png",
@@ -747,7 +747,7 @@
         {
           "icon_key": "auxiliary_2010",
           "category": "auxiliary",
-          "name": "玄冰玉榻",
+          "name": "Black Ice Jade Couch",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_009\\batch_009_02.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_009\\auxiliary_2010.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_009\\auxiliary_2010.png",
@@ -756,7 +756,7 @@
         {
           "icon_key": "auxiliary_2011",
           "category": "auxiliary",
-          "name": "无相面具",
+          "name": "Formless Mask",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_009\\batch_009_03.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_009\\auxiliary_2011.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_009\\auxiliary_2011.png",
@@ -765,7 +765,7 @@
         {
           "icon_key": "auxiliary_2051",
           "category": "auxiliary",
-          "name": "神风舟",
+          "name": "Divine Wind Boat",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_009\\batch_009_04.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_009\\auxiliary_2051.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_009\\auxiliary_2051.png",
@@ -774,7 +774,7 @@
         {
           "icon_key": "auxiliary_2052",
           "category": "auxiliary",
-          "name": "昆仑镜",
+          "name": "Kunlun Mirror",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_009\\batch_009_05.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_009\\auxiliary_2052.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_009\\auxiliary_2052.png",
@@ -783,7 +783,7 @@
         {
           "icon_key": "auxiliary_2053",
           "category": "auxiliary",
-          "name": "造化翠瓶",
+          "name": "Creation Emerald Bottle",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_009\\batch_009_06.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_009\\auxiliary_2053.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_009\\auxiliary_2053.png",
@@ -792,7 +792,7 @@
         {
           "icon_key": "auxiliary_2054",
           "category": "auxiliary",
-          "name": "龙凤呈祥戒",
+          "name": "Dragon and Phoenix Ring",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_009\\batch_009_07.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_009\\auxiliary_2054.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_009\\auxiliary_2054.png",
@@ -801,7 +801,7 @@
         {
           "icon_key": "auxiliary_2055",
           "category": "auxiliary",
-          "name": "隐形披风",
+          "name": "Invisibility Cloak",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_009\\batch_009_08.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_009\\auxiliary_2055.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_009\\auxiliary_2055.png",
@@ -810,14 +810,14 @@
         {
           "icon_key": "auxiliary_2056",
           "category": "auxiliary",
-          "name": "御兽环",
+          "name": "Beast Taming Ring",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_009\\batch_009_09.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_009\\auxiliary_2056.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_009\\auxiliary_2056.png",
           "pixel": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\pixel\\auxiliary_2056.png"
         }
       ],
-      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. auxiliary: 金丝软甲 - 刀枪不入，水火不侵，贴身软甲. 筑基\n2. auxiliary: 玄冰玉榻 - 极北玄冰所制，在此修炼可镇压心火，事半功倍。 筑基\n3. auxiliary: 无相面具 - 千人千面，不仅掩盖容貌，更能掩盖气息. 筑基\n4. auxiliary: 神风舟 - 飞行法器，速度极快，居家旅行杀人越货必备. 金丹\n5. auxiliary: 昆仑镜 - 上古神器，拥有穿梭时空之力，此为仿品，仅能窥探远方. 金丹\n6. auxiliary: 造化翠瓶 - 夺天地之造化，聚日月之精华，瓶中灵液可催熟万物。 元婴\n7. auxiliary: 龙凤呈祥戒 - 龙凤和鸣，心意相通，双修进境一日千里. 金丹\n8. auxiliary: 隐形披风 - 披上后身形尽隐，连神识也难以察觉. 金丹\n9. auxiliary: 御兽环 - 套在妖兽颈上，任其凶焰滔天，也要乖乖听命. 金丹\n"
+      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. auxiliary: Golden Thread Soft Armor - Invulnerable to swords and spears FOUNDATION_ESTABLISHMENT\n2. auxiliary: Black Ice Jade Couch - Made of extreme northern black ice. Cultivating on it can suppress the fire of the heart and yield twice the result with half the effort. FOUNDATION_ESTABLISHMENT\n3. auxiliary: Formless Mask - A thousand faces for a thousand people FOUNDATION_ESTABLISHMENT\n4. auxiliary: Divine Wind Boat - A flying artifact CORE_FORMATION\n5. auxiliary: Kunlun Mirror - An ancient divine artifact with the power to travel through time and space; this is an imitation CORE_FORMATION\n6. auxiliary: Creation Emerald Bottle - Seizing the creation of heaven and earth, gathering the essence of the sun and moon. The spiritual liquid in the bottle can ripen all things. NASCENT_SOUL\n7. auxiliary: Dragon and Phoenix Ring - Dragon and phoenix in harmony CORE_FORMATION\n8. auxiliary: Invisibility Cloak - When worn CORE_FORMATION\n9. auxiliary: Beast Taming Ring - Placed on a demonic beast's neck CORE_FORMATION\n"
     },
     {
       "ok": true,
@@ -829,7 +829,7 @@
         {
           "icon_key": "auxiliary_2057",
           "category": "auxiliary",
-          "name": "太虚甲",
+          "name": "Void Armor",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_010\\batch_010_01.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_010\\auxiliary_2057.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_010\\auxiliary_2057.png",
@@ -838,7 +838,7 @@
         {
           "icon_key": "auxiliary_2058",
           "category": "auxiliary",
-          "name": "八卦炉",
+          "name": "Eight Trigrams Furnace",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_010\\batch_010_02.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_010\\auxiliary_2058.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_010\\auxiliary_2058.png",
@@ -847,7 +847,7 @@
         {
           "icon_key": "auxiliary_2059",
           "category": "auxiliary",
-          "name": "聚宝盆",
+          "name": "Treasure Basin",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_010\\batch_010_03.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_010\\auxiliary_2059.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_010\\auxiliary_2059.png",
@@ -856,7 +856,7 @@
         {
           "icon_key": "auxiliary_2060",
           "category": "auxiliary",
-          "name": "天地烘炉",
+          "name": "Heaven and Earth Furnace",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_010\\batch_010_04.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_010\\auxiliary_2060.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_010\\auxiliary_2060.png",
@@ -865,7 +865,7 @@
         {
           "icon_key": "auxiliary_2061",
           "category": "auxiliary",
-          "name": "六道剑匣",
+          "name": "Six Paths Sword Casket",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_010\\batch_010_05.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_010\\auxiliary_2061.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_010\\auxiliary_2061.png",
@@ -874,7 +874,7 @@
         {
           "icon_key": "auxiliary_2062",
           "category": "auxiliary",
-          "name": "传国玉玺",
+          "name": "Imperial Seal",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_010\\batch_010_06.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_010\\auxiliary_2062.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_010\\auxiliary_2062.png",
@@ -883,7 +883,7 @@
         {
           "icon_key": "auxiliary_2063",
           "category": "auxiliary",
-          "name": "灵泉之眼",
+          "name": "Spirit Spring Eye",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_010\\batch_010_07.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_010\\auxiliary_2063.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_010\\auxiliary_2063.png",
@@ -892,7 +892,7 @@
         {
           "icon_key": "auxiliary_2064",
           "category": "auxiliary",
-          "name": "万魂幡",
+          "name": "Ten Thousand Souls Banner",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_010\\batch_010_08.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_010\\auxiliary_2064.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_010\\auxiliary_2064.png",
@@ -901,14 +901,14 @@
         {
           "icon_key": "auxiliary_2065",
           "category": "auxiliary",
-          "name": "青木神鼎",
+          "name": "Green Wood Divine Cauldron",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_010\\batch_010_09.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_010\\auxiliary_2065.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_010\\auxiliary_2065.png",
           "pixel": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\pixel\\auxiliary_2065.png"
         }
       ],
-      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. auxiliary: 太虚甲 - 太虚幻境所化，万法不沾，防御力惊人. 金丹\n2. auxiliary: 八卦炉 - 仿太上老君炼丹炉，丹成九转，药效倍增. 金丹\n3. auxiliary: 聚宝盆 - 放入一文，取出万贯，财源滚滚. 金丹\n4. auxiliary: 天地烘炉 - 以天地为炉，造化为工，炼制万物. 金丹\n5. auxiliary: 六道剑匣 - 背负六道，剑出轮回，悟剑良伴. 金丹\n6. auxiliary: 传国玉玺 - 受命于天，既寿永昌。皇威浩荡，震慑宵小. 元婴\n7. auxiliary: 灵泉之眼 - 可移动的灵气之眼，随身携带的修行宝地。 金丹\n8. auxiliary: 万魂幡 - 血海不枯，冥河不死。极度邪恶的掠夺法宝. 元婴\n9. auxiliary: 青木神鼎 - 上古神木雕琢而成，不仅可炼丹，更能自成空间催熟灵药。 元婴\n"
+      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. auxiliary: Void Armor - Transformed from the Void Illusion Realm CORE_FORMATION\n2. auxiliary: Eight Trigrams Furnace - An imitation of Grand Supreme Elder Lord's alchemy furnace CORE_FORMATION\n3. auxiliary: Treasure Basin - Put in one coin CORE_FORMATION\n4. auxiliary: Heaven and Earth Furnace - Using heaven and earth as the furnace and creation as the worker CORE_FORMATION\n5. auxiliary: Six Paths Sword Casket - Carrying the six paths CORE_FORMATION\n6. auxiliary: Imperial Seal - Mandated by Heaven NASCENT_SOUL\n7. auxiliary: Spirit Spring Eye - A movable source of spiritual energy, a cultivation treasure land carried with you. CORE_FORMATION\n8. auxiliary: Ten Thousand Souls Banner - The sea of blood never dries NASCENT_SOUL\n9. auxiliary: Green Wood Divine Cauldron - Carved from ancient divine wood. It can not only refine divine pills but also form a space of its own to ripen spirit herbs. NASCENT_SOUL\n"
     },
     {
       "ok": true,
@@ -920,7 +920,7 @@
         {
           "icon_key": "auxiliary_2071",
           "category": "auxiliary",
-          "name": "百虫囊",
+          "name": "Hundred-Bug Pouch",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_011\\batch_011_01.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_011\\auxiliary_2071.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_011\\auxiliary_2071.png",
@@ -929,7 +929,7 @@
         {
           "icon_key": "auxiliary_2072",
           "category": "auxiliary",
-          "name": "五毒蛊盅",
+          "name": "Five-Venom Gu Vessel",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_011\\batch_011_02.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_011\\auxiliary_2072.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_011\\auxiliary_2072.png",
@@ -938,7 +938,7 @@
         {
           "icon_key": "auxiliary_2073",
           "category": "auxiliary",
-          "name": "千机蛊匣",
+          "name": "Thousand-Mechanism Gu Box",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_011\\batch_011_03.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_011\\auxiliary_2073.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_011\\auxiliary_2073.png",
@@ -947,7 +947,7 @@
         {
           "icon_key": "auxiliary_2074",
           "category": "auxiliary",
-          "name": "万蛊母巢",
+          "name": "Myriad-Gu Brood Nest",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_011\\batch_011_04.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_011\\auxiliary_2074.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_011\\auxiliary_2074.png",
@@ -956,7 +956,7 @@
         {
           "icon_key": "auxiliary_2081",
           "category": "auxiliary",
-          "name": "下品阵盘",
+          "name": "Spirit-Calling Formation Disk",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_011\\batch_011_05.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_011\\auxiliary_2081.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_011\\auxiliary_2081.png",
@@ -965,7 +965,7 @@
         {
           "icon_key": "auxiliary_2082",
           "category": "auxiliary",
-          "name": "中品阵盘",
+          "name": "Leyline-Gathering Formation Disk",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_011\\batch_011_06.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_011\\auxiliary_2082.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_011\\auxiliary_2082.png",
@@ -974,7 +974,7 @@
         {
           "icon_key": "auxiliary_2083",
           "category": "auxiliary",
-          "name": "上品阵盘",
+          "name": "Mystic Pivot Formation Disk",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_011\\batch_011_07.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_011\\auxiliary_2083.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_011\\auxiliary_2083.png",
@@ -983,7 +983,7 @@
         {
           "icon_key": "auxiliary_2084",
           "category": "auxiliary",
-          "name": "极品阵盘",
+          "name": "Great Void Formation Disk",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_011\\batch_011_08.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_011\\auxiliary_2084.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_011\\auxiliary_2084.png",
@@ -992,14 +992,14 @@
         {
           "icon_key": "technique_1",
           "category": "technique",
-          "name": "混元金身",
+          "name": "Primordial Golden Body",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_011\\batch_011_09.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_011\\technique_1.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_011\\technique_1.png",
           "pixel": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\pixel\\technique_1.png"
         }
       ],
-      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. auxiliary: 百虫囊 - 以粗布与兽皮制成的蛊囊，可收纳寻常灵虫。 练气\n2. auxiliary: 五毒蛊盅 - 以五毒相生之法炼成的蛊盅，蛊性较为稳定。 筑基\n3. auxiliary: 千机蛊匣 - 机关与蛊术结合的蛊匣，便于隐蔽施蛊。 金丹\n4. auxiliary: 万蛊母巢 - 母蛊盘踞其中，可统御群蛊。 元婴\n5. auxiliary: 下品阵盘 - 刻有基础阵纹的阵盘，可在当前区域布置低阶阵法。 练气\n6. auxiliary: 中品阵盘 - 阵纹较为稳定的阵盘，可在当前区域布置中阶阵法。 筑基\n7. auxiliary: 上品阵盘 - 可承载复杂灵路的阵盘，可在当前区域布置高阶阵法。 金丹\n8. auxiliary: 极品阵盘 - 灵纹自成循环的阵盘，可在当前区域布置顶级阵法。 元婴\n9. technique: 混元金身 - 佛门护教神功，浑身坚若金石，寻常兵刃难伤。 LOWER GOLD\n"
+      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. auxiliary: Hundred-Bug Pouch - A Gu pouch made of coarse cloth and beast hide, used to hold common spirit insects. QI_REFINEMENT\n2. auxiliary: Five-Venom Gu Vessel - A Gu vessel refined through the mutual generation method of the five venoms. Its Gu nature is relatively stable. FOUNDATION_ESTABLISHMENT\n3. auxiliary: Thousand-Mechanism Gu Box - A Gu box combining mechanisms and Gu arts, suitable for concealed Gu infliction. CORE_FORMATION\n4. auxiliary: Myriad-Gu Brood Nest - A brood nest occupied by mother Gu, able to command many Gu. NASCENT_SOUL\n5. auxiliary: Spirit-Calling Formation Disk - A formation disk engraved with basic spirit-calling patterns, able to draw on local spiritual energy to set a temporary formation. QI_REFINEMENT\n6. auxiliary: Leyline-Gathering Formation Disk - Its patterns connect to shallow leylines, making formations steadier and slightly improving their power and duration. FOUNDATION_ESTABLISHMENT\n7. auxiliary: Mystic Pivot Formation Disk - Mystic pivot patterns coordinate multiple spirit circuits, empowering formations and reducing part of their spirit stone loss. CORE_FORMATION\n8. auxiliary: Great Void Formation Disk - Its spirit patterns form a self-contained cycle, drawing void spiritual energy to greatly improve formation power, duration, and efficiency. NASCENT_SOUL\n9. technique: Primordial Golden Body - A Buddhist guardian divine skill, the body is as hard as metal and stone, invulnerable to ordinary weapons. LOWER GOLD\n"
     },
     {
       "ok": true,
@@ -1011,7 +1011,7 @@
         {
           "icon_key": "technique_2",
           "category": "technique",
-          "name": "金钟罩",
+          "name": "Golden Bell Shield",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_012\\batch_012_01.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_012\\technique_2.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_012\\technique_2.png",
@@ -1020,7 +1020,7 @@
         {
           "icon_key": "technique_4",
           "category": "technique",
-          "name": "青元长生功",
+          "name": "Azure Origin Longevity Art",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_012\\batch_012_02.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_012\\technique_4.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_012\\technique_4.png",
@@ -1029,7 +1029,7 @@
         {
           "icon_key": "technique_5",
           "category": "technique",
-          "name": "太乙青木气",
+          "name": "Taiyi Azure Wood Qi",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_012\\batch_012_03.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_012\\technique_5.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_012\\technique_5.png",
@@ -1038,7 +1038,7 @@
         {
           "icon_key": "technique_7",
           "category": "technique",
-          "name": "若水诀",
+          "name": "Ruoshui Formula",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_012\\batch_012_04.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_012\\technique_7.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_012\\technique_7.png",
@@ -1047,7 +1047,7 @@
         {
           "icon_key": "technique_8",
           "category": "technique",
-          "name": "北冥玄水拳",
+          "name": "Northern Dark Mystic Water Fist",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_012\\batch_012_05.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_012\\technique_8.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_012\\technique_8.png",
@@ -1056,7 +1056,7 @@
         {
           "icon_key": "technique_10",
           "category": "technique",
-          "name": "火灵诀",
+          "name": "Fire Spirit Formula",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_012\\batch_012_06.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_012\\technique_10.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_012\\technique_10.png",
@@ -1065,7 +1065,7 @@
         {
           "icon_key": "technique_11",
           "category": "technique",
-          "name": "纯阳真功",
+          "name": "Pure Yang True Art",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_012\\batch_012_07.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_012\\technique_11.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_012\\technique_11.png",
@@ -1074,7 +1074,7 @@
         {
           "icon_key": "technique_13",
           "category": "technique",
-          "name": "搬山诀",
+          "name": "Mountain Moving Formula",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_012\\batch_012_08.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_012\\technique_13.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_012\\technique_13.png",
@@ -1083,14 +1083,14 @@
         {
           "icon_key": "technique_14",
           "category": "technique",
-          "name": "不动明王诀",
+          "name": "Immovable Wisdom King Formula",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_012\\batch_012_09.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_012\\technique_14.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_012\\technique_14.png",
           "pixel": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\pixel\\technique_14.png"
         }
       ],
-      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. technique: 金钟罩 - 运气成钟，护持周身，反震外力。 MIDDLE GOLD\n2. technique: 青元长生功 - 木系基础功法，气息绵长，有驻颜延寿之效。 LOWER WOOD\n3. technique: 太乙青木气 - 汲取天地草木精气，生机浩荡，万木臣服。 MIDDLE WOOD\n4. technique: 若水诀 - 上善若水，水利万物而不争，绵柔醇厚。 LOWER WATER\n5. technique: 北冥玄水拳 - 驾驭滔滔黑水，重若千钧，拳意如深海暗流。 MIDDLE WATER\n6. technique: 火灵诀 - 最基础的法术，凝聚火炎伤敌，简单实用。 LOWER FIRE\n7. technique: 纯阳真功 - 纯阳之气，刚猛无铸，克制阴邪。 MIDDLE FIRE\n8. technique: 搬山诀 - 力能扛鼎，气力悠长，如下山猛虎。 LOWER EARTH\n9. technique: 不动明王诀 - 不动如山，动如雷震，佛门护法神功。 MIDDLE EARTH\n"
+      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. technique: Golden Bell Shield - Gathers qi into a bell to protect the body and reflect external forces. MIDDLE GOLD\n2. technique: Azure Origin Longevity Art - Basic Wood-system cultivation method, with long breath and effects of maintaining youth and extending life. LOWER WOOD\n3. technique: Taiyi Azure Wood Qi - Absorbing the essence of heaven and earth's plants, with vast vitality, making all woods submit. MIDDLE WOOD\n4. technique: Ruoshui Formula - The highest good is like water, water benefits all things without competing, soft and mellow. LOWER WATER\n5. technique: Northern Dark Mystic Water Fist - Driving the surging black water, heavy as a thousand jun, with fist intent like deep sea undercurrents. MIDDLE WATER\n6. technique: Fire Spirit Formula - The most basic spell, gathering fire to hurt enemies, simple and practical. LOWER FIRE\n7. technique: Pure Yang True Art - Pure Yang qi, fierce and unyielding, restraining cold and evil. MIDDLE FIRE\n8. technique: Mountain Moving Formula - Able to lift a tripod with strength, with long physical power, like a tiger coming down the mountain. LOWER EARTH\n9. technique: Immovable Wisdom King Formula - Immovable as a mountain, moving like a thunderbolt, a Buddhist guardian divine skill. MIDDLE EARTH\n"
     },
     {
       "ok": true,
@@ -1102,7 +1102,7 @@
         {
           "icon_key": "technique_16",
           "category": "technique",
-          "name": "凝神冰心诀",
+          "name": "Concentrating Ice Heart Formula",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_013\\batch_013_01.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_013\\technique_16.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_013\\technique_16.png",
@@ -1111,7 +1111,7 @@
         {
           "icon_key": "technique_17",
           "category": "technique",
-          "name": "玄冰劲",
+          "name": "Profound Ice Power",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_013\\batch_013_02.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_013\\technique_17.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_013\\technique_17.png",
@@ -1120,7 +1120,7 @@
         {
           "icon_key": "technique_19",
           "category": "technique",
-          "name": "流云百变身",
+          "name": "Flowing Cloud Hundred Transformations Body",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_013\\batch_013_03.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_013\\technique_19.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_013\\technique_19.png",
@@ -1129,7 +1129,7 @@
         {
           "icon_key": "technique_20",
           "category": "technique",
-          "name": "踏云步",
+          "name": "Cloud Treading Step",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_013\\batch_013_04.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_013\\technique_20.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_013\\technique_20.png",
@@ -1138,7 +1138,7 @@
         {
           "icon_key": "technique_22",
           "category": "technique",
-          "name": "敛息术",
+          "name": "Breath Concealment Technique",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_013\\batch_013_05.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_013\\technique_22.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_013\\technique_22.png",
@@ -1147,7 +1147,7 @@
         {
           "icon_key": "technique_23",
           "category": "technique",
-          "name": "幻影迷踪步",
+          "name": "Phantom Trace Step",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_013\\batch_013_06.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_013\\technique_23.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_013\\technique_23.png",
@@ -1156,7 +1156,7 @@
         {
           "icon_key": "technique_25",
           "category": "technique",
-          "name": "掌心雷",
+          "name": "Palm Lightning",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_013\\batch_013_07.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_013\\technique_25.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_013\\technique_25.png",
@@ -1165,7 +1165,7 @@
         {
           "icon_key": "technique_26",
           "category": "technique",
-          "name": "五雷正法",
+          "name": "Five Thunders Orthodoxy",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_013\\batch_013_08.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_013\\technique_26.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_013\\technique_26.png",
@@ -1174,14 +1174,14 @@
         {
           "icon_key": "technique_28",
           "category": "technique",
-          "name": "燃血爆元术",
+          "name": "Blood Burning Essence Explosion Art",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_013\\batch_013_09.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_013\\technique_28.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_013\\technique_28.png",
           "pixel": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\pixel\\technique_28.png"
         }
       ],
-      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. technique: 凝神冰心诀 - 心若冰清，天塌不惊，凝神静气。 LOWER ICE\n2. technique: 玄冰劲 - 寒气透骨，冻结经脉，阴狠霸道。 MIDDLE ICE\n3. technique: 流云百变身 - 身法灵动，变幻莫测，逃跑一流。 LOWER WIND\n4. technique: 踏云步 - 借力腾空，左脚踩右脚，直上青云九霄。 MIDDLE WIND\n5. technique: 敛息术 - 收敛气息，如枯木死灰，令人难以察觉。 LOWER DARK\n6. technique: 幻影迷踪步 - 如鬼魅般难以捉摸，步法诡异，令人眼花缭乱。 MIDDLE DARK\n7. technique: 掌心雷 - 道家正宗法术，掌心发雷，震慑妖邪。 LOWER THUNDER\n8. technique: 五雷正法 - 役使五行之雷，刚猛霸道，无坚不摧。 MIDDLE THUNDER\n9. technique: 燃血爆元术 - 燃烧精血，短暂爆发实力，事后虚弱。 LOWER EVIL\n"
+      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. technique: Concentrating Ice Heart Formula - The heart is clear as ice, heaven falling will not startle, focusing and calming the mind. LOWER ICE\n2. technique: Profound Ice Power - Cold qi reaches the bone, freezing meridians, sinister and overbearing. MIDDLE ICE\n3. technique: Flowing Cloud Hundred Transformations Body - Agile movement, ever-changing, first-rate for escaping. LOWER WIND\n4. technique: Cloud Treading Step - Borrowing force to soar, left foot stepping on the right foot, going straight up to the nine heavens. MIDDLE WIND\n5. technique: Breath Concealment Technique - Concealing breath, like dead wood and cold ashes, making it difficult for others to detect. LOWER DARK\n6. technique: Phantom Trace Step - Elusive as a ghost, with mysterious steps, dazzling to the eye. MIDDLE DARK\n7. technique: Palm Lightning - A righteous Daoist spell, lightning emitted from the palm, intimidating evil spirits. LOWER THUNDER\n8. technique: Five Thunders Orthodoxy - Employing the five elements of thunder, fierce and overbearing, indestructible. MIDDLE THUNDER\n9. technique: Blood Burning Essence Explosion Art - Burning essence blood for a short burst of strength, followed by weakness. LOWER EVIL\n"
     },
     {
       "ok": true,
@@ -1193,7 +1193,7 @@
         {
           "icon_key": "technique_29",
           "category": "technique",
-          "name": "吞灵归元功",
+          "name": "Spirit Swallowing Origin Return Art",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_014\\batch_014_01.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_014\\technique_29.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_014\\technique_29.png",
@@ -1202,7 +1202,7 @@
         {
           "icon_key": "technique_30",
           "category": "technique",
-          "name": "斩星枯荣剑",
+          "name": "Star Slashing Withered Glory Sword",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_014\\batch_014_02.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_014\\technique_30.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_014\\technique_30.png",
@@ -1211,7 +1211,7 @@
         {
           "icon_key": "technique_31",
           "category": "technique",
-          "name": "九霄御雷术",
+          "name": "Nine Heavens Lightning Control Art",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_014\\batch_014_03.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_014\\technique_31.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_014\\technique_31.png",
@@ -1220,7 +1220,7 @@
         {
           "icon_key": "technique_32",
           "category": "technique",
-          "name": "沧浪剑意",
+          "name": "Surging Waves Sword Intent",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_014\\batch_014_04.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_014\\technique_32.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_014\\technique_32.png",
@@ -1229,7 +1229,7 @@
         {
           "icon_key": "technique_33",
           "category": "technique",
-          "name": "乙木长生诀",
+          "name": "Yimu Longevity Formula",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_014\\batch_014_05.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_014\\technique_33.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_014\\technique_33.png",
@@ -1238,7 +1238,7 @@
         {
           "icon_key": "technique_34",
           "category": "technique",
-          "name": "龙象镇魔功",
+          "name": "Dragon Elephant Demon Suppressing Art",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_014\\batch_014_06.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_014\\technique_34.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_014\\technique_34.png",
@@ -1247,7 +1247,7 @@
         {
           "icon_key": "technique_35",
           "category": "technique",
-          "name": "垂天阴阳翼",
+          "name": "Cloud Hanging Yin Yang Wings",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_014\\batch_014_07.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_014\\technique_35.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_014\\technique_35.png",
@@ -1256,7 +1256,7 @@
         {
           "icon_key": "technique_36",
           "category": "technique",
-          "name": "太虚行者录",
+          "name": "Void Walker Record",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_014\\batch_014_08.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_014\\technique_36.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_014\\technique_36.png",
@@ -1265,14 +1265,14 @@
         {
           "icon_key": "technique_37",
           "category": "technique",
-          "name": "太上忘情篇",
+          "name": "Supreme Oblivion Chapter",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_014\\batch_014_09.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_014\\technique_37.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_014\\technique_37.png",
           "pixel": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\pixel\\technique_37.png"
         }
       ],
-      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. technique: 吞灵归元功 - 强行吸取他人灵力为己用，霸道异常，常有反噬风险。 MIDDLE EVIL\n2. technique: 斩星枯荣剑 - 一剑枯荣，斩尽日月星辰，乃剑道至高境界。 UPPER GOLD\n3. technique: 九霄御雷术 - 引九天雷霆入剑，煌煌天威，荡尽群魔。 UPPER THUNDER\n4. technique: 沧浪剑意 - 君不见沧浪之水天上来，奔流到海不复回。 UPPER FIRE\n5. technique: 乙木长生诀 - 上古木系至高功法，生生不息，枯木逢春。 UPPER WOOD\n6. technique: 龙象镇魔功 - 以气引神，力若龙象，举手投足，镇压诸邪。 UPPER EARTH\n7. technique: 垂天阴阳翼 - 入海为鱼，扶摇为鸟。阴阳变化，极速与吞噬并存。 UPPER EVIL\n8. technique: 太虚行者录 - 以无限空间证道，掌控虚空，先天立于不败之地。 UPPER WATER\n9. technique: 太上忘情篇 - 太上忘情，非无情，乃忘情。至公至正，威力无穷。 UPPER ICE\n"
+      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. technique: Spirit Swallowing Origin Return Art - Forcibly absorbing others' spiritual power for own use, extraordinarily overbearing, often with backlash risks. MIDDLE EVIL\n2. technique: Star Slashing Withered Glory Sword - One sword brings withering and glory, slashing through the sun, moon, and stars, the highest realm of the sword way. UPPER GOLD\n3. technique: Nine Heavens Lightning Control Art - Guiding the lightning of the nine heavens into the sword, with grand heavenly majesty, wiping out all demons. UPPER THUNDER\n4. technique: Surging Waves Sword Intent - Don't you see the water of the surging waves coming from the sky, rushing to the sea and never returning. UPPER FIRE\n5. technique: Yimu Longevity Formula - Ancient supreme Wood-system cultivation method, unending life, dead wood encountering spring. UPPER WOOD\n6. technique: Dragon Elephant Demon Suppressing Art - Guiding spirit with qi, power like a dragon and elephant, every move suppresses all evils. UPPER EARTH\n7. technique: Cloud Hanging Yin Yang Wings - Entering the sea as a fish, rising as a bird. Yin-Yang changes, coexisting extreme speed and devouring. UPPER EVIL\n8. technique: Void Walker Record - Proving the Dao through infinite space, controlling the void, inherently invincible. UPPER WATER\n9. technique: Supreme Oblivion Chapter - Supreme amorousness is not emotionless, but forgetting emotion. Utmost justice and fairness, with infinite power. UPPER ICE\n"
     },
     {
       "ok": true,
@@ -1284,7 +1284,7 @@
         {
           "icon_key": "technique_38",
           "category": "technique",
-          "name": "逍遥游",
+          "name": "Carefree Travel",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_015\\batch_015_01.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_015\\technique_38.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_015\\technique_38.png",
@@ -1293,7 +1293,7 @@
         {
           "icon_key": "technique_39",
           "category": "technique",
-          "name": "混沌噬灵诀",
+          "name": "Chaos Spirit Swallowing Art",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_015\\batch_015_02.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_015\\technique_39.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_015\\technique_39.png",
@@ -1302,7 +1302,7 @@
         {
           "icon_key": "technique_40",
           "category": "technique",
-          "name": "罗刹魔典",
+          "name": "Rakshasa Demon Canon",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_015\\batch_015_03.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_015\\technique_40.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_015\\technique_40.png",
@@ -1311,7 +1311,7 @@
         {
           "icon_key": "technique_41",
           "category": "technique",
-          "name": "血海不灭经",
+          "name": "Blood Sea Indestructible Scripture",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_015\\batch_015_04.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_015\\technique_41.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_015\\technique_41.png",
@@ -1320,7 +1320,7 @@
         {
           "icon_key": "technique_42",
           "category": "technique",
-          "name": "九转火源经",
+          "name": "Nine Turns Fire Source Scripture",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_015\\batch_015_05.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_015\\technique_42.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_015\\technique_42.png",
@@ -1329,7 +1329,7 @@
         {
           "icon_key": "technique_43",
           "category": "technique",
-          "name": "种魔夺天诀",
+          "name": "Demon Seeding Heaven Seizing Art",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_015\\batch_015_06.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_015\\technique_43.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_015\\technique_43.png",
@@ -1338,7 +1338,7 @@
         {
           "icon_key": "technique_44",
           "category": "technique",
-          "name": "千念分神术",
+          "name": "Thousand Thoughts Distraction Art",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_015\\batch_015_07.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_015\\technique_44.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_015\\technique_44.png",
@@ -1347,7 +1347,7 @@
         {
           "icon_key": "technique_45",
           "category": "technique",
-          "name": "大乐赋",
+          "name": "Great Bliss Ode",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_015\\batch_015_08.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_015\\technique_45.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_015\\technique_45.png",
@@ -1356,14 +1356,14 @@
         {
           "icon_key": "technique_46",
           "category": "technique",
-          "name": "天魔舞",
+          "name": "Heavenly Demonic Dance",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_015\\batch_015_09.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_015\\technique_46.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_015\\technique_46.png",
           "pixel": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\pixel\\technique_46.png"
         }
       ],
-      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. technique: 逍遥游 - 乘天地之正，而御六气之辩，以游无穷。 UPPER WIND\n2. technique: 混沌噬灵诀 - 吞噬万千体质本源，以后天返先天，铸就混沌之躯。 UPPER DARK\n3. technique: 罗刹魔典 - 魔门至高宝典，包罗万象，直指破碎虚空之境。 UPPER EVIL\n4. technique: 血海不灭经 - 血海不枯，真身不死。演化亿万血神子。 UPPER ICE\n5. technique: 九转火源经 - 通过吞噬天地异火进化功法，潜力无限，号令万火。 UPPER FIRE\n6. technique: 种魔夺天诀 - 以天地为炉鼎，种魔种，夺天地造化，死中求生。 UPPER DARK\n7. technique: 千念分神术 - 专修神识，能分心多用，操控万千法器傀儡。 UPPER GOLD\n8. technique: 大乐赋 - 阴阳大道，极乐飞升。双修之至高法门。 UPPER WATER\n9. technique: 天魔舞 - 域外天魔之舞，勾魂摄魄，乱人心智。 UPPER DARK\n"
+      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. technique: Carefree Travel - Riding the correctness of heaven and earth, and controlling the changes of the six qi to travel infinitely. UPPER WIND\n2. technique: Chaos Spirit Swallowing Art - Devouring the origin of ten thousand constitutions, returning to the innate from the acquired, forging the Chaos Body. UPPER DARK\n3. technique: Rakshasa Demon Canon - The highest treasure book of the demonic gate, all-encompassing, pointing directly to the realm of shattering the void. UPPER EVIL\n4. technique: Blood Sea Indestructible Scripture - The blood sea never dries, the true body never dies. Evolving into hundreds of millions of blood god sons. UPPER ICE\n5. technique: Nine Turns Fire Source Scripture - Evolving the technique by devouring the exotic flames of heaven and earth, with infinite potential, commanding all fires. UPPER FIRE\n6. technique: Demon Seeding Heaven Seizing Art - Using heaven and earth as a furnace, planting demonic seeds, seizing the creation of heaven and earth, seeking life in death. UPPER DARK\n7. technique: Thousand Thoughts Distraction Art - Specializing in divine sense, able to multitask and control ten thousand magical artifacts and puppets. UPPER GOLD\n8. technique: Great Bliss Ode - The Great Dao of Yin and Yang, ascending in extreme bliss. The highest method of dual cultivation. UPPER WATER\n9. technique: Heavenly Demonic Dance - The dance of extraterrestrial demons, soul-hooking and mind-disturbing. UPPER DARK\n"
     },
     {
       "ok": true,
@@ -1375,7 +1375,7 @@
         {
           "icon_key": "technique_47",
           "category": "technique",
-          "name": "烟波渺步",
+          "name": "Misty Wave Step",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_016\\batch_016_01.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_016\\technique_47.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_016\\technique_47.png",
@@ -1384,7 +1384,7 @@
         {
           "icon_key": "technique_48",
           "category": "technique",
-          "name": "无量寂灭经",
+          "name": "Immeasurable Nirvana Scripture",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_016\\batch_016_02.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_016\\technique_48.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_016\\technique_48.png",
@@ -1393,7 +1393,7 @@
         {
           "icon_key": "technique_49",
           "category": "technique",
-          "name": "大威德金刚雷",
+          "name": "Yamantaka Vajra Lightning",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_016\\batch_016_03.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_016\\technique_49.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_016\\technique_49.png",
@@ -1402,7 +1402,7 @@
         {
           "icon_key": "technique_50",
           "category": "technique",
-          "name": "六字大明咒",
+          "name": "Six Syllable Mantra",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_016\\batch_016_04.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_016\\technique_50.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_016\\technique_50.png",
@@ -1411,7 +1411,7 @@
         {
           "icon_key": "technique_51",
           "category": "technique",
-          "name": "幽冥玄阴爪",
+          "name": "Nether Mystic Yin Claw",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_016\\batch_016_05.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_016\\technique_51.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_016\\technique_51.png",
@@ -1420,7 +1420,7 @@
         {
           "icon_key": "technique_52",
           "category": "technique",
-          "name": "雷影瞬遁",
+          "name": "Lightning Shadow Flash",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_016\\batch_016_06.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_016\\technique_52.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_016\\technique_52.png",
@@ -1429,7 +1429,7 @@
         {
           "icon_key": "technique_53",
           "category": "technique",
-          "name": "修罗血煞功",
+          "name": "Asura Blood Fiend Art",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_016\\batch_016_07.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_016\\technique_53.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_016\\technique_53.png",
@@ -1438,7 +1438,7 @@
         {
           "icon_key": "technique_54",
           "category": "technique",
-          "name": "天工造物诀",
+          "name": "Heavenly Creation Art",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_016\\batch_016_08.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_016\\technique_54.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_016\\technique_54.png",
@@ -1447,14 +1447,14 @@
         {
           "icon_key": "technique_55",
           "category": "technique",
-          "name": "万星飞仙阵",
+          "name": "Ten Thousand Stars Flying Immortal Array",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_016\\batch_016_09.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_016\\technique_55.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_016\\technique_55.png",
           "pixel": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\pixel\\technique_55.png"
         }
       ],
-      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. technique: 烟波渺步 - 体迅飞凫，飘忽若神，动无常则，若危若安。 UPPER WIND\n2. technique: 无量寂灭经 - 神魂不灭，超脱彼岸。修成无量法身，万劫不磨。 UPPER EARTH\n3. technique: 大威德金刚雷 - 佛门护法金刚之怒，如雷霆万钧，震慑一切邪魔，荡涤世间污秽。 UPPER THUNDER\n4. technique: 六字大明咒 - 唵嘛呢叭咪吽。佛门至高咒语，蕴含无尽愿力，能净化世间一切罪业与灾厄。 UPPER GOLD\n5. technique: 幽冥玄阴爪 - 阴损毒辣，专破内家真气，触之即死。 UPPER DARK\n6. technique: 雷影瞬遁 - 身化雷霆，瞬息千里，原地只留残影重重。 UPPER WIND\n7. technique: 修罗血煞功 - 以自身为皮，鲜血为墨。修炼者必先历经剥皮噬血之苦。 UPPER EVIL\n8. technique: 天工造物诀 - 炼器极致，化腐朽为神奇，万物皆可随心炼化。 UPPER GOLD\n9. technique: 万星飞仙阵 - 引周天星力，演化宇宙洪荒，攻防一体。 UPPER EARTH\n"
+      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. technique: Misty Wave Step - Moving as fast as a flying duck, elusive as a god, moving without rule, seemingly dangerous but safe. UPPER WIND\n2. technique: Immeasurable Nirvana Scripture - The soul is indestructible, transcending to the other shore. Cultivating the immeasurable dharma body, eternal through ten thousand calamities. UPPER EARTH\n3. technique: Yamantaka Vajra Lightning - The wrath of the Buddhist Guardian Vajra, like a thunderbolt of ten thousand jun, intimidating all demons and cleansing the world's filth. UPPER THUNDER\n4. technique: Six Syllable Mantra - Om Mani Padme Hum. The supreme mantra of Buddhism, containing endless power of vows, capable of purifying all sins and calamities in the world. UPPER GOLD\n5. technique: Nether Mystic Yin Claw - Sinister and ruthless, specifically breaking internal true qi, death upon touch. UPPER DARK\n6. technique: Lightning Shadow Flash - Body transforming into lightning, thousands of miles in an instant, leaving only heavy afterimages in place. UPPER WIND\n7. technique: Asura Blood Fiend Art - Using one's own skin as paper, fresh blood as ink. Cultivators must first undergo the pain of skinning and devouring blood. UPPER EVIL\n8. technique: Heavenly Creation Art - The peak of artifact refining, turning decay into magic, everything can be refined at will. UPPER GOLD\n9. technique: Ten Thousand Stars Flying Immortal Array - Attracting the stellar power of the sky, evolving the universe and wilderness, combining offense and defense. UPPER EARTH\n"
     },
     {
       "ok": true,
@@ -1466,7 +1466,7 @@
         {
           "icon_key": "technique_56",
           "category": "technique",
-          "name": "金光遁法",
+          "name": "Golden Light Escape Method",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_017\\batch_017_01.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_017\\technique_56.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_017\\technique_56.png",
@@ -1475,7 +1475,7 @@
         {
           "icon_key": "technique_57",
           "category": "technique",
-          "name": "浩然正气歌",
+          "name": "Song of Righteousness",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_017\\batch_017_02.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_017\\technique_57.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_017\\technique_57.png",
@@ -1484,7 +1484,7 @@
         {
           "icon_key": "technique_58",
           "category": "technique",
-          "name": "春秋笔法",
+          "name": "Spring and Autumn Brushwork",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_017\\batch_017_03.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_017\\technique_58.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_017\\technique_58.png",
@@ -1493,7 +1493,7 @@
         {
           "icon_key": "technique_59",
           "category": "technique",
-          "name": "言出法随",
+          "name": "Law Follows Speech",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_017\\batch_017_04.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_017\\technique_59.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_017\\technique_59.png",
@@ -1502,7 +1502,7 @@
         {
           "icon_key": "technique_60",
           "category": "technique",
-          "name": "旭日锻体术",
+          "name": "Sun Body Tempering Art",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_017\\batch_017_05.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_017\\technique_60.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_017\\technique_60.png",
@@ -1511,7 +1511,7 @@
         {
           "icon_key": "technique_61",
           "category": "technique",
-          "name": "圣光琉璃身",
+          "name": "Radiant Glass Body",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_017\\batch_017_06.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_017\\technique_61.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_017\\technique_61.png",
@@ -1520,7 +1520,7 @@
         {
           "icon_key": "technique_62",
           "category": "technique",
-          "name": "大光明金身",
+          "name": "Great Bright Golden Body",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_017\\batch_017_07.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_017\\technique_62.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_017\\technique_62.png",
@@ -1529,7 +1529,7 @@
         {
           "icon_key": "goldfinger_1",
           "category": "goldfinger",
-          "name": "气运之子",
+          "name": "Child of Fortune",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_017\\batch_017_08.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_017\\goldfinger_1.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_017\\goldfinger_1.png",
@@ -1538,14 +1538,14 @@
         {
           "icon_key": "goldfinger_2",
           "category": "goldfinger",
-          "name": "福缘深厚",
+          "name": "Deeply Blessed",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_017\\batch_017_09.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_017\\goldfinger_2.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_017\\goldfinger_2.png",
           "pixel": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\pixel\\goldfinger_2.png"
         }
       ],
-      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. technique: 金光遁法 - 化作一道流金遁光，瞬息千里，乃逃生赶路之绝学。 UPPER WIND\n2. technique: 浩然正气歌 - 天地有正气，杂然赋流形。养胸中浩然之气，诸邪不侵，万法不破。 UPPER GOLD\n3. technique: 春秋笔法 - 笔落惊风雨，诗成泣鬼神。以圣人之言判春秋功过，一字千金。 UPPER WOOD\n4. technique: 言出法随 - 口含天宪，言出法随。以圣贤之语调动天地规则，令行禁止，莫敢不从。 UPPER THUNDER\n5. technique: 旭日锻体术 - 引旭日紫气淬炼皮膜，通体温热，气血充盈。 LOWER FIRE\n6. technique: 圣光琉璃身 - 身如琉璃，内外明澈，诸邪不侵，坚不可摧。 MIDDLE GOLD\n7. technique: 大光明金身 - 长明宫镇派绝学。肉身成圣，金身不灭，光耀万古。 UPPER GOLD\n8. goldfinger: 气运之子 - 你仿佛生来便被天地眷顾，很多人求而不得的机缘总会向你靠近。 SSR\n9. goldfinger: 福缘深厚 - 你福缘深厚，常常能在险处见转机，在寻常处见收获。 SR\n"
+      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. technique: Golden Light Escape Method - Transforming into a stream of golden light, thousands of miles in an instant, a supreme skill for escaping and traveling. UPPER WIND\n2. technique: Song of Righteousness - Heaven and earth possess righteousness, manifested in various forms. Cultivating the noble spirit within, evil cannot invade, and all laws cannot break it. UPPER GOLD\n3. technique: Spring and Autumn Brushwork - With a stroke of the pen, wind and rain are startled, poems make ghosts and gods weep. Using the words of sages to judge the merits and faults of history, one word is worth a thousand gold. UPPER WOOD\n4. technique: Law Follows Speech - Speak the law. Mobilizing the rules of heaven and earth with the words of sages, orders are prohibited, and no one dares to disobey. UPPER THUNDER\n5. technique: Sun Body Tempering Art - Draws the purple qi of the rising sun to temper the skin, warming the body and filling it with vitality. LOWER FIRE\n6. technique: Radiant Glass Body - Body like glazed glass, clear inside and out, invulnerable to evil and indestructible. MIDDLE GOLD\n7. technique: Great Bright Golden Body - The supreme technique of the Eternal Bright Palace. Sanctification of the flesh, an imperishable golden body that shines through the ages. UPPER GOLD\n8. goldfinger: Child of Fortune - You seem to have been favored by heaven and earth since birth; opportunities others seek in vain always find their way to you. SSR\n9. goldfinger: Deeply Blessed - You are deeply blessed: in danger you often find a turning point, and in ordinary places you find unexpected gains. SR\n"
     },
     {
       "ok": true,
@@ -1557,7 +1557,7 @@
         {
           "icon_key": "goldfinger_3",
           "category": "goldfinger",
-          "name": "穿越者",
+          "name": "Transmigrator",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_018\\batch_018_01.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_018\\goldfinger_3.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_018\\goldfinger_3.png",
@@ -1566,7 +1566,7 @@
         {
           "icon_key": "goldfinger_4",
           "category": "goldfinger",
-          "name": "重生者",
+          "name": "Reincarnator",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_018\\batch_018_02.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_018\\goldfinger_4.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_018\\goldfinger_4.png",
@@ -1575,7 +1575,7 @@
         {
           "icon_key": "goldfinger_5",
           "category": "goldfinger",
-          "name": "随身老爷爷",
+          "name": "Old Grandpa in the Ring",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_018\\batch_018_03.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_018\\goldfinger_5.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_018\\goldfinger_5.png",
@@ -1584,7 +1584,7 @@
         {
           "icon_key": "fallback_weapon",
           "category": "fallback",
-          "name": "兵器兜底",
+          "name": "Fallback Weapon",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_018\\batch_018_04.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_018\\fallback_weapon.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_018\\fallback_weapon.png",
@@ -1593,7 +1593,7 @@
         {
           "icon_key": "fallback_elixir",
           "category": "fallback",
-          "name": "丹药兜底",
+          "name": "Fallback Elixir",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_018\\batch_018_05.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_018\\fallback_elixir.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_018\\fallback_elixir.png",
@@ -1602,7 +1602,7 @@
         {
           "icon_key": "fallback_auxiliary",
           "category": "fallback",
-          "name": "辅助装备兜底",
+          "name": "Fallback Auxiliary",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_018\\batch_018_06.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_018\\fallback_auxiliary.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_018\\fallback_auxiliary.png",
@@ -1611,7 +1611,7 @@
         {
           "icon_key": "fallback_technique",
           "category": "fallback",
-          "name": "功法兜底",
+          "name": "Fallback Technique",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_018\\batch_018_07.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_018\\fallback_technique.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_018\\fallback_technique.png",
@@ -1620,7 +1620,7 @@
         {
           "icon_key": "fallback_goldfinger",
           "category": "fallback",
-          "name": "外挂兜底",
+          "name": "Fallback Goldfinger",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_018\\batch_018_08.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_018\\fallback_goldfinger.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_018\\fallback_goldfinger.png",
@@ -1629,14 +1629,14 @@
         {
           "icon_key": "fallback_unknown",
           "category": "fallback",
-          "name": "未知物品兜底",
+          "name": "Fallback Unknown Item",
           "split": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\split\\batch_018\\batch_018_09.png",
           "alpha": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\alpha\\batch_018\\fallback_unknown.png",
           "despill": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\despill\\batch_018\\fallback_unknown.png",
           "pixel": "E:\\projects\\cultivation-world-simulator\\tools\\item_icons\\generated\\pixel\\fallback_unknown.png"
         }
       ],
-      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. goldfinger: 穿越者 - 你来自另一个世界，现代的记忆与思维仍在影响你看待修仙界的方式。 SR\n2. goldfinger: 重生者 - 你像是带着上一世的残影归来，对某些选择与危险有说不清的敏锐直觉。 SSR\n3. goldfinger: 随身老爷爷 - 你的命运里像是始终藏着一位看不见的前辈，在关键时刻指点、催促，甚至与你争执。 SSR\n4. fallback: 兵器兜底 - 通用武器图标。 generic weapon\n5. fallback: 丹药兜底 - 通用丹药图标。 generic pill bottle\n6. fallback: 辅助装备兜底 - 通用法器或辅助装备图标。 generic magic artifact\n7. fallback: 功法兜底 - 通用功法秘籍图标。 generic cultivation manual\n8. fallback: 外挂兜底 - 通用天赋外挂图标。 generic celestial token\n9. fallback: 未知物品兜底 - 通用未知物品图标。 mysterious item pouch\n"
+      "prompt": "Create a single pixel-art RPG item icon contact sheet for later transparent-background extraction.\n\nCanvas/layout:\n- Exactly 3 columns by 3 rows, one centered icon per cell.\n- Keep every icon fully inside its cell with generous padding.\n- No labels, no numbers, no UI frame, no watermark, no text.\n- Use one perfectly flat solid #ff00ff chroma-key background across the whole image.\n- The background must be mathematically plain: no dithering, no pixel speckles, no texture, no gradients, no vignette, no floor plane.\n- Do not use #ff00ff, purple-magenta outlines, or pink particles anywhere inside the items.\n- Keep item glow, particles, smoke, and magic aura inside the item silhouette; do not scatter decorative pixels into the background.\n\nStyle:\n- 32-bit fantasy cultivation RPG pixel art.\n- Clear silhouette, readable at 64x64, crisp hard edges.\n- Slight top-left highlight, subtle item detail, no cast shadow, no ambient shadow.\n- Transparent-ready asset style, isolated objects only.\n- Each icon should look like a standalone inventory item sprite, not a scene.\n\nItems in reading order:\n1. goldfinger: Transmigrator - You come from another world, and your modern memories and way of thinking still shape how you see the cultivation world. SR\n2. goldfinger: Reincarnator - You seem to have returned carrying traces of a past life, with an inexplicably sharp intuition for certain choices and dangers. SSR\n3. goldfinger: Old Grandpa in the Ring - An unseen senior seems to be hidden in your fate, guiding you, urging you on, and even arguing with you at critical moments. SSR\n4. fallback: Fallback Weapon - Generic weapon icon. generic weapon\n5. fallback: Fallback Elixir - Generic elixir icon. generic pill bottle\n6. fallback: Fallback Auxiliary - Generic magic artifact or auxiliary equipment icon. generic magic artifact\n7. fallback: Fallback Technique - Generic cultivation manual icon. generic cultivation manual\n8. fallback: Fallback Goldfinger - Generic innate talent (goldfinger) icon. generic celestial token\n9. fallback: Fallback Unknown Item - Generic unknown item icon. mysterious item pouch\n"
     }
   ]
 }

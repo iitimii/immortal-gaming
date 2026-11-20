@@ -20,7 +20,7 @@ def generate_tiles(
     selected = names or sorted(TILE_PROMPTS)
     unknown = [name for name in selected if name not in TILE_PROMPTS]
     if unknown:
-        raise ValueError(f"未知 tile prompt: {', '.join(unknown)}")
+        raise ValueError(f"Unknown tile prompt: {', '.join(unknown)}")
 
     saved: list[Path] = []
     for name in selected:
