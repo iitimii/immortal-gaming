@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { defineAsyncComponent } from 'vue';
 import type { AvatarDetail } from '@/types/core';
 import EntityRow from './components/EntityRow.vue';
 import TagList from './components/TagList.vue';
@@ -23,6 +24,9 @@ import packageIcon from '@/assets/icons/ui/lucide/package.svg';
 import pencilLineIcon from '@/assets/icons/ui/lucide/pencil-line.svg';
 import sparklesIcon from '@/assets/icons/ui/lucide/sparkles.svg';
 import triangleAlertIcon from '@/assets/icons/ui/lucide/triangle-alert.svg';
+import scaleIcon from '@/assets/icons/ui/lucide/scale.svg';
+
+const AvatarCompareModal = defineAsyncComponent(() => import('./avatar-detail/AvatarCompareModal.vue'));
 
 const { t, locale } = useI18n();
 const props = defineProps<{
@@ -36,6 +40,7 @@ const {
   adjustCategory,
   showPortraitPanel,
   showObjectiveModal,
+  showCompareModal,
   objectiveContent,
   parsedCurrentEffects,
   portraitUrl,
@@ -119,6 +124,14 @@ const {
       <div class="actions-bar" v-if="!data.is_dead">
         <button class="btn primary" @click="showObjectiveModal = true">{{ t('game.info_panel.avatar.set_objective') }}</button>
         <button class="btn" @click="handleClearObjective">{{ t('game.info_panel.avatar.clear_objective') }}</button>
+        <button
+          class="btn compare-btn"
+          :title="t('game.info_panel.avatar.compare.entry_desc')"
+          @click="showCompareModal = true"
+        >
+          <span class="compare-icon" :style="{ '--icon-url': `url(${scaleIcon})` }" aria-hidden="true"></span>
+          {{ t('game.info_panel.avatar.compare.entry') }}
+        </button>
       </div>
 
       <!-- Action State Banner -->
@@ -220,6 +233,13 @@ const {
       @confirm="handleSetObjective"
       @cancel="showObjectiveModal = false"
     />
+
+    <AvatarCompareModal
+      v-if="showCompareModal"
+      v-model:show="showCompareModal"
+      :avatar-id="data.id"
+      :avatar-name="data.name"
+    />
   </div>
 </template>
 
@@ -253,6 +273,16 @@ const {
   align-items: center;
   justify-content: center;
   gap: 6px;
+}
+
+.compare-icon {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+  background-color: currentColor;
+  -webkit-mask: var(--icon-url) center / contain no-repeat;
+  mask: var(--icon-url) center / contain no-repeat;
 }
 
 .action-banner {

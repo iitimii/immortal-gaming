@@ -46,6 +46,7 @@ class GameQueryDependencies:
     get_dynasty_detail_query: Any
     build_dynasty_detail: Any
     get_avatar_overview_query: Any
+    get_avatar_comparison_query: Any
     get_deceased_list_query: Any
     get_roleplay_session_query: Any
     get_world_secret_meta_query: Any
@@ -91,6 +92,7 @@ class GameQueryService:
             build_public_dynasty_overview=self.get_dynasty_overview,
             build_public_dynasty_detail=self.get_dynasty_detail,
             build_public_avatar_overview=self.get_avatar_overview,
+            build_public_avatar_comparison=self.get_avatar_comparison,
             build_public_deceased_list=self.get_deceased_list,
             build_public_roleplay_session=self.get_roleplay_session,
             build_public_world_secret_meta=self.get_world_secret_meta,
@@ -237,6 +239,9 @@ class GameQueryService:
 
     def get_avatar_overview(self) -> dict:
         return self._deps.get_avatar_overview_query(self._deps.runtime)
+
+    def get_avatar_comparison(self, *, a_id: str | None, b_id: str | None) -> dict:
+        return self._deps.get_avatar_comparison_query(self._deps.runtime, a_id=a_id, b_id=b_id)
 
     def get_saves(self) -> dict:
         return self._deps.list_saves_query(list_saves=self._deps.get_list_saves())
