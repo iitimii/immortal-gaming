@@ -163,6 +163,121 @@ def test_v1_game_pause_and_resume_use_ok_envelope():
         main.game_instance.update(original)
 
 
+def test_v1_set_speed_updates_runtime_and_runtime_status():
+    original = _reset_state()
+    try:
+        client = TestClient(main.app)
+
+        status = client.get("/api/v1/query/runtime/status").json()["data"]
+        assert status["speed"] == 1.0
+        assert status["allowed_speeds"] == [0.5, 1.0, 2.0, 4.0]
+
+        response = client.post("/api/v1/command/game/set-speed", json={"speed": 4})
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["ok"] is True
+        assert payload["data"]["speed"] == 4.0
+        assert payload["data"]["allowed_speeds"] == [0.5, 1.0, 2.0, 4.0]
+        assert main.game_instance["simulation_speed"] == 4.0
+
+        status = client.get("/api/v1/query/runtime/status").json()["data"]
+        assert status["speed"] == 4.0
+
+        client.post("/api/v1/command/game/set-speed", json={"speed": 0.5})
+        assert client.get("/api/v1/query/runtime/status").json()["data"]["speed"] == 0.5
+    finally:
+        main.game_instance.clear()
+        main.game_instance.update(original)
+
+
+@pytest.mark.parametrize("body", [{"speed": 3}, {"speed": 0}, {"speed": "fast"}, {}])
+def test_v1_set_speed_rejects_invalid_values_with_public_error(body):
+    original = _reset_state()
+    try:
+        main.game_instance["simulation_speed"] = 2.0
+        client = TestClient(main.app)
+
+        response = client.post("/api/v1/command/game/set-speed", json=body)
+
+        assert response.status_code == 400
+        detail = response.json()["detail"]
+        assert detail["code"] == "INVALID_SIMULATION_SPEED"
+        assert detail["details"]["allowed_speeds"] == [0.5, 1.0, 2.0, 4.0]
+        assert main.game_instance["simulation_speed"] == 2.0
+    finally:
+        main.game_instance.clear()
+        main.game_instance.update(original)
+
+
+def test_v1_reset_restores_default_speed():
+    original = _reset_state()
+    try:
+        client = TestClient(main.app)
+        client.post("/api/v1/command/game/set-speed", json={"speed": 2})
+
+        response = client.post("/api/v1/command/game/reset")
+
+        assert response.status_code == 200
+        assert client.get("/api/v1/query/runtime/status").json()["data"]["speed"] == 1.0
+    finally:
+        main.game_instance.clear()
+        main.game_instance.update(original)
+
+
+def test_v1_world_state_includes_speed():
+    original = _reset_state()
+    try:
+        mock_world = MagicMock()
+        mock_world.month_stamp.get_year.return_value = 100
+        mock_world.month_stamp.get_month.return_value = MagicMock(value=2)
+        mock_world.avatar_manager.avatars = {}
+        mock_world.event_manager = None
+        mock_world.current_phenomenon = None
+        main.game_instance["world"] = mock_world
+        main.game_instance["simulation_speed"] = 2.0
+
+        client = TestClient(main.app)
+        data = client.get("/api/v1/query/world/state").json()["data"]
+
+        assert data["speed"] == 2.0
+        assert data["allowed_speeds"] == [0.5, 1.0, 2.0, 4.0]
+    finally:
+        main.game_instance.clear()
+        main.game_instance.update(original)
+
+
+@pytest.mark.asyncio
+async def test_load_game_into_runtime_resets_speed(tmp_path):
+    from types import SimpleNamespace
+
+    from src.server.runtime import DEFAULT_GAME_STATE, GameSessionRuntime
+    from src.server.services.save_load_control import load_game_into_runtime
+
+    save_path = tmp_path / "demo.json"
+    save_path.write_text("{}", encoding="utf-8")
+    runtime = GameSessionRuntime(dict(DEFAULT_GAME_STATE))
+    runtime.set_simulation_speed(4.0)
+
+    new_world = SimpleNamespace(run_config_snapshot={"content_locale": "en-US"})
+    result = await load_game_into_runtime(
+        runtime,
+        filename="demo.json",
+        saves_dir=tmp_path,
+        get_save_info=lambda _path: None,
+        language_manager="en-US",
+        manager=SimpleNamespace(broadcast=AsyncMock()),
+        t=lambda text, **_kwargs: text,
+        apply_runtime_content_locale=lambda _locale: None,
+        scan_avatar_assets=lambda: None,
+        load_game=lambda _path: (new_world, object(), []),
+        get_settings_service=lambda: SimpleNamespace(get_default_run_config=lambda: {}),
+        _model_to_dict=lambda model: model,
+    )
+
+    assert result["status"] == "ok"
+    assert runtime.get_simulation_speed() == 1.0
+
+
 def test_v1_world_state_returns_every_living_avatar():
     original = _reset_state()
     try:

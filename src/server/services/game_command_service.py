@@ -93,6 +93,7 @@ class GameCommandService:
             run_pause_game=self.pause_game,
             run_pause_game_and_drain=self.pause_game_and_drain,
             run_resume_game=self.resume_game,
+            run_set_simulation_speed=self.set_simulation_speed,
             run_cleanup_events=self.cleanup_events,
             run_set_phenomenon=self.set_phenomenon,
             run_create_avatar=self.create_avatar,
@@ -146,6 +147,15 @@ class GameCommandService:
     async def resume_game(self) -> dict:
         self._deps.runtime.set_paused(False)
         return {"status": "ok", "message": "Game resumed"}
+
+    async def set_simulation_speed(self, *, speed: float) -> dict:
+        runtime = self._deps.runtime
+        applied = runtime.set_simulation_speed(speed)
+        return {
+            "status": "ok",
+            "speed": applied,
+            "allowed_speeds": runtime.get_allowed_simulation_speeds(),
+        }
 
     async def set_long_term_objective(self, req: Any) -> dict:
         return await self._deps.runtime.run_mutation(

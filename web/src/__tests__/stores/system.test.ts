@@ -8,6 +8,7 @@ vi.mock('@/api', () => ({
     fetchInitStatus: vi.fn(),
     pauseGame: vi.fn(),
     resumeGame: vi.fn(),
+    setSpeed: vi.fn(),
   },
 }))
 
@@ -111,6 +112,83 @@ describe('useSystemStore', () => {
 
       // Should rollback to original state.
       expect(store.isManualPaused).toBe(true)
+    })
+  })
+
+  describe('simulation speed', () => {
+    it('defaults to 1x with no options until the backend reports them', () => {
+      expect(store.simulationSpeed).toBe(1)
+      expect(store.allowedSpeeds).toEqual([])
+    })
+
+    it('syncs speed and allowed speeds from runtime status', async () => {
+      vi.mocked(systemApi.fetchInitStatus).mockResolvedValue(
+        createMockStatus({ status: 'ready', speed: 2, allowed_speeds: [0.5, 1, 2, 4] }),
+      )
+
+      await store.fetchInitStatus()
+
+      expect(store.simulationSpeed).toBe(2)
+      expect(store.allowedSpeeds).toEqual([0.5, 1, 2, 4])
+    })
+
+    it('keeps current speed when status omits it', async () => {
+      store.simulationSpeed = 4
+      vi.mocked(systemApi.fetchInitStatus).mockResolvedValue(createMockStatus({ status: 'ready' }))
+
+      await store.fetchInitStatus()
+
+      expect(store.simulationSpeed).toBe(4)
+    })
+
+    it('setSpeed updates optimistically and applies the backend response', async () => {
+      vi.mocked(systemApi.setSpeed).mockResolvedValue({
+        status: 'ok',
+        speed: 4,
+        allowed_speeds: [0.5, 1, 2, 4],
+      })
+
+      const pending = store.setSpeed(4)
+      expect(store.simulationSpeed).toBe(4)
+      await pending
+
+      expect(systemApi.setSpeed).toHaveBeenCalledWith(4)
+      expect(store.simulationSpeed).toBe(4)
+      expect(store.allowedSpeeds).toEqual([0.5, 1, 2, 4])
+    })
+
+    it('setSpeed skips the request when the speed is unchanged', async () => {
+      await store.setSpeed(1)
+      expect(systemApi.setSpeed).not.toHaveBeenCalled()
+    })
+
+    it('setSpeed rolls back on API failure', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      vi.mocked(systemApi.setSpeed).mockRejectedValue(new Error('INVALID_SIMULATION_SPEED'))
+
+      await store.setSpeed(2)
+
+      expect(store.simulationSpeed).toBe(1)
+      expect(consoleSpy).toHaveBeenCalled()
+    })
+
+    it('ignores a status poll that started before a local speed change', async () => {
+      let resolveStatus: (value: InitStatusDTO) => void = () => {}
+      vi.mocked(systemApi.fetchInitStatus).mockImplementation(
+        () => new Promise<InitStatusDTO>((resolve) => { resolveStatus = resolve }),
+      )
+      vi.mocked(systemApi.setSpeed).mockResolvedValue({
+        status: 'ok',
+        speed: 4,
+        allowed_speeds: [0.5, 1, 2, 4],
+      })
+
+      const poll = store.fetchInitStatus()
+      await store.setSpeed(4)
+      resolveStatus(createMockStatus({ status: 'ready', speed: 1, allowed_speeds: [0.5, 1, 2, 4] }))
+      await poll
+
+      expect(store.simulationSpeed).toBe(4)
     })
   })
 

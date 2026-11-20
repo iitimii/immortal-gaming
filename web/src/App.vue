@@ -10,6 +10,7 @@ const { t } = useI18n()
 import SplashLayer from './components/SplashLayer.vue'
 import GameCanvas from './components/game/GameCanvas.vue'
 import RoleplayDock from './components/game/RoleplayDock.vue'
+import SpeedControl from './components/game/SpeedControl.vue'
 import InfoPanelContainer from './components/game/panels/info/InfoPanelContainer.vue'
 import StatusBar from './components/layout/StatusBar.vue'
 import EventPanel from './components/game/panels/EventPanel.vue'
@@ -85,8 +86,11 @@ const {
 
 const {
   isManualPaused,
+  simulationSpeed,
+  allowedSpeeds,
   handleKeydown: controlHandleKeydown,
-  toggleManualPause
+  toggleManualPause,
+  setSimulationSpeed,
 } = useGameControl({
   gameInitialized,
   showMenu,
@@ -231,6 +235,13 @@ watch(sidebarWidth, width => {
                       aria-hidden="true"
                     ></span>
                   </button>
+
+                  <!-- Simulation speed -->
+                  <SpeedControl
+                    :speed="simulationSpeed"
+                    :options="allowedSpeeds"
+                    @select="setSimulationSpeed"
+                  />
 
                   <!-- Menu button -->
                   <button class="control-btn menu-toggle" @click="openGameMenu()">

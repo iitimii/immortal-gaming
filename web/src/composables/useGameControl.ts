@@ -18,7 +18,7 @@ export function useGameControl(options: UseGameControlOptions) {
   const systemStore = useSystemStore()
   const socketStore = useSocketStore()
   
-  const { isManualPaused } = storeToRefs(systemStore)
+  const { isManualPaused, simulationSpeed, allowedSpeeds } = storeToRefs(systemStore)
   const { isConnected } = storeToRefs(socketStore)
 
   // Unified pause control:
@@ -65,9 +65,16 @@ export function useGameControl(options: UseGameControlOptions) {
     systemStore.togglePause()
   }
 
+  function setSimulationSpeed(speed: number) {
+    systemStore.setSpeed(speed).catch((e) => logError('GameControl set speed', e))
+  }
+
   return {
     isManualPaused,
+    simulationSpeed,
+    allowedSpeeds,
     handleKeydown,
     toggleManualPause,
+    setSimulationSpeed,
   }
 }
