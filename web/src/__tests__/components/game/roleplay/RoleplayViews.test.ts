@@ -13,28 +13,28 @@ import RoleplaySectionHeader from '@/components/game/roleplay/RoleplaySectionHea
 function createRoleplayI18n() {
   return createI18n({
     legacy: false,
-    locale: 'zh',
+    locale: 'en-US',
     messages: {
-      zh: {
+      'en-US': {
         game: {
           roleplay: {
-            panel: { stop: '退出扮演' },
+            panel: { stop: 'Stop Roleplay' },
             dock: {
-              collapse: '折叠扮演面板',
-              expand: '展开扮演面板',
-              collapse_short: '收',
-              expand_short: '展',
+              collapse: 'Collapse roleplay panel',
+              expand: 'Expand roleplay panel',
+              collapse_short: 'Min',
+              expand_short: 'Max',
             },
             conversation: {
-              end: '结束对话',
-              end_disabled: '等待回复时暂不能结束对话',
-              placeholder: '输入你想说的话。',
+              end: 'End Conversation',
+              end_disabled: 'You cannot end the conversation while waiting for a reply',
+              placeholder: 'Enter what you want to say.',
             },
             decision: {
-              placeholder: '输入角色的下一步意图，例如：先调息恢复，再去附近探索。',
+              placeholder: "Enter the character's next intent, for example: recover first, then explore nearby.",
             },
             idle: {
-              hint: '当前仍在上帝视角观察世界。该角色的动作链结束后，会在这里等待你的下一步操作。',
+              hint: "You are still observing the world in omniscient view. When this character's action chain finishes, the next prompt will wait for you here.",
             },
           },
         },
@@ -48,17 +48,17 @@ describe('Roleplay subviews', () => {
     const wrapper = mount(RoleplayDockHeader, {
       global: { plugins: [createRoleplayI18n()] },
       props: {
-        avatarName: '闻人雾',
-        statusText: '等待指令',
-        requestSummary: '需要决定下一步行动',
+        avatarName: 'Wenren Wu',
+        statusText: 'Awaiting Command',
+        requestSummary: 'Needs a next action',
         isSubmitting: false,
         isCollapsed: false,
       },
     })
 
-    expect(wrapper.text()).toContain('闻人雾')
-    expect(wrapper.text()).toContain('等待指令')
-    expect(wrapper.text()).toContain('需要决定下一步行动')
+    expect(wrapper.text()).toContain('Wenren Wu')
+    expect(wrapper.text()).toContain('Awaiting Command')
+    expect(wrapper.text()).toContain('Needs a next action')
 
     await wrapper.find('button.roleplay-dock__exit').trigger('click')
     expect(wrapper.emitted('exit')).toHaveLength(1)
@@ -69,33 +69,33 @@ describe('Roleplay subviews', () => {
   it('renders section header copy', () => {
     const wrapper = mount(RoleplaySectionHeader, {
       props: {
-        title: '决策',
-        caption: '输入一句意图，系统会扩展成行动链',
+        title: 'Decision',
+        caption: 'Enter one intent and the system will expand it into an action chain',
       },
     })
 
-    expect(wrapper.text()).toContain('决策')
-    expect(wrapper.text()).toContain('输入一句意图，系统会扩展成行动链')
+    expect(wrapper.text()).toContain('Decision')
+    expect(wrapper.text()).toContain('Enter one intent and the system will expand it into an action chain')
   })
 
   it('updates and submits decision input', async () => {
     const wrapper = mount(RoleplayDecisionView, {
       global: { plugins: [createRoleplayI18n()] },
       props: {
-        description: '输入一句意图。',
+        description: 'Enter one intent.',
         modelValue: '',
         errorText: '',
         isSubmitting: false,
-        submitText: '提交指令',
+        submitText: 'Submit Command',
       },
     })
 
     const textarea = wrapper.find('textarea.roleplay-dock__input')
-    await textarea.setValue('先恢复灵气。')
+    await textarea.setValue('Restore spiritual qi first.')
 
-    expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['先恢复灵气。'])
+    expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['Restore spiritual qi first.'])
 
-    await wrapper.setProps({ modelValue: '先恢复灵气。' })
+    await wrapper.setProps({ modelValue: 'Restore spiritual qi first.' })
     await wrapper.find('button.roleplay-dock__submit').trigger('click')
 
     expect(wrapper.emitted('submit')).toHaveLength(1)
@@ -110,10 +110,10 @@ describe('Roleplay subviews', () => {
   it('renders choices and emits selected key', async () => {
     const wrapper = mount(RoleplayChoiceView, {
       props: {
-        description: '请选择一个回应。',
+        description: 'Choose one response.',
         options: [
-          { key: 'accept', title: '接受', description: '前往会面', variant: 'accept' },
-          { key: 'reject', title: '拒绝', description: '婉拒邀约', variant: 'reject' },
+          { key: 'accept', title: 'Accept', description: 'Go to the meeting', variant: 'accept' },
+          { key: 'reject', title: 'Decline', description: 'Politely decline the invitation', variant: 'reject' },
         ],
         errorText: '',
         isSubmitting: false,
@@ -137,34 +137,34 @@ describe('Roleplay subviews', () => {
     const wrapper = mount(RoleplayConversationView, {
       global: { plugins: [createRoleplayI18n()] },
       props: {
-        avatarName: '闻人雾',
-        targetName: '阴长生',
-        description: '世界已暂停，等待你继续发言。',
-        caption: '玩家控制闻人雾发言，对方由 LLM 回复',
+        avatarName: 'Wenren Wu',
+        targetName: 'Yin Changsheng',
+        description: 'The world is paused, waiting for you to continue speaking.',
+        caption: 'The player speaks as Wenren Wu, and the other side replies through the LLM',
         modelValue: '',
         messages: [
           {
             id: 'm1',
             role: 'assistant',
-            speaker_name: '阴长生',
-            content: '阁下为何前来？',
+            speaker_name: 'Yin Changsheng',
+            content: 'Why have you come?',
             created_at: 1,
           },
         ],
         errorText: '',
         isSubmitting: false,
-        submitText: '发送',
+        submitText: 'Send',
       },
     })
 
-    expect(wrapper.text()).toContain('闻人雾 ↔ 阴长生')
-    expect(wrapper.text()).toContain('阁下为何前来？')
+    expect(wrapper.text()).toContain('Wenren Wu ↔ Yin Changsheng')
+    expect(wrapper.text()).toContain('Why have you come?')
 
     const textarea = wrapper.find('textarea.roleplay-dock__input--conversation')
-    await textarea.setValue('我来求一条路。')
-    expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['我来求一条路。'])
+    await textarea.setValue('I have come seeking a path.')
+    expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['I have come seeking a path.'])
 
-    await wrapper.setProps({ modelValue: '我来求一条路。' })
+    await wrapper.setProps({ modelValue: 'I have come seeking a path.' })
     await wrapper.find('.roleplay-dock__conversation-actions .roleplay-dock__submit').trigger('click')
     expect(wrapper.emitted('send')).toHaveLength(1)
 
@@ -182,26 +182,26 @@ describe('Roleplay subviews', () => {
     const wrapper = mount(RoleplayIdleView, {
       global: { plugins: [createRoleplayI18n()] },
     })
-    expect(wrapper.text()).toContain('当前仍在上帝视角观察世界')
+    expect(wrapper.text()).toContain('You are still observing the world in omniscient view')
   })
 
   it('limits interaction history to recent items', () => {
     const wrapper = mount(RoleplayInteractionHistory, {
       props: {
         maxItems: 2,
-        playerName: '闻人雾',
-        counterpartName: '阴长生',
+        playerName: 'Wenren Wu',
+        counterpartName: 'Yin Changsheng',
         items: [
-          { type: 'conversation_player', created_at: 1, text: '第一条' },
-          { type: 'conversation_assistant', created_at: 2, text: '第二条' },
-          { type: 'command', created_at: 3, text: '第三条' },
+          { type: 'conversation_player', created_at: 1, text: 'First entry' },
+          { type: 'conversation_assistant', created_at: 2, text: 'Second entry' },
+          { type: 'command', created_at: 3, text: 'Third entry' },
         ],
       },
     })
 
-    expect(wrapper.text()).not.toContain('第一条')
-    expect(wrapper.text()).toContain('第二条')
-    expect(wrapper.text()).toContain('第三条')
-    expect(wrapper.text()).toContain('阴长生')
+    expect(wrapper.text()).not.toContain('First entry')
+    expect(wrapper.text()).toContain('Second entry')
+    expect(wrapper.text()).toContain('Third entry')
+    expect(wrapper.text()).toContain('Yin Changsheng')
   })
 })

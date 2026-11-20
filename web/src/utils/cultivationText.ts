@@ -6,33 +6,24 @@ const REALM_ALIAS_TO_KEY: Record<string, string> = {
   qi_refinement: 'QI_REFINEMENT',
   'qi refinement': 'QI_REFINEMENT',
   'Qi Refinement': 'QI_REFINEMENT',
-  练气: 'QI_REFINEMENT',
-  練氣: 'QI_REFINEMENT',
-  練気: 'QI_REFINEMENT',
 
   FOUNDATION_ESTABLISHMENT: 'FOUNDATION_ESTABLISHMENT',
   'FOUNDATION ESTABLISHMENT': 'FOUNDATION_ESTABLISHMENT',
   foundation_establishment: 'FOUNDATION_ESTABLISHMENT',
   'foundation establishment': 'FOUNDATION_ESTABLISHMENT',
   'Foundation Establishment': 'FOUNDATION_ESTABLISHMENT',
-  筑基: 'FOUNDATION_ESTABLISHMENT',
-  築基: 'FOUNDATION_ESTABLISHMENT',
 
   CORE_FORMATION: 'CORE_FORMATION',
   'CORE FORMATION': 'CORE_FORMATION',
   core_formation: 'CORE_FORMATION',
   'core formation': 'CORE_FORMATION',
   'Core Formation': 'CORE_FORMATION',
-  金丹: 'CORE_FORMATION',
-  結丹: 'CORE_FORMATION',
 
   NASCENT_SOUL: 'NASCENT_SOUL',
   'NASCENT SOUL': 'NASCENT_SOUL',
   nascent_soul: 'NASCENT_SOUL',
   'nascent soul': 'NASCENT_SOUL',
   'Nascent Soul': 'NASCENT_SOUL',
-  元婴: 'NASCENT_SOUL',
-  元嬰: 'NASCENT_SOUL',
 };
 
 const STAGE_ALIAS_TO_KEY: Record<string, string> = {
@@ -40,21 +31,16 @@ const STAGE_ALIAS_TO_KEY: Record<string, string> = {
   'early stage': 'early',
   'Early Stage': 'early',
   early: 'early',
-  前期: 'early',
-  初期: 'early',
 
   middle_stage: 'middle',
   'middle stage': 'middle',
   'Middle Stage': 'middle',
   middle: 'middle',
-  中期: 'middle',
 
   late_stage: 'late',
   'late stage': 'late',
   'Late Stage': 'late',
   late: 'late',
-  後期: 'late',
-  后期: 'late',
 };
 
 const TECHNIQUE_GRADE_KEYS = new Set(['LOWER', 'MIDDLE', 'UPPER']);

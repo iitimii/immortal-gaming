@@ -49,20 +49,20 @@ def _place_avatar_in_region(base_world, avatar, region, *, tile_type=TileType.PL
 
 
 def test_set_formation_requires_disk_region_and_spirit_stones(dummy_avatar, base_world):
-    region = CultivateRegion(id=301, name="青云洞府", desc="", cors=[(0, 0)])
+    region = CultivateRegion(id=301, name="Azure Cloud Grotto", desc="", cors=[(0, 0)])
     _place_avatar_in_region(base_world, dummy_avatar, region, tile_type=TileType.CAVE)
     dummy_avatar.magic_stone = 1000
     action = SetFormation(dummy_avatar, base_world)
 
     ok, reason = action.can_start(FORMATION_SPIRIT_GATHERING)
     assert ok is False
-    assert "阵盘" in reason
+    assert "formation disk" in reason
 
     _equip_disk(dummy_avatar, 2081)
     dummy_avatar.magic_stone = 1
     ok, reason = action.can_start(FORMATION_SPIRIT_GATHERING)
     assert ok is False
-    assert "灵石" in reason
+    assert "spirit stones" in reason
 
     dummy_avatar.magic_stone = 1000
     ok, reason = action.can_start(FORMATION_SPIRIT_GATHERING)
@@ -71,10 +71,10 @@ def test_set_formation_requires_disk_region_and_spirit_stones(dummy_avatar, base
 
 
 def test_formation_options_are_limited_to_current_region(dummy_avatar, base_world):
-    material = Material(id=9901, name="测试矿", desc="", realm=Realm.Qi_Refinement)
-    lode = Lode(id=9902, name="测试矿脉", realm=Realm.Qi_Refinement, desc="")
+    material = Material(id=9901, name="Test Ore", desc="", realm=Realm.Qi_Refinement)
+    lode = Lode(id=9902, name="Test Ore Vein", realm=Realm.Qi_Refinement, desc="")
     lode.materials = [material]
-    region = NormalRegion(id=101, name="矿山", desc="", lode_ids=[], cors=[(0, 0)])
+    region = NormalRegion(id=101, name="Mine", desc="", lode_ids=[], cors=[(0, 0)])
     region.lodes = [lode]
     region.plants = []
     region.animals = []
@@ -93,7 +93,7 @@ def test_formation_options_are_limited_to_current_region(dummy_avatar, base_worl
 
 
 def test_set_formation_places_and_replaces_region_formation(dummy_avatar, base_world):
-    region = CultivateRegion(id=301, name="青云洞府", desc="", cors=[(0, 0)])
+    region = CultivateRegion(id=301, name="Azure Cloud Grotto", desc="", cors=[(0, 0)])
     _place_avatar_in_region(base_world, dummy_avatar, region, tile_type=TileType.CAVE)
     _equip_disk(dummy_avatar, 2082)
     dummy_avatar.magic_stone = 1000
@@ -118,10 +118,10 @@ def test_set_formation_places_and_replaces_region_formation(dummy_avatar, base_w
 
 
 def test_formation_personas_modify_power_duration_and_cost(dummy_avatar, base_world):
-    region = CultivateRegion(id=301, name="青云洞府", desc="", cors=[(0, 0)])
+    region = CultivateRegion(id=301, name="Azure Cloud Grotto", desc="", cors=[(0, 0)])
     _place_avatar_in_region(base_world, dummy_avatar, region, tile_type=TileType.CAVE)
     _equip_disk(dummy_avatar, 2081)
-    dummy_avatar.personas = [personas_by_name["阵仙"]]
+    dummy_avatar.personas = [personas_by_name["Formation Immortal"]]
     dummy_avatar.recalc_effects()
     dummy_avatar.magic_stone = 1000
 
@@ -136,7 +136,7 @@ def test_formation_personas_modify_power_duration_and_cost(dummy_avatar, base_wo
 
 
 def test_formation_disk_effects_modify_power_duration_and_cost(dummy_avatar, base_world):
-    region = CultivateRegion(id=301, name="青云洞府", desc="", cors=[(0, 0)])
+    region = CultivateRegion(id=301, name="Azure Cloud Grotto", desc="", cors=[(0, 0)])
     _place_avatar_in_region(base_world, dummy_avatar, region, tile_type=TileType.CAVE)
     _equip_disk(dummy_avatar, 2084)
     dummy_avatar.magic_stone = 1000
@@ -152,7 +152,7 @@ def test_formation_disk_effects_modify_power_duration_and_cost(dummy_avatar, bas
 
 
 def test_cleanup_expired_region_formations(dummy_avatar, base_world):
-    region = CultivateRegion(id=301, name="青云洞府", desc="", cors=[(0, 0)])
+    region = CultivateRegion(id=301, name="Azure Cloud Grotto", desc="", cors=[(0, 0)])
     _place_avatar_in_region(base_world, dummy_avatar, region, tile_type=TileType.CAVE)
     base_world.map.region_formations[301] = {
         "formation_type": FORMATION_SPIRIT_GATHERING,
@@ -167,10 +167,10 @@ def test_cleanup_expired_region_formations(dummy_avatar, base_world):
 
 
 def test_region_formations_affect_gather_and_battle(dummy_avatar, base_world):
-    material = Material(id=9901, name="测试矿", desc="", realm=Realm.Qi_Refinement)
-    lode = Lode(id=9902, name="测试矿脉", realm=Realm.Qi_Refinement, desc="")
+    material = Material(id=9901, name="Test Ore", desc="", realm=Realm.Qi_Refinement)
+    lode = Lode(id=9902, name="Test Ore Vein", realm=Realm.Qi_Refinement, desc="")
     lode.materials = [material]
-    region = NormalRegion(id=101, name="矿山", desc="", lode_ids=[], cors=[(0, 0)])
+    region = NormalRegion(id=101, name="Mine", desc="", lode_ids=[], cors=[(0, 0)])
     region.lodes = [lode]
     _place_avatar_in_region(base_world, dummy_avatar, region)
     base_world.map.region_formations[101] = {
@@ -183,7 +183,7 @@ def test_region_formations_affect_gather_and_battle(dummy_avatar, base_world):
     with patch("random.choice", side_effect=[lode, material]):
         gained = execute_gather(dummy_avatar, "lodes", "extra_mine_materials")
 
-    assert gained == {"测试矿": 3}
+    assert gained == {"Test Ore": 3}
 
     opponent = Avatar(
         world=base_world,
@@ -211,7 +211,7 @@ def test_region_formations_affect_gather_and_battle(dummy_avatar, base_world):
 
 
 def test_healing_formation_affects_passive_hp_recovery(dummy_avatar, base_world):
-    region = CultivateRegion(id=301, name="青云洞府", desc="", cors=[(0, 0)])
+    region = CultivateRegion(id=301, name="Azure Cloud Grotto", desc="", cors=[(0, 0)])
     _place_avatar_in_region(base_world, dummy_avatar, region, tile_type=TileType.CAVE)
     dummy_avatar.hp.max = 200
     dummy_avatar.hp.cur = 100
@@ -228,7 +228,7 @@ def test_healing_formation_affects_passive_hp_recovery(dummy_avatar, base_world)
 
 
 def test_region_formations_are_saved_and_loaded(dummy_avatar, base_world, tmp_path):
-    region = CultivateRegion(id=301, name="青云洞府", desc="", cors=[(0, 0)])
+    region = CultivateRegion(id=301, name="Azure Cloud Grotto", desc="", cors=[(0, 0)])
     _place_avatar_in_region(base_world, dummy_avatar, region, tile_type=TileType.CAVE)
     dummy_avatar.weapon = None
     dummy_avatar.auxiliary = None
@@ -243,7 +243,7 @@ def test_region_formations_are_saved_and_loaded(dummy_avatar, base_world, tmp_pa
         "cost": 104,
     }
     base_world.run_config_snapshot = {
-        "content_locale": "zh-CN",
+        "content_locale": "en-US",
         "map_id": "classic",
         "init_npc_num": 0,
         "sect_num": 0,

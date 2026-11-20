@@ -39,7 +39,7 @@ def test_sect_mission_can_start_requires_membership_and_hq(dummy_avatar, base_wo
     action = SectMission(dummy_avatar, base_world)
     can_start, reason = action.can_start()
     assert can_start is False
-    assert ("宗门" in reason) or ("总部" in reason)
+    assert ("sect" in reason.lower()) or ("headquarters" in reason.lower())
 
 
 def test_sect_mission_can_possibly_start(sect_mission_avatar):
@@ -88,7 +88,7 @@ def test_sect_mission_calc_success_rate_uses_effect_and_luck(sect_mission_avatar
 @pytest.mark.asyncio
 async def test_sect_mission_finish_success_rewards_and_story(sect_mission_avatar):
     action = SectMission(sect_mission_avatar, sect_mission_avatar.world)
-    action.task_title = "巡逻山门"
+    action.task_title = "Patrol the Mountain Gate"
     action.task_id = "sect_task_patrol_gate"
     action.task_category = "patrol"
     action.issuer_type = "headquarter"
@@ -97,11 +97,11 @@ async def test_sect_mission_finish_success_rewards_and_story(sect_mission_avatar
     action.reward_magic_stones = 56
     action.reward_contribution = 16
     action.fail_damage_ratio = 0.2
-    action._start_event_content = "开始事件"
+    action._start_event_content = "Start event"
 
     with patch("src.classes.action.sect_mission.random.random", return_value=0.1), \
          patch("src.classes.story_event_service.StoryEventService.should_trigger", return_value=True), \
-         patch("src.classes.story_event_service.StoryTeller.tell_story", new_callable=AsyncMock, return_value="任务故事"):
+         patch("src.classes.story_event_service.StoryTeller.tell_story", new_callable=AsyncMock, return_value="Mission story"):
         events = await action.finish()
 
     assert sect_mission_avatar.magic_stone.value == 56
@@ -114,7 +114,7 @@ async def test_sect_mission_finish_success_rewards_and_story(sect_mission_avatar
 @pytest.mark.asyncio
 async def test_sect_mission_finish_failure_can_kill(sect_mission_avatar):
     action = SectMission(sect_mission_avatar, sect_mission_avatar.world)
-    action.task_title = "调查夜间异动"
+    action.task_title = "Investigate Nighttime Disturbance"
     action.task_id = "sect_task_investigate_night_anomaly"
     action.task_category = "investigate"
     action.issuer_type = "headquarter"
@@ -123,7 +123,7 @@ async def test_sect_mission_finish_failure_can_kill(sect_mission_avatar):
     action.reward_magic_stones = 0
     action.reward_contribution = 0
     action.fail_damage_ratio = 0.5
-    action._start_event_content = "开始事件"
+    action._start_event_content = "Start event"
     sect_mission_avatar.hp.cur = 10
 
     with patch("src.classes.action.sect_mission.random.random", return_value=0.95), \
@@ -134,7 +134,7 @@ async def test_sect_mission_finish_failure_can_kill(sect_mission_avatar):
     assert len(events) == 1
     assert sect_mission_avatar.is_dead is True
     assert sect_mission_avatar.id in sect_mission_avatar.world.avatar_manager.dead_avatars
-    assert "殒命" in events[0].content
+    assert "died on the spot" in events[0].content
 
 
 @pytest.mark.asyncio

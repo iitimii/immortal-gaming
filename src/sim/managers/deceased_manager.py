@@ -9,12 +9,12 @@ from src.classes.deceased_record import DeceasedRecord
 
 @dataclass
 class DeceasedManager:
-    """已故角色档案管理器，独立于 AvatarManager，不受 cleanup_long_dead_avatars 影响。"""
+    """Deceased avatar record manager, independent of AvatarManager and unaffected by cleanup_long_dead_avatars."""
 
     _records: Dict[str, DeceasedRecord] = field(default_factory=dict)
 
     def record_death(self, avatar: "Avatar") -> None:
-        """从 Avatar 快照生成 DeceasedRecord，按 id 覆盖写入（幂等）。"""
+        """Create a DeceasedRecord from an Avatar snapshot, overwriting by id (idempotent)."""
         death_info = avatar.death_info or {}
         record = DeceasedRecord(
             id=avatar.id,
@@ -33,7 +33,7 @@ class DeceasedManager:
         self._records[avatar.id] = record
 
     def get_all_records(self) -> List[DeceasedRecord]:
-        """按死亡时间倒序返回所有记录。"""
+        """Return all records ordered by time of death, newest first."""
         return sorted(self._records.values(), key=lambda r: r.death_time, reverse=True)
 
     def get_record(self, avatar_id: str) -> Optional[DeceasedRecord]:
@@ -49,7 +49,7 @@ class DeceasedManager:
             self._records[record.id] = record
 
     def cleanup_expired_records(self, current_time: object, threshold_years: int = 50) -> int:
-        """清理死亡超过阈值的轻量已故档案。"""
+        """Clean up lightweight deceased records older than the threshold."""
         to_remove: list[str] = []
         current_month = int(current_time)
         threshold_months = int(threshold_years) * 12

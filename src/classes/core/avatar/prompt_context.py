@@ -82,7 +82,7 @@ def build_avatar_prompt_context(
             "sect_rule_desc": str(getattr(avatar.sect, "rule_desc", "") or ""),
             "sect_is_at_war": bool(active_wars),
             "active_wars": active_wars,
-            "hostile_sects_summary": "、".join(hostile_names[:4]),
+            "hostile_sects_summary": ", ".join(hostile_names[:4]),
             "can_seek_support_from_sect": bool(active_wars),
         }
 

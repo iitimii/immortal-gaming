@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from src.classes.core.world import World
 
 class BasePlayAction(TimedAction):
-    """消遣动作基类"""
+    """Base class for leisure actions."""
     duration_months = 1
     REQUIREMENTS_ID = "play_requirements"
 
@@ -21,7 +21,7 @@ class BasePlayAction(TimedAction):
         super().__init__(avatar, world)
 
     def _try_trigger_benefit(self) -> str:
-        """尝试触发额外收益 (突破概率)"""
+        """Try to trigger extra benefits (breakthrough probability)."""
         prob = CONFIG.play.base_benefit_probability if hasattr(CONFIG, 'play') else 0.05
         
         if random.random() < prob:
@@ -31,14 +31,14 @@ class BasePlayAction(TimedAction):
         return ""
 
     def _execute(self) -> None:
-        pass # 具体逻辑由子类实现或只需记录事件
+        pass # Concrete logic is implemented by subclasses, or only an event is recorded
 
     def start(self) -> Event:
-        # 通用开始事件
+        # Generic start event
         return Event(self.world.month_stamp, t("{avatar} starts {action}", avatar=self.avatar.name, action=self.get_action_name()), related_avatars=[self.avatar.id])
 
     async def finish(self) -> list[Event]:
-        # 结算时尝试触发收益
+        # Try to trigger benefits on settlement
         benefit_msg = self._try_trigger_benefit()
         content = t("{avatar} finished {action}.", avatar=self.avatar.name, action=self.get_action_name())
         if benefit_msg:
@@ -46,7 +46,7 @@ class BasePlayAction(TimedAction):
         
         return [Event(self.world.month_stamp, content, related_avatars=[self.avatar.id])]
 
-# 具体动作实现
+# Concrete action implementations
 class Reading(BasePlayAction):
     ACTION_NAME_ID = "action_reading"
     DESC_ID = "action_reading_desc"

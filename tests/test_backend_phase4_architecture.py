@@ -57,8 +57,8 @@ def test_config_providers_read_current_config_and_run_snapshot(monkeypatch):
     assert provider.max_action_rounds_per_turn() == 7
     assert provider.can_interrupt_major_events() is True
 
-    world = SimpleNamespace(run_config_snapshot={"content_locale": "zh-CN"})
-    assert RunConfigProvider(world).get("content_locale") == "zh-CN"
+    world = SimpleNamespace(run_config_snapshot={"content_locale": "en-US"})
+    assert RunConfigProvider(world).get("content_locale") == "en-US"
     assert RunConfigProvider(world).get("missing", "fallback") == "fallback"
 
 

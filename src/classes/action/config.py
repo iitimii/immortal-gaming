@@ -7,11 +7,11 @@ from src.utils.config import CONFIG
 
 class ActionConfig:
     """
-    读取动作相关配置的轻量封装。
+    Lightweight wrapper for reading action-related config.
 
-    用法：
+    Usage:
         ActionConfig.get("actions.duration.play", default=6)
-    支持以点号分隔的路径逐层 getattr，读取不到时返回 default。
+    Supports dot-separated paths resolved via getattr level by level; returns default if not found.
     """
     @staticmethod
     def get(path: str, default: Any = None) -> Any:

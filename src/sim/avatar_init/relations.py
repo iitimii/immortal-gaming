@@ -4,7 +4,7 @@ from ._shared import _apply_structural_initial_friendliness
 
 class RelationApplier:
     """
-    负责将规划关系写入 Avatar 实例。
+    Writes planned relations into Avatar instances.
     """
 
     @staticmethod
@@ -38,7 +38,7 @@ class RelationApplier:
 
 class SectRankAssigner:
     """
-    负责宗门职位的分配，保证掌门唯一。
+    Assigns sect positions, ensuring a unique sect leader.
     """
 
     @staticmethod

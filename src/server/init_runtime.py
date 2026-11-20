@@ -33,9 +33,9 @@ def check_llm_connectivity() -> tuple[bool, str]:
         fast_config = LLMConfig.from_mode(LLMMode.FAST)
 
         if not normal_config.base_url:
-            return False, "LLM 配置不完整：请填写 Base URL"
+            return False, "Incomplete LLM configuration: please enter the Base URL"
         if not normal_config.model_name:
-            return False, "LLM 配置不完整：请填写智能模型名称"
+            return False, "Incomplete LLM configuration: please enter the smart model name"
         if (
             llm_requires_api_key(
                 base_url=normal_config.base_url,
@@ -43,7 +43,7 @@ def check_llm_connectivity() -> tuple[bool, str]:
             )
             and not normal_config.api_key
         ):
-            return False, "LLM 配置不完整：请填写 API Key"
+            return False, "Incomplete LLM configuration: please enter the API Key"
 
         same_model = (
             normal_config.model_name == fast_config.model_name
@@ -55,22 +55,22 @@ def check_llm_connectivity() -> tuple[bool, str]:
             print(f"Testing LLM connectivity (Single Model): {normal_config.model_name}")
             success, error = test_connectivity(LLMMode.NORMAL, normal_config)
             if not success:
-                return False, f"连接失败：{error}"
+                return False, f"Connection failed: {error}"
             return True, ""
 
         print(f"Testing normal model connectivity: {normal_config.model_name}")
         success, error = test_connectivity(LLMMode.NORMAL, normal_config)
         if not success:
-            return False, f"智能模型连接失败：{error}"
+            return False, f"Smart model connection failed: {error}"
 
         print(f"Testing fast model connectivity: {fast_config.model_name}")
         success, error = test_connectivity(LLMMode.FAST, fast_config)
         if not success:
-            return False, f"快速模型连接失败：{error}"
+            return False, f"Fast model connection failed: {error}"
 
         return True, ""
     except Exception as exc:
-        return False, f"连通性检测异常：{exc}"
+        return False, f"Connectivity check error: {exc}"
 
 
 def update_init_progress(*, runtime, phase: int, phase_name: str = "") -> None:

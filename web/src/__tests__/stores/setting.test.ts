@@ -140,11 +140,11 @@ describe('useSettingStore', () => {
     currentSettings = clone(baseSettings)
     mockMapPreload.mockResolvedValue(undefined)
     mockFetchMapPresets.mockResolvedValue([
-      { id: 'classic', name: '九州中土', desc: '地貌均衡，适合默认体验。', size_label: '中型' },
+      { id: 'classic', name: 'Central Nine Provinces', desc: 'Balanced terrain, suited to the default experience.', size_label: 'Medium' },
     ])
     mockFetchWorldSecretOptions.mockResolvedValue([
-      { id: 'none', title: '无' },
-      { id: 'random', title: '随机' },
+      { id: 'none', title: 'None' },
+      { id: 'random', title: 'Random' },
     ])
     mockWorldFetchState.mockResolvedValue(undefined)
     mockSectRefreshTerritories.mockResolvedValue(undefined)
@@ -224,17 +224,17 @@ describe('useSettingStore', () => {
     expect(document.documentElement.lang).toBe(getExpectedHtmlLang(testFallbackLocale))
   })
 
-  it('saves locale through patchSettings', async () => {
-    await store.setLocale('zh-TW')
+  it('saves locale through patchSettings, normalizing unknown locales to the default', async () => {
+    await store.setLocale('xx-XX')
 
     expect(mockPatchSettings).toHaveBeenCalledWith({
-      ui: { locale: 'zh-TW' },
-      new_game_defaults: { content_locale: 'zh-TW' },
+      ui: { locale: 'en-US' },
+      new_game_defaults: { content_locale: 'en-US' },
     })
-    expect(store.locale).toBe('zh-TW')
-    expect(store.newGameDraft.content_locale).toBe('zh-TW')
-    expect(document.documentElement.lang).toBe(getExpectedHtmlLang('zh-TW'))
-    expect(mockFetchMapPresets).toHaveBeenCalledWith('zh-TW')
+    expect(store.locale).toBe('en-US')
+    expect(store.newGameDraft.content_locale).toBe('en-US')
+    expect(document.documentElement.lang).toBe(getExpectedHtmlLang('en-US'))
+    expect(mockFetchMapPresets).toHaveBeenCalledWith('en-US')
     expect(mockMapPreload).toHaveBeenCalled()
     expect(mockWorldFetchState).toHaveBeenCalled()
     expect(mockEventResetEvents).toHaveBeenCalledWith({})

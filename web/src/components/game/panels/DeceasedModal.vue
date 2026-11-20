@@ -48,7 +48,7 @@ watch(() => props.show, (newVal) => {
     :title="t('game.deceased.title')"
     style="width: 700px; max-height: 80vh; overflow-y: auto;"
   >
-    <!-- 详情视图 -->
+    <!-- Detail view -->
     <template v-if="selectedRecord">
       <div style="margin-bottom: 12px;">
         <n-button size="small" @click="backToList">{{ t('game.deceased.back_to_list') }}</n-button>
@@ -99,7 +99,7 @@ watch(() => props.show, (newVal) => {
       </n-spin>
     </template>
 
-    <!-- 列表视图 -->
+    <!-- List view -->
     <template v-else>
       <n-spin :show="loading">
         <n-empty v-if="!loading && records.length === 0" :description="t('game.deceased.empty')" />

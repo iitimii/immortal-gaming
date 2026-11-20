@@ -14,10 +14,10 @@ msgstr ""
 
 msgid ""
 "\n"
-"【Related Avatars Information】"
+"[Related Avatars Information]"
 msgstr ""
 "\n"
-"【Related Avatars Information】"
+"[Related Avatars Information]"
 
 msgid "auxiliary"
 msgstr "auxiliary equipment"
@@ -51,5 +51,5 @@ msgid "item_verb_switched"
 msgstr "switched to"
 
 # Auto-equip Message
-msgid "{avatar_name} obtained {grade} {label}『{item_name}』and {action}."
-msgstr "{avatar_name} obtained {grade} {label}『{item_name}』and {action}."
+msgid "{avatar_name} obtained {grade} {label} '{item_name}' and {action}."
+msgstr "{avatar_name} obtained {grade} {label} '{item_name}' and {action}."

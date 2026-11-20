@@ -370,7 +370,7 @@ class TestEventStorageEdgeCases:
         storage = EventStorage(db_path)
 
         # Create event with large content (10KB)
-        large_content = "测试内容" * 2500  # ~10KB of Chinese characters
+        large_content = "Test content " * 800  # ~10KB of text
         event = make_event(100, 1, large_content, ["a1"])
 
         result = storage.add_event(event)

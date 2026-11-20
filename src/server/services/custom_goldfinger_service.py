@@ -36,8 +36,8 @@ def normalize_custom_goldfinger_draft(draft: dict[str, Any]) -> dict[str, Any]:
         raise HTTPException(status_code=400, detail="name is required")
 
     effects = validate_custom_effects(draft.get("effects"))
-    normalized_desc = desc or f"{name}会持续影响角色命数与发展。"
-    normalized_story_prompt = story_prompt or f"若角色拥有“{name}”外挂，请围绕其外挂特征展开故事，并突出其超规格之处。"
+    normalized_desc = desc or f"{name} continuously shapes the avatar's fate and growth."
+    normalized_story_prompt = story_prompt or f"If the avatar has the \"{name}\" goldfinger, build the story around its traits and highlight how far it exceeds the norm."
     rarity_raw = str(draft.get("rarity", "SSR") or "SSR").strip().upper()
     normalized_rarity = rarity_raw if rarity_raw in {"SR", "SSR"} else "SSR"
 

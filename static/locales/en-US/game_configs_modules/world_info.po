@@ -12,7 +12,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#. world_info.csv: 你有一系列可以执行的动作。要注意动作的效果、限制条件、区域和时间。
+#. world_info.csv: You have a series of executable actions. Pay at...
 msgid "WORLD_INFO_ACTION_DESC"
 msgstr ""
 "You have a series of executable actions. Pay attention to the effects, "
@@ -24,7 +24,7 @@ msgstr "Action"
 msgid "WORLD_INFO_ACTION_TITLE"
 msgstr "Action"
 
-#. world_info.csv: 每隔一段不确定的时间会有神秘人组织的拍卖会，或许有好货出售。
+#. world_info.csv: Every uncertain period of time, there will be a...
 msgid "WORLD_INFO_AUCTION_DESC"
 msgstr ""
 "Every uncertain period of time, there will be an auction organized by a "
@@ -36,7 +36,7 @@ msgstr "Auction"
 msgid "WORLD_INFO_AUCTION_TITLE"
 msgstr "Auction"
 
-#. world_info.csv: 弱肉强食，境界压制极大，高境界者对低境界者有绝对优势。若对方死亡，胜者可掠夺败者财物。
+#. world_info.csv: Survival of the fittest; realm suppression is h...
 msgid "WORLD_INFO_BATTLE_DESC"
 msgstr ""
 "Survival of the fittest; realm suppression is huge, high-realm cultivators "
@@ -49,7 +49,7 @@ msgstr "Battle"
 msgid "WORLD_INFO_BATTLE_TITLE"
 msgstr "Battle"
 
-#. world_info.csv: 修炼可以增加经验，直到到达突破前的瓶颈。突破是概率事件，突破后会进入下一个境界。
+#. world_info.csv: Cultivation accumulates power until the current...
 msgid "WORLD_INFO_CULTIVATION_DESC"
 msgstr ""
 "Cultivation accumulates power until the current rank reaches its bottleneck."
@@ -62,7 +62,7 @@ msgstr "Cultivation"
 msgid "WORLD_INFO_CULTIVATION_TITLE"
 msgstr "Cultivation"
 
-#. world_info.csv: HP降至0以下也会死亡。
+#. world_info.csv: HP dropping below 0 also causes death.
 msgid "WORLD_INFO_DEATH_DESC"
 msgstr "HP dropping below 0 also causes death."
 
@@ -72,7 +72,7 @@ msgstr "Death"
 msgid "WORLD_INFO_DEATH_TITLE"
 msgstr "Death"
 
-#. world_info.csv: 通过兵器、辅助装备、丹药等装备，可以获得额外的属性加成，获得或小或大的增益。拥有好的装备或者服...
+#. world_info.csv: Weapons, auxiliary equipment, and elixirs provi...
 msgid "WORLD_INFO_EQUIPMENT_AND_ELIXIR_DESC"
 msgstr ""
 "Weapons, auxiliary equipment, and elixirs provide extra bonuses. High-grade "
@@ -85,7 +85,7 @@ msgstr "Equipment & Elixir"
 msgid "WORLD_INFO_EQUIPMENT_AND_ELIXIR_TITLE"
 msgstr "Equipment & Elixir"
 
-#. world_info.csv: 这是一个诸多修士竞相修行，纷争四起的修仙世界。
+#. world_info.csv: This is a cultivation world where many cultivat...
 msgid "WORLD_INFO_INTRO_DESC"
 msgstr "This is a cultivation world where many cultivators compete and conflicts rage on all sides."
 
@@ -95,7 +95,7 @@ msgstr "Introduction"
 msgid "WORLD_INFO_INTRO_TITLE"
 msgstr "Introduction"
 
-#. world_info.csv: 若当前年龄达到最大寿元，会立刻死亡。突破境界可以增加最大寿元，突破失败也可能折损寿元。
+#. world_info.csv: Every character has a lifespan limit. When life...
 msgid "WORLD_INFO_LIFESPAN_DESC"
 msgstr ""
 "Every character has a lifespan limit. When lifespan is exhausted, death "
@@ -108,22 +108,22 @@ msgstr "Lifespan"
 msgid "WORLD_INFO_LIFESPAN_TITLE"
 msgstr "Lifespan"
 
-#. world_info.csv: 道、佛、儒等根本理念，决定门牌的根脚与修行起源。
+#. world_info.csv: Different orthodoxies have different cultivatio...
 msgid "WORLD_INFO_ORTHODOXY_DESC"
 msgstr ""
 "Different orthodoxies have different cultivation methods. Taoists respire, "
 "Martial Artists practice Body Tempering, Buddhists meditate, and Confucians "
 "educate the people."
 
-#. world_info.csv: 道统
+#. world_info.csv:
 msgid "WORLD_INFO_ORTHODOXY_NAME"
 msgstr "Orthodoxy"
 
-#. world_info.csv: 道统
+#. world_info.csv: Orthodoxy
 msgid "WORLD_INFO_ORTHODOXY_TITLE"
 msgstr "Orthodoxy"
 
-#. world_info.csv: 修仙的境界从弱到强：练气、筑基、金丹、元婴。每个境界分前期、中期、后期。境界间差距很大。
+#. world_info.csv: The world's underlying standard realms, from we...
 msgid "WORLD_INFO_REALM_DESC"
 msgstr ""
 "The world's underlying standard realms, from weak to strong, are Qi "
@@ -137,7 +137,7 @@ msgstr "Realm"
 msgid "WORLD_INFO_REALM_TITLE"
 msgstr "Realm"
 
-#. world_info.csv: 不同区域有不同效果，在适当的区域做适当的事情事半功倍。
+#. world_info.csv: Different regions have different effects; doing...
 msgid "WORLD_INFO_REGION_DESC"
 msgstr ""
 "Different regions have different effects; doing the right thing in the right"
@@ -149,7 +149,7 @@ msgstr "Region"
 msgid "WORLD_INFO_REGION_TITLE"
 msgstr "Region"
 
-#. world_info.csv: 灵根由五行元素（金、木、水、火、土）组成，分为单灵根、双灵根和天灵根。五行相克：金克木，木克土...
+#. world_info.csv: Spirit roots are composed of five elements (Met...
 msgid "WORLD_INFO_ROOT_DESC"
 msgstr ""
 "Spirit roots are composed of five elements (Metal, Wood, Water, Fire, "
@@ -166,7 +166,7 @@ msgstr "Spirit Root"
 msgid "WORLD_INFO_ROOT_TITLE"
 msgstr "Spirit Root"
 
-#. world_info.csv: 每隔数年会有秘境开启。进入秘境可能遭遇凶险，也可能获得高阶法宝和功法。
+#. world_info.csv: Secret realms open every few years. Entering a ...
 msgid "WORLD_INFO_SECRET_REALM_DESC"
 msgstr ""
 "Secret realms open every few years. Entering a secret realm may encounter "
@@ -178,7 +178,7 @@ msgstr "Secret Realm"
 msgid "WORLD_INFO_SECRET_REALM_TITLE"
 msgstr "Secret Realm"
 
-#. world_info.csv: 修士的庇护所。加入宗门可习得独门功法、获同门庇护；散修自由但资源匮乏。
+#. world_info.csv: A shelter for cultivators. Joining a sect allow...
 msgid "WORLD_INFO_SECT_DESC"
 msgstr ""
 "A shelter for cultivators. Joining a sect allows learning unique techniques "
@@ -191,7 +191,7 @@ msgstr "Sect"
 msgid "WORLD_INFO_SECT_TITLE"
 msgstr "Sect"
 
-#. world_info.csv: 在城市区域可以购买练气级别丹药、兵器。购买丹药后会立刻服用强化自身。购买兵器可以帮自己切换兵器...
+#. world_info.csv: In city regions, you can buy Qi Refinement-grad...
 msgid "WORLD_INFO_SHOPPING_DESC"
 msgstr ""
 "In city regions, you can buy Qi Refinement-grade elixirs and weapons. "
@@ -204,7 +204,7 @@ msgstr "Shopping"
 msgid "WORLD_INFO_SHOPPING_TITLE"
 msgstr "Shopping"
 
-#. world_info.csv: 修仙界的通用货币。可用于购买法宝丹药，通过采集、交易或掠夺获取。
+#. world_info.csv: The common currency of the cultivation world. C...
 msgid "WORLD_INFO_SPIRIT_STONE_DESC"
 msgstr ""
 "The common currency of the cultivation world. Can be used to buy artifacts "
@@ -216,7 +216,7 @@ msgstr "Spirit Stone"
 msgid "WORLD_INFO_SPIRIT_STONE_TITLE"
 msgstr "Spirit Stone"
 
-#. world_info.csv: 世界每隔数年会有一次天象变动（如灵气潮汐），影响角色能力。
+#. world_info.csv: The world undergoes celestial changes (such as ...
 msgid "WORLD_INFO_WORLD_QI_DESC"
 msgstr ""
 "The world undergoes celestial changes (such as Qi Tides) every few years, "
@@ -228,7 +228,7 @@ msgstr "World Qi"
 msgid "WORLD_INFO_WORLD_QI_TITLE"
 msgstr "World Qi"
 
-#. world_info.csv: 修仙界设有天地人三榜及宗门榜。天榜收录元婴期强者，地榜收录金丹期强者，人榜收录筑基期强者，宗门榜按宗门总实力排名。
+#. world_info.csv: The cultivation world features the Heaven, Eart...
 msgid "WORLD_INFO_RANKING_DESC"
 msgstr "The cultivation world features the Heaven, Earth, and Human Rankings, as well as the Sect Ranking. The three personal rankings are grouped by equivalent standard realm: Heaven records Nascent Soul-tier experts, Earth records Core Formation-tier experts, and Human records Foundation Establishment-tier experts. The Sect Ranking ranks sects by total power."
 
@@ -238,7 +238,7 @@ msgstr "Ranking"
 msgid "WORLD_INFO_RANKING_TITLE"
 msgstr "Ranking"
 
-#. world_info.csv: 凡人王朝统御天下，维持凡俗秩序与疆域。皇帝寿元与普通凡人无异，驾崩后会有新帝继位。
+#. world_info.csv: Mortal dynasties rule the realm, maintaining wo...
 msgid "WORLD_INFO_DYNASTY_DESC"
 msgstr "Mortal dynasties rule the realm, maintaining worldly order and borders. Emperors live no longer than ordinary mortals, and when one dies, a new emperor succeeds to the throne."
 
@@ -248,7 +248,7 @@ msgstr "Dynasty"
 msgid "WORLD_INFO_DYNASTY_TITLE"
 msgstr "Dynasty"
 
-#. world_info.csv: 修士可为朝廷理政，积累朝廷威望并领取俸禄。威望足够可升官，官职越高，俸禄与气运越多；久不理政，威望会逐渐下滑。
+#. world_info.csv: Cultivators may govern for the imperial court, ...
 msgid "WORLD_INFO_OFFICIAL_DESC"
 msgstr "Cultivators may govern for the imperial court, building court reputation and receiving salary. With enough reputation they can be promoted; the higher the office, the greater the salary and luck. If they neglect governance for too long, their reputation will gradually decline."
 
@@ -270,38 +270,38 @@ msgstr "Realm Aliases"
 msgid "WORLD_INFO_CULTIVATION_ALIAS_TITLE"
 msgstr "Realm Aliases"
 
-#. world_info.csv: 蛊术需要修士持有蛊具并拥有下蛊能力，才能对可观测目标施加蛊。
+#. world_info.csv: Gu arts require a cultivator to carry a Gu tool...
 msgid "WORLD_INFO_GU_DESC"
 msgstr "Gu arts require a cultivator to carry a Gu tool and have the ability to inflict Gu before applying it to an observable target. Different Gu act in different ways: Mind-Sinking Gu subtly shifts relationships, Blood-Devouring Gu periodically damages life, while Essence-Eroding Gu and Heart-Disordering Gu disturb cultivation. Inflicting Gu has a success rate affected by the tool, the caster's bonuses, and the target's Gu resistance; failure may be detected and harm the relationship."
 
-#. world_info.csv: 蛊
+#. world_info.csv:
 msgid "WORLD_INFO_GU_NAME"
 msgstr "Gu"
 
-#. world_info.csv: 蛊
+#. world_info.csv: Gu
 msgid "WORLD_INFO_GU_TITLE"
 msgstr "Gu"
 
-#. world_info.csv: 阵法需要修士持有阵盘并拥有布阵能力，才能在当前区域布置限时区域效果。
+#. world_info.csv: Formations require a cultivator to carry a form...
 msgid "WORLD_INFO_FORMATION_DESC"
 msgstr "Formations require a cultivator to carry a formation disk and have formation-setting ability before placing a temporary regional effect at the current location. Different formations suit different regions: cultivation grounds and sect regions can hold spirit-gathering, mountain-guarding, clarity, and similar arrays; cities can hold healing arrays; mines, herb fields, and beast domains can hold vein-seeking, wood-growth, and beast-driving arrays. Formations consume spirit stones and expire after their duration ends."
 
-#. world_info.csv: 阵法
+#. world_info.csv:
 msgid "WORLD_INFO_FORMATION_NAME"
 msgstr "Formations"
 
-#. world_info.csv: 阵法
+#. world_info.csv: Formations
 msgid "WORLD_INFO_FORMATION_TITLE"
 msgstr "Formations"
 
-#. world_info.csv: 机缘
+#. world_info.csv: Cultivators may occasionally feel a sudden stir...
 msgid "WORLD_INFO_OPPORTUNITY_DESC"
 msgstr "Cultivators may occasionally feel a sudden stir of fate, sensing that a person or place is tied to their own opportunity. If they follow the sense, they may gain treasure or a boon, return empty-handed, or meet danger; if they delay too long, the opportunity fades away."
 
-#. world_info.csv: 机缘
+#. world_info.csv:
 msgid "WORLD_INFO_OPPORTUNITY_NAME"
 msgstr "Opportunity"
 
-#. world_info.csv: 机缘
+#. world_info.csv: Opportunity
 msgid "WORLD_INFO_OPPORTUNITY_TITLE"
 msgstr "Opportunity"

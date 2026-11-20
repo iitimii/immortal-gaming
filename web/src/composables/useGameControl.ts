@@ -21,9 +21,9 @@ export function useGameControl(options: UseGameControlOptions) {
   const { isManualPaused } = storeToRefs(systemStore)
   const { isConnected } = storeToRefs(socketStore)
 
-  // 统一的暂停控制逻辑：
-  // - 菜单打开时：暂停后端（不影响 isManualPaused）
-  // - 菜单关闭时：如果没有手动暂停，恢复后端
+  // Unified pause control:
+  // - Menu opened: pause the backend (does not touch isManualPaused)
+  // - Menu closed: resume the backend unless manually paused
   watch(options.showMenu, (menuVisible) => {
     if (!options.gameInitialized.value) return
     
@@ -44,7 +44,7 @@ export function useGameControl(options: UseGameControlOptions) {
     systemStore.resume().catch((e) => logError('GameControl resume after reconnect', e))
   })
 
-  // 快捷键处理
+  // Keyboard shortcuts
   function handleKeydown(e: KeyboardEvent) {
     if (e.key === 'Escape') {
       if (uiStore.selectedTarget) {

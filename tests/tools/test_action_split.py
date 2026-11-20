@@ -15,7 +15,7 @@ def make_po(entries: dict[str, str]) -> polib.POFile:
     po = polib.POFile()
     po.metadata = {
         "Content-Type": "text/plain; charset=UTF-8",
-        "Language": "zh_CN",
+        "Language": "en_US",
     }
     for msgid, msgstr in entries.items():
         po.append(polib.POEntry(msgid=msgid, msgstr=msgstr))
@@ -32,10 +32,10 @@ def test_action_split_rules_route_expected_msgids():
 def test_build_split_outputs_preserves_entries_and_metadata():
     source = make_po(
         {
-            "attack_action_name": "发起战斗",
-            "breakthrough_action_name": "突破",
-            "move_to_region_action_name": "前往区域",
-            "action_reading": "读书",
+            "attack_action_name": "Attack",
+            "breakthrough_action_name": "Breakthrough",
+            "move_to_region_action_name": "Move to Region",
+            "action_reading": "Read",
         }
     )
 
@@ -48,7 +48,7 @@ def test_build_split_outputs_preserves_entries_and_metadata():
         "action_world.po",
     }
 
-    assert outputs["action_combat.po"].metadata["Language"] == "zh_CN"
+    assert outputs["action_combat.po"].metadata["Language"] == "en_US"
     assert [entry.msgid for entry in outputs["action_combat.po"]] == ["attack_action_name"]
     assert [entry.msgid for entry in outputs["action_progression.po"]] == ["breakthrough_action_name"]
     assert [entry.msgid for entry in outputs["action_world.po"]] == ["move_to_region_action_name"]

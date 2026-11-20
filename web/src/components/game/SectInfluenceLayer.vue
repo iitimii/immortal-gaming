@@ -22,7 +22,7 @@ function hexToNumber(hex: string): number {
   return parseInt(hex.replace(/^#/, ''), 16)
 }
 
-/** 向白色混合，得到提亮版颜色（用于边框更显眼），t 为向白比例 0~1 */
+/** Blend toward white for a brighter color (makes borders stand out); t is the white ratio, 0-1 */
 function brightenColor(colorNum: number, t: number): number {
   const r = (colorNum >> 16) & 0xff
   const g = (colorNum >> 8) & 0xff

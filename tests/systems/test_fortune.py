@@ -72,11 +72,11 @@ async def test_try_trigger_fortune(dummy_avatar: Avatar, mock_game_configs, mock
         assert call_args is not None
         prompt = call_args.kwargs.get("prompt")
         assert prompt is not None
-        # In English/Chinese the prompt contains the action description
+        # The prompt contains the action description
         # But during tests, if translations are missing, it might just be the msgid
         # So we check if it's the right msgid or contains the action
-        assert "Respire" in prompt or "吐纳" in prompt or "吐納" in prompt or prompt == "fortune_dynamic_story_prompt"
-        assert "穿越者" in prompt
+        assert "Respire" in prompt or prompt == "fortune_dynamic_story_prompt"
+        assert "Transmigrator" in prompt
         assert dummy_avatar.goldfinger.story_prompt in prompt
 
 @pytest.mark.asyncio
@@ -185,4 +185,4 @@ def test_tribulation_selector_skips_dead_relation_targets(base_world, dummy_avat
 
     handle_death(base_world, enemy, DeathReason(DeathType.BATTLE, killer_name="Someone"))
 
-    assert TribulationSelector.choose_related_avatar(dummy_avatar, "寻仇") is None
+    assert TribulationSelector.choose_related_avatar(dummy_avatar, "vengeance") is None

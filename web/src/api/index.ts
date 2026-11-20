@@ -1,4 +1,4 @@
-// 导出子模块
+// Re-export submodules
 export { worldApi } from './modules/world';
 export { avatarApi, type HoverParams } from './modules/avatar';
 export { systemApi } from './modules/system';

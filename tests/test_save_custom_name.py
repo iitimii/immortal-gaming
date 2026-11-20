@@ -47,10 +47,10 @@ def temp_save_dir(tmp_path):
 class TestSanitizeSaveName:
     """Tests for the sanitize_save_name helper function."""
 
-    def test_chinese_characters_allowed(self):
-        """Test that Chinese characters are preserved."""
-        result = sanitize_save_name("我的存档")
-        assert result == "我的存档"
+    def test_non_ascii_letters_allowed(self):
+        """Test that non-ASCII (Unicode word) letters are preserved."""
+        result = sanitize_save_name("CaféSave")
+        assert result == "CaféSave"
 
     def test_english_characters_allowed(self):
         """Test that English characters are preserved."""
@@ -68,9 +68,9 @@ class TestSanitizeSaveName:
         assert result == "my_save_file"
 
     def test_mixed_content(self):
-        """Test mixed Chinese, English, and numbers."""
-        result = sanitize_save_name("我的Save存档_123")
-        assert result == "我的Save存档_123"
+        """Test mixed non-ASCII letters, English, and numbers."""
+        result = sanitize_save_name("CaféSave_123")
+        assert result == "CaféSave_123"
 
     def test_special_characters_replaced(self):
         """Test that special characters are replaced with underscores."""
@@ -139,14 +139,14 @@ class TestSaveGameWithCustomName:
         success, filename = save_game(
             world, sim, [],
             save_path=None,
-            custom_name="我的测试存档"
+            custom_name="MyTestSave"
         )
 
         # Check save succeeded.
         assert success
 
         # Filename should start with the sanitized custom name.
-        assert filename.startswith("我的测试存档_")
+        assert filename.startswith("MyTestSave_")
         assert filename.endswith(".json")
 
     def test_save_without_custom_name(self, temp_save_dir):
@@ -177,7 +177,7 @@ class TestSaveGameWithCustomName:
         success, _ = save_game(
             world, sim, [],
             save_path=save_path,
-            custom_name="我的存档"
+            custom_name="MySave"
         )
 
         assert success
@@ -186,7 +186,7 @@ class TestSaveGameWithCustomName:
         with open(save_path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        assert data["meta"]["custom_name"] == "我的存档"
+        assert data["meta"]["custom_name"] == "MySave"
 
     def test_null_custom_name_in_meta(self, temp_save_dir):
         """Test that null custom_name is stored when not provided."""
@@ -289,13 +289,13 @@ class TestSaveApiWithCustomName:
             client = TestClient(main.app)
             response = client.post(
                 "/api/v1/command/game/save",
-                json={"custom_name": "我的API存档"}
+                json={"custom_name": "MyAPISave"}
             )
 
         assert response.status_code == 200
         data = response.json()["data"]
         assert data["status"] == "ok"
-        assert "我的API存档" in data["filename"]
+        assert "MyAPISave" in data["filename"]
 
         # Cleanup.
         main.game_instance.update(original_state)
@@ -409,7 +409,7 @@ class TestSavesListApiWithMetadata:
 
         sim = Simulator(world)
         save_path = temp_save_dir / "test_list.json"
-        save_game(world, sim, [], save_path, custom_name="列表测试")
+        save_game(world, sim, [], save_path, custom_name="ListTest")
 
         with patch.object(CONFIG.paths, "saves", temp_save_dir):
             client = TestClient(main.app)
@@ -430,7 +430,7 @@ class TestSavesListApiWithMetadata:
         assert "language" in save_item
 
         # Verify values.
-        assert save_item["custom_name"] == "列表测试"
+        assert save_item["custom_name"] == "ListTest"
         assert save_item["alive_count"] == 3
         assert save_item["avatar_count"] == 3
 
@@ -445,7 +445,7 @@ class TestSavesListApiWithMetadata:
             "meta": {
                 "version": "1.0",
                 "save_time": "2026-01-01T12:00:00",
-                "game_time": "100年1月",
+                "game_time": "Year 100, Month 1",
             },
             "world": {"month_stamp": 1200},
             "avatars": [],
@@ -489,9 +489,9 @@ class TestSavesListApiWithMetadata:
 class TestValidateSaveName:
     """Tests for the validate_save_name function in main.py."""
 
-    def test_valid_chinese_name(self):
+    def test_valid_non_ascii_name(self):
         from src.server.main import validate_save_name
-        assert validate_save_name("我的存档") is True
+        assert validate_save_name("CaféSave") is True
 
     def test_valid_english_name(self):
         from src.server.main import validate_save_name
@@ -499,7 +499,7 @@ class TestValidateSaveName:
 
     def test_valid_mixed_name(self):
         from src.server.main import validate_save_name
-        assert validate_save_name("我的Save_123") is True
+        assert validate_save_name("MySave_Café_123") is True
 
     def test_empty_name_invalid(self):
         from src.server.main import validate_save_name

@@ -1,6 +1,6 @@
 /**
- * API 数据传输对象 (Data Transfer Objects)
- * 这些类型严格对应后端接口返回的 JSON 结构。
+ * API Data Transfer Objects
+ * These types mirror the JSON returned by the backend.
  */
 
 import type { AppLocale } from '../locales/registry';
@@ -16,15 +16,15 @@ import type {
   CultivationDisplay,
 } from './core';
 
-// --- 通用响应 ---
+// --- Common responses ---
 
 export interface ApiResponse<T> {
   status: 'ok' | 'error';
   message?: string;
-  data?: T; // 有些接口直接把数据铺平在顶层，需根据实际情况调整
+  data?: T; // Some endpoints flatten data at the top level instead
 }
 
-// --- 具体接口响应 ---
+// --- Endpoint responses ---
 
 export interface InitialStateDTO {
   status: 'ok' | 'error';
@@ -121,10 +121,10 @@ export type POIUpdateDTO =
       id: string;
     };
 
-// --- Detail 接口 ---
+// --- Detail endpoint ---
 
-// 目前后端 /api/v1/query/detail 直接返回 Avatar/Region/Sect 的结构化信息，
-// 在 P0 阶段我们先复用前端领域模型作为 DTO 类型，后续若后端结构调整再拆分。
+// /api/v1/query/detail currently returns structured Avatar/Region/Sect data,
+// so for now the frontend domain models double as DTO types; split them if the backend shape diverges.
 export type AvatarDetailDTO = AvatarDetail;
 export type RegionDetailDTO = RegionDetail;
 export type SectDetailDTO = SectDetail;
@@ -146,7 +146,7 @@ export interface SaveFileDTO {
   save_time: string;
   game_time: string;
   version: string;
-  // 新增字段。
+  // Added fields.
   language: string;
   avatar_count: number;
   alive_count: number;
@@ -605,8 +605,8 @@ export interface SectRelationDTO {
   diplomacy_status: 'war' | 'peace' | string;
   diplomacy_duration_months: number;
   reason_breakdown: Array<{
-    reason: string;     // 枚举字符串，如 ALIGNMENT_OPPOSITE
-    delta: number;      // 本事由对关系值的增减
+    reason: string;     // Enum string, e.g. ALIGNMENT_OPPOSITE
+    delta: number;      // Change to the relation value from this reason
     meta?: Record<string, unknown>;
   }>;
 }

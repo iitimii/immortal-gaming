@@ -1,6 +1,6 @@
 """
-宗门等级系统
-定义宗门内的职位等级及其与修仙境界的映射关系
+Sect rank system
+Defines sect ranks and their mapping to cultivation realms
 """
 from enum import Enum
 from functools import total_ordering
@@ -14,13 +14,13 @@ if TYPE_CHECKING:
 @total_ordering
 class SectRank(Enum):
     """
-    宗门职位等级
-    从高到低：掌门 > 长老 > 内门弟子 > 外门弟子
+    Sect rank
+    From high to low: Patriarch > Elder > Inner Disciple > Outer Disciple
     """
-    Patriarch = "patriarch"      # 掌门
-    Elder = "elder"              # 长老
-    InnerDisciple = "inner"      # 内门弟子
-    OuterDisciple = "outer"      # 外门弟子
+    Patriarch = "patriarch"      # Patriarch
+    Elder = "elder"              # Elder
+    InnerDisciple = "inner"      # Inner Disciple
+    OuterDisciple = "outer"      # Outer Disciple
     
     def __str__(self) -> str:
         from src.i18n import t
@@ -29,7 +29,7 @@ class SectRank(Enum):
     def __lt__(self, other):
         if not isinstance(other, SectRank):
             return NotImplemented
-        # 数字越小职位越高，所以比较时反过来
+        # A smaller number means a higher rank, so the comparison is reversed
         return RANK_ORDER[self] > RANK_ORDER[other]
     
     def __le__(self, other):
@@ -40,7 +40,7 @@ class SectRank(Enum):
     def __gt__(self, other):
         if not isinstance(other, SectRank):
             return NotImplemented
-        # 数字越小职位越高，所以比较时反过来
+        # A smaller number means a higher rank, so the comparison is reversed
         return RANK_ORDER[self] < RANK_ORDER[other]
     
     def __ge__(self, other):
@@ -49,7 +49,7 @@ class SectRank(Enum):
         return RANK_ORDER[self] <= RANK_ORDER[other]
 
 
-# 宗门职位顺序（数字越小职位越高）
+# Sect rank order (smaller number = higher rank)
 RANK_ORDER = {
     SectRank.Patriarch: 0,
     SectRank.Elder: 1,
@@ -57,7 +57,7 @@ RANK_ORDER = {
     SectRank.OuterDisciple: 3,
 }
 
-# msgid映射
+# msgid mapping
 sect_rank_msg_ids = {
     SectRank.Patriarch: "patriarch",
     SectRank.Elder: "elder",
@@ -65,7 +65,7 @@ sect_rank_msg_ids = {
     SectRank.OuterDisciple: "outer_disciple",
 }
 
-# 默认职位名称（可被宗门自定义覆盖）
+# Default rank names (sects can override with custom names)
 DEFAULT_RANK_NAMES = {
     SectRank.Patriarch: "patriarch",
     SectRank.Elder: "elder",
@@ -76,19 +76,19 @@ DEFAULT_RANK_NAMES = {
 
 def get_rank_from_realm(realm: "Realm") -> SectRank:
     """
-    根据修仙境界映射为宗门职位
+    Map a cultivation realm to a sect rank
     
-    映射规则：
-    - 练气 → 外门弟子
-    - 筑基 → 内门弟子
-    - 金丹 → 长老
-    - 元婴 → 掌门（需要额外检查唯一性）
+    Mapping rules:
+    - Qi Refinement -> Outer Disciple
+    - Foundation Establishment -> Inner Disciple
+    - Core Formation -> Elder
+    - Nascent Soul -> Patriarch (requires an extra uniqueness check)
     
     Args:
-        realm: 修仙境界
+        realm: cultivation realm
         
     Returns:
-        对应的宗门职位
+        The corresponding sect rank
     """
     from src.systems.cultivation import Realm
     
@@ -103,77 +103,77 @@ def get_rank_from_realm(realm: "Realm") -> SectRank:
 
 def get_rank_display_name(rank: SectRank, sect: Optional["Sect"] = None) -> str:
     """
-    获取职位的显示名称（支持宗门自定义）
+    Get the rank's display name (sect custom names supported)
     
     Args:
-        rank: 宗门职位
-        sect: 宗门对象（可选，如果提供则使用其自定义名称）
+        rank: sect rank
+        sect: sect object (optional; if given, its custom names are used)
         
     Returns:
-        职位的显示名称
+        The rank's display name
     """
     from src.i18n import t
     if sect is not None:
         custom_name = sect.get_rank_name(rank)
         if custom_name:
             return custom_name
-    val = DEFAULT_RANK_NAMES.get(rank, "弟子")
+    val = DEFAULT_RANK_NAMES.get(rank, "Disciple")
     return t(val)
 
 
 def should_auto_promote(old_realm: "Realm", new_realm: "Realm") -> bool:
     """
-    判断境界突破后是否应该自动晋升宗门职位
+    Determine whether the sect rank should be auto-promoted after a realm breakthrough
     
     Args:
-        old_realm: 旧境界
-        new_realm: 新境界
+        old_realm: old realm
+        new_realm: new realm
         
     Returns:
-        是否应该晋升
+        Whether to promote
     """
     if old_realm == new_realm:
         return False
     
     from src.systems.cultivation import Realm
     
-    # 检查境界是否提升
+    # Check whether the realm increased
     old_rank = get_rank_from_realm(old_realm)
     new_rank = get_rank_from_realm(new_realm)
     
-    # 只有当新境界对应的职位更高时才晋升（职位枚举中 > 表示更高）
+    # Only promote if the new realm's rank is higher (in the rank enum, > means higher)
     return new_rank > old_rank
 
 
 def check_and_promote_sect_rank(avatar: "Avatar", old_realm: "Realm", new_realm: "Realm") -> None:
     """
-    检查境界突破后是否需要晋升宗门职位。
+    Check whether the sect rank needs promotion after a realm breakthrough.
 
-    当前版本中，宗门职位的主逻辑由“贡献点 + 战力”年度重排决定，
-    因此这里不再在突破瞬间直接改职，只保留接口以兼容旧调用点。
+    In the current version, sect ranks are mainly decided by the yearly reshuffle based on "contribution + battle strength",
+    so ranks no longer change at the moment of breakthrough; the interface is kept for compatibility with old call sites.
     
     Args:
-        avatar: 要检查的角色
-        old_realm: 旧境界
-        new_realm: 新境界
+        avatar: the avatar to check
+        old_realm: old realm
+        new_realm: new realm
     """
     return
 
 
 def sect_has_patriarch(avatar: "Avatar") -> bool:
     """
-    检查当前宗门是否已有掌门（不包括自己）
+    Check whether the current sect already has a patriarch (excluding oneself)
     
     Args:
-        avatar: 要检查的角色
+        avatar: the avatar to check
         
     Returns:
-        是否已有其他掌门
+        Whether there is another patriarch
     """
     if avatar.sect is None:
         return False
     
-    # 从world中查找同宗门的其他avatar
+    # Look for other avatars of the same sect in the world
     for other in avatar.world.avatar_manager.avatars.values():
         if other is avatar:
             continue

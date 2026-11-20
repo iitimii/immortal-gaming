@@ -102,11 +102,11 @@ def test_update_paths_for_language_falls_back_when_resources_missing(monkeypatch
     original_resources = app_config.CONFIG.resources
     try:
         app_config.CONFIG.resources = {}
-        app_config.update_paths_for_language("zh-CN")
+        app_config.update_paths_for_language("en-US")
 
         assert Path(app_config.CONFIG.paths.locales) == get_project_root() / "static" / "locales"
         assert Path(app_config.CONFIG.paths.shared_game_configs) == get_project_root() / "static" / "game_configs"
-        assert Path(app_config.CONFIG.paths.templates) == get_project_root() / "static" / "locales" / "zh-CN" / "templates"
+        assert Path(app_config.CONFIG.paths.templates) == get_project_root() / "static" / "locales" / "en-US" / "templates"
     finally:
         app_config.CONFIG.resources = original_resources
 

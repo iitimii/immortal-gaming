@@ -29,8 +29,8 @@ class DummySect:
 
 @pytest.mark.asyncio
 async def test_relation_event_two_sects(base_world):
-    sect_a = DummySect(1, "A宗")
-    sect_b = DummySect(2, "B宗")
+    sect_a = DummySect(1, "Sect A")
+    sect_b = DummySect(2, "Sect B")
     base_world.existed_sects = [sect_a, sect_b]
 
     records = [
@@ -47,7 +47,7 @@ async def test_relation_event_two_sects(base_world):
         patch("src.systems.sect_random_event.call_llm_with_template", new_callable=AsyncMock) as mock_llm, \
         patch("src.systems.sect_random_event.random.random", return_value=0.0):
         mock_configs.get.return_value = records
-        mock_llm.return_value = {"reason_fragment": "边境旧约重新谈判"}
+        mock_llm.return_value = {"reason_fragment": "the old border treaty was renegotiated"}
 
         event = await try_trigger_sect_random_event(base_world)
 
@@ -56,14 +56,16 @@ async def test_relation_event_two_sects(base_world):
     assert len(base_world.sect_relation_modifiers) == 1
     assert base_world.sect_relation_modifiers[0]["delta"] == 12
     assert base_world.sect_relation_modifiers[0]["duration"] == 60
-    assert "边境旧约重新谈判" in event.content
-    assert "Because" not in event.content
+    assert event.content == (
+        "Because the old border treaty was renegotiated, relations between Sect A and Sect B "
+        "improved (+12 for 60 months)."
+    )
     assert mock_llm.await_args.kwargs["mode"] == LLMMode.FAST
 
 
 @pytest.mark.asyncio
 async def test_magic_stone_event_single_sect(base_world):
-    sect_a = DummySect(1, "A宗")
+    sect_a = DummySect(1, "Sect A")
     base_world.existed_sects = [sect_a]
 
     records = [
@@ -80,7 +82,7 @@ async def test_magic_stone_event_single_sect(base_world):
         patch("src.systems.sect_random_event.call_llm_with_template", new_callable=AsyncMock) as mock_llm, \
         patch("src.systems.sect_random_event.random.random", return_value=0.0):
         mock_configs.get.return_value = records
-        mock_llm.return_value = {"reason_fragment": "内务整顿资金紧张"}
+        mock_llm.return_value = {"reason_fragment": "internal reforms strained the treasury"}
 
         event = await try_trigger_sect_random_event(base_world)
 
@@ -93,7 +95,7 @@ async def test_magic_stone_event_single_sect(base_world):
 
 @pytest.mark.asyncio
 async def test_income_event_single_sect(base_world):
-    sect_a = DummySect(1, "A宗")
+    sect_a = DummySect(1, "Sect A")
     base_world.existed_sects = [sect_a]
 
     records = [
@@ -110,7 +112,7 @@ async def test_income_event_single_sect(base_world):
         patch("src.systems.sect_random_event.call_llm_with_template", new_callable=AsyncMock) as mock_llm, \
         patch("src.systems.sect_random_event.random.random", return_value=0.0):
         mock_configs.get.return_value = records
-        mock_llm.return_value = {"reason_fragment": "新商路税契暂时稳定"}
+        mock_llm.return_value = {"reason_fragment": "new trade-route tax contracts stabilized for now"}
 
         event = await try_trigger_sect_random_event(base_world)
 
@@ -122,8 +124,8 @@ async def test_income_event_single_sect(base_world):
 
 @pytest.mark.asyncio
 async def test_no_event_when_reason_generation_raises(base_world):
-    sect_a = DummySect(1, "A宗")
-    sect_b = DummySect(2, "B宗")
+    sect_a = DummySect(1, "Sect A")
+    sect_b = DummySect(2, "Sect B")
     base_world.existed_sects = [sect_a, sect_b]
 
     records = [
@@ -154,7 +156,7 @@ async def test_no_event_when_reason_generation_raises(base_world):
 
 @pytest.mark.asyncio
 async def test_no_event_when_reason_fragment_is_empty(base_world):
-    sect_a = DummySect(1, "A宗")
+    sect_a = DummySect(1, "Sect A")
     base_world.existed_sects = [sect_a]
 
     records = [
@@ -183,7 +185,7 @@ async def test_no_event_when_reason_fragment_is_empty(base_world):
 
 @pytest.mark.asyncio
 async def test_no_event_when_reason_payload_is_not_dict(base_world):
-    sect_a = DummySect(1, "A宗")
+    sect_a = DummySect(1, "Sect A")
     base_world.existed_sects = [sect_a]
 
     records = [
@@ -212,7 +214,7 @@ async def test_no_event_when_reason_payload_is_not_dict(base_world):
 
 @pytest.mark.asyncio
 async def test_invalid_event_type_raises(base_world):
-    sect_a = DummySect(1, "A宗")
+    sect_a = DummySect(1, "Sect A")
     base_world.existed_sects = [sect_a]
 
     records = [{"id": 99, "event_type": "unknown", "weight": 1.0, "value": 1, "duration_months": 1}]
@@ -227,7 +229,7 @@ async def test_invalid_event_type_raises(base_world):
 
 @pytest.mark.asyncio
 async def test_legacy_relation_delta_raises(base_world):
-    sect_a = DummySect(1, "A宗")
+    sect_a = DummySect(1, "Sect A")
     base_world.existed_sects = [sect_a]
 
     records = [

@@ -58,7 +58,7 @@ class SectDecisionPlan:
 
 class SectDecider:
     """
-    按配置周期执行的宗门行政决策执行器。
+    Sect administrative decision executor, run on the configured cycle.
     """
 
     @classmethod
@@ -528,4 +528,4 @@ class SectDecider:
                 "{sect_name} focused this round of sect decisions on consolidation and observation, with no major adjustments made.",
                 sect_name=sect.name,
             )
-        return t("{sect_name} this round of sect decisions:", sect_name=sect.name) + " " + "、".join(parts) + "。"
+        return t("{sect_name} this round of sect decisions:", sect_name=sect.name) + " " + ", ".join(parts) + "."

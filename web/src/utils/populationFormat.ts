@@ -1,19 +1,16 @@
 import type { ComposerTranslation } from 'vue-i18n';
 
-const MYRIAD_LOCALES = new Set(['zh-CN', 'zh-TW', 'ja-JP']);
+// Backend population values are expressed in units of 10,000 people.
+const POPULATION_UNIT = 10000;
 
 function normalizeLocale(locale: string | undefined): string {
   return locale || 'en-US';
 }
 
-function formatCompactNumber(
-  value: number,
-  locale: string,
-  options?: Intl.NumberFormatOptions,
-): string {
+function formatCompactNumber(value: number, locale: string, maximumFractionDigits: number): string {
   return new Intl.NumberFormat(locale, {
     notation: 'compact',
-    ...options,
+    maximumFractionDigits,
   }).format(value);
 }
 
@@ -21,25 +18,7 @@ export function formatPopulationValue(
   value: number | undefined,
   locale?: string,
 ): string {
-  const normalized = value ?? 0;
-  const resolvedLocale = normalizeLocale(locale);
-
-  if (MYRIAD_LOCALES.has(resolvedLocale)) {
-    return normalized.toFixed(1);
-  }
-
-  const actualPopulation = normalized * 10000;
-
-  if (resolvedLocale === 'vi-VN') {
-    return formatCompactNumber(actualPopulation, resolvedLocale, {
-      compactDisplay: 'long',
-      maximumFractionDigits: 2,
-    });
-  }
-
-  return formatCompactNumber(actualPopulation, resolvedLocale, {
-    maximumFractionDigits: 2,
-  });
+  return formatCompactNumber((value ?? 0) * POPULATION_UNIT, normalizeLocale(locale), 2);
 }
 
 export function formatPopulationText(
@@ -59,24 +38,7 @@ export function formatPopulationGrowthText(
 ): string {
   const normalized = value ?? 0;
   const prefix = normalized > 0 ? '+' : '';
-  const resolvedLocale = normalizeLocale(locale);
-
-  if (MYRIAD_LOCALES.has(resolvedLocale)) {
-    return t('game.mortal_system.population_growth_value', {
-      value: `${prefix}${normalized.toFixed(2)}`
-    });
-  }
-
-  const actualGrowth = normalized * 10000;
-  const formattedValue =
-    resolvedLocale === 'vi-VN'
-      ? formatCompactNumber(actualGrowth, resolvedLocale, {
-          compactDisplay: 'long',
-          maximumFractionDigits: 1,
-        })
-      : formatCompactNumber(actualGrowth, resolvedLocale, {
-          maximumFractionDigits: 1,
-        });
+  const formattedValue = formatCompactNumber(normalized * POPULATION_UNIT, normalizeLocale(locale), 1);
 
   return t('game.mortal_system.population_growth_value', {
     value: `${prefix}${formattedValue}`

@@ -12,82 +12,82 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#. root.csv: 资质通天；五行皆通，修行全面...
+#. root.csv: Peerless aptitude; proficient in all five elements
 msgid "ROOT_10_DESC"
 msgstr "Peerless aptitude; proficient in all five elements"
 
-#. root.csv: 天灵根
+#. root.csv: Heavenly Spiritual Root
 msgid "ROOT_10_NAME"
 msgstr "Heavenly Spiritual Root"
 
-#. root.csv: 刚强果断；攻击力强，适合剑修...
+#. root.csv: Strong and decisive; strong attack power
 msgid "ROOT_1_DESC"
 msgstr "Strong and decisive; strong attack power"
 
-#. root.csv: 金灵根
+#. root.csv: Metal Spiritual Root
 msgid "ROOT_1_NAME"
 msgstr "Metal Spiritual Root"
 
-#. root.csv: 仁厚坚韧；擅恢复、毒术与木属性法术...
+#. root.csv: Kind and resilient; good at recovery
 msgid "ROOT_2_DESC"
 msgstr "Kind and resilient; good at recovery"
 
-#. root.csv: 木灵根
+#. root.csv: Wood Spiritual Root
 msgid "ROOT_2_NAME"
 msgstr "Wood Spiritual Root"
 
-#. root.csv: 智慧圆融；身法轻盈，善辅助与隐匿...
+#. root.csv: Wise and smooth; light movement
 msgid "ROOT_3_DESC"
 msgstr "Wise and smooth; light movement"
 
-#. root.csv: 水灵根
+#. root.csv: Water Spiritual Root
 msgid "ROOT_3_NAME"
 msgstr "Water Spiritual Root"
 
-#. root.csv: 激情暴烈；高爆发攻术，火系功法...
+#. root.csv: Passionate and violent; high-burst offensive te...
 msgid "ROOT_4_DESC"
 msgstr "Passionate and violent; high-burst offensive techniques"
 
-#. root.csv: 火灵根
+#. root.csv: Fire Spiritual Root
 msgid "ROOT_4_NAME"
 msgstr "Fire Spiritual Root"
 
-#. root.csv: 稳重踏实；防御高，体修或傀儡术...
+#. root.csv: Steady and practical; high defense
 msgid "ROOT_5_DESC"
 msgstr "Steady and practical; high defense"
 
-#. root.csv: 土灵根
+#. root.csv: Earth Spiritual Root
 msgid "ROOT_5_NAME"
 msgstr "Earth Spiritual Root"
 
-#. root.csv: 爆发性极强；战斗系顶尖...
+#. root.csv: Extremely explosive; top-tier in combat
 msgid "ROOT_6_DESC"
 msgstr "Extremely explosive; top-tier in combat"
 
-#. root.csv: 雷灵根
+#. root.csv: Thunder Spiritual Root
 msgid "ROOT_6_NAME"
 msgstr "Thunder Spiritual Root"
 
-#. root.csv: 控制力强；持久性好...
+#. root.csv: Strong control; good persistence
 msgid "ROOT_7_DESC"
 msgstr "Strong control; good persistence"
 
-#. root.csv: 冰灵根
+#. root.csv: Ice Spiritual Root
 msgid "ROOT_7_NAME"
 msgstr "Ice Spiritual Root"
 
-#. root.csv: 身法卓绝；难以捉摸...
+#. root.csv: Exceptional movement; elusive
 msgid "ROOT_8_DESC"
 msgstr "Exceptional movement; elusive"
 
-#. root.csv: 风灵根
+#. root.csv: Wind Spiritual Root
 msgid "ROOT_8_NAME"
 msgstr "Wind Spiritual Root"
 
-#. root.csv: 隐匿系；擅幻术与诡道...
+#. root.csv: Stealth-oriented; good at illusions and deceit
 msgid "ROOT_9_DESC"
 msgstr "Stealth-oriented; good at illusions and deceit"
 
-#. root.csv: 暗灵根
+#. root.csv: Dark Spiritual Root
 msgid "ROOT_9_NAME"
 msgstr "Dark Spiritual Root"

@@ -14,8 +14,8 @@ from src.systems.time import MonthStamp
 
 def test_population_planner_assigns_only_accepting_sects_when_all_yao(monkeypatch):
     monkeypatch.setattr("src.sim.avatar_init.roll_avatar_race", lambda: get_race("fox"))
-    academy = sects_by_name["浩然书院"]
-    accepting = sects_by_name["凌霄剑宗"]
+    academy = sects_by_name["Haoran Academy"]
+    accepting = sects_by_name["High Heaven Sword Sect"]
 
     plan = PopulationPlanner.plan_group(8, [academy, accepting])
 
@@ -25,8 +25,8 @@ def test_population_planner_assigns_only_accepting_sects_when_all_yao(monkeypatc
 
 def test_make_avatars_uses_yao_probability_and_respects_sect_policy(base_world, monkeypatch):
     monkeypatch.setattr("src.sim.avatar_init.roll_avatar_race", lambda: get_race("wolf"))
-    academy = sects_by_name["浩然书院"]
-    accepting = sects_by_name["凌霄剑宗"]
+    academy = sects_by_name["Haoran Academy"]
+    accepting = sects_by_name["High Heaven Sword Sect"]
 
     avatars = make_avatars(base_world, count=6, current_month_stamp=MonthStamp(100 * 12), existed_sects=[academy, accepting])
 
@@ -36,7 +36,7 @@ def test_make_avatars_uses_yao_probability_and_respects_sect_policy(base_world, 
 
 
 def test_create_avatar_from_request_defaults_human_and_blocks_non_accepting_sect(base_world):
-    academy = sects_by_name["浩然书院"]
+    academy = sects_by_name["Haoran Academy"]
 
     human_avatar = create_avatar_from_request(
         base_world,
@@ -66,7 +66,7 @@ def test_yao_random_name_uses_race_surname(base_world):
     )
 
     assert avatar.race.id == "snake"
-    assert avatar.name.startswith("蛇")
+    assert avatar.name.startswith("Snake ")
 
 
 def test_avatar_factory_build_from_plan_applies_race(base_world):

@@ -8,16 +8,16 @@ from src.systems.cultivation import Realm
 EXTRA_RESPIRE_EXP_MULTIPLIER = "extra_respire_exp_multiplier"
 
 class TestOrthodoxyData:
-    """测试道统数据的加载和基本结构"""
+    """Test loading and basic structure of orthodoxy data."""
 
     def test_orthodoxy_loaded(self):
-        """确保道统数据已加载且包含预期的ID"""
+        """Ensure orthodoxy data is loaded and contains the expected IDs."""
         assert "dao" in orthodoxy_by_id
         assert "buddhism" in orthodoxy_by_id
         assert "confucianism" in orthodoxy_by_id
 
     def test_orthodoxy_attributes(self):
-        """测试道统对象的属性"""
+        """Test orthodoxy object attributes."""
         dao = get_orthodoxy("dao")
         assert dao.id == "dao"
         assert dao.name # Should not be empty
@@ -25,7 +25,7 @@ class TestOrthodoxyData:
         assert isinstance(dao.effects, dict)
         
     def test_orthodoxy_info(self):
-        """测试 get_info 方法"""
+        """Test the get_info method."""
         buddhism = get_orthodoxy("buddhism")
         info = buddhism.get_info(detailed=False)
         assert "id" in info
@@ -37,26 +37,26 @@ class TestOrthodoxyData:
         assert "effect_desc" in detailed_info
 
 class TestSectIntegration:
-    """测试宗门与道统的集成"""
+    """Test integration between sects and orthodoxies."""
 
     def test_sect_default_orthodoxy(self):
-        """测试未指定道统的宗门默认为道门"""
-        # 假设 ID 1 的宗门 (凌霄剑宗) 没有指定道统，应默认为 dao
+        """A sect without an explicit orthodoxy defaults to Dao."""
+        # Sect ID 1 (High Heaven Sword Sect) has no explicit orthodoxy and should default to dao
         sect_1 = sects_by_id.get(1)
         if sect_1:
             assert sect_1.orthodoxy_id == "dao"
 
     def test_sect_explicit_orthodoxy(self):
-        """测试指定道统的宗门"""
-        # 须弥禅院 (ID 7) 指定为 buddhism
+        """Test sects with an explicit orthodoxy."""
+        # Sumeru Zen Temple (ID 7) is set to buddhism
         sect_7 = sects_by_id.get(7)
         if sect_7:
             assert sect_7.orthodoxy_id == "buddhism"
-            # 检查 buddhism 的 effect 是否存在 (legal_actions: ['Meditate'])
+            # Check that the buddhism effect exists (legal_actions: ['Meditate'])
             assert "legal_actions" in sect_7.effects
             assert "Meditate" in sect_7.effects["legal_actions"]
 
-        # 浩然书院 (ID 13) 指定为 confucianism
+        # Haoran Academy (ID 13) is set to confucianism
         sect_13 = sects_by_id.get(13)
         if sect_13:
             assert sect_13.orthodoxy_id == "confucianism"
@@ -64,24 +64,24 @@ class TestSectIntegration:
             assert "Educate" in sect_13.effects["legal_actions"]
 
     def test_sect_info_contains_orthodoxy(self):
-        """测试宗门信息包含道统"""
+        """Sect info includes the orthodoxy."""
         sect_7 = sects_by_id.get(7)
         if sect_7:
             info = sect_7.get_info()
-            assert "佛" in info or "Buddhism" in info # Depends on language, but key should be translated
+            assert "Buddhism" in info
             
             detailed = sect_7.get_detailed_info()
-            assert "佛" in detailed or "Buddhism" in detailed
+            assert "Buddhism" in detailed
 
 class TestOrthodoxyEffects:
-    """测试道统效果在游戏逻辑中的生效情况"""
+    """Test that orthodoxy effects apply in game logic."""
 
     def test_respire_exp_multiplier(self, dummy_avatar):
-        """测试修炼经验倍率加成"""
-        # 1. 设置角色为道门宗门成员 (或者直接修改 effects)
-        # 这里直接模拟 effects 字典，因为我们测的是 Cultivate action 对 effect 的响应
+        """Test the cultivation EXP multiplier bonus."""
+        # 1. Make the avatar a Dao sect member (or modify effects directly)
+        # Mock the effects dict directly since we are testing how Cultivate responds to effects
         
-        # 基础经验
+        # Base EXP
         dummy_avatar.cultivation_progress.is_in_bottleneck = MagicMock(return_value=False)
         dummy_avatar.cultivation_progress.add_exp = MagicMock()
         

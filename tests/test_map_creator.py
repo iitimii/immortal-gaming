@@ -20,7 +20,7 @@ def _write_map(root, map_id, *, width=84, height=60, region_id=101):
         "wilderness_tile": "plain",
         "region_rows": [[region_id for _ in range(width)] for _ in range(height)],
         "landmarks": {"301": {"x": 1, "y": 2, "asset": "city_301"}},
-        "region_overrides": {"101": {"name": "测试平原"}},
+        "region_overrides": {"101": {"name": "Test Plains"}},
     }
     (preset_dir / "map.json").write_text(
         json.dumps(payload, ensure_ascii=False),
@@ -55,7 +55,7 @@ def test_map_creator_save_payload_preserves_existing_size_and_metadata(tmp_path,
     assert payload["region_rows"][0][0] == 102
     assert payload["region_rows"][59][83] == 105
     assert payload["landmarks"] == {"301": {"x": 1, "y": 2, "asset": "city_301"}}
-    assert payload["region_overrides"] == {"101": {"name": "测试平原"}}
+    assert payload["region_overrides"] == {"101": {"name": "Test Plains"}}
     assert payload["wilderness_tile"] == "sea"
 
 

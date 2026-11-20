@@ -11,31 +11,31 @@ from src.utils.resolution import resolve_query
 
 
 class MoveAwayFromRegion(InstantAction):
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "move_away_from_region_action_name"
     DESC_ID = "move_away_from_region_description"
     REQUIREMENTS_ID = "move_away_from_region_requirements"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "🏃"
     PARAMS = {"region": "RegionName"}
     PARAM_OPTION_SOURCES = {"region": ParamOptionSource.KNOWN_REGION_NAME}
 
     def _execute(self, region: str) -> None:
-        # 解析目标区域，并沿“远离该区域最近格点”的方向移动一步
+        # Resolve the target region and move one step away from "the nearest tile in that region"
         r = resolve_query(region, self.world, expected_types=[Region]).obj
         if not r:
             return
 
         x = self.avatar.pos_x
         y = self.avatar.pos_y
-        # 找到目标区域内距离当前坐标最近的格点
+        # Find the tile in the target region nearest to the current coordinate
         if getattr(r, "cors", None):
             nearest = min(r.cors, key=lambda p: euclidean_distance((x, y), p))
             away_dx = x - nearest[0]
             away_dy = y - nearest[1]
         else:
-            # 无 cors（极少数异常），退化为“远离地图中心”
+            # No cors (rare anomaly); degrade to "move away from the map center"
             cx, cy = self.world.map.width // 2, self.world.map.height // 2
             away_dx = x - cx
             away_dy = y - cy
@@ -56,7 +56,7 @@ class MoveAwayFromRegion(InstantAction):
                    avatar=self.avatar.name, region=region_name)
         return Event(self.world.month_stamp, content, related_avatars=[self.avatar.id])
 
-    # InstantAction 已实现 step 完成
+    # InstantAction already completes in step
 
     async def finish(self, region: str) -> list[Event]:
         return []

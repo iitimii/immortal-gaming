@@ -38,7 +38,7 @@ def get_category_from_comment(comment):
             
         # Priority Keyword Matching
         # This handles cases like "Battle messages", "Battle - action", "Action: Attack"
-        # Also handles "Effect 系统" (Effect System) which contains Chinese characters
+        # Also handles mixed-language comments such as "Effect System" variants
         keywords = {
             'Battle': 'battle',
             'Fortune': 'fortune',

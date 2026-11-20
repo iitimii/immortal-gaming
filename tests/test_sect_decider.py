@@ -68,7 +68,7 @@ def _dummy_ctx(rogue: Avatar, member: Avatar, breaker: Avatar) -> SectDecisionCo
             }
         ],
         active_wars=[],
-        rule={"rule_id": "righteous_orthodoxy", "rule_desc": "不得勾结邪魔。"},
+        rule={"rule_id": "righteous_orthodoxy", "rule_desc": "Never collude with demonic cultivators."},
         recruitment_candidates=[
             {
                 "avatar_id": rogue.id,
@@ -120,15 +120,15 @@ async def test_sect_decider_executes_recruit_expel_reward_and_support(base_world
         member_act_style="",
         alignment=Alignment.RIGHTEOUS,
         headquarter=SectHeadQuarter(name="HQ", desc="", image=Path("")),
-        technique_names=["测试上品金诀"],
+        technique_names=["Test Upper Gold Art"],
         rule_id="righteous_orthodoxy",
-        rule_desc="不得勾结邪魔。",
+        rule_desc="Never collude with demonic cultivators.",
         magic_stone=1000,
     )
 
     reward_technique = Technique(
         id=99901,
-        name="测试上品金诀",
+        name="Test Upper Gold Art",
         attribute=TechniqueAttribute.GOLD,
         grade=TechniqueGrade.UPPER,
         desc="",
@@ -138,7 +138,7 @@ async def test_sect_decider_executes_recruit_expel_reward_and_support(base_world
     )
     low_technique = Technique(
         id=99902,
-        name="测试下品金诀",
+        name="Test Lower Gold Art",
         attribute=TechniqueAttribute.GOLD,
         grade=TechniqueGrade.LOWER,
         desc="",
@@ -170,7 +170,7 @@ async def test_sect_decider_executes_recruit_expel_reward_and_support(base_world
     try:
         with patch(
             "src.classes.sect_decider.resolve_sect_recruitment",
-            new=AsyncMock(return_value=type("Outcome", (), {"accepted": True, "result_text": "Rogue 答应了 Test Sect 的招徕。"})()),
+            new=AsyncMock(return_value=type("Outcome", (), {"accepted": True, "result_text": "Rogue accepted the invitation from Test Sect."})()),
         ), patch("src.classes.sect_decider.random.choice", return_value=reward_technique):
             result = await SectDecider.decide(sect, ctx, base_world)
     finally:
@@ -190,8 +190,8 @@ async def test_sect_decider_executes_recruit_expel_reward_and_support(base_world
     assert result.expulsion_count == 1
     assert result.technique_reward_count == 2
     assert result.support_count == 1
-    assert "招徕散修 1 人" in result.summary_text
-    assert any("逐出宗门" in event.content for event in result.events)
+    assert "recruited 1 rogue cultivators" in result.summary_text
+    assert any("expelled them from the sect" in event.content for event in result.events)
 
 
 @pytest.mark.asyncio
@@ -205,7 +205,7 @@ async def test_sect_decider_skips_recruitment_when_funds_insufficient(base_world
         headquarter=SectHeadQuarter(name="HQ", desc="", image=Path("")),
         technique_names=[],
         rule_id="righteous_orthodoxy",
-        rule_desc="不得勾结邪魔。",
+        rule_desc="Never collude with demonic cultivators.",
         magic_stone=400,
     )
     rogue = _create_avatar(base_world, avatar_id="rogue", name="Rogue", alignment=Alignment.RIGHTEOUS)
@@ -217,7 +217,7 @@ async def test_sect_decider_skips_recruitment_when_funds_insufficient(base_world
         territory={},
         self_assessment={},
         economy={},
-        rule={"rule_id": "righteous_orthodoxy", "rule_desc": "不得勾结邪魔。"},
+        rule={"rule_id": "righteous_orthodoxy", "rule_desc": "Never collude with demonic cultivators."},
         recruitment_candidates=[
             {
                 "avatar_id": rogue.id,
@@ -257,7 +257,7 @@ async def test_sect_decider_llm_plan_receives_detailed_info(base_world):
         headquarter=SectHeadQuarter(name="HQ", desc="", image=Path("")),
         technique_names=[],
         rule_id="righteous_orthodoxy",
-        rule_desc="不得勾结邪魔。",
+        rule_desc="Never collude with demonic cultivators.",
         magic_stone=1000,
     )
     rogue = _create_avatar(base_world, avatar_id="rogue", name="Rogue", alignment=Alignment.RIGHTEOUS)
@@ -265,10 +265,10 @@ async def test_sect_decider_llm_plan_receives_detailed_info(base_world):
         basic_structured={"name": "Wise Sect"},
         basic_text="",
         identity={
-            "purpose": "守正积势",
-            "style": "行事果决",
-            "orthodoxy_name": "仙道",
-            "rule_desc": "不得勾结邪魔。",
+            "purpose": "Uphold righteousness and build momentum",
+            "style": "Decisive in action",
+            "orthodoxy_name": "Immortal Dao",
+            "rule_desc": "Never collude with demonic cultivators.",
         },
         power={},
         territory={},
@@ -276,8 +276,8 @@ async def test_sect_decider_llm_plan_receives_detailed_info(base_world):
         economy={
             "treasury_pressure": "tight",
             "action_cost_notes": [
-                "每成功招募一名新人会立即消耗 500 灵石，并增加后续年度成员供养支出。",
-                "赐予功法会消耗宗门传承资源。",
+                "Each successful recruit immediately costs 500 spirit stones and raises future yearly member upkeep.",
+                "Bestowing techniques consumes the sect's inheritance resources.",
             ],
         },
         relations=[],
@@ -285,7 +285,7 @@ async def test_sect_decider_llm_plan_receives_detailed_info(base_world):
         history={"recent_events": [], "summary_text": ""},
         diplomacy_targets=[],
         active_wars=[],
-        rule={"rule_id": "righteous_orthodoxy", "rule_desc": "不得勾结邪魔。"},
+        rule={"rule_id": "righteous_orthodoxy", "rule_desc": "Never collude with demonic cultivators."},
         recruitment_candidates=[
             {
                 "avatar_id": rogue.id,
@@ -304,7 +304,7 @@ async def test_sect_decider_llm_plan_receives_detailed_info(base_world):
     )
 
     payload = {
-        "thinking": "先观其人。",
+        "thinking": "Observe the person first.",
         "recruit_avatar_ids": [rogue.id],
         "expel_avatar_ids": [],
         "reward_avatar_ids": [],
@@ -320,8 +320,8 @@ async def test_sect_decider_llm_plan_receives_detailed_info(base_world):
     infos = mock_llm.call_args.kwargs["infos"]
     assert "detailed_info" in infos["decision_context_info"]
     assert "bio" in infos["decision_context_info"]
-    assert "守正积势" in infos["decision_context_info"]
-    assert "传承资源" in infos["decision_context_info"]
+    assert "Uphold righteousness and build momentum" in infos["decision_context_info"]
+    assert "inheritance resources" in infos["decision_context_info"]
     assert infos["world_lore"] == ""
 
 
@@ -364,7 +364,7 @@ async def test_sect_decider_can_declare_war_from_llm_plan(base_world):
         member_candidates=[],
     )
     payload = {
-        "thinking": "先压边界。",
+        "thinking": "Press the borders first.",
         "declare_war_target_ids": [2],
         "seek_peace_target_ids": [],
         "recruit_avatar_ids": [],
@@ -380,7 +380,7 @@ async def test_sect_decider_can_declare_war_from_llm_plan(base_world):
 
     assert base_world.are_sects_at_war(1, 2)
     assert result.war_declared_count == 1
-    assert any("宣战" in event.content for event in result.events)
+    assert any("declared war on" in event.content for event in result.events)
 
 
 def test_sect_decider_llm_available_uses_runtime_config():

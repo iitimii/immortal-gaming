@@ -34,12 +34,12 @@ def is_in_sect_headquarter(world: "World", sect: "Sect" | None, region: object) 
 
 def sync_world_sect_metadata(world: "World") -> None:
     """
-    同步宗门本体与宗门驻地区域的派生展示字段。
+    Sync derived display fields between a sect and its headquarters region.
 
-    约定：
-    - `Sect.id <-> SectRegion.sect_id` 是唯一绑定真源；
-    - `Sect.headquarter.*` 和 `SectRegion.sect_name` 由该绑定派生；
-    - 名称只用于展示，不再承担关系绑定职责。
+    Conventions:
+    - `Sect.id <-> SectRegion.sect_id` is the single source of truth for the binding;
+    - `Sect.headquarter.*` and `SectRegion.sect_name` are derived from that binding;
+    - Names are for display only and no longer carry binding responsibility.
     """
     game_map = getattr(world, "map", None)
     if game_map is None:

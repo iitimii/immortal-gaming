@@ -3,13 +3,13 @@ from __future__ import annotations
 
 def clamp_manhattan_with_diagonal_priority(dx: int, dy: int, step: int) -> tuple[int, int]:
     """
-    在不超过给定曼哈顿步长 step 的前提下，对 (dx, dy) 进行裁剪，且优先斜向移动。
+    Clip (dx, dy) so the Manhattan step doesn't exceed the given step, preferring diagonal moves.
 
-    规则：
-    - 返回的 (mx, my) 满足 |mx| + |my| <= step
-    - 每轴不超过原目标量：|mx| <= |dx|, |my| <= |dy|
-    - 优先分配斜向步（即同时占用 x 与 y 各 1 步），其后再把剩余步数分配给剩余距离更大的轴
-    - 保持原方向（符号）
+    Rules:
+    - The returned (mx, my) satisfies |mx| + |my| <= step
+    - Each axis doesn't exceed the original target: |mx| <= |dx|, |my| <= |dy|
+    - Diagonal steps are allocated first (using 1 step on both x and y), then the remaining steps go to the axis with more remaining distance
+    - The original direction (sign) is preserved
     """
     if step <= 0 or (dx == 0 and dy == 0):
         return 0, 0
@@ -19,17 +19,17 @@ def clamp_manhattan_with_diagonal_priority(dx: int, dy: int, step: int) -> tuple
     sign_x = 1 if dx > 0 else (-1 if dx < 0 else 0)
     sign_y = 1 if dy > 0 else (-1 if dy < 0 else 0)
 
-    # 实际可用预算不超过所需的曼哈顿距离
+    # The usable budget doesn't exceed the required Manhattan distance
     budget = min(step, abs_dx + abs_dy)
 
-    # 先分配尽量多的斜向步：每个斜向步消耗 2 点预算
+    # Allocate as many diagonal steps as possible first: each costs 2 budget points
     diagonal_steps = min(min(abs_dx, abs_dy), budget // 2)
     move_x = diagonal_steps
     move_y = diagonal_steps
 
     remaining = budget - 2 * diagonal_steps
 
-    # 若还有剩余预算，分配给剩余距离更大的轴
+    # If budget remains, give it to the axis with more remaining distance
     rem_x = abs_dx - move_x
     rem_y = abs_dy - move_y
     if remaining > 0:

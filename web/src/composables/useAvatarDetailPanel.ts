@@ -15,14 +15,12 @@ import zapIcon from '@/assets/icons/ui/lucide/zap.svg'
 type UiStore = ReturnType<typeof useUiStore>
 export type AvatarAdjustCategory = 'technique' | 'weapon' | 'auxiliary' | 'personas' | 'goldfinger'
 
-const ZH_NUMBERS = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
-
 export function parseAvatarEffectLine(line: string, t: ComposerTranslation): { source: string; segments: string[] } {
   const trimmed = line.trim()
   if (!trimmed.startsWith('[')) {
     return {
       source: t('ui.other'),
-      segments: trimmed.split(/[;；]/).map(segment => segment.trim()).filter(Boolean),
+      segments: trimmed.split(';').map(segment => segment.trim()).filter(Boolean),
     }
   }
 
@@ -38,7 +36,7 @@ export function parseAvatarEffectLine(line: string, t: ComposerTranslation): { s
     source: trimmed.slice(1, separatorIndex).trim() || t('ui.other'),
     segments: trimmed
       .slice(separatorIndex + 2)
-      .split(/[;；]/)
+      .split(';')
       .map(segment => segment.trim())
       .filter(Boolean),
   }
@@ -65,7 +63,7 @@ export function buildAvatarRelationMetaLines(rel: RelationInfo): string[] {
   }
 
   if (attitudeText && rel.numeric_relation !== 'stranger') {
-    const friendlinessSuffix = typeof rel.friendliness === 'number' ? `（${rel.friendliness}）` : ''
+    const friendlinessSuffix = typeof rel.friendliness === 'number' ? ` (${rel.friendliness})` : ''
     lines.push(`${attitudeText}${friendlinessSuffix}`)
   }
 
@@ -89,7 +87,6 @@ export function createMortalRelationPlaceholder(labelKey: 'father_short' | 'moth
 export function useAvatarDetailPanel(
   data: () => AvatarDetail,
   t: ComposerTranslation,
-  locale: { value: string },
   uiStore: UiStore,
   confirmClear: (message: string) => boolean = window.confirm,
   alertError: (message: string) => void = window.alert,
@@ -100,10 +97,10 @@ export function useAvatarDetailPanel(
   const showObjectiveModal = ref(false)
   const objectiveContent = ref('')
 
-  const currentEffectsText = computed(() => data().current_effects || data()['当前效果'])
+  const currentEffectsText = computed(() => data().current_effects)
   const currentEffectsLines = computed(() => {
     const text = currentEffectsText.value
-    if (!text || text === '无') return []
+    if (!text) return []
     return text.split('\n')
   })
 
@@ -182,13 +179,6 @@ export function useAvatarDetailPanel(
     if (!ranking) return null
     const { type, rank } = ranking
     const listName = t(`game.ranking.${type}`).split(' ')[0]
-
-    if (locale.value.startsWith('zh')) {
-      return `${listName}第${ZH_NUMBERS[rank] || rank}`
-    }
-    if (locale.value.startsWith('ja')) {
-      return `${listName}${rank}位`
-    }
     return `${listName} Rank ${rank}`
   })
 

@@ -34,7 +34,7 @@ __all__ = [
     "SwearBrotherhood",
 ]
 
-# 注册 mutual actions（均为实际动作）
+# Register mutual actions (all are actual actions)
 register_action(actual=True)(DriveAway)
 register_action(actual=True)(MutualAttack)
 register_action(actual=True)(Conversation)

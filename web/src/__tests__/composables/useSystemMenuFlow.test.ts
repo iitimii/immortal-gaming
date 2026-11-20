@@ -67,7 +67,7 @@ describe('useSystemMenuFlow', () => {
     mockFetchStatus.mockResolvedValue({
       configured: true,
       requires_config: true,
-      last_failure: '身份验证失败',
+      last_failure: 'Authentication failed',
     })
     const flow = useSystemMenuFlow()
 
@@ -75,7 +75,7 @@ describe('useSystemMenuFlow', () => {
 
     expect(flow.menuDefaultTab.value).toBe('llm')
     expect(flow.canCloseMenu.value).toBe(false)
-    expect(mockMessageWarning).toHaveBeenCalledWith('身份验证失败')
+    expect(mockMessageWarning).toHaveBeenCalledWith('Authentication failed')
   })
 
   it('handles llm ready by reopening start path', () => {

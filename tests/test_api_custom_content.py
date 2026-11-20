@@ -16,10 +16,10 @@ def test_generate_custom_content_api_uses_generation_service():
         mock_generate.return_value = {
             "category": "weapon",
             "realm": "CORE_FORMATION",
-            "name": "曜火巡天剑",
-            "desc": "测试描述",
+            "name": "Blazing Sky-Patrol Sword",
+            "desc": "Test description",
             "effects": {"extra_battle_strength_points": 3},
-            "effect_desc": "额外战斗力 +3",
+            "effect_desc": "Extra battle strength +3",
             "weapon_type": "SWORD",
             "is_custom": True,
         }
@@ -29,14 +29,14 @@ def test_generate_custom_content_api_uses_generation_service():
             json={
                 "category": "weapon",
                 "realm": "CORE_FORMATION",
-                "user_prompt": "我想要一把偏爆发的金丹剑",
+                "user_prompt": "I want a burst-focused Core Formation sword",
             },
         )
 
     assert response.status_code == 200
     payload = response.json()["data"]
     assert payload["status"] == "ok"
-    assert payload["draft"]["name"] == "曜火巡天剑"
+    assert payload["draft"]["name"] == "Blazing Sky-Patrol Sword"
     assert payload["draft"]["is_custom"] is True
     assert mock_generate.await_count == 1
 
@@ -50,11 +50,11 @@ def test_generate_custom_goldfinger_api_uses_generation_service():
     ) as mock_generate:
         mock_generate.return_value = {
             "category": "goldfinger",
-            "name": "天命签到簿",
-            "desc": "一本只会在你心底翻页的天命簿册。",
-            "story_prompt": "请围绕签到感与命数回报展开。",
+            "name": "Destiny Check-In Ledger",
+            "desc": "A ledger of destiny whose pages turn only in your heart.",
+            "story_prompt": "Focus on the feeling of daily check-ins and fate paying back.",
             "effects": {"extra_luck": 12},
-            "effect_desc": "气运 +12",
+            "effect_desc": "Luck +12",
             "mechanism_type": "effect_only",
             "is_custom": True,
         }
@@ -63,7 +63,7 @@ def test_generate_custom_goldfinger_api_uses_generation_service():
             "/api/v1/command/avatar/generate-custom-content",
             json={
                 "category": "goldfinger",
-                "user_prompt": "想要一个偏签到流、数值稍强的外挂",
+                "user_prompt": "I want a check-in style goldfinger with slightly strong numbers",
             },
         )
 
@@ -86,8 +86,8 @@ def test_create_custom_content_api_registers_new_item():
             "category": "technique",
             "draft": {
                 "category": "technique",
-                "name": "九曜焚息诀",
-                "desc": "火行吐纳功法",
+                "name": "Nine Luminaries Flame Breath Art",
+                "desc": "Fire-element respiration technique",
                 "effects": {
                     "extra_respire_exp_multiplier": 0.2,
                     "extra_breakthrough_success_rate": 0.1,
@@ -116,9 +116,9 @@ def test_create_custom_goldfinger_api_registers_new_item():
             "category": "goldfinger",
             "draft": {
                 "category": "goldfinger",
-                "name": "万劫翻盘令",
-                "desc": "你像被一枚无形令牌庇护，越是倒霉越容易翻盘。",
-                "story_prompt": "若出现险境，请强调翻盘感。",
+                "name": "Myriad Tribulations Reversal Token",
+                "desc": "An invisible token shields you; the worse your luck, the easier the comeback.",
+                "story_prompt": "In dangerous situations, emphasize the comeback.",
                 "effects": {
                     "extra_luck": 10,
                     "extra_breakthrough_success_rate": 0.1,
@@ -145,8 +145,8 @@ def test_create_custom_goldfinger_api_accepts_numeric_string_effect_values():
             "category": "goldfinger",
             "draft": {
                 "category": "goldfinger",
-                "name": "天运回响",
-                "desc": "你总能从命运回响里捞到一点额外好处。",
+                "name": "Echo of Heavenly Fortune",
+                "desc": "You always scoop a little extra benefit from the echoes of fate.",
                 "effects": {
                     "extra_luck": "14",
                     "extra_breakthrough_success_rate": "0.12",
@@ -170,8 +170,8 @@ def test_create_custom_goldfinger_api_rejects_noncanonical_effect_keys():
             "category": "goldfinger",
             "draft": {
                 "category": "goldfinger",
-                "name": "命数偏爱",
-                "desc": "你总能从命数的缝隙里捞到一点好处。",
+                "name": "Favored by Fate",
+                "desc": "You always scoop a little benefit from the cracks of fate.",
                 "effects": {
                     "luck_boost": 15,
                 },
@@ -192,14 +192,14 @@ async def test_generate_custom_goldfinger_draft_passes_allowed_effects_to_llm():
         new_callable=AsyncMock,
     ) as mock_call:
         mock_call.return_value = {
-            "name": "天命签到簿",
-            "desc": "一本只会在你心底翻页的天命簿册。",
-            "story_prompt": "请围绕签到感与命数回报展开。",
+            "name": "Destiny Check-In Ledger",
+            "desc": "A ledger of destiny whose pages turn only in your heart.",
+            "story_prompt": "Focus on the feeling of daily check-ins and fate paying back.",
             "effects": {"extra_luck": 12},
             "rarity": "SSR",
         }
 
-        draft = await generate_custom_goldfinger_draft("想要一个偏签到流、数值稍强的外挂")
+        draft = await generate_custom_goldfinger_draft("I want a check-in style goldfinger with slightly strong numbers")
 
     assert draft["category"] == "goldfinger"
     assert mock_call.await_count == 1

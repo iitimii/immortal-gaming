@@ -39,14 +39,14 @@ class DomainConfig:
 @register_gathering
 class HiddenDomain(Gathering):
     """
-    秘境系统 (Hidden Domain)
-    定期开启，只有对应境界的修士可进入探索，面临凶险或获得机缘。
+    Hidden Domain system
+    Opens periodically; only cultivators of the matching realm may enter and explore, facing danger or gaining opportunities.
     """
     
-    # 记录每个秘境上次开启的年份 {domain_id: last_open_year}
+    # Year each hidden domain last opened {domain_id: last_open_year}
     _domain_states: Dict[str, int] = {}
     
-    # 临时存储本轮开启的秘境
+    # Temporary storage of domains opened this round
     _active_domains: List[DomainConfig] = []
     
     # LLM Prompt ID
@@ -57,7 +57,7 @@ class HiddenDomain(Gathering):
         return t(cls.STORY_PROMPT_ID)
 
     def _load_configs(self) -> List[DomainConfig]:
-        """从配置表加载秘境配置"""
+        """Load hidden domain config from the config table."""
         configs = []
         df = game_configs.get("hidden_domain")
         if df is None:
@@ -65,7 +65,7 @@ class HiddenDomain(Gathering):
         
         for row in df:
             try:
-                # 必须字段
+                # Required fields
                 conf = DomainConfig(
                     id=get_str(row, "id"),
                     name=get_str(row, "name"),
@@ -85,7 +85,7 @@ class HiddenDomain(Gathering):
 
     def is_start(self, world: "World") -> bool:
         """
-        判断是否有秘境开启
+        Determine whether any hidden domain opens.
         """
         self._active_domains = []
         current_year = world.month_stamp.get_year()
@@ -94,20 +94,20 @@ class HiddenDomain(Gathering):
         for conf in configs:
             last_open = self._domain_states.get(conf.id, -999)
             
-            # 只有 CD 转好才进行概率判定
+            # Only roll the probability once the CD is over
             if current_year - last_open >= conf.cd_years:
                 if random.random() < conf.open_prob:
                     self._active_domains.append(conf)
-                    # 立即更新状态，防止同一step多次调用导致状态不一致（虽然后续execute才算正式执行）
-                    # 但GatheringManager是 is_start -> execute 顺序执行，所以这里更新没问题
-                    # 如果需要execute失败回滚，可以把更新移到execute里。这里简单起见放在这里。
+                    # Update state immediately to avoid inconsistency if called multiple times in one step (though execute is the formal run)
+                    # GatheringManager runs is_start -> execute in order, so updating here is fine
+                    # If execute failures need rollback, move the update into execute. Kept here for simplicity.
                     self._domain_states[conf.id] = current_year
                     
         return len(self._active_domains) > 0
 
     def get_related_avatars(self, world: "World") -> List[int]:
         """
-        获取所有可能参与的角色（即所有存活角色，具体筛选在 execute 中按秘境条件进行）
+        Get all potential participants (all living avatars; concrete filtering by domain conditions happens in execute)
         """
         return [av.id for av in world.avatar_manager.get_living_avatars() if self._can_avatar_join(av)]
 
@@ -121,29 +121,29 @@ class HiddenDomain(Gathering):
         return t("Hidden Domains opened: {names}", names="\n".join(details))
 
     def _get_next_realm(self, realm: Realm) -> Optional[Realm]:
-        """获取下一个大境界"""
+        """Get the next major realm."""
         current_idx = REALM_RANK.get(realm)
         if current_idx is not None and current_idx + 1 < len(REALM_ORDER):
             return REALM_ORDER[current_idx + 1]
         return None
 
     def _generate_loot(self, avatar: "Avatar", next_realm: Realm) -> Optional[Item]:
-        """生成掉落物：优先给予高一阶的物品"""
-        # 掉落类型权重：兵器(40%), 防具(40%), 功法(20%)
+        """Generate a drop: prefer items one tier higher."""
+        # Drop type weights: weapon (40%), armor (40%), technique (20%)
         roll = random.random()
         
         loot = None
         if roll < 0.4:
-            # 兵器
+            # Weapon
             loot = get_random_weapon_by_realm(next_realm)
         elif roll < 0.8:
-            # 防具
+            # Armor
             loot = get_random_auxiliary_by_realm(next_realm)
         else:
-            # 功法：尝试获取更高级的功法
-            # get_random_technique_for_avatar 根据灵根匹配，但这里我们希望给一点“机缘”
-            # 复用该函数，但可能获取到同阶的。为了体现“机缘”，我们允许多试几次取最好的，或者直接给
-            # 这里简单调用现有接口
+            # Technique: try to get a higher-grade technique
+            # get_random_technique_for_avatar matches by spiritual root, but here we want a bit of "opportunity"
+            # Reuse that function, though it may return the same grade. To reflect "opportunity" we could retry and take the best, or just give it
+            # Simply call the existing interface here
             loot = get_random_technique_for_avatar(avatar)
             
         return loot
@@ -158,20 +158,20 @@ class HiddenDomain(Gathering):
         return events
 
     async def _process_single_domain(self, world: "World", domain: DomainConfig) -> List[Event]:
-        """处理单个秘境的逻辑"""
+        """Handle the logic for a single hidden domain."""
         events = []
         month_stamp = world.month_stamp
         
-        # 1. 筛选进入秘境的角色
+        # 1. Filter avatars entering the domain
         entrants: List["Avatar"] = []
         for av in world.avatar_manager.get_living_avatars():
             if not self._can_avatar_join(av):
                 continue
-            # 境界判定：只能是对应境界进入
+            # Realm check: only the matching realm may enter
             if av.cultivation_progress.realm == domain.required_realm:
                 entrants.append(av)
 
-        # 添加开启事件
+        # Add the opening event
         entrants_names = [av.name for av in entrants]
         if entrants_names:
             entrants_str = ", ".join(entrants_names)
@@ -188,24 +188,24 @@ class HiddenDomain(Gathering):
         if not entrants:
             return events
 
-        # 记录本次秘境的事件文本和相关角色
+        # Record this domain's event texts and related avatars
         event_texts: List[str] = [open_event_content]
         related_avatars_set: set["Avatar"] = set()
         empty_handed_avatars: List["Avatar"] = []
         
-        # 2. 遍历角色执行逻辑
+        # 2. Iterate over avatars
         for av in entrants:
-            # --- 效果结算 ---
+            # --- Effect settlement ---
             extra_drop = float(av.effects.get("extra_hidden_domain_drop_prob", 0.0))
             extra_danger = float(av.effects.get("extra_hidden_domain_danger_prob", 0.0))
 
             drop_prob = domain.drop_prob + extra_drop
             danger_prob = domain.danger_prob + extra_danger
             
-            # 确保概率合理
+            # Keep probabilities sane
             danger_prob = max(0.0, danger_prob)
                 
-            # --- 凶险判定 ---
+            # --- Danger check ---
             triggered_event = False
             
             if random.random() < danger_prob:
@@ -215,7 +215,7 @@ class HiddenDomain(Gathering):
                 av.hp.cur -= damage
                 
                 if av.hp.cur <= 0:
-                    # 死亡结算
+                    # Death settlement
                     reason = DeathReason(DeathType.HIDDEN_DOMAIN)
                     handle_death(world, av, reason)
                     
@@ -232,21 +232,21 @@ class HiddenDomain(Gathering):
                     
                     event_texts.append(event_content)
                     related_avatars_set.add(av)
-                    continue # 死了就不能拿奖励了
+                    continue # The dead can't take rewards
             
-            # --- 机缘判定 ---
+            # --- Opportunity check ---
             if random.random() < drop_prob:
                 triggered_event = True
-                # 获取奖励阶位（高一阶）
+                # Get the reward tier (one higher)
                 target_realm = self._get_next_realm(av.cultivation_progress.realm)
-                # 如果已经是最高阶，则维持当前阶位
+                # If already at the top tier, keep the current tier
                 if not target_realm:
                     target_realm = av.cultivation_progress.realm
                     
                 loot = self._generate_loot(av, target_realm)
                 
                 if loot:
-                    # 发放奖励
+                    # Grant the reward
                     from src.classes.items.weapon import Weapon
                     from src.classes.items.auxiliary import Auxiliary
                     from src.classes.technique import Technique
@@ -257,7 +257,7 @@ class HiddenDomain(Gathering):
                     if isinstance(loot, Weapon):
                         old = av.weapon
                         av.change_weapon(loot)
-                        if old: # 回收旧物
+                        if old: # Recycle the old item
                             av.magic_stone += prices.get_selling_price(old, av)
                             
                     elif isinstance(loot, Auxiliary):
@@ -267,12 +267,12 @@ class HiddenDomain(Gathering):
                             av.magic_stone += prices.get_selling_price(old, av)
                             
                     elif isinstance(loot, Technique):
-                        # 只有当比当前功法好，或者还没功法时才更换？
-                        # 或者直接放入背包（如果有）？目前 Avatar 没有通用背包，通常直接修习
-                        # 简化逻辑：直接修习
+                        # Only replace if better than the current technique, or if there's none?
+                        # Or put it in the inventory (if any)? Avatar has no general inventory for this; usually learned directly
+                        # Simplified: learn it directly
                         av.technique = loot
                     
-                    # 记录事件
+                    # Record the event
                     event_content = t("{name} found a treasure {loot} in {domain}!", name=av.name, loot=loot_name, domain=domain.name)
                     event = Event(
                         month_stamp,
@@ -285,29 +285,29 @@ class HiddenDomain(Gathering):
                     related_avatars_set.add(av)
 
             if not triggered_event:
-                # 既没死也没拿东西，一无所获
+                # Neither died nor got anything: came back empty-handed
                 empty_handed_avatars.append(av)
         
-        # 处理一无所获的人
+        # Handle those who came back empty-handed
         if empty_handed_avatars:
             empty_names = ", ".join([av.name for av in empty_handed_avatars])
             empty_event_content = t("{names} returned from {domain} empty-handed.", names=empty_names, domain=domain.name)
             
-            # 作为一个聚合事件添加（避免刷屏）
-            # 或者仅添加到 event_texts 用于生成故事，不作为独立 Event 显示？
-            # 按照需求 "显示所有人的名字 + 均一无所获的文字"，应该也是一条 Log
+            # Add as one aggregated event (avoid spamming)
+            # Or only add to event_texts for the story, without a standalone Event?
+            # Per the requirement "show everyone's names + the empty-handed text", it should also be a log entry
             events.append(Event(
                 month_stamp,
                 empty_event_content,
                 related_avatars=[av.id for av in empty_handed_avatars]
             ))
             event_texts.append(empty_event_content)
-            # 也要加入 related_avatars_set 以便 story teller 知道他们参与了
+            # Also add them to related_avatars_set so the story teller knows they took part
             related_avatars_set.update(empty_handed_avatars)
 
 
-        # 3. 生成故事 (StoryTeller)
-        # 只有当发生了一些值得记录的事情（死人、或者有人获得重宝）才生成故事，避免刷屏
+        # 3. Generate the story (StoryTeller)
+        # Only generate a story when something noteworthy happened (a death, or someone got a treasure), to avoid spamming
         if event_texts:
             story_event = await self._generate_story(world, domain, event_texts, list(related_avatars_set))
             if story_event:
@@ -343,23 +343,23 @@ class HiddenDomain(Gathering):
         event_texts: List[str], 
         related_avatars: List["Avatar"]
     ) -> Optional[Event]:
-        """调用 LLM 生成秘境探索故事"""
+        """Call the LLM to generate the hidden domain exploration story."""
         
         if not related_avatars:
             return None
             
-        # 1. 场景描述
+        # 1. Scene description
         gathering_info = t(
             "Event: Hidden Domain Opening\nName: {name}\nDescription: {desc}",
             name=domain.name, desc=domain.desc
         )
         
-        # 2. 事件列表
+        # 2. Event list
         events_str = "\n".join(event_texts)
         
-        # 3. 角色信息 (可选，增加故事细节)
+        # 3. Avatar info (optional, adds story detail)
         details_list = []
-        details_list.append(t("\n【Related Avatars Information】"))
+        details_list.append(t("\n[Related Avatars Information]"))
         for av in related_avatars:
             info = av.get_info(detailed=True)
             details_list.append(f"- {av.name}: {info}")

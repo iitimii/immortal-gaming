@@ -139,7 +139,7 @@ class RandomMinorEventService:
         goldfinger_hint = build_goldfinger_story_hint(source_avatar, target_avatar)
         world_info = context.world_info
         if goldfinger_hint:
-            world_info = f"{world_info}\n外挂叙事提示：{goldfinger_hint}".strip()
+            world_info = f"{world_info}\nGoldfinger narrative hint: {goldfinger_hint}".strip()
 
         if target_avatar is None:
             avatar_info = json.dumps(source_avatar.get_expanded_info(detailed=True), ensure_ascii=False)
@@ -174,20 +174,20 @@ class RandomMinorEventService:
     @staticmethod
     def _tone_label(tone: MinorEventTone) -> str:
         labels = {
-            MinorEventTone.NEUTRAL: "中性日常",
-            MinorEventTone.WARM: "略带善意",
-            MinorEventTone.TENSE: "略带紧张",
-            MinorEventTone.COMPETITIVE: "轻微竞争",
+            MinorEventTone.NEUTRAL: "neutral, everyday",
+            MinorEventTone.WARM: "slightly warm",
+            MinorEventTone.TENSE: "slightly tense",
+            MinorEventTone.COMPETITIVE: "mildly competitive",
         }
         return labels[tone]
 
     @staticmethod
     def _relation_hint_label(relation_hint: MinorEventRelationHint) -> str:
         labels = {
-            MinorEventRelationHint.NONE: "不涉及关系变化倾向",
-            MinorEventRelationHint.MAYBE_UP: "可表现出细微升温",
-            MinorEventRelationHint.MAYBE_DOWN: "可表现出细微降温",
-            MinorEventRelationHint.MIXED: "可以偏冷也可以偏暖，视情境而定",
+            MinorEventRelationHint.NONE: "no tendency toward relationship change",
+            MinorEventRelationHint.MAYBE_UP: "may show a slight warming",
+            MinorEventRelationHint.MAYBE_DOWN: "may show a slight cooling",
+            MinorEventRelationHint.MIXED: "may lean cooler or warmer depending on the situation",
         }
         return labels[relation_hint]
 
@@ -198,14 +198,14 @@ class RandomMinorEventService:
         numeric_a = avatar_a.get_numeric_relation(avatar_b)
         numeric_b = avatar_b.get_numeric_relation(avatar_a)
         return (
-            f"{avatar_a.name}对{avatar_b.name}："
-            f"身份关系={relation_a or '无'}，"
-            f"数值关系={numeric_a}，"
-            f"友好度={avatar_a.get_friendliness(avatar_b)}；"
-            f"{avatar_b.name}对{avatar_a.name}："
-            f"身份关系={relation_b or '无'}，"
-            f"数值关系={numeric_b}，"
-            f"友好度={avatar_b.get_friendliness(avatar_a)}"
+            f"{avatar_a.name} toward {avatar_b.name}: "
+            f"identity relation={relation_a or 'none'}, "
+            f"numeric relation={numeric_a}, "
+            f"friendliness={avatar_a.get_friendliness(avatar_b)}; "
+            f"{avatar_b.name} toward {avatar_a.name}: "
+            f"identity relation={relation_b or 'none'}, "
+            f"numeric relation={numeric_b}, "
+            f"friendliness={avatar_b.get_friendliness(avatar_a)}"
         )
 
     @staticmethod

@@ -1,24 +1,12 @@
 <script setup lang="ts">
-import { NSelect, NSlider, NSwitch } from 'naive-ui'
-import { computed } from 'vue'
+import { NSlider, NSwitch } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
-import { localeRegistry } from '@/locales/registry'
 import { useSettingStore } from '@/stores/setting'
-import languagesIcon from '@/assets/icons/ui/lucide/languages.svg'
 import volumeIcon from '@/assets/icons/ui/lucide/volume-2.svg'
 import saveIcon from '@/assets/icons/ui/lucide/save.svg'
 
 const { t } = useI18n()
 const settingStore = useSettingStore()
-
-const languageOptions = computed(() =>
-  localeRegistry
-    .filter((locale) => locale.enabled)
-    .map((locale) => ({
-      label: locale.label,
-      value: locale.code,
-    })),
-)
 </script>
 
 <template>
@@ -28,19 +16,6 @@ const languageOptions = computed(() =>
     </div>
 
     <div class="settings-form">
-      <div class="setting-item">
-        <div class="setting-label-group">
-          <span class="setting-icon language-badge-icon" :style="{ '--icon-url': `url(${languagesIcon})` }" :aria-label="t('ui.language_accessible_label')"></span>
-          <span class="setting-label">{{ t('ui.language') }}</span>
-        </div>
-        <n-select
-          v-model:value="settingStore.locale"
-          :options="languageOptions"
-          @update:value="settingStore.setLocale"
-          style="width: 240px"
-        />
-      </div>
-
       <div class="setting-item">
         <div class="setting-label-group">
           <span class="setting-icon" :style="{ '--icon-url': `url(${volumeIcon})` }" aria-hidden="true"></span>
@@ -155,10 +130,6 @@ const languageOptions = computed(() =>
   mask-position: center;
   -webkit-mask-size: contain;
   mask-size: contain;
-}
-
-.language-badge-icon {
-  opacity: 1;
 }
 
 .setting-label {

@@ -143,7 +143,7 @@ def _config(
 
 
 def _put_avatar_in_city(base_world, avatar: Avatar) -> CityRegion:
-    region = CityRegion(id=301, name="青云城", desc="城", sell_item_ids=[])
+    region = CityRegion(id=301, name="Qingyun City", desc="City", sell_item_ids=[])
     tile = SimpleNamespace(region=region)
     avatar.tile = tile
     avatar.pos_x = 0
@@ -203,9 +203,9 @@ def test_region_tick_creates_world_only_small_event(base_world, dummy_avatar):
     assert event.is_major is False
     assert event.is_story is False
     assert event.event_type == BACKGROUND_NPC_EVENT_TYPE
-    assert "青云城" in event.content
-    assert "药材商" in event.content
-    assert event.render_params["region_name"] == "青云城"
+    assert "Qingyun City" in event.content
+    assert "herb vendor" in event.content
+    assert event.render_params["region_name"] == "Qingyun City"
     assert event.render_params["trigger_kind"] == "region_tick"
 
 
@@ -225,12 +225,12 @@ def test_avatar_witness_filters_by_yao_race(base_world, dummy_avatar):
         yao_events = BackgroundNpcService.create_monthly_events(base_world, [dummy_avatar])
 
     assert len(human_events) == 1
-    assert "青云城" in human_events[0].content
+    assert "Qingyun City" in human_events[0].content
     assert dummy_avatar.id in human_events[0].related_avatars
     assert len(yao_events) == 1
     assert yao_events[0].related_avatars == [dummy_avatar.id]
     assert dummy_avatar.name in yao_events[0].content
-    assert yao_events[0].render_params["region_name"] == "青云城"
+    assert yao_events[0].render_params["region_name"] == "Qingyun City"
 
 
 def test_action_echo_matches_action_key(base_world, dummy_avatar):
@@ -285,7 +285,7 @@ def test_avatar_filters_support_alignment_and_realm(base_world, dummy_avatar):
 def test_phase_background_npc_events_delegates(base_world, dummy_avatar):
     from src.sim.simulator_engine.phases.world import phase_background_npc_events
 
-    event = SimpleNamespace(content="凡人场景")
+    event = SimpleNamespace(content="Mortal scene")
     with patch(
         "src.sim.simulator_engine.phases.world.try_trigger_background_npc_events",
         return_value=[event],
@@ -309,7 +309,7 @@ class _CompletedAction(InstantAction):
 
 @pytest.mark.asyncio
 async def test_avatar_tick_action_appends_background_npc_action_echo(dummy_avatar):
-    echo_event = SimpleNamespace(content="动作回声")
+    echo_event = SimpleNamespace(content="Action echo")
     dummy_avatar.current_action = ActionInstance(action=_CompletedAction(dummy_avatar, dummy_avatar.world), params={})
     with patch(
         "src.systems.background_npc.try_trigger_background_npc_action_echo",

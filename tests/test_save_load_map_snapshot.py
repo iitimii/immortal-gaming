@@ -16,7 +16,7 @@ def test_save_writes_full_map_snapshot(tmp_path):
         events_db_path=tmp_path / "map_snapshot_events.db",
     )
     world.run_config_snapshot = {
-        "content_locale": "zh-CN",
+        "content_locale": "en-US",
         "map_id": "mountain_frontier",
         "init_npc_num": 0,
         "sect_num": 0,
@@ -52,7 +52,7 @@ def test_load_prefers_map_snapshot_over_run_config_map_id(tmp_path):
         events_db_path=tmp_path / "load_snapshot_events.db",
     )
     world.run_config_snapshot = {
-        "content_locale": "zh-CN",
+        "content_locale": "en-US",
         "map_id": "classic",
         "init_npc_num": 0,
         "sect_num": 0,
@@ -82,7 +82,7 @@ def test_map_snapshot_persists_region_overrides(tmp_path):
         events_db_path=tmp_path / "override_snapshot_events.db",
     )
     world.run_config_snapshot = {
-        "content_locale": "zh-CN",
+        "content_locale": "en-US",
         "map_id": "classic",
         "init_npc_num": 0,
         "sect_num": 0,
@@ -99,5 +99,5 @@ def test_map_snapshot_persists_region_overrides(tmp_path):
         save_data = json.load(f)
 
     snapshot = save_data["world"]["map_snapshot"]
-    assert snapshot["region_overrides"]["101"]["name"] == "东南平原"
-    assert "河渠与海风" in snapshot["region_overrides"]["101"]["desc"]
+    assert snapshot["region_overrides"]["101"]["name"] == "Southeastern Plains"
+    assert "canals, and sea breezes" in snapshot["region_overrides"]["101"]["desc"]

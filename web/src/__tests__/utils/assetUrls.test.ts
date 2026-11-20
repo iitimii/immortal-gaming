@@ -14,7 +14,7 @@ describe('assetUrls', () => {
   it('builds realm-aware avatar portrait urls from gender and pic id', () => {
     expect(getAvatarPortraitUrl('male', 3)).toBe('/assets/avatars/male/003/qi_refining.png')
     expect(getAvatarPortraitUrl('female', 8, 'FOUNDATION_ESTABLISHMENT')).toBe('/assets/avatars/female/008/foundation.png')
-    expect(getAvatarPortraitUrl('女', 5, 'CORE_FORMATION')).toBe('/assets/avatars/female/005/golden_core.png')
+    expect(getAvatarPortraitUrl('female', 5, 'CORE_FORMATION')).toBe('/assets/avatars/female/005/golden_core.png')
     expect(getAvatarPortraitUrl('male', 6, 'NASCENT_SOUL')).toBe('/assets/avatars/male/006/nascent_soul.png')
     expect(getAvatarPortraitUrl('female', 4, 'QI_REFINEMENT', 'fox')).toBe('/assets/yao/fox/female/04/qi_refining.png')
     expect(getAvatarPortraitUrl('male', null)).toBe('')

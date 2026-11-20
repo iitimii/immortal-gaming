@@ -13,8 +13,8 @@ if TYPE_CHECKING:
 @dataclass
 class Goldfinger:
     """
-    角色外挂。
-    用于承载主角模板、超规格命数和额外叙事视角。
+    Avatar goldfinger.
+    Carries protagonist templates, beyond-the-rules destinies and extra narrative perspectives.
     """
 
     id: int
@@ -125,7 +125,7 @@ def build_goldfinger_story_hint(*avatars: Optional["Avatar"]) -> str:
 
         if avatar_id:
             seen_avatar_ids.add(avatar_id)
-        lines.append(f"{avatar.name}拥有外挂「{goldfinger.name}」：{story_prompt}")
+        lines.append(f"{avatar.name} has the goldfinger \"{goldfinger.name}\": {story_prompt}")
 
     return "\n".join(lines)
 
@@ -138,7 +138,7 @@ def merge_story_prompt_with_goldfinger(base_prompt: str, *avatars: Optional["Ava
 
     goldfinger_hint = build_goldfinger_story_hint(*avatars).strip()
     if goldfinger_hint:
-        prompt_parts.append(f"外挂相关重点：\n{goldfinger_hint}")
+        prompt_parts.append(f"Goldfinger focus:\n{goldfinger_hint}")
 
     return "\n\n".join(prompt_parts)
 

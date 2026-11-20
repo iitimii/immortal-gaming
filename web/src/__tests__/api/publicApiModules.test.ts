@@ -69,12 +69,12 @@ describe('public api module migration', () => {
 
     await systemApi.fetchInitStatus()
     await systemApi.fetchSaves()
-    await systemApi.saveGame('存档A')
+    await systemApi.saveGame('Save A')
     await systemApi.loadGame('save.json')
 
     expect(getMock).toHaveBeenNthCalledWith(1, '/api/v1/query/runtime/status')
     expect(getMock).toHaveBeenNthCalledWith(2, '/api/v1/query/saves')
-    expect(postMock).toHaveBeenNthCalledWith(1, '/api/v1/command/game/save', { custom_name: '存档A' })
+    expect(postMock).toHaveBeenNthCalledWith(1, '/api/v1/command/game/save', { custom_name: 'Save A' })
     expect(postMock).toHaveBeenNthCalledWith(2, '/api/v1/command/game/load', { filename: 'save.json' })
   })
 

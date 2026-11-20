@@ -33,7 +33,7 @@ export function useGameInit(options: UseGameInitOptions = {}) {
 
   const { initStatus, isInitialized, isLoading } = storeToRefs(systemStore)
   
-  // 内部变量
+  // Internal state
   const mapPreloaded = ref(false)
   const avatarsPreloaded = ref(false)
   const texturesPreloaded = ref(false)
@@ -63,22 +63,22 @@ export function useGameInit(options: UseGameInitOptions = {}) {
     const start = performance.now()
     try {
       if (isInitialized.value) {
-        // 重新加载存档时，重新初始化
+        // Reinitialize when a save is reloaded
         worldStore.reset()
       }
 
-      // 初始化 Socket 连接
+      // Initialize the socket connection
       if (!socketStore.isConnected) {
         socketStore.init()
       }
 
-      // 初始化世界状态
+      // Initialize world state
       await worldStore.initialize()
       if (!worldStore.isLoaded) {
         throw new Error('World data was not loaded after initialization')
       }
 
-      // 确保地图区域纹理和基础纹理都已加载，loading 阶段完整承接资源准备。
+      // Make sure region and base textures are loaded so the loading phase covers all asset prep.
       await Promise.all([
         preloadRegionTextures(mapStore.regions.values()),
         loadBaseTextures(),
@@ -109,31 +109,31 @@ export function useGameInit(options: UseGameInitOptions = {}) {
         if (prevStatus !== 'idle') {
           options.onIdle?.()
         }
-        // 如果后端是 idle，确保前端状态也是重置的
+        // If the backend is idle, make sure frontend state is reset too
         if (isInitialized.value) {
             systemStore.setInitialized(false)
             worldStore.reset()
         }
-        // 重置预加载标记
+        // Reset preload flags
         mapPreloaded.value = false
         avatarsPreloaded.value = false
         texturesPreloaded.value = false
       }
 
-      // 提前加载地图
+      // Preload the map
       if (!mapPreloaded.value && isPhaseIn(GAME_PHASES.MAP_READY, res.phase_name)) {
         mapPreloaded.value = true
         Promise.resolve(preloadMapAndRegionTextures()).catch((e) => logWarn('GameInit preload map textures', e))
         preloadBaseTexturesOnce()
       }
       
-      // 提前加载角色
+      // Preload avatars
       if (!avatarsPreloaded.value && isPhaseIn(GAME_PHASES.AVATAR_READY, res.phase_name)) {
         avatarsPreloaded.value = true
         worldStore.preloadAvatars()
       }
       
-      // 提前加载纹理资源（利用后端生成事件等待期）
+      // Preload textures (while the backend is still generating)
       if (!texturesPreloaded.value && isPhaseIn(GAME_PHASES.TEXTURES_READY, res.phase_name)) {
         preloadBaseTexturesOnce()
       }
@@ -144,7 +144,7 @@ export function useGameInit(options: UseGameInitOptions = {}) {
         } catch {
           // Keep polling; the next ready poll can retry frontend initialization.
         }
-        // 不要停止轮询，否则 reset 之后无法检测到状态变化
+        // Keep polling; otherwise state changes after a reset are missed
         // stopPolling()
       }
     } catch (e) {

@@ -15,11 +15,11 @@ from src.classes.items.item import Item
 @dataclass
 class Weapon(Item):
     """
-    兵器类：用于战斗的装备
-    字段与 static/game_configs/weapon.csv 对应：
-    - weapon_type: 兵器类型（剑、刀、枪等）
-    - realm: 装备等级（练气/筑基/金丹/元婴）
-    - effects: 解析为 dict，用于与 Avatar.effects 合并
+    Weapon: equipment used in battle
+    Fields correspond to static/game_configs/weapon.csv:
+    - weapon_type: weapon type (sword, saber, spear, etc.)
+    - realm: equipment grade (Qi Refinement/Foundation Establishment/Core Formation/Nascent Soul)
+    - effects: parsed into a dict, merged with Avatar.effects
     """
     id: int
     name: str
@@ -28,7 +28,7 @@ class Weapon(Item):
     desc: str
     effects: dict[str, object] = field(default_factory=dict)
     effect_desc: str = ""
-    # 特殊属性（如万魂幡的吞噬魂魄计数）
+    # Special attributes (e.g. the devoured soul count of the Ten Thousand Souls Banner)
     special_data: dict = field(default_factory=dict)
 
     def __hash__(self):
@@ -40,13 +40,13 @@ class Weapon(Item):
         return instance
 
     def get_info(self, detailed: bool = False) -> str:
-        """获取信息"""
+        """Get info."""
         if detailed:
             return self.get_detailed_info()
         return f"{self.name}"
 
     def get_detailed_info(self) -> str:
-        """获取详细信息"""
+        """Get detailed info."""
         from src.i18n import t
         effect_part = t(" Effect: {effect_desc}", effect_desc=self.effect_desc) if self.effect_desc else ""
         return f"[{self.id}] " + t("{name} ({type}·{realm}, {desc}){effect}",
@@ -54,7 +54,7 @@ class Weapon(Item):
                  desc=self.desc, effect=effect_part)
     
     def get_colored_info(self) -> str:
-        """获取带颜色标记的信息，供前端渲染使用"""
+        """Get info with color markup for frontend rendering."""
         r, g, b = self.realm.color_rgb
         return f"<color:{r},{g},{b}>{self.get_info()}</color>"
 
@@ -72,8 +72,8 @@ class Weapon(Item):
 
 
 def _load_weapons_data() -> tuple[Dict[int, Weapon], Dict[str, Weapon]]:
-    """从配表加载 weapon 数据。
-    返回：新的 (按ID、按名称 的映射)。
+    """Load weapon data from the config table.
+    Returns: new (by ID, by name) mappings.
     """
     new_by_id: Dict[int, Weapon] = {}
     new_by_name: Dict[str, Weapon] = {}
@@ -87,11 +87,11 @@ def _load_weapons_data() -> tuple[Dict[int, Weapon], Dict[str, Weapon]]:
         from src.classes.effect import format_effects_to_text
         effect_desc = format_effects_to_text(effects)
 
-        # 解析weapon_type
+        # Parse weapon_type
         weapon_type_str = get_str(row, "weapon_type")
         weapon_type = WeaponType.from_str(weapon_type_str)
         
-        # 解析grade
+        # Parse grade
         grade_str = get_str(row, "grade", "QI_REFINEMENT")
         realm = Realm.from_str(grade_str)
 
@@ -108,18 +108,18 @@ def _load_weapons_data() -> tuple[Dict[int, Weapon], Dict[str, Weapon]]:
         new_by_id[w.id] = w
         new_by_name[w.name] = w
         
-        # 注册到全局注册表 (注意：ItemRegistry 在外部 reset 之后，这里会重新注册)
+        # Register in the global registry (note: after ItemRegistry is reset externally, items are re-registered here)
         from src.classes.items.registry import ItemRegistry
         ItemRegistry.register(w.id, w)
 
     return new_by_id, new_by_name
 
-# 全局容器
+# Global containers
 weapons_by_id: Dict[int, Weapon] = {}
 weapons_by_name: Dict[str, Weapon] = {}
 
 def reload():
-    """重新加载数据，保留全局字典引用"""
+    """Reload data while preserving the global dict references."""
     new_id, new_name = _load_weapons_data()
     
     weapons_by_id.clear()
@@ -128,12 +128,12 @@ def reload():
     weapons_by_name.clear()
     weapons_by_name.update(new_name)
 
-# 模块初始化时执行一次
+# Run once at module import
 reload()
 
 
 def get_random_weapon_by_realm(realm: Realm, weapon_type: Optional[WeaponType] = None) -> Optional[Weapon]:
-    """获取指定境界（及可选类型）的随机兵器"""
+    """Get a random weapon of the given realm (and optional type)."""
     candidates = [w for w in weapons_by_id.values() if w.realm == realm]
     if weapon_type is not None:
         candidates = [w for w in candidates if w.weapon_type == weapon_type]

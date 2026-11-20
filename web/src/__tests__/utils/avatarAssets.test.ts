@@ -9,7 +9,7 @@ describe('avatarAssets', () => {
     })
 
     expect(libraries.human.male).toEqual([1])
-    expect(getAvatarAssetIds(libraries, 'fox', '男')).toEqual([3])
+    expect(getAvatarAssetIds(libraries, 'fox', 'male')).toEqual([3])
     expect(getAvatarAssetIds(libraries, 'fox', 'female')).toEqual([4])
   })
 

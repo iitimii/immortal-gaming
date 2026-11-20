@@ -1,4 +1,4 @@
-# 忽略不需要的文件
+# Ignore files the image build does not need
 .git
 .gitignore
 node_modules
@@ -14,7 +14,7 @@ venv/
 .DS_Store
 Thumbs.db
 
-# 开发文件
+# Development files
 README.md
 ROADMAP.md
 CONTRIBUTING.md
@@ -23,17 +23,17 @@ CONTRIBUTING.md
 .idea/
 *.md
 
-# 构建产物
+# Build artifacts
 web/dist/
 web/node_modules/
 dist/
 build/
 
-# 日志
+# Logs
 *.log
 logs/
 
-# 测试
+# Tests
 tests/
 pytest_cache/
 .coverage

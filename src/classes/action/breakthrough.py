@@ -14,76 +14,76 @@ from src.classes.hp import HP_MAX_BY_REALM
 from src.classes.effect import _merge_effects
 from src.systems.formation import get_region_formation_effect_value
 
-# —— 配置：哪些"出发境界"会生成突破小故事（global var）——
+# -- Config: which "starting realms" generate a breakthrough story (global var) --
 ALLOW_STORY_FROM_REALMS: list[Realm] = [
-    Realm.Foundation_Establishment,  # 筑基
-    Realm.Core_Formation,            # 金丹
+    Realm.Foundation_Establishment,  # Foundation Establishment
+    Realm.Core_Formation,            # Core Formation
 ]
 
 
 @cooldown_action
 class Breakthrough(TimedAction):
     """
-    突破境界。
-    成功率由 `CultivationProgress.get_breakthrough_success_rate()` 决定；
-    失败时按 `CultivationProgress.get_breakthrough_fail_reduce_lifespan()` 减少寿元（年）。
+    Break through to the next realm.
+    The success rate is determined by `CultivationProgress.get_breakthrough_success_rate()`;
+    on failure, lifespan (years) is reduced per `CultivationProgress.get_breakthrough_fail_reduce_lifespan()`.
     """
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "breakthrough_action_name"
     DESC_ID = "breakthrough_description"
     REQUIREMENTS_ID = "breakthrough_requirements"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "⚡"
     PARAMS = {}
-    # 冷却：突破应当有CD，避免连刷
+    # Cooldown: breakthroughs should have a CD to prevent spamming
     ACTION_CD_MONTHS: int = 3
-    # 突破是大事（长期记忆）
+    # Breakthrough is a major event (long-term memory)
     IS_MAJOR: bool = True
-    # 保留类级常量声明，实际读取模块级配置
+    # Class-level constant declaration kept; the module-level config is what's actually read
 
     def can_possibly_start(self) -> bool:
         return self.avatar.cultivation_progress.can_break_through()
 
     def calc_success_rate(self) -> float:
         """
-        计算突破境界的成功率（由修为进度给出）
+        Compute the breakthrough success rate (given by cultivation progress)
         """
         base = self.avatar.cultivation_progress.get_breakthrough_success_rate()
-        # 统一从 avatar.effects 读取额外加成（root/technique/sect 等已合并）
+        # Read extra bonuses uniformly from avatar.effects (root/technique/sect etc. already merged)
         bonus = float(self.avatar.effects.get("extra_breakthrough_success_rate", 0.0))
         bonus += float(get_region_formation_effect_value(self.avatar, "extra_breakthrough_success_rate", 0.0) or 0.0)
-        # 夹紧到 [0, 1]
+        # Clamp to [0, 1]
         return max(0.0, min(1.0, base + bonus))
 
     duration_months = 1
 
     def _execute(self) -> None:
         """
-        突破境界
+        Break through to the next realm
         """
         assert self.avatar.cultivation_progress.can_break_through()
         success_rate = self.calc_success_rate()
-        # 记录本次尝试的基础信息
+        # Record the basic info of this attempt
         self._success_rate_cached = success_rate
         if random.random() < success_rate:
             old_realm = self.avatar.cultivation_progress.realm
             self.avatar.cultivation_progress.break_through()
             new_realm = self.avatar.cultivation_progress.realm
 
-            # 突破成功时更新HP的最大值
+            # Update max HP on a successful breakthrough
             if new_realm != old_realm:
                 self._update_hp_on_breakthrough(new_realm)
                 self.avatar.recalc_effects()
-            # 记录结果用于 finish 事件
+            # Record the result for the finish event
             self._last_result = (
                 "success",
                 old_realm.value,
                 new_realm.value,
             )
         else:
-            # 突破失败：增加一个永久折寿效果，便于前端展示来源
+            # Breakthrough failed: add a permanent lifespan-loss effect so the frontend can show the source
             reduce_years = self.avatar.cultivation_progress.get_breakthrough_fail_reduce_lifespan()
             self.avatar.add_persistent_effect(
                 "effect_source_breakthrough_failure",
@@ -95,34 +95,34 @@ class Breakthrough(TimedAction):
                     self.avatar,
                     DeathReason(DeathType.OLD_AGE),
                 )
-            # 记录结果用于 finish 事件
+            # Record the result for the finish event
             self._last_result = ("fail", int(reduce_years))
 
     def _update_hp_on_breakthrough(self, new_realm):
         """
-        突破境界时更新HP的最大值并完全恢复
+        Update max HP and fully recover on breakthrough
 
         Args:
-            new_realm: 新的境界
+            new_realm: the new realm
         """
         new_max_hp = HP_MAX_BY_REALM.get(new_realm, 100)
 
-        # 计算增加的最大值
+        # Compute the max HP increase
         hp_increase = new_max_hp - self.avatar.hp.max
 
-        # 更新最大值并恢复相应的当前值
+        # Update the max and recover the current value accordingly
         self.avatar.hp.add_max(hp_increase)
-        self.avatar.hp.recover(hp_increase)  # 突破时完全恢复HP
+        self.avatar.hp.recover(hp_increase)  # Fully recover HP on breakthrough
 
     def can_start(self) -> tuple[bool, str]:
         ok = self.avatar.cultivation_progress.can_break_through()
         return (ok, "" if ok else t("Not at bottleneck, cannot breakthrough"))
 
     def start(self) -> Event:
-        # 初始化状态
+        # Initialize state
         self._last_result = None
         self._success_rate_cached = None
-        # 预判是否生成故事与选择劫难
+        # Decide in advance whether to generate a story and pick a tribulation
         old_realm = self.avatar.cultivation_progress.realm
         self._gen_story = old_realm in ALLOW_STORY_FROM_REALMS
         if self._gen_story:
@@ -134,14 +134,14 @@ class Breakthrough(TimedAction):
         content = t("{avatar} begins attempting breakthrough", avatar=self.avatar.name)
         return Event(self.world.month_stamp, content, related_avatars=[self.avatar.id], is_major=True)
 
-    # TimedAction 已统一 step 逻辑
+    # TimedAction already unifies the step logic
 
     async def finish(self) -> list[Event]:
         if not self._last_result:
             return []
         result_ok = self._last_result[0] == "success"
         if not self._gen_story:
-            # 不生成故事：不出现劫难，仅简单结果
+            # No story: no tribulation, just a simple result
             result_text = t("Breakthrough succeeded") if result_ok else t("Breakthrough failed")
             core_text = t("{avatar} breakthrough result: {result}", 
                          avatar=self.avatar.name, result=result_text)
@@ -160,9 +160,9 @@ class Breakthrough(TimedAction):
                 pass
         events: list[Event] = [Event(self.world.month_stamp, core_text, related_avatars=rel_ids, is_major=True)]
 
-        # 故事参与者：本体 +（可选）相关角色
+        # Story participants: self + (optional) related avatars
         prompt = TribulationSelector.get_story_prompt(str(calamity))
-        # 突破强制单人模式，不改变关系（因为没有双修/战斗那样的互动）
+        # Breakthrough is forced into solo mode and doesn't change relations (no interaction like dual cultivation/battle)
         story_result = t("Breakthrough succeeded") if result_ok else t("Breakthrough failed")
         story_event = await StoryEventService.maybe_create_story(
             kind=StoryEventKind.CULTIVATION_MAJOR,

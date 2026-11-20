@@ -30,7 +30,7 @@ from src.utils.id_generator import get_avatar_id
 
 
 def _add_region(world, region_id: int, name: str, coords: list[tuple[int, int]]) -> CityRegion:
-    region = CityRegion(id=region_id, name=name, desc="测试区域", cors=coords)
+    region = CityRegion(id=region_id, name=name, desc="Test region", cors=coords)
     world.map.regions[region_id] = region
     world.map.city_regions[region_id] = region
     world.map.region_cors[region_id] = coords
@@ -81,7 +81,7 @@ def _record_for_region(avatar, region_id: int) -> OpportunityRecord:
         avatar_id=avatar.id,
         target_type=OpportunityTargetType.REGION,
         target_id=str(region_id),
-        hint_text="机缘感应：东南某处有缘法。",
+        hint_text="Opportunity sense: a fated chance lies somewhere to the southeast.",
         created_month=now - 1,
         expires_month=now + 60,
     )
@@ -89,7 +89,7 @@ def _record_for_region(avatar, region_id: int) -> OpportunityRecord:
 
 @pytest.mark.asyncio
 async def test_generate_opportunity_creates_hint_without_action_guidance(base_world, dummy_avatar, monkeypatch):
-    _add_region(base_world, 101, "远城", [(5, 5)])
+    _add_region(base_world, 101, "Far City", [(5, 5)])
     base_world.avatar_manager.register_avatar(dummy_avatar)
     monkeypatch.setattr("src.systems.opportunity._opportunity_probability", lambda avatar: 1.0)
     monkeypatch.setattr("src.systems.opportunity._weighted_choice_from_mapping", lambda mapping, defaults: "region")
@@ -100,7 +100,7 @@ async def test_generate_opportunity_creates_hint_without_action_guidance(base_wo
     assert record is not None
     assert record.target_type == OpportunityTargetType.REGION
     assert len(events) == 1
-    assert "机缘" in events[0].content
+    assert "opportunity" in events[0].content
     assert "MoveTo" not in record.hint_text
     assert "suggested_search" not in get_opportunity_context_text(dummy_avatar)
     assert "risk_hint" not in get_opportunity_context_text(dummy_avatar)
@@ -108,7 +108,7 @@ async def test_generate_opportunity_creates_hint_without_action_guidance(base_wo
 
 @pytest.mark.asyncio
 async def test_region_opportunity_resolves_on_any_target_region_tile(base_world, dummy_avatar, monkeypatch):
-    _add_region(base_world, 101, "远城", [(5, 5), (5, 6)])
+    _add_region(base_world, 101, "Far City", [(5, 5), (5, 6)])
     base_world.avatar_manager.register_avatar(dummy_avatar)
     base_world.opportunity_manager.add(_record_for_region(dummy_avatar, 101))
     _place_avatar(dummy_avatar, 5, 6)
@@ -118,7 +118,7 @@ async def test_region_opportunity_resolves_on_any_target_region_tile(base_world,
     events = await phase_check_opportunities(base_world, [dummy_avatar])
 
     assert base_world.opportunity_manager.get_for_avatar(dummy_avatar.id) is None
-    assert any("无所得" in event.content or "灵机" in event.content for event in events)
+    assert any("spiritual trace already gone" in event.content for event in events)
     assert base_world.opportunity_manager.is_in_cooldown(dummy_avatar.id, int(base_world.month_stamp) + 1)
 
 
@@ -133,7 +133,7 @@ async def test_avatar_opportunity_resolves_when_target_is_observable(base_world,
             avatar_id=dummy_avatar.id,
             target_type=OpportunityTargetType.AVATAR,
             target_id=target.id,
-            hint_text="机缘感应：近处某人有缘法。",
+            hint_text="Opportunity sense: someone nearby holds a fated chance.",
             created_month=now - 1,
             expires_month=now + 60,
         )
@@ -149,7 +149,7 @@ async def test_avatar_opportunity_resolves_when_target_is_observable(base_world,
 
 @pytest.mark.asyncio
 async def test_opportunity_expires_and_sets_dissipated_cooldown(base_world, dummy_avatar):
-    _add_region(base_world, 101, "远城", [(5, 5)])
+    _add_region(base_world, 101, "Far City", [(5, 5)])
     base_world.avatar_manager.register_avatar(dummy_avatar)
     record = _record_for_region(dummy_avatar, 101)
     record.expires_month = int(base_world.month_stamp)
@@ -158,7 +158,7 @@ async def test_opportunity_expires_and_sets_dissipated_cooldown(base_world, dumm
     events = await phase_check_opportunities(base_world, [dummy_avatar])
 
     assert base_world.opportunity_manager.get_for_avatar(dummy_avatar.id) is None
-    assert "散去" in events[0].content
+    assert "gradually faded away" in events[0].content
     assert base_world.opportunity_manager.is_in_cooldown(dummy_avatar.id, int(base_world.month_stamp) + 1)
 
 
@@ -166,7 +166,7 @@ async def test_opportunity_expires_and_sets_dissipated_cooldown(base_world, dumm
 async def test_avatar_target_death_dissipates_opportunity(base_world, dummy_avatar):
     target = _make_avatar(base_world, "Target", 5, 5)
     base_world.avatar_manager.register_avatar(dummy_avatar)
-    target.set_dead("测试死亡", base_world.month_stamp)
+    target.set_dead("Test death", base_world.month_stamp)
     base_world.avatar_manager.handle_death(target.id)
     now = int(base_world.month_stamp)
     base_world.opportunity_manager.add(
@@ -175,7 +175,7 @@ async def test_avatar_target_death_dissipates_opportunity(base_world, dummy_avat
             avatar_id=dummy_avatar.id,
             target_type=OpportunityTargetType.AVATAR,
             target_id=target.id,
-            hint_text="机缘感应：某人有缘法。",
+            hint_text="Opportunity sense: someone holds a fated chance.",
             created_month=now - 1,
             expires_month=now + 60,
         )
@@ -184,12 +184,12 @@ async def test_avatar_target_death_dissipates_opportunity(base_world, dummy_avat
     events = await phase_check_opportunities(base_world, [dummy_avatar])
 
     assert base_world.opportunity_manager.get_for_avatar(dummy_avatar.id) is None
-    assert "断绝" in events[0].content
+    assert "suddenly broke" in events[0].content
 
 
 @pytest.mark.asyncio
 async def test_boon_outcome_adds_effect_and_recalculates(base_world, dummy_avatar, monkeypatch):
-    _add_region(base_world, 101, "远城", [(5, 5)])
+    _add_region(base_world, 101, "Far City", [(5, 5)])
     base_world.avatar_manager.register_avatar(dummy_avatar)
     base_world.opportunity_manager.add(_record_for_region(dummy_avatar, 101))
     _place_avatar(dummy_avatar, 5, 5)
@@ -201,7 +201,7 @@ async def test_boon_outcome_adds_effect_and_recalculates(base_world, dummy_avata
                 "effects": "{extra_max_hp: 50}",
                 "duration_months": 0,
                 "source": "effect_source_opportunity",
-                "title": "灵机淬体",
+                "title": "Spirit Tempering",
                 "weight": 1,
                 "min_realm": "QI_REFINEMENT",
                 "max_realm": "NASCENT_SOUL",
@@ -215,21 +215,21 @@ async def test_boon_outcome_adds_effect_and_recalculates(base_world, dummy_avata
 
     assert dummy_avatar.hp.max == old_max + 50
     assert dummy_avatar.persistent_effects
-    assert any("灵机淬体" in event.content for event in events)
+    assert any("Spirit Tempering" in event.content for event in events)
 
 
 @pytest.mark.asyncio
 async def test_equipment_outcome_grants_next_realm_weapon(base_world, dummy_avatar, monkeypatch):
-    _add_region(base_world, 101, "远城", [(5, 5)])
+    _add_region(base_world, 101, "Far City", [(5, 5)])
     base_world.avatar_manager.register_avatar(dummy_avatar)
     base_world.opportunity_manager.add(_record_for_region(dummy_avatar, 101))
     _place_avatar(dummy_avatar, 5, 5)
     weapon = Weapon(
         id=999001,
-        name="测试筑基剑",
+        name="Test Foundation Sword",
         weapon_type=WeaponType.SWORD,
         realm=Realm.Foundation_Establishment,
-        desc="测试",
+        desc="Test",
         effects={},
     )
     monkeypatch.setattr("src.systems.opportunity._pick_outcome", lambda: OpportunityOutcome.EQUIPMENT)
@@ -243,7 +243,7 @@ async def test_equipment_outcome_grants_next_realm_weapon(base_world, dummy_avat
 
 @pytest.mark.asyncio
 async def test_injury_outcome_can_kill_avatar(base_world, dummy_avatar, monkeypatch):
-    _add_region(base_world, 101, "远城", [(5, 5)])
+    _add_region(base_world, 101, "Far City", [(5, 5)])
     base_world.avatar_manager.register_avatar(dummy_avatar)
     base_world.opportunity_manager.add(_record_for_region(dummy_avatar, 101))
     _place_avatar(dummy_avatar, 5, 5)
@@ -256,11 +256,11 @@ async def test_injury_outcome_can_kill_avatar(base_world, dummy_avatar, monkeypa
 
     assert dummy_avatar.is_dead is True
     assert dummy_avatar.id in base_world.avatar_manager.dead_avatars
-    assert "身死道消" in events[0].content
+    assert "perished" in events[0].content
 
 
 def test_opportunity_serialization_round_trip(base_world, dummy_avatar):
-    _add_region(base_world, 101, "远城", [(5, 5)])
+    _add_region(base_world, 101, "Far City", [(5, 5)])
     base_world.opportunity_manager.add(_record_for_region(dummy_avatar, 101))
     base_world.opportunity_manager.cooldowns[dummy_avatar.id] = int(base_world.month_stamp) + 12
 

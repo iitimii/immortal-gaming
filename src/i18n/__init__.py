@@ -163,7 +163,6 @@ def t(message: str, **kwargs) -> str:
         
     Example:
         t("{winner} defeated {loser}", winner="Zhang San", loser="Li Si")
-        # zh-CN: "Zhang San 战胜了 Li Si"
         # en-US: "Zhang San defeated Li Si"
     """
     trans = _get_translation()

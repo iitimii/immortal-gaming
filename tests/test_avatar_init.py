@@ -1,4 +1,4 @@
-"""测试 new_avatar 模块的角色创建逻辑."""
+"""Tests for avatar creation logic in the new_avatar module."""
 import pytest
 
 from src.classes.core.orthodoxy import get_orthodoxy
@@ -27,7 +27,7 @@ def _find_goldfinger_by_key(key: str):
 
 
 class TestAgeLifespanInitialization:
-    """测试新角色的先天寿元与即时死亡规则。"""
+    """Innate lifespan and immediate-death rules for new avatars."""
 
     def test_batch_creation_innate_lifespan_within_range(self, base_world):
         avatars = make_avatars(base_world, count=100)
@@ -76,7 +76,7 @@ class TestAgeLifespanInitialization:
         avatar = create_avatar_from_request(
             base_world,
             base_world.month_stamp,
-            name="老成",
+            name="Veteran",
             age=65,
             level=1,
         )
@@ -90,14 +90,14 @@ class TestAgeLifespanInitialization:
             create_avatar_from_request(
                 base_world,
                 base_world.month_stamp,
-                name="越界",
+                name="Overflow",
                 age=66,
                 level=1,
             )
 
 
 class TestInitialOfficialStatus:
-    """测试开局角色的初始官职威望规则。"""
+    """Initial official reputation rules for starting avatars."""
 
     def test_confucian_avatar_has_higher_initial_official_chance(self, dummy_avatar):
         confucian_sect = sects_by_id[13]
@@ -145,7 +145,7 @@ class TestInitialOfficialStatus:
 
 
 class TestInitialGoldfingerAssignment:
-    """测试开局随机外挂分配。"""
+    """Random goldfinger assignment at game start."""
 
     def test_batch_creation_can_assign_goldfinger_when_probability_hits(self, base_world, monkeypatch):
         target_goldfinger = _find_goldfinger_by_key("TRANSMIGRATOR")
@@ -171,7 +171,7 @@ class TestInitialGoldfingerAssignment:
         avatar = create_avatar_from_request(
             base_world,
             base_world.month_stamp,
-            name="手动创建角色",
+            name="Manually Created Avatar",
             level=10,
         )
 
@@ -187,10 +187,10 @@ class TestInitialGoldfingerAssignment:
 
 
 class TestInitialRelationConstraints:
-    """测试开局批量生成时的关系约束."""
+    """Relation constraints during initial batch generation."""
 
     def test_batch_creation_parent_child_constraints(self, base_world):
-        """亲子关系应满足年龄和等级差约束."""
+        """Parent-child relations must satisfy age and level gap constraints."""
         for _ in range(10):
             avatars = make_avatars(base_world, count=80)
             for avatar in avatars.values():
@@ -198,16 +198,16 @@ class TestInitialRelationConstraints:
                     if relation is not Relation.IS_CHILD_OF:
                         continue
                     assert avatar.age.age - other.age.age >= 16, (
-                        f"父母 {avatar.name}({avatar.age.age}) 与子女 "
-                        f"{other.name}({other.age.age}) 年龄差不合法"
+                        f"Parent {avatar.name}({avatar.age.age}) and child "
+                        f"{other.name}({other.age.age}) have an invalid age gap"
                     )
                     assert avatar.cultivation_progress.level - other.cultivation_progress.level >= 10, (
-                        f"父母 {avatar.name}({avatar.cultivation_progress.level}) 与子女 "
-                        f"{other.name}({other.cultivation_progress.level}) 等级差不合法"
+                        f"Parent {avatar.name}({avatar.cultivation_progress.level}) and child "
+                        f"{other.name}({other.cultivation_progress.level}) have an invalid level gap"
                     )
 
     def test_batch_creation_master_disciple_constraints(self, base_world):
-        """师徒关系应满足等级差约束."""
+        """Master-disciple relations must satisfy the level gap constraint."""
         sects = list(sects_by_id.values())
         for _ in range(10):
             avatars = make_avatars(base_world, count=80, existed_sects=sects)
@@ -218,21 +218,21 @@ class TestInitialRelationConstraints:
                         continue
                     found_master_pair = True
                     assert avatar.cultivation_progress.level - other.cultivation_progress.level >= 20, (
-                        f"师傅 {avatar.name}({avatar.cultivation_progress.level}) 与徒弟 "
-                        f"{other.name}({other.cultivation_progress.level}) 等级差不合法"
+                        f"Master {avatar.name}({avatar.cultivation_progress.level}) and disciple "
+                        f"{other.name}({other.cultivation_progress.level}) have an invalid level gap"
                     )
             if found_master_pair:
                 break
         else:
-            pytest.skip("本轮随机未生成师徒关系，跳过约束断言")
+            pytest.skip("No master-disciple relation generated in this random run; skipping constraint assertions")
 
     def test_batch_creation_cultivation_start_not_in_future(self, base_world):
-        """所有初始角色的修炼开始时间都不应晚于当前时间."""
+        """No initial avatar may start cultivating later than the current time."""
         avatars = make_avatars(base_world, count=120, current_month_stamp=base_world.month_stamp)
         current_month = int(base_world.month_stamp)
         for avatar in avatars.values():
             assert avatar.cultivation_start_month_stamp is not None
             assert int(avatar.cultivation_start_month_stamp) <= current_month, (
-                f"角色 {avatar.name} 的修炼开始时间 "
-                f"{int(avatar.cultivation_start_month_stamp)} 晚于当前时间 {current_month}"
+                f"Avatar {avatar.name} cultivation start time "
+                f"{int(avatar.cultivation_start_month_stamp)} is later than the current time {current_month}"
             )

@@ -58,7 +58,7 @@ export function getAvatarAssetIds(
 ): number[] {
   if (!libraries) return []
   const normalizedGender = String(gender || '').toLowerCase()
-  const genderKey = normalizedGender === 'female' || normalizedGender === '女' ? 'female' : 'male'
+  const genderKey = normalizedGender === 'female' ? 'female' : 'male'
   const raceKey = String(race || 'human').trim().toLowerCase() || 'human'
   const candidate = libraries[raceKey]
   const library = candidate || libraries.human || { male: [], female: [] }

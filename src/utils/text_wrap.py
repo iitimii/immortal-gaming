@@ -3,18 +3,18 @@ from typing import Optional
 
 def wrap_text_by_pixels(font, text: str, max_width_px: int, first_line_max_width_px: Optional[int] = None) -> list[str]:
     """
-    使用像素宽度对文本进行自动换行（Word Wrap）。
-    支持 <color:R,G,B>...</color> 标签，确保换行时不破坏标签结构。
+    Word-wrap text by pixel width.
+    Supports <color:R,G,B>...</color> tags and keeps them intact across line breaks.
     
     Args:
-        font: 具有 .size(text) -> (w, h) 方法的对象 (如 pygame.font.Font)
-        text: 输入文本
-        max_width_px: 标准行的最大像素宽度
-        first_line_max_width_px: (可选) 第一行的最大像素宽度。用于处理首行缩进或前缀的情况。
-                                 如果未提供，默认为 max_width_px。
+        font: object with a .size(text) -> (w, h) method (e.g. pygame.font.Font)
+        text: input text
+        max_width_px: maximum pixel width of a regular line
+        first_line_max_width_px: (optional) maximum pixel width of the first line, for first-line indents or prefixes.
+                                 Defaults to max_width_px if not provided.
     
     Returns:
-        list[str]: 换行后的文本列表，每行都是独立的富文本字符串
+        list[str]: wrapped lines, each a self-contained rich-text string
     """
     if not text:
         return []
@@ -24,16 +24,16 @@ def wrap_text_by_pixels(font, text: str, max_width_px: int, first_line_max_width
     
     wrapped_lines = []
     
-    # 标记是否处于整个文本的第一行（用于 first_line_max_width_px）
+    # Whether we are on the very first line of the text (for first_line_max_width_px)
     is_absolute_first_line = True
 
-    # 匹配颜色标签的正则: 开头标签，或结束标签
+    # Regex matching color tags: opening or closing tag
     tag_pattern = re.compile(r'(<color:\d+,\d+,\d+>)|(</color>)')
 
     for paragraph in paragraphs:
         if not paragraph:
             wrapped_lines.append("")
-            # 空行也算作一行，之后的行不再是 absolute_first_line
+            # An empty line counts as a line; later lines are no longer the absolute first line
             is_absolute_first_line = False
             continue
 
@@ -89,7 +89,7 @@ def wrap_text_by_pixels(font, text: str, max_width_px: int, first_line_max_width
                     
                     if current_line_str:
                         wrapped_lines.append(current_line_str)
-                        # 发生换行，下一行肯定不是第一行了
+                        # A line break happened, so the next line is no longer the first
                         is_absolute_first_line = False
                     
                     # Start new line

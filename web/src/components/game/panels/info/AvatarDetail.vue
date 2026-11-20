@@ -57,7 +57,7 @@ const {
   jumpToSect,
   handleSetObjective,
   handleClearObjective,
-} = useAvatarDetailPanel(() => props.data, t, locale, uiStore);
+} = useAvatarDetailPanel(() => props.data, t, uiStore);
 </script>
 
 <template>

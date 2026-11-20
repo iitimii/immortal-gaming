@@ -7,12 +7,12 @@ from enum import Enum
 
 class ActionStatus(Enum):
     """
-    动作推进过程中的标准状态枚举。
-    - RUNNING: 仍在进行中，需要在未来的 tick 中继续推进
-    - COMPLETED: 已正常完成
-    - FAILED: 执行失败（参数/前置条件等导致）
-    - CANCELLED: 被外部取消（如被其他动作抢占）
-    - INTERRUPTED: 运行中被打断（如战斗/事件中断）
+    Standard status enum while advancing an action.
+    - RUNNING: still in progress; must continue advancing in future ticks
+    - COMPLETED: finished normally
+    - FAILED: execution failed (due to params/preconditions etc.)
+    - CANCELLED: cancelled externally (e.g. preempted by another action)
+    - INTERRUPTED: interrupted while running (e.g. by battle/events)
     """
 
     RUNNING = "running"
@@ -25,13 +25,13 @@ class ActionStatus(Enum):
 @dataclass
 class ActionResult:
     """
-    标准动作返回体。所有 Action.step() 必须返回该类型。
+    Standard action result. Every Action.step() must return this type.
 
     Attributes:
-        status: 当前推进后的状态（见 ActionStatus）
-        events: 在本次推进过程中生成的事件（通常由 Avatar 收集并展示）
-        payload: 可选的结构化数据，便于上层消费（如数值、战斗结果等）
-        next_action: 可选的“建议下一个动作”（名称, 参数）供上层调度策略参考
+        status: the status after this advance (see ActionStatus)
+        events: events generated during this advance (usually collected and shown by Avatar)
+        payload: optional structured data for upper layers (e.g. values, battle results)
+        next_action: optional "suggested next action" (name, params) for upper-layer scheduling
     """
 
     status: ActionStatus
@@ -43,18 +43,18 @@ class ActionResult:
 @dataclass
 class ActionPlan:
     """
-    计划中的动作项：尚未提交执行。
-    仅包含 class 名与参数，外加可选的调度策略字段。
+    A planned action item: not yet committed for execution.
+    Holds only the class name and params, plus optional scheduling fields.
     """
     action_name: str
     params: Dict[str, Any]
     priority: int = 0
-    expiry_month: Optional[int] = None  # 到期月戳；None 为不过期
+    expiry_month: Optional[int] = None  # Expiry month stamp; None means it never expires
     max_retries: int = 0
     attempted: int = 0
     
     def to_dict(self) -> dict:
-        """转换为可序列化的字典"""
+        """Convert to a serializable dict."""
         return {
             "action_name": self.action_name,
             "params": self.params,
@@ -66,7 +66,7 @@ class ActionPlan:
     
     @classmethod
     def from_dict(cls, data: dict) -> "ActionPlan":
-        """从字典重建ActionPlan"""
+        """Rebuild an ActionPlan from a dict."""
         return cls(
             action_name=data["action_name"],
             params=data["params"],
@@ -80,9 +80,9 @@ class ActionPlan:
 @dataclass
 class ActionInstance:
     """
-    已提交并开始执行的动作实例。
+    An action instance that has been committed and started.
     """
     action: Any  # src.classes.action.Action
     params: Dict[str, Any]
-    status: str = "running"  # 遗留字段：Avatar 以字符串记录运行态
+    status: str = "running"  # Legacy field: Avatar records the running state as a string
 

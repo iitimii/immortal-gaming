@@ -12,11 +12,11 @@ type DetailDomainByType<T extends SelectionType> =
         : POIDetail;
 
 /**
- * 将 /api/v1/query/detail 返回的 DTO 归一化为前端领域模型。
+ * Normalize the DTO returned by /api/v1/query/detail into a frontend domain model.
  *
- * 当前后端已经直接返回接近领域结构的对象，因此这里主要负责：
- * - 根据调用方的 target.type 缩小联合类型
- * - 保留未来在此处做兼容映射的扩展点
+ * The backend already returns objects close to the domain shape, so this mainly:
+ * - narrows the union type based on the caller's target.type
+ * - keeps an extension point for future mapping
  */
 export function mapDetailDTOToDomain(
   dto: DetailResponseDTO,

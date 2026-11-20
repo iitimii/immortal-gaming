@@ -41,15 +41,15 @@ def test_remove_mortal(manager):
 def test_get_awakening_candidates(manager, current_time):
     # current_time = 1000 months
     
-    # 1. 刚出生 (0岁) -> 不符合 >= 16岁
+    # 1. Newborn (age 0) -> does not satisfy >= 16
     m1 = Mortal(id="m1", name="Baby", gender=Gender.MALE, 
                 birth_month_stamp=MonthStamp(1000), parents=[])
     
-    # 2. 恰好 16岁 (16 * 12 = 192 months old) -> birth = 1000 - 192 = 808
+    # 2. Exactly 16 (16 * 12 = 192 months old) -> birth = 1000 - 192 = 808
     m2 = Mortal(id="m2", name="Teen", gender=Gender.FEMALE, 
                 birth_month_stamp=MonthStamp(808), parents=[])
     
-    # 3. 20岁 -> 符合
+    # 3. Age 20 -> eligible
     m3 = Mortal(id="m3", name="Adult", gender=Gender.MALE, 
                 birth_month_stamp=MonthStamp(760), parents=[])
                 
@@ -68,17 +68,17 @@ def test_cleanup_dead_mortals(manager, current_time):
     # current_time = 1000
     # max_lifespan = 100 years = 1200 months
     
-    # 1. 正常存活 (50岁)
+    # 1. Alive (age 50)
     # 1000 - (50*12) = 400
     m1 = Mortal(id="m1", name="Living", gender=Gender.MALE,
                 birth_month_stamp=MonthStamp(400), parents=[])
                 
-    # 2. 刚死 (100岁)
+    # 2. Just died (age 100)
     # 1000 - (100*12) = -200
     m2 = Mortal(id="m2", name="Dead", gender=Gender.MALE,
                 birth_month_stamp=MonthStamp(-200), parents=[])
                 
-    # 3. 早就死了 (150岁)
+    # 3. Long dead (age 150)
     m3 = Mortal(id="m3", name="LongDead", gender=Gender.MALE,
                 birth_month_stamp=MonthStamp(-800), parents=[])
                 

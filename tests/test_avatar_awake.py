@@ -20,78 +20,76 @@ def mock_world(base_world):
     return base_world
 
 def test_process_bloodline_awakening(mock_world):
-    """测试血脉觉醒逻辑"""
-    # 1. 准备凡人
+    """Test bloodline awakening logic."""
+    # 1. Prepare a mortal
     mortal = Mortal(
         id="m1", 
         name="Test Mortal", 
         gender=Gender.MALE, 
         race=get_race("fox"),
-        birth_month_stamp=MonthStamp(0), # 足够大
+        birth_month_stamp=MonthStamp(0), # old enough
         parents=[]
     )
     mock_world.mortal_manager.register_mortal(mortal)
     
-    # 2. 设置时间，使其满足年龄条件 (>=16岁)
-    mock_world.month_stamp = MonthStamp(20 * 12) # 20岁
+    # 2. Set the time so the age requirement (>= 16) is met
+    mock_world.month_stamp = MonthStamp(20 * 12) # age 20
     
-    # 3. 强制随机命中觉醒
+    # 3. Force the awakening roll to hit
     with patch("random.random", return_value=0.0): # < 0.05
         events = _process_bloodline_awakening(mock_world)
         
-    # 4. 验证
+    # 4. Verify
     assert len(events) == 1
-    # 兼容中英文环境 (虽然 conftest 强制中文，但双重检查更稳健)
-    assert "awakened" in events[0].content or "觉醒" in events[0].content
+    assert "awakened" in events[0].content
     
-    # 凡人应被移除
+    # The mortal should be removed
     assert mock_world.mortal_manager.get_mortal("m1") is None
     
-    # Avatar 应被注册 (ID 复用)
+    # The avatar should be registered (ID reused)
     avatar = mock_world.avatar_manager.get_avatar("m1")
     assert avatar is not None
     assert avatar.name == "Test Mortal"
     assert avatar.race.id == "fox"
-    assert avatar.cultivation_progress.level == 1 # 练气一层
+    assert avatar.cultivation_progress.level == 1 # Qi Refinement level 1
 
 def test_process_bloodline_awakening_age_limit(mock_world):
-    """测试凡人超过觉醒年龄上限无法觉醒"""
+    """A mortal past the awakening age limit cannot awaken."""
     mortal = Mortal(
         id="m1", name="Old Mortal", gender=Gender.MALE, 
         birth_month_stamp=MonthStamp(0), parents=[]
     )
     mock_world.mortal_manager.register_mortal(mortal)
     
-    # 设置为 80 岁 (> 60)
+    # Set age to 80 (> 60)
     mock_world.month_stamp = MonthStamp(80 * 12)
     
     with patch("random.random", return_value=0.0):
         events = _process_bloodline_awakening(mock_world)
         
     assert len(events) == 0
-    assert mock_world.mortal_manager.get_mortal("m1") is not None # 还在，等老死
+    assert mock_world.mortal_manager.get_mortal("m1") is not None # still present, waiting to die of old age
     assert mock_world.avatar_manager.get_avatar("m1") is None
 
 def test_process_wild_awakening(mock_world):
-    """测试野生觉醒逻辑"""
-    # 强制随机命中
-    # 注意：simulator.py 中 process_awakening 会调用它
-    # 我们这里直接测试 _process_wild_awakening
+    """Test wild awakening logic."""
+    # Note: process_awakening in simulator.py calls this;
+    # here we test _process_wild_awakening directly
     
     with patch("src.sim.avatar_awake.roll_avatar_race", return_value=get_race("snake")):
         event = _process_wild_awakening(mock_world)
     
     assert event is not None
-    assert "rogue cultivator" in event.content or "散修" in event.content
+    assert "rogue cultivator" in event.content
     
-    # 验证产生了一个 Avatar
-    # 由于 ID 是随机的，我们需要通过 pop_newly_born 来找
+    # Verify an avatar was created
+    # The ID is random, so look it up via pop_newly_born
     new_ids = mock_world.avatar_manager.pop_newly_born()
     assert len(new_ids) == 1
     
     avatar = mock_world.avatar_manager.get_avatar(new_ids[0])
     assert avatar is not None
-    assert avatar.sect is None # 散修
+    assert avatar.sect is None # rogue cultivator
     assert avatar.race.id == "snake"
 
 
@@ -108,8 +106,8 @@ def test_lifespan_exhausted_awakening_creates_grave(mock_world, dummy_avatar):
     assert graves[0].deceased_avatar_id == dummy_avatar.id
 
 def test_awakening_integration(mock_world):
-    """测试 process_awakening 集成调用"""
-    # 同时触发血脉和野生
+    """Test the process_awakening integration call."""
+    # Trigger both bloodline and wild awakening
     mortal = Mortal(id="m1", name="M", gender=Gender.MALE, birth_month_stamp=MonthStamp(0), parents=[])
     mock_world.mortal_manager.register_mortal(mortal)
     mock_world.month_stamp = MonthStamp(20 * 12)
@@ -118,9 +116,9 @@ def test_awakening_integration(mock_world):
     with patch("random.random", return_value=0.0):
         events = process_awakening(mock_world)
         
-    # 应该有 2 个事件 (1个血脉 + 1个野生)
+    # There should be 2 events (1 bloodline + 1 wild)
     assert len(events) == 2
     
-    # 验证结果
+    # Verify results
     assert mock_world.avatar_manager.get_avatar("m1") is not None
     assert len(mock_world.avatar_manager.pop_newly_born()) == 2 # m1 + wild

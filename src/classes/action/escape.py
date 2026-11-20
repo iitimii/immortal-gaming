@@ -11,24 +11,24 @@ from src.utils.resolution import resolve_query
 
 class Escape(InstantAction):
     """
-    逃离：尝试从对方身边脱离（有成功率）。
-    成功：抢占并进入 MoveAwayFromAvatar(6个月)。
-    失败：抢占并进入 Attack。
+    Escape: try to break away from the other (with a success rate).
+    Success: preempt and enter MoveAwayFromAvatar (6 months).
+    Failure: preempt and enter Attack.
     """
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "escape_action_name"
     DESC_ID = "escape_description"
     REQUIREMENTS_ID = "escape_requirements"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "💨"
     PARAMS = {"avatar_name": "AvatarName"}
     PARAM_OPTION_SOURCES = {"avatar_name": ParamOptionSource.OBSERVABLE_AVATAR_NAME}
 
     def _find_avatar_by_name(self, name: str) -> "Avatar|None":
         """
-        根据名字或 ID 查找角色；找不到返回 None。
+        Find an avatar by name or ID; return None if not found.
         """
         from src.classes.core.avatar import Avatar
 
@@ -73,7 +73,7 @@ class Escape(InstantAction):
                    avatar=self.avatar.name, target=target_name)
         return Event(self.world.month_stamp, content, related_avatars=rel_ids)
 
-    # InstantAction 已实现 step 完成
+    # InstantAction already completes in step
 
     async def finish(self, avatar_name: str) -> list[Event]:
         return []

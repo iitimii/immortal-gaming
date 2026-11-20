@@ -8,12 +8,12 @@ from src.classes.alignment import Alignment
 
 @pytest.fixture
 def test_sect():
-    hq = SectHeadQuarter(name="测试驻地", desc="测试驻地描述", image="test.png")
+    hq = SectHeadQuarter(name="Test HQ", desc="Test HQ description", image="test.png")
     sect = Sect(
         id=1,
-        name="测试宗门",
-        desc="测试",
-        member_act_style="测试风格",
+        name="Test Sect",
+        desc="Test",
+        member_act_style="Test style",
         alignment=Alignment.RIGHTEOUS,
         headquarter=hq,
         technique_names=[]
@@ -34,36 +34,32 @@ def test_update_rankings_empty():
 def test_update_rankings_avatars(dummy_avatar, test_sect):
     manager = RankingManager()
     
-    # 构造人榜（筑基）角色
+    # Build a Human Ranking (Foundation Establishment) avatar
     human_avatar = MagicMock()
     human_avatar.id = "human_1"
     human_avatar.name = "Human"
     human_avatar.sect = test_sect
-    human_avatar.cultivation_progress = CultivationProgress(31) # 筑基前期
+    human_avatar.cultivation_progress = CultivationProgress(31) # Foundation Establishment Early Stage
     human_avatar.is_dead = False
     
-    # 构造地榜（金丹）角色
+    # Build an Earth Ranking (Core Formation) avatar
     earth_avatar = MagicMock()
     earth_avatar.id = "earth_1"
     earth_avatar.name = "Earth"
-    earth_avatar.sect = None # 散修
-    earth_avatar.cultivation_progress = CultivationProgress(61) # 金丹前期
+    earth_avatar.sect = None # rogue cultivator
+    earth_avatar.cultivation_progress = CultivationProgress(61) # Core Formation Early Stage
     earth_avatar.is_dead = False
     
-    # 构造天榜（元婴）角色
+    # Build a Heaven Ranking (Nascent Soul) avatar
     heaven_avatar = MagicMock()
     heaven_avatar.id = "heaven_1"
     heaven_avatar.name = "Heaven"
     heaven_avatar.sect = test_sect
-    heaven_avatar.cultivation_progress = CultivationProgress(91) # 元婴前期
+    heaven_avatar.cultivation_progress = CultivationProgress(91) # Nascent Soul Early Stage
     heaven_avatar.is_dead = False
     
-    # 还需要 mock get_base_strength
-    # 为了避免依赖具体战斗力计算，我们在 avatar 上加上 mock 返回值？
-    # 实际上 get_base_strength 是根据 realm 和 effects 来的
-    # 我们可以用真实的 Avatar 或者给 mock_avatar 加上必要的属性
-    
-    # 为了方便，直接修改 dummy_avatar 产生三个真实的 Avatar
+    # get_base_strength derives from realm and effects, so instead of mocking it
+    # we build three real Avatars from dummy_avatar for convenience.
     import copy
     import uuid
     
@@ -90,41 +86,41 @@ def test_update_rankings_avatars(dummy_avatar, test_sect):
     av3.sect = test_sect
     test_sect.add_member(av3)
 
-    # 我们需要 patch sects_by_id 让他只包含 test_sect，这样才能测试宗门榜
+    # Patch sects_by_id to contain only test_sect so the sect ranking can be tested
     with pytest.MonkeyPatch.context() as m:
         m.setattr("src.classes.core.sect.sects_by_id", {1: test_sect})
         manager.update_rankings([av1, av2, av3])
     
     data = manager.get_rankings_data()
     
-    # 验证天榜
+    # Verify the Heaven Ranking
     assert len(data["heaven"]) == 1
     assert data["heaven"][0]["name"] == "Heaven"
-    assert data["heaven"][0]["sect"] == "测试宗门"
+    assert data["heaven"][0]["sect"] == "Test Sect"
     assert data["heaven"][0]["realm"] == "NASCENT_SOUL"
     assert data["heaven"][0]["stage"] == "EARLY_STAGE"
-    assert data["heaven"][0]["cultivation_display"] == "元婴前期"
+    assert data["heaven"][0]["cultivation_display"] == "Nascent Soul Early Stage"
     
-    # 验证地榜
+    # Verify the Earth Ranking
     assert len(data["earth"]) == 1
     assert data["earth"][0]["name"] == "Earth"
-    assert data["earth"][0]["sect"] == "散修"  # t("Rogue Cultivator") returns "散修" in zh-CN
+    assert data["earth"][0]["sect"] == "Rogue Cultivator"
     assert data["earth"][0]["cultivation"]["realm_id"] == "CORE_FORMATION"
     
-    # 验证人榜
+    # Verify the Human Ranking
     assert len(data["human"]) == 1
     assert data["human"][0]["name"] == "Human"
-    assert data["human"][0]["sect"] == "测试宗门"
+    assert data["human"][0]["sect"] == "Test Sect"
     
-    # 验证宗门榜
+    # Verify the Sect Ranking
     assert len(data["sect"]) == 1
-    assert data["sect"][0]["name"] == "测试宗门"
+    assert data["sect"][0]["name"] == "Test Sect"
     assert data["sect"][0]["member_count"] == 2
-    # 宗门总战斗力应大于0
+    # Total sect power should be positive
     assert data["sect"][0]["total_power"] > 0
     
 def test_ranking_sorting(dummy_avatar):
-    """验证同境界下的战斗力排序"""
+    """Avatars in the same realm are sorted by battle strength."""
     manager = RankingManager()
     
     import copy
@@ -134,12 +130,12 @@ def test_ranking_sorting(dummy_avatar):
     av1 = copy.deepcopy(dummy_avatar)
     av1.id = str(uuid.uuid4())
     av1.name = "Weak Nascent"
-    av1.update_cultivation(91) # 元婴前期
+    av1.update_cultivation(91) # Nascent Soul Early Stage
     
     av2 = copy.deepcopy(dummy_avatar)
     av2.id = str(uuid.uuid4())
     av2.name = "Strong Nascent"
-    av2.update_cultivation(111) # 元婴后期
+    av2.update_cultivation(111) # Nascent Soul Late Stage
 
     print(f"av1 strength: {get_base_strength(av1)}")
     print(f"av2 strength: {get_base_strength(av2)}")
@@ -149,7 +145,7 @@ def test_ranking_sorting(dummy_avatar):
     data = manager.get_rankings_data()
     print(data["heaven"])
     assert len(data["heaven"]) == 2
-    # 战斗力高的排在前面
+    # Stronger avatars rank first
     assert data["heaven"][0]["name"] == "Strong Nascent"
     assert data["heaven"][1]["name"] == "Weak Nascent"
 

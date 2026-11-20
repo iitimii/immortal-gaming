@@ -16,29 +16,29 @@ if TYPE_CHECKING:
 @register_gathering
 class Auction(Gathering):
     """
-    拍卖会事件
+    Auction event
     """
     
-    # 类变量 - LLM Prompt
+    # Class variable - LLM prompt
     STORY_PROMPT_ID = "auction_story_prompt"
     
     @classmethod
     def get_story_prompt(cls) -> str:
-        """获取故事生成提示词"""
+        """Get the story generation prompt."""
         from src.i18n import t
         return t(cls.STORY_PROMPT_ID)
     
     def is_start(self, world: "World") -> bool:
         """
-        检测拍卖会是否开始
-        条件：后台积攒的 sold_item_count 到达配置阈值
+        Check whether the auction starts.
+        Condition: the background sold_item_count reaches the configured threshold
         """
         threshold = CONFIG.world.gathering.auction_trigger_count
         return world.circulation.sold_item_count >= threshold
 
     def get_related_avatars(self, world: "World") -> List[int]:
         """
-        所有存活且允许参加聚会的 avatar 都参与
+        All living avatars allowed to join gatherings participate
         """
         return [
             avatar.id 
@@ -52,17 +52,17 @@ class Auction(Gathering):
 
     async def get_needs(self, world: "World", avatars: List["Avatar"]) -> Dict["Item", Dict["Avatar", int]]:
         """
-        获取所有参与角色对拍卖品的需程度
-        返回格式: Dict[Item, Dict[Avatar, int]]
+        Get every participant's need level for the auction items.
+        Return format: Dict[Item, Dict[Avatar, int]]
         """
         
         if is_test_mode_enabled():
             return {}
 
-        # 1. 准备拍卖品信息
+        # 1. Prepare auction item info
         items_info = []
         
-        # 收集流通管理器中的物品
+        # Collect items from the circulation manager
         circulation = world.circulation
         all_items = []
         all_items.extend(circulation.sold_weapons)
@@ -70,59 +70,59 @@ class Auction(Gathering):
         all_items.extend(circulation.sold_elixirs)
         
         for item in all_items:
-            # 假设所有 item 都有 get_info 或类似方法
-            # 这里统一用 get_detailed_info 如果有的话，或者 str(item)
+            # Assume every item has get_info or a similar method
+            # Use get_detailed_info uniformly if available, otherwise str(item)
             info = getattr(item, "get_detailed_info", lambda: str(item))()
-            # 补充 ID 以便 LLM 引用
+            # Add the ID so the LLM can reference it
             items_info.append(f"ID: {item.id}, Info: {info}")
             
         items_str = "\n".join(items_info)
         
-        # 2. 准备角色信息并分批处理
+        # 2. Prepare avatar info and process in batches
         batch_size = 5
         tasks = []
         
         for i in range(0, len(avatars), batch_size):
             batch_avatars = avatars[i : i + batch_size]
             
-            # 构建该批次的 avatar_infos 字符串
+            # Build this batch's avatar_infos string
             batch_infos = {}
             for avatar in batch_avatars:
-                # 使用 avatar.get_info(detailed=True)
+                # Use avatar.get_info(detailed=True)
                 info = avatar.get_info(detailed=True)
                 batch_infos[avatar.name] = str(info)
             
-            # 构建模板参数
+            # Build template params
             template_params = {
                 "avatar_infos": str(batch_infos),
                 "items": items_str
             }
             
-            # 创建并发任务
+            # Create concurrent tasks
             task = call_llm_with_template(
                 template_path=CONFIG.paths.templates / "auction_need.txt",
                 infos=template_params
             )
             tasks.append(task)
             
-        # 3. 并发执行并收集结果
+        # 3. Run concurrently and collect results
         results = await asyncio.gather(*tasks)
         
-        # 4. 合并结果
+        # 4. Merge results
         final_needs = {}
         for result in results:
             if isinstance(result, dict):
                 final_needs.update(result)
                 
-        # 5. 转换结构为 dict[Item, dict[Avatar, int]]
-        # 建立 name -> Avatar 映射
+        # 5. Convert the structure into dict[Item, dict[Avatar, int]]
+        # Build a name -> Avatar mapping
         name_to_avatar = {av.name: av for av in avatars}
-        # 建立 id -> Item 映射
+        # Build an id -> Item mapping
         id_to_item = {str(item.id): item for item in all_items}
         
         item_based_needs: Dict["Item", Dict["Avatar", int]] = {}
         
-        # 遍历 final_needs: {avatar_name: {item_id: score}}
+        # Iterate final_needs: {avatar_name: {item_id: score}}
         for av_name, items_score_map in final_needs.items():
             avatar = name_to_avatar.get(av_name)
             if not avatar:
@@ -134,7 +134,7 @@ class Auction(Gathering):
                     continue
                     
                 score_val = int(score)
-                # 只有需求 > 1 才记录（可选优化，1表示完全不需要）
+                # Only record need > 1 (optional optimization; 1 means not needed at all)
                 if score_val <= 1:
                     continue
                     
@@ -146,18 +146,18 @@ class Auction(Gathering):
 
     def _calculate_bid(self, item: "Item", need_level: int, current_balance: int) -> int:
         """
-        计算单次出价，根据当前余额动态调整
+        Compute a single bid, adjusted dynamically by the current balance.
         """
         from src.classes.prices import prices
         
         if need_level <= 1:
             return 0
             
-        # 策略：
-        # Need 2: min(money, base_price * 0.8)  (捡漏)
-        # Need 3: min(money, base_price * 1.5)  (略微溢价)
-        # Need 4: min(money, base_price * 3.0)  (高倍溢价)
-        # Need 5: money                         (梭哈)
+        # Strategy:
+        # Need 2: min(money, base_price * 0.8)  (bargain hunting)
+        # Need 3: min(money, base_price * 1.5)  (slight premium)
+        # Need 4: min(money, base_price * 3.0)  (high premium)
+        # Need 5: money                         (all in)
         
         base_price = prices.get_price(item)
         multipliers = {
@@ -172,7 +172,7 @@ class Auction(Gathering):
         multiplier = multipliers.get(need_level, 0.0)
         calculated_price = int(base_price * multiplier)
         
-        # 最终出价不能超过当前余额
+        # The final bid cannot exceed the current balance
         return min(current_balance, calculated_price)
 
     def resolve_auctions(
@@ -180,11 +180,11 @@ class Auction(Gathering):
         needs: Dict["Item", Dict["Avatar", int]]
     ) -> tuple[Dict["Item", tuple["Avatar", int]], List["Item"], Dict["Item", Dict["Avatar", int]]]:
         """
-        结算拍卖结果
+        Settle the auction results.
         Returns:
-            deal_results: 成交结果 {item: (winner, price)}
-            unsold_items: 流拍物品列表
-            all_willing_prices: 所有的出价记录 {item: {avatar: price}} (用于生成故事)
+            deal_results: deal results {item: (winner, price)}
+            unsold_items: list of unsold items
+            all_willing_prices: all bid records {item: {avatar: price}} (used for story generation)
         """
         from src.classes.prices import prices
 
@@ -192,20 +192,20 @@ class Auction(Gathering):
         unsold_items = []
         all_willing_prices = {} 
         
-        # 1. 建立角色资金快照
+        # 1. Snapshot avatar funds
         all_avatars = set()
         for av_map in needs.values():
             all_avatars.update(av_map.keys())
         current_balances = {av: int(av.magic_stone) for av in all_avatars}
         
-        # 2. 物品排序：按价值从高到低结算，优先处理贵重物品
+        # 2. Sort items: settle from highest to lowest value, valuable items first
         sorted_items = sorted(needs.keys(), key=lambda x: prices.get_price(x), reverse=True)
         
         for item in sorted_items:
             avatar_needs = needs[item]
             bids = {}
             
-            # 计算该物品的所有有效出价
+            # Compute all valid bids for this item
             for avatar, need_val in avatar_needs.items():
                 balance = current_balances.get(avatar, 0)
                 if balance <= 0:
@@ -218,12 +218,12 @@ class Auction(Gathering):
             if bids:
                 all_willing_prices[item] = bids
             
-            # 判定流拍
+            # Decide whether it goes unsold
             if not bids:
                 unsold_items.append(item)
                 continue
             
-            # 判定赢家 (第二价格密封拍卖)
+            # Decide the winner (second-price sealed-bid auction)
             sorted_bids = sorted(bids.items(), key=lambda x: x[1], reverse=True)
             winner, highest_bid = sorted_bids[0]
             
@@ -232,13 +232,13 @@ class Auction(Gathering):
                 second_bid = sorted_bids[1][1]
                 deal_price = min(highest_bid, second_bid + 1)
             else:
-                # 无竞争：底价成交 (60% bid)
+                # No competition: sold at the reserve price (60% of bid)
                 deal_price = max(1, int(highest_bid * 0.6))
             
-            # 只有成交价 <= 余额时才有效（理论上 calculate_bid 已经保证了 bid <= balance，
-            # 但为了逻辑闭环，且 bid >= deal_price，所以 deal_price <= balance 必然成立）
+            # Only valid when the deal price <= balance (in theory calculate_bid already ensures bid <= balance,
+            # and since bid >= deal_price, deal_price <= balance always holds; this closes the logic loop)
             
-            # 更新状态
+            # Update state
             current_balances[winner] -= deal_price
             deal_results[item] = (winner, deal_price)
             
@@ -251,7 +251,7 @@ class Auction(Gathering):
         willing_prices: Dict["Item", Dict["Avatar", int]]
     ) -> List[Event]:
         """
-        生成拍卖事件（合并成交与竞争信息）
+        Generate auction events (combining deal and competition info).
         """
         from src.i18n import t
         events = []
@@ -259,9 +259,9 @@ class Auction(Gathering):
         
         for item, (winner, deal_price) in deal_results.items():
             bids = willing_prices.get(item, {})
-            # 检查是否有竞争者（出价人数 >= 2）
+            # Check for competitors (bidders >= 2)
             if len(bids) >= 2:
-                # 获取出价第二名
+                # Get the second-highest bidder
                 sorted_bids = sorted(bids.items(), key=lambda x: x[1], reverse=True)
                 runner_up = sorted_bids[1][0]
                 
@@ -295,7 +295,7 @@ class Auction(Gathering):
                     if winner_avatar is not None:
                         mode = RelationDeltaService.get_action_mode("gathering")
                         if mode == "llm":
-                            # gathering 结算点是同步函数，统一在 execute 末尾异步补 delta
+                            # The gathering settlement point is synchronous; deltas are applied asynchronously at the end of execute
                             setattr(event, "_relation_delta_pair", (winner_avatar, runner_up_avatar))
             events.append(event)
             
@@ -308,25 +308,25 @@ class Auction(Gathering):
         willing_prices: Dict["Item", Dict["Avatar", int]]
     ) -> List[Event]:
         """
-        生成故事 (StoryTeller)
-        将本次拍卖的所有重要信息（成交、竞争）汇总传给 LLM，
-        让 LLM 自行选取切入点生成故事。
+        Generate the story (StoryTeller).
+        Summarize all the important info from this auction (deals, competition) for the LLM,
+        letting the LLM pick its own angle for the story.
         """
         from src.i18n import t
         events = []
         
-        # 1. 收集所有相关事件文本
+        # 1. Collect all relevant event text
         interaction_lines = []
         
-        # 收集成交信息
+        # Collect deal info
         for item, (winner, deal_price) in deal_results.items():
             interaction_lines.append(
                 t("Deal: {winner_name} acquired {item_name} for {price} spirit stones.",
                   winner_name=winner.name, item_name=item.name, price=deal_price)
             )
             
-        # 收集竞争信息（压一头）
-        # 这里为了避免重复太琐碎，只记录竞争激烈（参与者>=2）的情况
+        # Collect competition info (outbidding)
+        # To avoid trivial repetition, only record fierce competition (participants >= 2)
         rivalry_avatars = set()
         for item, bids in willing_prices.items():
             if len(bids) < 2:
@@ -347,8 +347,8 @@ class Auction(Gathering):
             
         interaction_result = "\n".join(interaction_lines)
         
-        # 2. 收集相关 items 信息
-        # 只收集成交了的或者有竞争的物品
+        # 2. Collect relevant item info
+        # Only collect items that were sold or contested
         related_items = set(deal_results.keys())
         for item in willing_prices:
             if len(willing_prices[item]) >= 2:
@@ -363,8 +363,8 @@ class Auction(Gathering):
             )
         items_info_str = "\n".join(items_info_list)
         
-        # 3. 收集相关 avatars
-        # 主要是成交者和有明显竞争行为的
+        # 3. Collect relevant avatars
+        # Mainly the winners and those with notable competing behavior
         related_avatars = set()
         for winner, _ in deal_results.values():
             related_avatars.add(winner)
@@ -373,23 +373,23 @@ class Auction(Gathering):
         if not related_avatars:
             return []
 
-        # 4. 调用 StoryTeller
-        # 准备模板参数
+        # 4. Call the StoryTeller
+        # Prepare template params
         gathering_info = t(
             "Event Type: Mysterious Auction\nScene Setting: The auction takes place in a mysterious space, hosted by a mysterious figure with an unfathomable aura."
         )
         
-        # 构建 details (物品信息 + 角色信息)
-        # 物品信息
+        # Build details (item info + avatar info)
+        # Item info
         details_list = []
         if items_info_str:
-            details_list.append(t("【Auction Items Information】"))
+            details_list.append(t("[Auction Items Information]"))
             details_list.append(items_info_str)
             
-        # 角色信息
-        details_list.append(t("\n【Related Avatars Information】"))
+        # Avatar info
+        details_list.append(t("\n[Related Avatars Information]"))
         for av in related_avatars:
-            # 获取详细信息
+            # Get detailed info
             info = av.get_info(detailed=True)
             details_list.append(f"- {av.name}: {info}")
             
@@ -410,55 +410,55 @@ class Auction(Gathering):
 
     async def execute(self, world: "World") -> List[Event]:
         """
-        执行拍卖会
+        Run the auction.
         """
         events = []
         
-        # 0. 检查是否有物品
-        # 只要 sold_item_count >= threshold 就已经保证有物品了，但为了安全再检查一次
+        # 0. Check that there are items
+        # sold_item_count >= threshold already guarantees items, but check again for safety
         if world.circulation.sold_item_count == 0:
             return []
             
         avatars = [world.avatar_manager.get_avatar(aid) for aid in self.get_related_avatars(world)]
-        # 过滤掉 None
+        # Filter out None
         avatars = [a for a in avatars if a]
         
         if not avatars:
             return []
 
-        # 1. 计算需求
+        # 1. Compute needs
         needs = await self.get_needs(world, avatars)
         
-        # 2. 结算拍卖 (动态计算出价，处理资产穿透)
+        # 2. Settle the auction (dynamic bids, handling asset pass-through)
         deal_results, unsold_items, willing_prices = self.resolve_auctions(needs)
         
-        # 3. 执行交易 (扣钱、给物品、移除 circulation)
+        # 3. Execute trades (deduct money, give items, remove from circulation)
         from src.classes.items.weapon import Weapon
         from src.classes.items.auxiliary import Auxiliary
         from src.classes.items.elixir import Elixir
         from src.classes.material import Material
         from src.classes.prices import prices
         
-        # 处理成交物品
+        # Process sold items
         for item, (winner, price) in deal_results.items():
-            # 扣钱
+            # Deduct money
             winner.magic_stone -= price
             
-            # 移除 circulation (先移除，避免因为交换装备导致的添加逻辑混淆)
+            # Remove from circulation (remove first, to avoid confusion with add logic when swapping equipment)
             world.circulation.remove_item(item)
             
-            # 给物品
+            # Give the item
             if isinstance(item, (Weapon, Auxiliary)):
-                # 装备并处理旧装备
-                # 特殊逻辑：拍卖会换下的旧装备直接销毁（折价回收但不再进入流通池），防止物品无限膨胀
+                # Equip and handle the old equipment
+                # Special logic: old equipment swapped out at an auction is destroyed (recycled at a discount but not returned to the circulation pool) to prevent unbounded item growth
                 
                 if isinstance(item, Weapon):
                     old_equip = winner.weapon
                     if old_equip:
-                        # 计算回收价
+                        # Compute the recycle price
                         refund = prices.get_selling_price(old_equip, winner)
                         winner.magic_stone += refund
-                    # 换装
+                    # Swap equipment
                     winner.change_weapon(item)
                     
                 elif isinstance(item, Auxiliary):
@@ -466,22 +466,22 @@ class Auction(Gathering):
                     if old_equip:
                         refund = prices.get_selling_price(old_equip, winner)
                         winner.magic_stone += refund
-                    # 换装
+                    # Swap equipment
                     winner.change_auxiliary(item)
                 
             elif isinstance(item, Elixir):
-                # 丹药直接服用
+                # Elixirs are consumed directly
                 winner.consume_elixir(item)
                 
             elif isinstance(item, Material):
-                # 材料放入背包
+                # Materials go into the inventory
                 winner.add_material(item)
         
-        # 处理流拍物品：直接销毁（移出流通池）
+        # Handle unsold items: destroy directly (remove from the circulation pool)
         for item in unsold_items:
             world.circulation.remove_item(item)
             
-        # 5. 生成基础事件（合并成交与竞争信息）
+        # 5. Generate base events (combining deal and competition info)
         auction_events = self._generate_auction_events(world, deal_results, willing_prices)
         events.extend(auction_events)
         for event in auction_events:
@@ -497,7 +497,7 @@ class Auction(Gathering):
             )
             RelationDeltaService.apply_bidirectional_delta(winner_avatar, runner_up_avatar, a_to_b, b_to_a)
 
-        # 6. 生成故事 (StoryTeller)
+        # 6. Generate the story (StoryTeller)
         story_events = await self._generate_story(world, deal_results, willing_prices)
         events.extend(story_events)
         

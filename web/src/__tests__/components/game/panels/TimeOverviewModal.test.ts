@@ -28,7 +28,7 @@ const worldStoreMock = {
   year: 103,
   month: 5,
   elapsedMonths: 29,
-  currentPhenomenon: { id: 1, name: '灵气潮汐', rarity: 'SR' },
+  currentPhenomenon: { id: 1, name: 'Spirit Tide', rarity: 'SR' },
 }
 
 vi.mock('@/stores/world', () => ({
@@ -43,36 +43,36 @@ describe('TimeOverviewModal', () => {
     worldStoreMock.year = 103
     worldStoreMock.month = 5
     worldStoreMock.elapsedMonths = 29
-    worldStoreMock.currentPhenomenon = { id: 1, name: '灵气潮汐', rarity: 'SR' }
+    worldStoreMock.currentPhenomenon = { id: 1, name: 'Spirit Tide', rarity: 'SR' }
   })
 
   function createWrapper() {
     const i18n = createI18n({
       legacy: false,
-      locale: 'zh-CN',
+      locale: 'en-US',
       messages: {
-        'zh-CN': {
+        'en-US': {
           game: {
             status_bar: {
               time: {
-                title: '时间总览',
-                current_date: '当前日期',
-                current_date_value: '第 {year} 年 {month} 月',
-                elapsed: '本局历时',
-                elapsed_months_only: '已运行 {months} 个月',
-                elapsed_years_only: '已运行 {years} 年',
-                elapsed_years_months: '已运行 {years} 年 {months} 个月',
-                phenomenon: '当前天象',
-                no_phenomenon: '暂无天象',
-                tournament: '下次论道/大比',
-                no_tournament: '暂无论道/大比信息',
-                sect_war: '宗门战争',
-                war_active: '当前有 {count} 场宗门战争',
-                war_none: '当前无宗门战争',
+                title: 'Time Overview',
+                current_date: 'Current Date',
+                current_date_value: 'Year {year}, Month {month}',
+                elapsed: 'Run Duration',
+                elapsed_months_only: 'Running for {months} months',
+                elapsed_years_only: 'Running for {years} years',
+                elapsed_years_months: 'Running for {years} years and {months} months',
+                phenomenon: 'Current Phenomenon',
+                no_phenomenon: 'No current phenomenon',
+                tournament: 'Next Tournament',
+                no_tournament: 'No tournament info available',
+                sect_war: 'Sect Wars',
+                war_active: '{count} sect war(s) currently active',
+                war_none: 'No sect wars at the moment',
               },
             },
             ranking: {
-              tournament_next: '距离下一届还有 {years} 年',
+              tournament_next: 'Next tournament in {years} years',
             },
           },
         },
@@ -99,9 +99,9 @@ describe('TimeOverviewModal', () => {
       relations: [
         {
           sect_a_id: 1,
-          sect_a_name: '青云宗',
+          sect_a_name: 'Qingyun Sect',
           sect_b_id: 2,
-          sect_b_name: '赤炎宗',
+          sect_b_name: 'Crimson Flame Sect',
           value: -30,
           diplomacy_status: 'war',
           diplomacy_duration_months: 12,
@@ -109,9 +109,9 @@ describe('TimeOverviewModal', () => {
         },
         {
           sect_a_id: 3,
-          sect_a_name: '玄心宗',
+          sect_a_name: 'Xuanxin Sect',
           sect_b_id: 4,
-          sect_b_name: '北斗宗',
+          sect_b_name: 'Beidou Sect',
           value: 20,
           diplomacy_status: 'peace',
           diplomacy_duration_months: 8,
@@ -126,11 +126,11 @@ describe('TimeOverviewModal', () => {
     await nextTick()
 
     const text = wrapper.text()
-    expect(text).toContain('第 103 年 5 月')
-    expect(text).toContain('已运行 2 年 5 个月')
-    expect(text).toContain('灵气潮汐')
-    expect(text).toContain('距离下一届还有 7 年')
-    expect(text).toContain('当前有 1 场宗门战争')
+    expect(text).toContain('Year 103, Month 5')
+    expect(text).toContain('Running for 2 years and 5 months')
+    expect(text).toContain('Spirit Tide')
+    expect(text).toContain('Next tournament in 7 years')
+    expect(text).toContain('1 sect war(s) currently active')
   })
 
   it('shows empty-style fallback text when no phenomenon or no war exists', async () => {
@@ -151,8 +151,8 @@ describe('TimeOverviewModal', () => {
     await nextTick()
 
     const text = wrapper.text()
-    expect(text).toContain('暂无天象')
-    expect(text).toContain('暂无论道/大比信息')
-    expect(text).toContain('当前无宗门战争')
+    expect(text).toContain('No current phenomenon')
+    expect(text).toContain('No tournament info available')
+    expect(text).toContain('No sect wars at the moment')
   })
 })

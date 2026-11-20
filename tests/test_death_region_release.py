@@ -5,8 +5,8 @@ from src.classes.death import handle_death
 from src.classes.environment.region import CultivateRegion, EssenceType
 
 def test_death_releases_region(base_world, dummy_avatar):
-    """测试死亡时释放占领的洞府"""
-    # 1. 创建一个修炼区域
+    """An occupied cave dwelling is released when its owner dies."""
+    # 1. Create a cultivation region
     region = CultivateRegion(
         id=1001,
         name="Test Cave",
@@ -14,27 +14,27 @@ def test_death_releases_region(base_world, dummy_avatar):
         essence_type=EssenceType.GOLD,
         essence_density=10
     )
-    # 将区域添加到地图
+    # Add the region to the map
     base_world.map.regions[region.id] = region
     
-    # 2. 让角色占领该区域
+    # 2. Have the avatar occupy the region
     dummy_avatar.occupy_region(region)
     
-    # 验证占领成功
+    # Occupation succeeded
     assert region.host_avatar == dummy_avatar
     assert region in dummy_avatar.owned_regions
     
-    # 3. 角色死亡
+    # 3. The avatar dies
     reason = DeathReason(DeathType.OLD_AGE)
     handle_death(base_world, dummy_avatar, reason)
     
-    # 4. 验证洞府已被释放
+    # 4. The cave dwelling has been released
     assert region.host_avatar is None
     assert len(dummy_avatar.owned_regions) == 0
     assert dummy_avatar.is_dead is True
 
 def test_occupy_region_logic(base_world, dummy_avatar):
-    """测试占领逻辑的双向绑定和抢夺"""
+    """Occupation keeps a bidirectional binding and supports seizure."""
     from src.classes.core.avatar import Avatar, Gender
     from src.classes.age import Age
     from src.systems.cultivation import Realm
@@ -43,7 +43,7 @@ def test_occupy_region_logic(base_world, dummy_avatar):
     from src.classes.alignment import Alignment
     from src.systems.time import create_month_stamp, Year, Month
 
-    # 创建第二个角色
+    # Create a second avatar
     other_avatar = Avatar(
         world=base_world,
         name="Other",
@@ -64,24 +64,24 @@ def test_occupy_region_logic(base_world, dummy_avatar):
         essence_density=10
     )
     
-    # 1. dummy_avatar 占领
+    # 1. dummy_avatar occupies
     dummy_avatar.occupy_region(region)
     assert region.host_avatar == dummy_avatar
     assert region in dummy_avatar.owned_regions
     
-    # 2. other_avatar 抢夺
+    # 2. other_avatar seizes it
     other_avatar.occupy_region(region)
     
-    # 验证所有权转移
+    # Ownership transferred
     assert region.host_avatar == other_avatar
     assert region in other_avatar.owned_regions
     
-    # 验证旧主已释放
+    # The previous owner released it
     assert region not in dummy_avatar.owned_regions
 
 def test_remove_avatar_releases_region(base_world, dummy_avatar):
-    """测试彻底删除角色时释放占领的洞府"""
-    # 1. 创建一个修炼区域
+    """An occupied cave dwelling is released when its owner is fully removed."""
+    # 1. Create a cultivation region
     region = CultivateRegion(
         id=1003,
         name="Test Cave 3",
@@ -91,17 +91,17 @@ def test_remove_avatar_releases_region(base_world, dummy_avatar):
     )
     base_world.map.regions[region.id] = region
     
-    # 2. 注册并占领
+    # 2. Register and occupy
     base_world.avatar_manager.register_avatar(dummy_avatar)
     dummy_avatar.occupy_region(region)
     
     assert region.host_avatar == dummy_avatar
     
-    # 3. 彻底删除角色
+    # 3. Fully remove the avatar
     base_world.avatar_manager.remove_avatar(dummy_avatar.id)
     
-    # 4. 验证洞府已被释放
+    # 4. The cave dwelling has been released
     assert region.host_avatar is None
-    # 注意：此时 dummy_avatar 对象可能还在内存中，但已经从管理器移除
-    # 它的 owned_regions 应该被清空了
+    # Note: the dummy_avatar object may still be in memory, but it is removed from the manager
+    # its owned_regions should be cleared
     assert len(dummy_avatar.owned_regions) == 0

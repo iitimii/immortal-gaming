@@ -2,10 +2,10 @@ from typing import Any
 
 
 def get_effect_desc(effect_key: str) -> str:
-    """获取 effect 的描述名称（支持国际化）。"""
+    """Get the display name of an effect (i18n-aware)."""
     from src.i18n import t
 
-    # 映射 effect_key -> msgid
+    # Map effect_key -> msgid
     msgid_map = {
         "extra_hp_recovery_rate": "effect_extra_hp_recovery_rate",
         "extra_max_hp": "effect_extra_max_hp",
@@ -68,16 +68,16 @@ def get_effect_desc(effect_key: str) -> str:
 
 
 def get_action_short_name(action_name: str) -> str:
-    """获取 action 的简称（复用 Action 系统翻译）。"""
+    """Get an action's short name (reuses the Action system translations)."""
     from src.i18n import t
 
-    # 使用统一命名规则：action_xxx_short_name
+    # Uses the shared naming convention: action_xxx_short_name
     msgid = f"action_{action_name.lower()}_short_name"
     return t(msgid)
 
 
 def format_value(key: str, value: Any) -> str:
-    """格式化效果数值。"""
+    """Format an effect value."""
     if key == "legal_actions" and isinstance(value, list):
         from src.i18n import t
 
@@ -95,7 +95,7 @@ def format_value(key: str, value: Any) -> str:
             percent = value * 100
             return f"-{percent:.1f}%"
 
-        # 百分比类字段统一展示为百分号。
+        # Percentage-style fields are always shown with a percent sign.
         if (
             "rate" in key
             or "probability" in key
@@ -105,7 +105,7 @@ def format_value(key: str, value: Any) -> str:
             or "reduction" in key
             or "bonus" in key
         ):
-            # 约定 0.1 表示 +10%。
+            # Convention: 0.1 means +10%.
             if isinstance(value, float):
                 percent = value * 100
                 sign = "+" if percent > 0 else ""
@@ -121,7 +121,7 @@ def format_value(key: str, value: Any) -> str:
 
 
 def translate_condition(condition: str) -> str:
-    """将代码形式的条件表达式转换为可读描述。"""
+    """Convert a code-style condition expression into a readable description."""
     import re
 
     from src.i18n import t
@@ -129,8 +129,8 @@ def translate_condition(condition: str) -> str:
     if not condition:
         return t("Conditional effect")
 
-    # 1) Persona 条件（特质）
-    # 例: any(p.key == "CHILD_OF_FORTUNE" for p in avatar.personas)
+    # 1) Persona (trait) condition
+    # e.g. any(p.key == "CHILD_OF_FORTUNE" for p in avatar.personas)
     if "avatar.personas" in condition:
         m_key = re.search(r'p\.key\s*==\s*["\'](.*?)["\']', condition)
         if m_key:
@@ -148,8 +148,8 @@ def translate_condition(condition: str) -> str:
         if m_name:
             return t("Has [{trait}] trait", trait=m_name.group(1))
 
-    # 1.5) Goldfinger 条件（外挂）
-    # 例: avatar.goldfinger and avatar.goldfinger.key == "CHILD_OF_FORTUNE"
+    # 1.5) Goldfinger condition
+    # e.g. avatar.goldfinger and avatar.goldfinger.key == "CHILD_OF_FORTUNE"
     if "avatar.goldfinger" in condition:
         m_key = re.search(r'goldfinger\.key\s*==\s*["\'](.*?)["\']', condition)
         if m_key:
@@ -163,8 +163,8 @@ def translate_condition(condition: str) -> str:
                     break
             return t("Has [{trait}] trait", trait=goldfinger_name)
 
-    # 2) Alignment 条件（阵营）
-    # 例: avatar.alignment == Alignment.RIGHTEOUS
+    # 2) Alignment condition
+    # e.g. avatar.alignment == Alignment.RIGHTEOUS
     if "avatar.alignment" in condition:
         m_align = re.search(r"Alignment\.([A-Z_]+)", condition)
         if m_align:
@@ -177,8 +177,8 @@ def translate_condition(condition: str) -> str:
             except KeyError:
                 pass
 
-    # 3) WeaponType 条件（武器类型）
-    # 例: avatar.weapon.weapon_type == WeaponType.SWORD
+    # 3) WeaponType condition
+    # e.g. avatar.weapon.weapon_type == WeaponType.SWORD
     weapon_matches = re.finditer(
         r"avatar\.weapon\.(?:weapon_type|type)\s*==\s*"
         r"(?:WeaponType\.)?(?:[\"'](?P<quoted>[A-Z_]+)[\"']|(?P<bare>[A-Z_]+))",
@@ -198,7 +198,7 @@ def translate_condition(condition: str) -> str:
         if weapon_names:
             return t("When using {weapon_type}", weapon_type=t("action_list_separator").join(weapon_names))
 
-    # 4) 兜底简化：去掉常见前缀与符号，尽量可读。
+    # 4) Fallback simplification: strip common prefixes and symbols to keep it readable.
     simple_cond = condition
     simple_cond = simple_cond.replace("avatar.", "")
     simple_cond = simple_cond.replace("Alignment.", "")
@@ -208,7 +208,7 @@ def translate_condition(condition: str) -> str:
 
 
 def format_effects_to_text(effects: dict[str, Any] | list[dict[str, Any]]) -> str:
-    """把 effects 转为易读文本，例如 {"extra_max_hp": 100} -> "最大生命 +100"。"""
+    """Turn effects into readable text, e.g. {"extra_max_hp": 100} -> "Max HP +100"."""
     from src.i18n import t
 
     if not effects:
@@ -222,7 +222,7 @@ def format_effects_to_text(effects: dict[str, Any] | list[dict[str, Any]]) -> st
                 parts.append(text)
         return "\n".join(parts)
 
-    # 1) 优先使用整段描述覆盖。
+    # 1) A whole-text description override takes precedence.
     if "_desc" in effects:
         return t(effects["_desc"])
 
@@ -233,7 +233,7 @@ def format_effects_to_text(effects: dict[str, Any] | list[dict[str, Any]]) -> st
 
         name = get_effect_desc(k)
 
-        # 字符串代码片段（eval 或 avatar 引用）不直接回显，避免噪声。
+        # String code snippets (eval or avatar references) are not echoed, to avoid noise.
         if isinstance(v, str):
             if v.startswith("eval(") or "avatar." in v or "//" in v:
                 val_str = t("Special effect (dynamic)")
@@ -247,7 +247,7 @@ def format_effects_to_text(effects: dict[str, Any] | list[dict[str, Any]]) -> st
     sep = t("effect_separator")
     text = sep.join(desc_list)
 
-    # 2) 附加条件描述。
+    # 2) Append the condition description.
     if effects.get("when"):
         if "when_desc" in effects:
             cond = t(effects["when_desc"])

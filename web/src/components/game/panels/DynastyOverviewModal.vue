@@ -52,7 +52,7 @@ function handleShowChange(value: boolean) {
                 <span class="hero-icon" :style="{ '--icon-url': `url(${landmarkIcon})` }" aria-hidden="true"></span>
                 <div>
                 <div class="hero-title">{{ overview.title || overview.name }}</div>
-                <div class="hero-subtitle">{{ t('game.dynasty.royal_house') }}：{{ overview.royal_house_name || overview.royal_surname }}</div>
+                <div class="hero-subtitle">{{ t('game.dynasty.royal_house') }}: {{ overview.royal_house_name || overview.royal_surname }}</div>
                 </div>
               </div>
               <n-tag size="small" :bordered="false" type="success">
@@ -155,13 +155,13 @@ function handleShowChange(value: boolean) {
                 </div>
                 <div class="official-side">
                   <div class="official-meta">
-                    {{ t('game.dynasty.officials.realm') }}：{{ formatCultivationText(official.realm, t) || t('common.none') }}
+                    {{ t('game.dynasty.officials.realm') }}: {{ formatCultivationText(official.realm, t) || t('common.none') }}
                   </div>
                   <div class="official-meta">
-                    {{ t('game.dynasty.officials.court_reputation') }}：{{ official.courtReputation }}
+                    {{ t('game.dynasty.officials.court_reputation') }}: {{ official.courtReputation }}
                   </div>
                   <div class="official-meta">
-                    {{ t('game.dynasty.officials.sect') }}：{{ official.sectName || t('game.dynasty.officials.rogue') }}
+                    {{ t('game.dynasty.officials.sect') }}: {{ official.sectName || t('game.dynasty.officials.rogue') }}
                   </div>
                 </div>
               </button>

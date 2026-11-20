@@ -2,8 +2,8 @@ import { mount } from '@vue/test-utils'
 import { describe, it, expect, vi } from 'vitest'
 import LLMConfigPanel from '@/components/game/panels/system/LLMConfigPanel.vue'
 import { createI18n } from 'vue-i18n'
-import llmMessages from '@/locales/zh-CN/llm.json'
-import uiMessages from '@/locales/zh-CN/ui.json'
+import llmMessages from '@/locales/en-US/llm.json'
+import uiMessages from '@/locales/en-US/ui.json'
 
 // Mock API
 vi.mock('@/api', () => ({
@@ -40,9 +40,9 @@ vi.mock('naive-ui', () => ({
 describe('LLMConfigPanel', () => {
   const i18n = createI18n({
     legacy: false,
-    locale: 'zh-CN',
+    locale: 'en-US',
     messages: {
-      'zh-CN': {
+      'en-US': {
         llm: llmMessages,
         ui: uiMessages
       }

@@ -21,28 +21,28 @@ class Simulator:
 
     async def step(self) -> list[Event]:
         """
-        模拟器单步主流程（一个月的推进）。
+        Main flow of a single simulator step (advances one month).
 
-        相位顺序：
-        1.  更新角色感知与已知区域
-        2.  长期目标思考
-        3.  Gathering 系统（聚会/大会）处理
-        4.  AI 决策（为无计划角色生成行动链）
-        5.  提交并启动下一步计划
-        6.  执行当前行动（多轮 Tick，直到稳定或达到上限）
-        7.  按事件处理交互（第一轮）
-        8.  关系演化相位
-        9.  死亡结算
-        10. 年龄更新与出生/觉醒处理
-        11. 身世背景生成
-        12. 被动效果与世界性随机事件
-        13. 小型随机事件 + 宗门随机事件
-        14. 外号生成
-        15. 天象（大环境气候）更新
-        16. 城市人口更新
-        17. 按事件处理交互（第二轮，包含后续新事件）
-        18. 计算型关系（如二阶关系）更新
-        19. 每年一月：世界年度维护
-        20. 最终整理事件、入库、写日志并推进月份
+        Phase order:
+        1.  Update avatar perception and known regions
+        2.  Long-term objective thinking
+        3.  Gathering system (gatherings/conventions)
+        4.  AI decisions (generate action chains for avatars without plans)
+        5.  Commit and start the next planned step
+        6.  Execute current actions (multiple tick rounds until stable or the cap is reached)
+        7.  Process interactions from events (first round)
+        8.  Relation evolution phase
+        9.  Death settlement
+        10. Age update and birth/awakening handling
+        11. Backstory generation
+        12. Passive effects and world-level random events
+        13. Minor random events + sect random events
+        14. Nickname generation
+        15. Celestial phenomenon (world climate) update
+        16. City population update
+        17. Process interactions from events (second round, including newly generated events)
+        18. Computed relations update (e.g. second-order relations)
+        19. Every January: yearly world maintenance
+        20. Finalize events, persist them, write logs, and advance the month
         """
         return await SimulationPhaseRunner(self).run()

@@ -70,21 +70,10 @@ async def test_retreat_failure_adds_negative_lifespan_effect(dummy_avatar):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize(
-    ("locale", "expected_content", "unexpected_fragment"),
-    [
-        ("en-US", "TestDummy encountered nether prison tribulation, breakthrough succeeded", "阴狱"),
-        ("zh-TW", "TestDummy 遭遇了陰獄劫難，突破成功", "阴狱"),
-        ("vi-VN", "TestDummy gặp phải âm ngục, đột phá thành công", "阴狱"),
-        ("ja-JP", "TestDummy は 陰獄 の劫に遭い、突破は 成功", "阴狱"),
-    ],
-)
-async def test_breakthrough_story_event_localizes_tribulation_name_in_enabled_locales(
-    dummy_avatar,
-    locale,
-    expected_content,
-    unexpected_fragment,
-):
+async def test_breakthrough_story_event_localizes_tribulation_name(dummy_avatar):
+    locale = "en-US"
+    expected_content = "TestDummy encountered nether prison tribulation, breakthrough succeeded"
+    unexpected_fragment = "nether_prison"
     original_lang = str(language_manager)
     try:
         language_manager.set_language(locale)
@@ -92,7 +81,7 @@ async def test_breakthrough_story_event_localizes_tribulation_name_in_enabled_lo
         dummy_avatar.recalc_effects()
 
         action = Breakthrough(dummy_avatar, dummy_avatar.world)
-        with patch("src.classes.action.breakthrough.TribulationSelector.choose_tribulation", return_value="阴狱"), \
+        with patch("src.classes.action.breakthrough.TribulationSelector.choose_tribulation", return_value="nether_prison"), \
              patch("src.classes.action.breakthrough.TribulationSelector.choose_related_avatar", return_value=None), \
              patch("src.classes.action.breakthrough.StoryEventService.maybe_create_story", new_callable=AsyncMock, return_value=None), \
              patch("random.random", return_value=0.0):

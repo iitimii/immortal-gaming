@@ -12,7 +12,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#. hidden_domain.csv: 万年前人族大能与炎魔皇同归于尽之地，至今...
+#. hidden_domain.csv: The site where a human mighty figure perished t...
 msgid "HIDDEN_DOMAIN_HIDDEN_DOMAIN_FIRE_DESC"
 msgstr ""
 "The site where a human mighty figure perished together with the Flame Demon "
@@ -25,11 +25,11 @@ msgstr ""
 "with deep destiny might even pick up fragment artifacts left by ancient "
 "cultivators from the magma depths or glimpse a trace of the Great Dao."
 
-#. hidden_domain.csv: 陨仙焚谷
+#. hidden_domain.csv: Valley of Fallen Immortals
 msgid "HIDDEN_DOMAIN_HIDDEN_DOMAIN_FIRE_NAME"
 msgstr "Valley of Fallen Immortals"
 
-#. hidden_domain.csv: 漂浮于九天罡风层之上的宏伟宫殿群，非有大...
+#. hidden_domain.csv: A magnificent complex of palaces floating above...
 msgid "HIDDEN_DOMAIN_HIDDEN_DOMAIN_PALACE_DESC"
 msgstr ""
 "A magnificent complex of palaces floating above the Nine Heavens Wind Layer."
@@ -43,11 +43,11 @@ msgstr ""
 "Formation cultivators can barely withstand the pressure from the ancient "
 "times to spy a glimpse of immortal opportunity."
 
-#. hidden_domain.csv: 九天虚空殿
+#. hidden_domain.csv: Nine Heavens Void Palace
 msgid "HIDDEN_DOMAIN_HIDDEN_DOMAIN_PALACE_NAME"
 msgstr "Nine Heavens Void Palace"
 
-#. hidden_domain.csv: 此乃上古丹宗“青帝苑”崩碎后遗落的一角碎...
+#. hidden_domain.csv: A fragment of the ancient Azure Emperor's Garde...
 msgid "HIDDEN_DOMAIN_HIDDEN_DOMAIN_WOOD_DESC"
 msgstr ""
 "A fragment of the ancient Azure Emperor's Garden that shattered eons ago, "
@@ -59,6 +59,6 @@ msgstr ""
 "However, one must beware of the guardian beasts, twisted by millennia of "
 "consuming medicinal dregs, who thirst for fresh blood."
 
-#. hidden_domain.csv: 万木残界
+#. hidden_domain.csv: Remnant of Myriad Woods
 msgid "HIDDEN_DOMAIN_HIDDEN_DOMAIN_WOOD_NAME"
 msgstr "Remnant of Myriad Woods"

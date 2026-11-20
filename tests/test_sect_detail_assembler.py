@@ -17,18 +17,18 @@ def test_build_sect_detail_includes_yearly_income_and_upkeep(base_world):
     world = base_world
     region_id = 1001
     cors = [(1, 1)]
-    region = SectRegion(id=region_id, name="R1", desc="", sect_id=1, sect_name="测试宗门", cors=cors)
+    region = SectRegion(id=region_id, name="R1", desc="", sect_id=1, sect_name="Test Sect", cors=cors)
     world.map.regions[region_id] = region
     world.map.region_cors[region_id] = cors
     world.map.update_sect_regions()
 
     sect = Sect(
         id=1,
-        name="测试宗门",
-        desc="稳住传承",
+        name="Test Sect",
+        desc="Preserve the lineage",
         member_act_style="",
         alignment=Alignment.NEUTRAL,
-        headquarter=SectHeadQuarter(name="驻地", desc="", image=Path("")),
+        headquarter=SectHeadQuarter(name="HQ", desc="", image=Path("")),
         technique_names=[],
     )
     sect.set_war_weariness(27)
@@ -37,7 +37,7 @@ def test_build_sect_detail_includes_yearly_income_and_upkeep(base_world):
 
     member = Avatar(
         world=world,
-        name="弟子甲",
+        name="Disciple A",
         id="member_a",
         birth_month_stamp=MonthStamp(1),
         age=Age(18, realm=0),

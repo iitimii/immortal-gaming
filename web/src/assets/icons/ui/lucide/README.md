@@ -37,7 +37,7 @@ Suggested mapping:
 - `swords.svg`: tournament
 - `users.svg`: mortal system
 - `landmark.svg`: dynasty system
-- `languages.svg`: language setting
+- `languages.svg`: language (currently unused)
 - `volume-2.svg`: audio setting
 - `plus.svg`: new save
 - `zap.svg`: quick save

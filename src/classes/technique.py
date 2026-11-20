@@ -14,16 +14,16 @@ from src.classes.root import Root, RootElement
 
 
 class TechniqueAttribute(Enum):
-    GOLD = "GOLD"  # 金
-    WOOD = "WOOD"  # 木
-    WATER = "WATER"#水
-    FIRE = "FIRE"  # 火
-    EARTH = "EARTH"# 土
-    ICE = "ICE"    # 冰
-    WIND = "WIND"  # 风
-    DARK = "DARK"  # 暗
-    THUNDER = "THUNDER"  # 雷
-    EVIL = "EVIL"  # 邪
+    GOLD = "GOLD"  # Metal
+    WOOD = "WOOD"  # Wood
+    WATER = "WATER"# Water
+    FIRE = "FIRE"  # Fire
+    EARTH = "EARTH"# Earth
+    ICE = "ICE"    # Ice
+    WIND = "WIND"  # Wind
+    DARK = "DARK"  # Dark
+    THUNDER = "THUNDER"  # Thunder
+    EVIL = "EVIL"  # Evil
 
     def __str__(self) -> str:
         from src.i18n import t
@@ -45,9 +45,9 @@ technique_attribute_msg_ids = {
 
 
 class TechniqueGrade(Enum):
-    LOWER = "LOWER"    # 下品
-    MIDDLE = "MIDDLE"  # 中品
-    UPPER = "UPPER"    # 上品
+    LOWER = "LOWER"    # Lower grade
+    MIDDLE = "MIDDLE"  # Middle grade
+    UPPER = "UPPER"    # Upper grade
 
     def __str__(self) -> str:
         from src.i18n import t
@@ -56,18 +56,18 @@ class TechniqueGrade(Enum):
     @staticmethod
     def from_str(s: str) -> "TechniqueGrade":
         s = str(s).strip().upper()
-        # 兼容旧的中文配置（可选，但为了稳妥建议保留映射或直接转换）
+        # Accept the enum names used in technique.csv
         mapping = {
-            "上品": "UPPER", "UPPER": "UPPER",
-            "中品": "MIDDLE", "MIDDLE": "MIDDLE",
-            "下品": "LOWER", "LOWER": "LOWER"
+            "UPPER": "UPPER",
+            "MIDDLE": "MIDDLE",
+            "LOWER": "LOWER"
         }
         grade_id = mapping.get(s, "LOWER")
         return TechniqueGrade(grade_id)
     
     @property
     def color_rgb(self) -> tuple[int, int, int]:
-        """返回功法品阶对应的RGB颜色值"""
+        """Return the RGB color for the technique grade."""
         color_map = {
             TechniqueGrade.LOWER: TECHNIQUE_GRADE_COLORS["LOWER"],
             TechniqueGrade.MIDDLE: TECHNIQUE_GRADE_COLORS["MIDDLE"],
@@ -93,9 +93,9 @@ class Technique:
     weight: float
     condition: str
     realm: Realm | None = None
-    # 归属宗门ID；None 表示无宗门要求（散修可修）
+    # Owning sect ID; None means no sect requirement (rogue cultivators can learn it)
     sect_id: Optional[int] = None
-    # 影响角色或系统的效果
+    # Effects applied to avatars or systems
     effects: dict[str, object] = field(default_factory=dict)
     effect_desc: str = ""
 
@@ -118,10 +118,10 @@ class Technique:
                  desc=self.desc, effect=effect_part)
     
     def get_colored_info(self) -> str:
-        """获取带颜色标记的信息，供前端渲染使用"""
+        """Get info with color markup for frontend rendering."""
         from src.i18n import t
         r, g, b = self.grade.color_rgb
-        # 使用与 get_info 相同的格式，但带有颜色标签
+        # Same format as get_info, but with color tags
         info = t("{name} ({attribute}·{grade})", name=self.name, attribute=str(self.attribute), grade=str(self.grade))
         return f"<color:{r},{g},{b}>{info}</color>"
 
@@ -138,9 +138,9 @@ class Technique:
             "effect_desc": self.effect_desc,
         }
 
-# 五行与扩展属性的克制关系
-# - 五行：金克木，木克土，土克水，水克火，火克金
-# - 雷克邪；邪、冰、风、暗不克任何人
+# Counter relationships among the five elements and extended attributes
+# - Five elements: Metal counters Wood, Wood counters Earth, Earth counters Water, Water counters Fire, Fire counters Metal
+# - Thunder counters Evil; Evil, Ice, Wind and Dark counter nothing
 SUPPRESSION: dict[TechniqueAttribute, set[TechniqueAttribute]] = {
     TechniqueAttribute.GOLD: {TechniqueAttribute.WOOD},
     TechniqueAttribute.WOOD: {TechniqueAttribute.EARTH},
@@ -156,8 +156,8 @@ SUPPRESSION: dict[TechniqueAttribute, set[TechniqueAttribute]] = {
 
 
 def _load_techniques_data() -> tuple[dict[int, Technique], dict[str, Technique]]:
-    """从配表加载 technique 数据
-    返回：新的 (techniques_by_id, techniques_by_name)
+    """Load technique data from the config table.
+    Returns: new (techniques_by_id, techniques_by_name)
     """
     new_by_id: dict[int, Technique] = {}
     new_by_name: dict[str, Technique] = {}
@@ -165,7 +165,7 @@ def _load_techniques_data() -> tuple[dict[int, Technique], dict[str, Technique]]
     for row in df:
         attr = TechniqueAttribute(get_str(row, "technique_root"))
         name = get_str(row, "name")
-        grade = TechniqueGrade.from_str(get_str(row, "grade", "下品"))
+        grade = TechniqueGrade.from_str(get_str(row, "grade", "LOWER"))
         condition = get_str(row, "condition")
         weight = get_float(row, "weight", 1.0)
         
@@ -194,12 +194,12 @@ def _load_techniques_data() -> tuple[dict[int, Technique], dict[str, Technique]]
     return new_by_id, new_by_name
 
 
-# 全局容器（保持引用不变）
+# Global containers (keep references stable)
 techniques_by_id: dict[int, Technique] = {}
 techniques_by_name: dict[str, Technique] = {}
 
 def reload():
-    """重新加载数据，保留全局字典引用"""
+    """Reload data while preserving the global dict references."""
     new_id, new_name = _load_techniques_data()
     
     techniques_by_id.clear()
@@ -208,20 +208,20 @@ def reload():
     techniques_by_name.clear()
     techniques_by_name.update(new_name)
 
-# 模块初始化时执行一次
+# Run once at module import
 reload()
 
 
 def is_attribute_compatible_with_root(attr: TechniqueAttribute, root: Root) -> bool:
     if attr == TechniqueAttribute.EVIL:
-        # 邪功法仅由阵营约束，这里视为与灵根无关
+        # Evil techniques are constrained only by alignment; treated as unrelated to spiritual roots here
         return True
 
-    # 天灵根：除邪外全系可修
+    # Heavenly spiritual root: can cultivate all types except Evil
     if root == Root.HEAVEN:
         return attr != TechniqueAttribute.EVIL
 
-    # 单属性灵根：只能修行对应属性
+    # Single-attribute spiritual root: can only cultivate the matching attribute
     single_map = {
         Root.GOLD: TechniqueAttribute.GOLD,
         Root.WOOD: TechniqueAttribute.WOOD,
@@ -232,7 +232,7 @@ def is_attribute_compatible_with_root(attr: TechniqueAttribute, root: Root) -> b
     if root in single_map:
         return attr == single_map[root]
 
-    # 复合/扩展灵根：根名属性 + 其元素列表中的属性
+    # Compound/extended spiritual roots: the root's own attribute + the attributes in its element list
     complex_map: dict[Root, set[TechniqueAttribute]] = {
         Root.ICE: {TechniqueAttribute.ICE, TechniqueAttribute.GOLD, TechniqueAttribute.WATER},
         Root.WIND: {TechniqueAttribute.WIND, TechniqueAttribute.WOOD, TechniqueAttribute.WATER},
@@ -256,7 +256,7 @@ def get_random_technique_for_avatar(avatar) -> Technique:
             continue
         candidates.append(t)
     if not candidates:
-        # 回退：不考虑条件，仅按灵根兼容挑选（若仍为空，则全量）
+        # Fallback: ignore conditions, pick only by spiritual root compatibility (if still empty, use all)
         fallback = [
             t for t in techniques_by_id.values()
             if (t.attribute != TechniqueAttribute.EVIL) and is_attribute_compatible_with_root(t.attribute, avatar.root)
@@ -268,8 +268,8 @@ def get_random_technique_for_avatar(avatar) -> Technique:
 
 def get_random_upper_technique_for_avatar(avatar) -> Technique | None:
     """
-    返回一个与 avatar 灵根/阵营/条件相容的上品功法；若无则返回 None。
-    仅用于奇遇奖励优先挑选上品功法。
+    Return an upper-grade technique compatible with the avatar's spiritual root/alignment/conditions; None if none.
+    Only used to prefer upper-grade techniques for fortune rewards.
     """
     import random
     candidates: List[Technique] = []
@@ -290,10 +290,10 @@ def get_random_upper_technique_for_avatar(avatar) -> Technique | None:
 
 def get_technique_by_sect(sect) -> Technique:
     """
-    简化版：仅按宗门筛选并按权重抽样，不考虑灵根与 condition。
-    - 散修（sect 为 None）：只从无宗门要求（sect_id 为 None）的功法中抽样；
-    - 有宗门：从"无宗门 + 该宗门"的功法中抽样；
-    若集合为空，则退回全量功法。
+    Simplified: filter only by sect and sample by weight, ignoring spiritual roots and conditions.
+    - Rogue cultivators (sect is None): sample only from techniques without a sect requirement (sect_id is None);
+    - With a sect: sample from techniques with "no sect + this sect";
+    If the set is empty, fall back to all techniques.
     """
     import random
 
@@ -320,7 +320,7 @@ def get_suppression_bonus(att_attr: TechniqueAttribute, def_attr: TechniqueAttri
 
 
 
-# 将功法属性映射为默认的灵根（邪功法不返回）
+# Map technique attributes to default spiritual roots (Evil techniques return nothing)
 def attribute_to_root(attr: TechniqueAttribute) -> Optional[Root]:
     mapping: dict[TechniqueAttribute, Root] = {
         TechniqueAttribute.GOLD: Root.GOLD,

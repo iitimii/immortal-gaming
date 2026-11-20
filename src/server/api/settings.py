@@ -69,12 +69,12 @@ def create_settings_router(
                 test_connectivity=test_connectivity,
             )
             if success:
-                return {"status": "ok", "message": "连接成功"}
+                return {"status": "ok", "message": "Connection successful"}
             raise HTTPException(status_code=400, detail=error_msg)
         except HTTPException:
             raise
         except Exception as exc:
-            raise HTTPException(status_code=500, detail=f"测试出错: {str(exc)}")
+            raise HTTPException(status_code=500, detail=f"Test failed: {str(exc)}")
 
     @router.put("/api/settings/llm")
     async def save_llm_config(req: LLMSettingsUpdate):
@@ -83,11 +83,11 @@ def create_settings_router(
             if isawaitable(updated):
                 updated = await updated
             await on_llm_updated()
-            return {"status": "ok", "message": "配置已保存", "config": model_to_dict(updated)}
+            return {"status": "ok", "message": "Configuration saved", "config": model_to_dict(updated)}
         except Exception as exc:
             import traceback
 
             traceback.print_exc()
-            raise HTTPException(status_code=500, detail=f"保存失败: {str(exc)}")
+            raise HTTPException(status_code=500, detail=f"Save failed: {str(exc)}")
 
     return router

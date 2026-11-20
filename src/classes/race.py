@@ -109,11 +109,11 @@ def is_yao_avatar(avatar: object | None) -> bool:
 def get_race_surname(race: Race | str | None) -> str:
     race_obj = race if isinstance(race, Race) else get_race(str(race or HUMAN_RACE_ID))
     mapping = {
-        "fox": "狐",
-        "wolf": "狼",
-        "bird": "鸟",
-        "snake": "蛇",
-        "turtle": "龟",
+        "fox": "Fox",
+        "wolf": "Wolf",
+        "bird": "Bird",
+        "snake": "Snake",
+        "turtle": "Turtle",
     }
     return mapping.get(race_obj.id, "")
 

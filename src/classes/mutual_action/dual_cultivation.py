@@ -18,31 +18,31 @@ if TYPE_CHECKING:
 
 @cooldown_action
 class DualCultivation(InvitationAction):
-    """双修：修士可与交互范围内的修士尝试双修。
+    """Dual cultivation: a cultivator may attempt dual cultivation with a cultivator within interaction range.
 
-    - 仅当目标在交互范围内
-    - 目标可以选择 接受 或 拒绝
-    - 若接受：发起者获得大量修为（约为修炼的 3~5 倍，随对方等级浮动），目标不获得修为
-    - 成功进入后生成一段"恋爱/双修"的小故事
+    - Only when the target is within interaction range
+    - The target can choose to accept or refuse
+    - If accepted: the initiator gains a lot of cultivation exp (about 3-5x normal cultivation, varying with the other's level); the target gains none
+    - On success, a short "romance/dual cultivation" story is generated
     """
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "dual_cultivation_action_name"
     DESC_ID = "dual_cultivation_description"
     REQUIREMENTS_ID = "dual_cultivation_requirements"
     STORY_PROMPT_ID = "dual_cultivation_story_prompt"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "💕"
     PARAMS = {"target_avatar": "AvatarName"}
     RESPONSE_ACTIONS = ["Accept", "Reject"]
-    # 双修的社交冷却：避免频繁请求
+    # Social cooldown for dual cultivation: avoid frequent requests
     ACTION_CD_MONTHS: int = 3
-    # 双修是大事（长期记忆）
+    # Dual cultivation is a major event (long-term memory)
     IS_MAJOR: bool = True
 
     def _can_start(self, target: "Avatar") -> tuple[bool, str]:
-        """检查双修特有的启动条件"""
+        """Check the dual-cultivation-specific start conditions."""
         return True, ""
 
     def start(self, target_avatar: "Avatar|str") -> Event:
@@ -52,14 +52,14 @@ class DualCultivation(InvitationAction):
         if target is not None:
             rel_ids.append(target.id)
         
-        # 双修有特殊的邀请语义
+        # Dual cultivation has special invitation semantics
         content = t("{initiator} invites {target} for dual cultivation",
                    initiator=self.avatar.name, target=target_name)
         event = Event(self.world.month_stamp, content, related_avatars=rel_ids, is_major=False)
         
-        # 记录开始文本用于故事生成
+        # Record the start text for story generation
         self._start_event_content = event.content
-        # 初始化内部标记，避免后续 getattr
+        # Initialize internal flags to avoid later getattr
         self._dual_cultivation_success = False
         self._dual_exp_gain = 0
         return event
@@ -67,26 +67,26 @@ class DualCultivation(InvitationAction):
     def _settle_response(self, target_avatar: "Avatar", response_name: str) -> None:
         fb = str(response_name).strip()
         if fb == "Accept":
-            # 接受则当场结算修为收益（发起者获得，对象不获得），并记录标记供 finish 生成故事
+            # If accepted, settle the cultivation gain on the spot (initiator gains, target doesn't) and set a flag for finish to generate the story
             self._apply_dual_cultivation_gain(self.avatar, target_avatar)
             self._dual_cultivation_success = True
         else:
-            # 拒绝
+            # Refused
             self._dual_cultivation_success = False
 
     def _apply_dual_cultivation_gain(self, initiator: "Avatar", target: "Avatar") -> None:
-        # 以“修炼”的基础经验为参照：base=100 * essence_density
-        # 由于此处不依赖具体修炼区域灵气，取一个稳定的基准值：视为 essence_density=1 的基础；
-        # 然后按对方等级决定 3~5 倍之间的倍数。
+        # Use the base exp of "cultivate" as reference: base=100 * essence_density
+        # Since this doesn't depend on a specific cultivation region's qi, use a stable baseline: essence_density=1;
+        # then pick a multiplier between 3 and 5 based on the other's level.
         base = 100
-        # 对方等级越高，倍数越高（3.0 ~ 5.0），做一个线性映射并夹紧
+        # The higher the other's level, the higher the multiplier (3.0 ~ 5.0), via a clamped linear mapping
         other_level = target.cultivation_progress.level
-        factor = 3.0 + min(2.0, max(0.0, other_level / 60.0 * 2.0))  # level 0-120 -> +0~4，但上限5
-        # 添加少量抖动，避免过度稳定
+        factor = 3.0 + min(2.0, max(0.0, other_level / 60.0 * 2.0))  # level 0-120 -> +0~4, but capped at 5
+        # Add a little jitter to avoid being too stable
         jitter = random.uniform(-0.2, 0.2)
         factor = max(3.0, min(5.0, factor + jitter))
         exp_gain = int(base * factor)
-        # 附加“双修经验提升”效果（如法宝）
+        # Apply "dual cultivation exp boost" effects (e.g. from treasures)
         extra_raw = initiator.effects.get("extra_dual_cultivation_exp", 0)
         extra = int(extra_raw or 0)
         exp_gain += extra

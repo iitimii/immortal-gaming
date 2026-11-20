@@ -5,32 +5,32 @@ from src.classes.color import Color
 
 @total_ordering
 class Realm(Enum):
-    Qi_Refinement = "QI_REFINEMENT"           # 练气
-    Foundation_Establishment = "FOUNDATION_ESTABLISHMENT"  # 筑基
-    Core_Formation = "CORE_FORMATION"        # 金丹
-    Nascent_Soul = "NASCENT_SOUL"            # 元婴
+    Qi_Refinement = "QI_REFINEMENT"
+    Foundation_Establishment = "FOUNDATION_ESTABLISHMENT"
+    Core_Formation = "CORE_FORMATION"
+    Nascent_Soul = "NASCENT_SOUL"
 
     def __str__(self) -> str:
-        """返回境界的翻译名称"""
+        """Return the translated realm name."""
         from src.i18n import t
         return t(realm_msg_ids.get(self, self.value))
 
     @staticmethod
     def from_str(s: str) -> "Realm":
         s = str(s).strip().replace(" ", "_").upper()
-        # 建立映射以兼容多种输入格式
+        # Mapping to accept several input formats
         mapping = {
-            "练气": "QI_REFINEMENT", "QI_REFINEMENT": "QI_REFINEMENT", "QI REFINEMENT": "QI_REFINEMENT",
-            "筑基": "FOUNDATION_ESTABLISHMENT", "FOUNDATION_ESTABLISHMENT": "FOUNDATION_ESTABLISHMENT", "FOUNDATION ESTABLISHMENT": "FOUNDATION_ESTABLISHMENT",
-            "金丹": "CORE_FORMATION", "CORE_FORMATION": "CORE_FORMATION", "CORE FORMATION": "CORE_FORMATION",
-            "元婴": "NASCENT_SOUL", "NASCENT_SOUL": "NASCENT_SOUL", "NASCENT SOUL": "NASCENT_SOUL"
+            "QI_REFINEMENT": "QI_REFINEMENT", "QI REFINEMENT": "QI_REFINEMENT",
+            "FOUNDATION_ESTABLISHMENT": "FOUNDATION_ESTABLISHMENT", "FOUNDATION ESTABLISHMENT": "FOUNDATION_ESTABLISHMENT",
+            "CORE_FORMATION": "CORE_FORMATION", "CORE FORMATION": "CORE_FORMATION",
+            "NASCENT_SOUL": "NASCENT_SOUL", "NASCENT SOUL": "NASCENT_SOUL"
         }
         realm_id = mapping.get(s, "QI_REFINEMENT")
         return Realm(realm_id)
 
     @property
     def color_rgb(self) -> tuple[int, int, int]:
-        """返回境界对应的RGB颜色值"""
+        """Return the RGB color for the realm."""
         color_map = {
             Realm.Qi_Refinement: Color.COMMON_WHITE,
             Realm.Foundation_Establishment: Color.UNCOMMON_GREEN,
@@ -69,12 +69,12 @@ class Realm(Enum):
 
 @total_ordering
 class Stage(Enum):
-    Early_Stage = "EARLY_STAGE"    # 前期
-    Middle_Stage = "MIDDLE_STAGE"  # 中期
-    Late_Stage = "LATE_STAGE"      # 后期
+    Early_Stage = "EARLY_STAGE"
+    Middle_Stage = "MIDDLE_STAGE"
+    Late_Stage = "LATE_STAGE"
 
     def __str__(self) -> str:
-        """返回阶段的翻译名称"""
+        """Return the translated stage name."""
         from src.i18n import t
         return t(stage_msg_ids.get(self, self.value))
 
@@ -82,9 +82,9 @@ class Stage(Enum):
     def from_str(s: str) -> "Stage":
         s = str(s).strip().replace(" ", "_").upper()
         mapping = {
-            "前期": "EARLY_STAGE", "EARLY_STAGE": "EARLY_STAGE", "EARLY STAGE": "EARLY_STAGE",
-            "中期": "MIDDLE_STAGE", "MIDDLE_STAGE": "MIDDLE_STAGE", "MIDDLE STAGE": "MIDDLE_STAGE",
-            "后期": "LATE_STAGE", "LATE_STAGE": "LATE_STAGE", "LATE STAGE": "LATE_STAGE"
+            "EARLY_STAGE": "EARLY_STAGE", "EARLY STAGE": "EARLY_STAGE",
+            "MIDDLE_STAGE": "MIDDLE_STAGE", "MIDDLE STAGE": "MIDDLE_STAGE",
+            "LATE_STAGE": "LATE_STAGE", "LATE STAGE": "LATE_STAGE"
         }
         stage_id = mapping.get(s, "EARLY_STAGE")
         return Stage(stage_id)
@@ -109,7 +109,7 @@ class Stage(Enum):
             return NotImplemented
         return STAGE_RANK[self] >= STAGE_RANK[other]
 
-# msgid映射
+# msgid mapping
 realm_msg_ids = {
     Realm.Qi_Refinement: "qi_refinement",
     Realm.Foundation_Establishment: "foundation_establishment",
@@ -123,7 +123,7 @@ stage_msg_ids = {
     Stage.Late_Stage: "late_stage",
 }
 
-# 统一的境界顺序与排名，避免重复定义
+# Single definition of realm order and rank
 REALM_ORDER: tuple[Realm, ...] = (
     Realm.Qi_Refinement,
     Realm.Foundation_Establishment,
@@ -132,7 +132,7 @@ REALM_ORDER: tuple[Realm, ...] = (
 )
 REALM_RANK: dict[Realm, int] = {realm: idx for idx, realm in enumerate(REALM_ORDER)}
 
-# 统一的阶段顺序与排名，避免重复定义
+# Single definition of stage order and rank
 STAGE_ORDER: tuple[Stage, ...] = (
     Stage.Early_Stage,
     Stage.Middle_Stage,
@@ -152,14 +152,14 @@ REALM_TO_MOVE_STEP = {
 
 class CultivationProgress:
     """
-    修仙进度(包含等级、境界和经验值)
-    目前一个四个大境界，每个境界分前期、中期、后期。每一期对应10级。
-    所以每一个境界对应30级。境界的级别满了之后，需要突破才能进入下一个境界与升级。
-    所以有：
-    练气(Qi Refinement)：前期(1-10)、中期(11-20)、后期(21-30)、突破(31)
-    筑基(Foundation Establishment)：前期(31-40)、中期(41-50)、后期(51-60)、突破(61)
-    金丹(Core Formation)：前期(61-70)、中期(71-80)、后期(81-90)、突破(91)
-    元婴(Nascent Soul)：前期(91-100)、中期(101-110)、后期(111-120)、突破(121)
+    Cultivation progress (level, realm and experience).
+    There are currently four major realms, each split into Early, Middle and Late stages of 10 levels each,
+    so each realm spans 30 levels. Once a realm's levels are maxed out, a breakthrough is required to
+    enter the next realm and keep leveling:
+    Qi Refinement: Early (1-10), Middle (11-20), Late (21-30), breakthrough (31)
+    Foundation Establishment: Early (31-40), Middle (41-50), Late (51-60), breakthrough (61)
+    Core Formation: Early (61-70), Middle (71-80), Late (81-90), breakthrough (91)
+    Nascent Soul: Early (91-100), Middle (101-110), Late (111-120), breakthrough (121)
     """
 
     def __init__(self, level: int, exp: int = 0):
@@ -169,14 +169,14 @@ class CultivationProgress:
         self.stage = self.get_stage(level)
 
     def get_realm(self, level: int) -> Realm:
-        """获取境界（算术推导，不依赖映射表）"""
+        """Get the realm (derived arithmetically, no lookup table)."""
         if level <= 0:
             return Realm.Qi_Refinement
         realm_index = (level - 1) // LEVELS_PER_REALM  # 0-based index
         return REALM_ORDER[min(realm_index, len(REALM_ORDER) - 1)]
 
     def get_stage(self, level: int) -> Stage:
-        """获取阶段（算术推导：1-10前期，11-20中期，21-30后期）"""
+        """Get the stage (derived arithmetically: 1-10 Early, 11-20 Middle, 21-30 Late)."""
         if level <= 0:
             return Stage.Early_Stage
         stage_index = ((level - 1) % LEVELS_PER_REALM) // LEVELS_PER_STAGE
@@ -184,11 +184,11 @@ class CultivationProgress:
 
     def get_move_step(self) -> int:
         """
-        每月能够移动的距离，
-        练气: 2
-        筑基: 3
-        金丹: 4
-        元婴: 5
+        Distance that can be moved per month:
+        Qi Refinement: 2
+        Foundation Establishment: 3
+        Core Formation: 4
+        Nascent Soul: 5
         """
         return REALM_TO_MOVE_STEP[self.realm]
 
@@ -205,24 +205,21 @@ class CultivationProgress:
 
     def get_exp_required(self) -> int:
         """
-        计算升级到指定等级需要的经验值
-        使用简单的代数加法：base_exp + (level - 1) * increment + realm_bonus
-        
-        参数:
-            target_level: 目标等级
-        
-        返回:
-            需要的经验值
+        Compute the experience required to reach the next level.
+        Uses simple arithmetic: base_exp + (level - 1) * increment + realm_bonus
+
+        Returns:
+            Required experience
         """
         next_level = self.level + 1
         
-        base_exp = 100  # 基础经验值
-        increment = 50   # 每级增加50点经验值
+        base_exp = 100  # Base experience
+        increment = 50   # +50 experience per level
         
-        # 基础经验值计算
+        # Base experience calculation
         exp_required = base_exp + (next_level - 1) * increment
         
-        # 境界加成：按 next_level 所处境界（延后入境界，算术推导）增加
+        # Realm bonus: based on the realm next_level falls in (derived arithmetically)
         realm_index = (max(1, next_level) - 1) // LEVELS_PER_REALM
         realm_bonus = realm_index * 1000
         
@@ -230,30 +227,30 @@ class CultivationProgress:
 
     def get_exp_progress(self) -> tuple[int, int]:
         """
-        获取当前经验值进度
-        
-        返回:
-            (当前经验值, 升级所需经验值)
+        Get the current experience progress.
+
+        Returns:
+            (current experience, experience required to level up)
         """
         required_exp = self.get_exp_required()
         return self.exp, required_exp
 
     def add_exp(self, exp_amount: int) -> bool:
         """
-        增加经验值
-        
-        参数:
-            exp_amount: 要增加的经验值数量
-        
-        返回:
-            如果升级了则返回True
+        Add experience.
+
+        Args:
+            exp_amount: Amount of experience to add
+
+        Returns:
+            True if the avatar leveled up
         """
         self.exp += exp_amount
 
         leveled_up = False
-        # 支持多级升级，但在瓶颈（30/60/90…）停下，等待突破
+        # Supports multiple level-ups, but stops at bottlenecks (30/60/90...) awaiting breakthrough
         while True:
-            # 瓶颈位：level > 0 且 level % LEVELS_PER_REALM == 0
+            # Bottleneck: level > 0 and level % LEVELS_PER_REALM == 0
             if self.is_in_bottleneck():
                 break
             if not self.is_level_up():
@@ -271,7 +268,7 @@ class CultivationProgress:
 
     def break_through(self):
         """
-        突破境界
+        Break through to the next realm.
         """
         self.level += 1
         self.realm = self.get_realm(self.level)
@@ -279,16 +276,16 @@ class CultivationProgress:
 
     def is_in_bottleneck(self) -> bool:
         """
-        是否处于瓶颈期。
-        处于每个大境界的第 30、60、90…级时（level > 0 且 level % LEVELS_PER_REALM == 0）。
+        Whether the avatar is at a bottleneck.
+        True at level 30, 60, 90... of each major realm (level > 0 and level % LEVELS_PER_REALM == 0).
         """
         return self.level > 0 and (self.level % LEVELS_PER_REALM == 0)
 
     def can_break_through(self) -> bool:
         """
-        检查是否可以突破
+        Check whether a breakthrough is possible.
         """
-        # 动态检测目前最高级别的修为：如果已经是最高境界的最高等级，则不能突破
+        # Dynamically detect the cap: no breakthrough at the highest level of the highest realm
         max_level = len(REALM_ORDER) * LEVELS_PER_REALM
         if self.level >= max_level:
             return False
@@ -296,14 +293,14 @@ class CultivationProgress:
 
     def can_cultivate(self) -> bool:
         """
-        检查是否可以修炼
-        可以突破，说明到顶了，说明不能修炼了，必须突破后才能正常修炼。
+        Check whether cultivation is possible.
+        If a breakthrough is due, the level is capped and cultivation is blocked until the breakthrough.
         """
         return not self.is_in_bottleneck()
 
     def is_level_up(self) -> bool:
         """
-        检查是否可以进入下一级
+        Check whether the next level can be reached.
         """
         exp_required = self.get_exp_required()
         return self.exp >= exp_required
@@ -327,26 +324,26 @@ class CultivationProgress:
         }
     
     def to_dict(self) -> dict:
-        """转换为可序列化的字典"""
+        """Convert to a serializable dict."""
         return {
             "level": self.level,
             "exp": self.exp,
-            "realm": self.realm.name,  # 保存枚举的name
+            "realm": self.realm.name,  # Store the enum name
             "stage": self.stage.name
         }
     
     @classmethod
     def from_dict(cls, data: dict) -> "CultivationProgress":
-        """从字典重建CultivationProgress"""
+        """Rebuild CultivationProgress from a dict."""
         return cls(level=data["level"], exp=data["exp"])
 
 
 
 breakthrough_success_rate_by_realm = {
-    Realm.Qi_Refinement: 0.8, # 练气，80%
-    Realm.Foundation_Establishment: 0.6, # 筑基，60%
-    Realm.Core_Formation: 0.4, # 金丹，40%
-    Realm.Nascent_Soul: 0.2, # 元婴，20%
+    Realm.Qi_Refinement: 0.8, # Qi Refinement, 80%
+    Realm.Foundation_Establishment: 0.6, # Foundation Establishment, 60%
+    Realm.Core_Formation: 0.4, # Core Formation, 40%
+    Realm.Nascent_Soul: 0.2, # Nascent Soul, 20%
 }
 
 breakthrough_fail_reduce_lifespan_by_realm = {

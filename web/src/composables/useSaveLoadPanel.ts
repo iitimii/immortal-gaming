@@ -29,7 +29,7 @@ export function useSaveLoadPanel(options: UseSaveLoadPanelOptions) {
     if (saveName.value.length > 50) {
       return t('save_load.name_too_long')
     }
-    const pattern = /^[\w\u4e00-\u9fff]+$/
+    const pattern = /^\w+$/
     if (!pattern.test(saveName.value)) {
       return t('save_load.name_invalid_chars')
     }

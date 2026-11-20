@@ -7,66 +7,66 @@ from src.systems.cultivation import Realm
 from src.classes.material import Material
 
 # -----------------------------------------------------------------------------
-# Refine (炼丹) Tests
+# Refine (alchemy) Tests
 # -----------------------------------------------------------------------------
 
 def test_refine_can_start_params(dummy_avatar):
-    """测试炼丹动作的参数解析逻辑"""
+    """Parameter parsing for the Refine action."""
     action = Refine(dummy_avatar, dummy_avatar.world)
     
-    # 1. 缺少参数
+    # 1. Missing parameter
     can, reason = action.can_start("")
     assert not can
-    assert "not specified" in reason or "未指定" in reason
+    assert "not specified" in reason
 
-    # 2. 无效参数
+    # 2. Invalid parameter
     can, reason = action.can_start("INVALID_REALM_XYZ")
     assert not can
-    assert "Invalid realm" in reason or "无效" in reason
+    assert "Invalid realm" in reason
 
-    # 3. 有效参数 - 枚举值字符串 (Prompt 引导的格式)
-    # 先给 Avatar 发点材料，否则会报材料不足
+    # 3. Valid parameter - enum value string (the format the prompt asks for)
+    # Give the avatar some materials first, otherwise it reports insufficient materials
     mat = Material(id=1, name="TestMat", realm=Realm.Qi_Refinement, desc="desc")
     dummy_avatar.materials[mat] = 100
     
     can, reason = action.can_start("QI_REFINEMENT")
     assert can, f"Should accept enum value string. Reason: {reason}"
 
-    # 4. 有效参数 - 枚举名字符串
+    # 4. Valid parameter - enum name string
     can, reason = action.can_start("Qi_Refinement")
     assert can, f"Should accept enum name string. Reason: {reason}"
 
-    # 5. 有效参数 - Realm 对象
+    # 5. Valid parameter - Realm object
     can, reason = action.can_start(Realm.Qi_Refinement)
     assert can, f"Should accept Realm object. Reason: {reason}"
 
-    # 6. 中文参数 (预期失败，因为 resolution 未调用 Realm.from_str，且 Prompt 已引导使用英文)
-    # 注意：如果未来 resolution.py 改了，这个测试需要更新
-    can, reason = action.can_start("练气")
+    # 6. Display-name parameter (expected to fail: resolution only accepts enum names/values)
+    # Note: update this test if resolution.py changes
+    can, reason = action.can_start("Qi Refinement Realm")
     assert not can
-    assert "Invalid realm" in reason or "无效" in reason
+    assert "Invalid realm" in reason
 
 def test_refine_materials_check(dummy_avatar):
-    """测试炼丹的材料检查逻辑"""
+    """Material check logic for Refine."""
     action = Refine(dummy_avatar, dummy_avatar.world)
     target_realm = Realm.Qi_Refinement
     cost = action.COST # 3
 
-    # 清空材料
+    # Clear materials
     dummy_avatar.materials = {}
     
-    # 1. 材料不足
+    # 1. Insufficient materials
     can, reason = action.can_start(target_realm)
     assert not can
-    assert "Insufficient materials" in reason or "材料不足" in reason
+    assert "Insufficient materials" in reason
 
-    # 2. 材料足够 (同境界)
+    # 2. Enough materials (same realm)
     mat = Material(id=1, name="TestMat", realm=target_realm, desc="desc")
     dummy_avatar.materials[mat] = cost
     can, reason = action.can_start(target_realm)
     assert can
 
-    # 3. 材料足够 (混合材料，总数够)
+    # 3. Enough materials (mixed materials, total is enough)
     dummy_avatar.materials = {}
     mat1 = Material(id=1, name="Mat1", realm=target_realm, desc="desc")
     mat2 = Material(id=2, name="Mat2", realm=target_realm, desc="desc")
@@ -75,7 +75,7 @@ def test_refine_materials_check(dummy_avatar):
     can, reason = action.can_start(target_realm)
     assert can
 
-    # 4. 只有高阶材料 (不应计入低阶炼丹)
+    # 4. Only higher-tier materials (must not count toward lower-tier refining)
     dummy_avatar.materials = {}
     high_mat = Material(id=3, name="HighMat", realm=Realm.Foundation_Establishment, desc="desc")
     dummy_avatar.materials[high_mat] = 10
@@ -84,26 +84,26 @@ def test_refine_materials_check(dummy_avatar):
 
 @pytest.mark.asyncio
 async def test_refine_execution_flow(dummy_avatar):
-    """测试炼丹的执行流程：扣材料 -> 成功/失败 -> 产出"""
+    """Refine execution flow: consume materials -> success/failure -> output."""
     action = Refine(dummy_avatar, dummy_avatar.world)
     target_realm = Realm.Qi_Refinement
     cost = action.COST
 
-    # 准备材料
+    # Prepare materials
     mat = Material(id=1, name="TestMat", realm=target_realm, desc="desc")
-    dummy_avatar.materials[mat] = cost + 2 # 多给一点
+    dummy_avatar.materials[mat] = cost + 2 # a little extra
 
     # Start
     event = action.start(target_realm)
     assert event is not None
     assert action.target_realm == target_realm
     
-    # 验证材料已扣除
+    # Verify materials were consumed
     assert dummy_avatar.materials[mat] == 2
 
-    # Mock 成功率 (100% 成功)
+    # Mock the success rate (100% success)
     # Refine.SUCCESS_RATES[Realm.Qi_Refinement] = 0.6
-    # 我们可以 mock random.random 来控制结果
+    # We mock random.random to control the outcome
     
     # Case A: Success
     with patch("random.random", return_value=0.0): # 0.0 < success_rate
@@ -122,7 +122,7 @@ async def test_refine_execution_flow(dummy_avatar):
                     events = await action.finish()
                 
                     assert len(events) == 2 # 1 success event + 1 exchange event
-                    assert "succeeded" in events[0].content or "成功" in events[0].content
+                    assert "successfully" in events[0].content
                     mock_get_elixir.assert_called_once_with(target_realm)
                     mock_exchange.assert_called_once()
 
@@ -131,18 +131,18 @@ async def test_refine_execution_flow(dummy_avatar):
     with patch("random.random", return_value=0.99): # 0.99 > success_rate
          events = await action.finish()
          assert len(events) == 1
-         assert "failed" in events[0].content or "失败" in events[0].content
+         assert "failed" in events[0].content
 
 
 # -----------------------------------------------------------------------------
-# Cast (铸造) Tests
+# Cast (forging) Tests
 # -----------------------------------------------------------------------------
 
 def test_cast_can_start_params(dummy_avatar):
-    """测试铸造动作的参数解析"""
+    """Parameter parsing for the Cast action."""
     action = Cast(dummy_avatar, dummy_avatar.world)
     
-    # 基本参数测试
+    # Basic parameter test
     can, reason = action.can_start("QI_REFINEMENT")
     # Need materials
     mat = Material(id=1, name="TestMat", realm=Realm.Qi_Refinement, desc="desc")
@@ -155,27 +155,27 @@ def test_cast_can_start_params(dummy_avatar):
     assert not can
 
 def test_cast_materials_check(dummy_avatar):
-    """测试铸造的材料消耗 (COST=5)"""
+    """Material cost for Cast (COST=5)."""
     action = Cast(dummy_avatar, dummy_avatar.world)
     target_realm = Realm.Qi_Refinement
     cost = action.COST # 5
 
     dummy_avatar.materials = {}
     
-    # 1. 不足
+    # 1. Not enough
     mat = Material(id=1, name="TestMat", realm=target_realm, desc="desc")
     dummy_avatar.materials[mat] = cost - 1
     can, reason = action.can_start(target_realm)
     assert not can
     
-    # 2. 足够
+    # 2. Enough
     dummy_avatar.materials[mat] = cost
     can, reason = action.can_start(target_realm)
     assert can
 
 @pytest.mark.asyncio
 async def test_cast_execution_flow(dummy_avatar):
-    """测试铸造流程"""
+    """Cast execution flow."""
     action = Cast(dummy_avatar, dummy_avatar.world)
     target_realm = Realm.Qi_Refinement
     cost = action.COST
@@ -202,7 +202,7 @@ async def test_cast_execution_flow(dummy_avatar):
                     events = await action.finish()
                 
                     assert len(events) == 2
-                    assert "succeeded" in events[0].content or "成功" in events[0].content
-                    # 应该是兵器
-                    assert "weapon" in events[0].content or "兵器" in events[0].content or "sword" in events[0].content.lower()
+                    assert "successfully" in events[0].content
+                    # Should be a weapon
+                    assert "weapon" in events[0].content
 

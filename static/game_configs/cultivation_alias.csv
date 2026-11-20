@@ -1,5 +1,5 @@
 profile_id,realm_key,stage_key,realm_name_id,stage_name_id,full_name_id,sort_order
-体系ID,标准境界ID,标准阶段ID,大境界名称ID,阶段名称ID,完整名称ID,排序
+Profile ID,Canonical realm ID,Canonical stage ID,Major realm name ID,Stage name ID,Full name ID,Sort order
 dao,QI_REFINEMENT,EARLY_STAGE,cultivation_alias.dao.realm.qi_refinement,cultivation_alias.dao.stage.early,,101
 dao,QI_REFINEMENT,MIDDLE_STAGE,cultivation_alias.dao.realm.qi_refinement,cultivation_alias.dao.stage.middle,,102
 dao,QI_REFINEMENT,LATE_STAGE,cultivation_alias.dao.realm.qi_refinement,cultivation_alias.dao.stage.late,,103

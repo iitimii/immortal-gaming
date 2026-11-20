@@ -12,24 +12,24 @@ if TYPE_CHECKING:
 
 @cooldown_action
 class MutualAttack(PressureAction):
-    """攻击另一个NPC"""
+    """Attack another NPC."""
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "mutual_attack_action_name"
     DESC_ID = "mutual_attack_description"
     REQUIREMENTS_ID = "mutual_attack_requirements"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "⚔️"
     PARAMS = {"target_avatar": "AvatarName"}
     RESPONSE_ACTIONS = ["Escape", "Attack"]
-    # 攻击冷却：避免同月连刷攻击
+    # Attack cooldown: avoid repeated attacks in the same month
     ACTION_CD_MONTHS: int = 3
-    # 攻击是大事（长期记忆）
+    # Attack is a major event (long-term memory)
     IS_MAJOR: bool = True
 
     def _can_start(self, target: "Avatar") -> tuple[bool, str]:
-        """攻击无额外检查条件"""
+        """Attack has no extra start conditions."""
         from src.classes.observe import is_within_observation
         if not is_within_observation(self.avatar, target):
             return False, t("Target not within interaction range")
@@ -40,10 +40,10 @@ class MutualAttack(PressureAction):
         a_to_b, b_to_a = RelationDeltaService.get_fixed_delta("attack", "started")
         RelationDeltaService.apply_bidirectional_delta(self.avatar, target_avatar, a_to_b, b_to_a)
         
-        # 此处不产生新事件，仅改变目标行为
-        # 目标的行为改变会通过 _set_target_immediate_action -> commit_next_plan 产生新事件
-        # 且 commit_next_plan 内部会处理事件分发（理论上）
-        # 但我们看看基类的 _set_target_immediate_action 实现
+        # No new event is produced here; only the target's behavior changes
+        # The target's behavior change produces new events via _set_target_immediate_action -> commit_next_plan
+        # and commit_next_plan handles event dispatch internally (in theory)
+        # But let's look at the base class's _set_target_immediate_action implementation
         
         if fb == "Escape":
             params = {"avatar_name": self.avatar.name}

@@ -9,18 +9,18 @@ if TYPE_CHECKING:
 
 def load_effect_from_str(value: object) -> dict[str, Any] | list[dict[str, Any]]:
     """
-    将 effects 字段解析为 dict 或 list（支持宽松JSON格式）。
+    Parse an effects field into a dict or list (relaxed JSON is supported).
     
-    支持的格式：
-    1. 标准JSON: {"extra_battle_strength_points": 3}
-    2. 单引号: {'extra_battle_strength_points': 3}
-    3. 无引号key: {extra_battle_strength_points: 3}
-    4. 混合格式: {extra_battle_strength_points: 3, 'legal_actions': ['DevourPeople']}
-    5. 条件数组: [{when: 'condition', effect1: value1}, ...]
+    Supported formats:
+    1. Standard JSON: {"extra_battle_strength_points": 3}
+    2. Single quotes: {'extra_battle_strength_points': 3}
+    3. Unquoted keys: {extra_battle_strength_points: 3}
+    4. Mixed: {extra_battle_strength_points: 3, 'legal_actions': ['DevourPeople']}
+    5. Conditional array: [{when: 'condition', effect1: value1}, ...]
     
-    - value 为 None/空字符串/'nan' 时返回 {}
-    - 解析失败时返回 {}
-    - 支持返回 dict（单个effect）或 list[dict]（多个条件effect）
+    - Returns {} when value is None / empty string / 'nan'
+    - Returns {} when parsing fails
+    - May return a dict (single effect) or list[dict] (multiple conditional effects)
     """
     if value is None:
         return {}
@@ -30,7 +30,7 @@ def load_effect_from_str(value: object) -> dict[str, Any] | list[dict[str, Any]]
     if not s or s == "nan":
         return {}
     
-    # 先尝试标准 JSON 解析
+    # Try standard JSON parsing first
     try:
         obj = json.loads(s)
         if isinstance(obj, (dict, list)):
@@ -39,45 +39,45 @@ def load_effect_from_str(value: object) -> dict[str, Any] | list[dict[str, Any]]
     except Exception:
         pass
     
-    # 尝试宽松解析：单引号转双引号 + 无引号key处理
+    # Try relaxed parsing: single quotes to double quotes + quote bare keys
     try:
         import re
         
-        # 1. 先保护所有引号内的内容（包括单引号和双引号字符串）
+        # 1. First protect everything inside quotes (both single- and double-quoted strings)
         strings = []
         def save_string(match):
             strings.append(match.group(0))
             return f"__STRING_{len(strings)-1}__"
         
         relaxed = s
-        # 保护双引号字符串
+        # Protect double-quoted strings
         relaxed = re.sub(r'"(?:[^"\\]|\\.)*"', save_string, relaxed)
-        # 保护单引号字符串
+        # Protect single-quoted strings
         relaxed = re.sub(r"'(?:[^'\\]|\\.)*'", save_string, relaxed)
         
-        # 2. 给无引号的key添加引号（此时所有字符串都已被保护）
-        # 匹配: 开始位置后的标识符 + 冒号
+        # 2. Quote unquoted keys (all strings are protected at this point)
+        # Match: identifier after a start position + colon
         relaxed = re.sub(r'([{\[,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)(\s*):', r'\1"__KEY_\2__"\3:', relaxed)
         
-        # 3. 恢复字符串，并将单引号转为双引号
+        # 3. Restore strings and convert single quotes to double quotes
         for i, s_val in enumerate(strings):
-            # 如果是单引号字符串，转为双引号
+            # Single-quoted string: convert to double quotes
             if s_val.startswith("'"):
-                # 需要转义内部的双引号，但要先恢复其中的__STRING_占位符
-                content = s_val[1:-1]  # 去掉单引号
-                # 恢复内部的字符串占位符
+                # Inner double quotes must be escaped, but restore the __STRING_ placeholders first
+                content = s_val[1:-1]  # strip the single quotes
+                # Restore inner string placeholders
                 for j, inner_str in enumerate(strings):
                     if f"__STRING_{j}__" in content and j != i:
                         content = content.replace(f"__STRING_{j}__", inner_str)
-                # 转义处理
+                # Escape
                 content = content.replace('\\', '\\\\').replace('"', '\\"')
                 s_val = f'"{content}"'
             relaxed = relaxed.replace(f"__STRING_{i}__", s_val)
         
-        # 4. 恢复key（去掉__KEY_标记）
+        # 4. Restore keys (drop the __KEY_ markers)
         relaxed = relaxed.replace('"__KEY_', '"').replace('__"', '"')
         
-        # 5. 尝试解析
+        # 5. Try to parse
         obj = json.loads(relaxed)
         if isinstance(obj, (dict, list)):
             return obj
@@ -88,32 +88,32 @@ def load_effect_from_str(value: object) -> dict[str, Any] | list[dict[str, Any]]
 
 def _evaluate_conditional_effect(effect: dict[str, Any] | list[dict[str, Any]], avatar: "Avatar") -> dict[str, Any]:
     """
-    评估带条件的effect，返回实际生效的effect dict。
+    Evaluate conditional effects and return the effect dict that actually applies.
     
-    支持三种格式：
-    1. 普通dict（无条件）: {"extra_battle_strength_points": 1}
-    2. 带条件的dict: {"extra_battle_strength_points": 2, "when": "avatar.weapon.weapon_type == WeaponType.SWORD"}
-    3. 条件数组: [{"extra_battle_strength_points": 2, "when": "..."}, {...}]
+    Three formats are supported:
+    1. Plain dict (unconditional): {"extra_battle_strength_points": 1}
+    2. Conditional dict: {"extra_battle_strength_points": 2, "when": "avatar.weapon.weapon_type == WeaponType.SWORD"}
+    3. Conditional array: [{"extra_battle_strength_points": 2, "when": "..."}, {...}]
     
     Args:
-        effect: 原始effect配置（dict或list）
-        avatar: 当前角色对象
+        effect: raw effect config (dict or list)
+        avatar: the current avatar
     
     Returns:
-        评估后实际生效的effect dict（合并所有满足条件的effects）
+        the effective effect dict after evaluation (all effects whose conditions hold, merged)
     """
     from src.classes.weapon_type import WeaponType
     from src.systems.cultivation import Realm
     from src.classes.alignment import Alignment
     
-    # 构建安全的eval上下文
+    # Build a safe eval context
     safe_context = {
         "__builtins__": {},
         "avatar": avatar,
         "WeaponType": WeaponType,
         "Realm": Realm,
         "Alignment": Alignment,
-        # 常用内置函数
+        # Common builtins
         "any": any,
         "all": all,
         "len": len,
@@ -124,33 +124,33 @@ def _evaluate_conditional_effect(effect: dict[str, Any] | list[dict[str, Any]], 
     }
     
     def _check_condition(when_expr: str) -> bool:
-        """检查条件表达式是否为真"""
+        """Check whether a condition expression is true"""
         if not when_expr:
             return True
         try:
             return bool(eval(when_expr, safe_context, {}))
         except Exception:
-            # 条件评估失败时视为False
+            # Treat a failed condition evaluation as False
             return False
     
     def _process_single_effect(eff: dict[str, Any]) -> dict[str, Any]:
-        """处理单个effect dict，检查条件并返回生效的部分"""
+        """Process a single effect dict: check its condition and return the part that applies"""
         if not isinstance(eff, dict):
             return {}
         
         when_expr = eff.get("when")
         if when_expr is None:
-            # 无条件effect，直接返回
+            # Unconditional effect: return as is
             return eff
         
-        # 有条件effect，检查条件
+        # Conditional effect: check the condition
         if not _check_condition(when_expr):
             return {}
         
-        # 条件满足，返回除了when之外的所有字段
+        # Condition holds: return every field except when
         return {k: v for k, v in eff.items() if k != "when"}
     
-    # 处理list格式（多个条件effect）
+    # Handle list format (multiple conditional effects)
     if isinstance(effect, list):
         result = {}
         for item in effect:
@@ -158,17 +158,17 @@ def _evaluate_conditional_effect(effect: dict[str, Any] | list[dict[str, Any]], 
             result = _merge_effects(result, evaluated)
         return result
     
-    # 处理dict格式（单个effect）
+    # Handle dict format (single effect)
     return _process_single_effect(effect)
 
 
 def _merge_effects(base: dict[str, object], addition: dict[str, object]) -> dict[str, object]:
     """
-    合并两个 effects 字典：
-    - list 型（如 legal_actions）：做去重并集
-    - 数值型：相加
-    - 其他：后者覆盖前者
-    返回新字典，不修改原对象。
+    Merge two effects dicts:
+    - lists (e.g. legal_actions): deduplicated union
+    - numbers: summed
+    - others: the latter overrides the former
+    Returns a new dict without modifying the inputs.
     """
     if not base and not addition:
         return {}
@@ -177,7 +177,7 @@ def _merge_effects(base: dict[str, object], addition: dict[str, object]) -> dict
         if key in merged:
             old = merged[key]
             if isinstance(old, list) and isinstance(val, list):
-                # 去重并集，保持相对顺序
+                # Deduplicated union, preserving relative order
                 seen: set[object] = set()
                 result: list[object] = []
                 for x in old + val:
@@ -202,10 +202,10 @@ def build_effects_map_from_df(
     effects_column: str = "effects",
 ) -> dict[Any, dict[str, object]]:
     """
-    将配表数据列表构造成 {key -> effects} 的映射：
-    - key_column：用于定位键（字符串），通过 parse_key 解析为目标键（如 Enum）
-    - effects_column：字符串列，使用 load_effect_from_str 解析
-    解析失败或空值的行将被忽略。
+    Build a {key -> effects} mapping from config rows:
+    - key_column: column holding the key (string), parsed into the target key (e.g. an Enum) via parse_key
+    - effects_column: string column, parsed with load_effect_from_str
+    Rows that fail to parse or are empty are ignored.
     """
     effects_map: dict[Any, dict[str, object]] = {}
     if not data:

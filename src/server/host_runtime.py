@@ -48,7 +48,7 @@ class ConnectionManager:
             self.active_connections.remove(websocket)
 
         if len(self.active_connections) == 0:
-            self._set_pause_state(True, "所有客户端已断开，自动暂停游戏以节省资源。")
+            self._set_pause_state(True, "All clients disconnected; game auto-paused to save resources.")
 
             if self.is_idle_shutdown_enabled():
                 print("[Auto-Control] All clients disconnected. Server will shutdown in 5 seconds...")
@@ -112,7 +112,7 @@ def trigger_process_shutdown(*, is_dev_mode: bool) -> dict[str, str]:
 
 
 def patch_sys_streams() -> None:
-    """修复无控制台模式下 sys.stdout/stderr 为 None 导致 uvicorn 报错的问题"""
+    """Fix uvicorn errors caused by sys.stdout/stderr being None in console-less mode."""
     from src.server.encoding_runtime import configure_process_encoding
 
     configure_process_encoding()

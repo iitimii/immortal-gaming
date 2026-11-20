@@ -64,9 +64,8 @@ describe('useWorldStore', () => {
     mapStore = useMapStore()
     
     store.reset()
-    // 子 store 的 reset 也由 worldStore.reset() 触发，但为了保险起见，或者如果测试用例直接操作了子 store，
-    // 这里依赖 worldStore.reset() 应该足够，因为它内部调用了子 store 的 reset。
-    // 不过，为了确保测试隔离，手动 reset 子 store 也是好的，但 worldStore.reset 已经做了。
+    // worldStore.reset() also resets the child stores, so relying on it here is enough
+    // to keep tests isolated even when a test manipulates a child store directly.
     
     vi.clearAllMocks()
   })
@@ -93,7 +92,7 @@ describe('useWorldStore', () => {
       const avatar1 = createMockAvatar({ id: 'a1', name: 'Avatar 1' })
       const avatar2 = createMockAvatar({ id: 'a2', name: 'Avatar 2' })
       
-      // 直接操作 avatarStore
+      // Manipulate avatarStore directly
       avatarStore.avatars = new Map([['a1', avatar1], ['a2', avatar2]])
 
       expect(avatarStore.avatarList).toHaveLength(2)
@@ -140,7 +139,7 @@ describe('useWorldStore', () => {
 
     it('should merge avatar updates when loaded', () => {
       store.isLoaded = true
-      // 初始化 avatarStore 数据
+      // Seed avatarStore data
       avatarStore.avatars = new Map([['avatar-1', createMockAvatar({ age: 20 })]])
 
       const payload: TickPayloadDTO = {
@@ -208,7 +207,7 @@ describe('useWorldStore', () => {
 
     it('should filter events by avatar_id when filter is set', () => {
       store.isLoaded = true
-      // 设置 filter 到 eventStore
+      // Set the filter on eventStore
       eventStore.eventsFilter = { avatar_id: 'a1' }
 
       const payload: TickPayloadDTO = {
@@ -461,7 +460,7 @@ describe('useWorldStore', () => {
         year: 100,
         month: 1,
         avatars: [createMockAvatar()],
-        activeDomains: [{ id: 'domain-1', name: '秘境', desc: 'desc', required_realm: 'QI_REFINEMENT', danger_prob: 0.2, drop_prob: 0.4, cd_years: 3, open_prob: 0.1 }],
+        activeDomains: [{ id: 'domain-1', name: 'Hidden Domain', desc: 'desc', required_realm: 'QI_REFINEMENT', danger_prob: 0.2, drop_prob: 0.4, cd_years: 3, open_prob: 0.1 }],
       })
       vi.mocked(eventApi.fetchEvents).mockResolvedValue({
         events: [],

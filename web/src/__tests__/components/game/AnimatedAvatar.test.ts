@@ -12,7 +12,7 @@ describe('AnimatedAvatar', () => {
   it('should render successfully', () => {
     const i18n = createI18n({
       legacy: false,
-      locale: 'zh-CN',
+      locale: 'en-US',
       messages: {}
     })
 

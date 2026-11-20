@@ -15,34 +15,34 @@ if TYPE_CHECKING:
 class Event:
     month_stamp: MonthStamp
     content: str
-    # 相关角色ID列表；若与任何角色无关则为 None
+    # IDs of related avatars; None if unrelated to any avatar
     related_avatars: Optional[List[str]] = None
-    # 相关宗门ID列表；若与任何宗门无关则为 None
+    # IDs of related sects; None if unrelated to any sect
     related_sects: Optional[List[int]] = None
-    # 是否为大事（长期记忆），默认False（小事/短期记忆）
+    # Whether this is a major event (long-term memory); default False (minor / short-term memory)
     is_major: bool = False
-    # 是否为故事事件（不进入记忆索引），默认False
+    # Whether this is a story event (not indexed into memory); default False
     is_story: bool = False
-    # 事实事件类型，用于传播与渲染
+    # Fact event type, used for propagation and rendering
     event_type: str = ""
-    # 前端可本地化渲染用的模板 key
+    # Template key the frontend can use for localized rendering
     render_key: Optional[str] = None
-    # 前端模板渲染参数
+    # Frontend template render parameters
     render_params: Optional[dict[str, Any]] = None
-    # 事件发生时的主体显示快照。角色被手动删除或长期清理后，事件栏仍可展示名称。
+    # Display snapshot of the subjects at event time, so the event panel can still show names after an avatar is manually deleted or cleaned up
     subject_snapshots: dict[str, str] = field(default_factory=dict)
-    # 唯一ID，用于去重
+    # Unique ID used for deduplication
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    # 创建时间戳 (Unix timestamp float)
+    # Creation timestamp (Unix timestamp float)
     created_at: float = field(default_factory=time.time)
-    # 运行时挂载的 observation，统一由 EventManager 持久化
+    # Observation attached at runtime; persisted centrally by EventManager
     observations: List["EventObservation"] = field(default_factory=list, repr=False, compare=False)
 
     def __str__(self) -> str:
         return f"{get_date_str(int(self.month_stamp))}: {self.content}"
     
     def to_dict(self) -> dict:
-        """转换为可序列化的字典"""
+        """Convert to a serializable dict."""
         return {
             "month_stamp": int(self.month_stamp),
             "content": self.content,
@@ -60,7 +60,7 @@ class Event:
     
     @classmethod
     def from_dict(cls, data: dict) -> "Event":
-        """从字典重建Event"""
+        """Rebuild an Event from a dict."""
         return cls(
             month_stamp=MonthStamp(data["month_stamp"]),
             content=data["content"],
@@ -78,14 +78,14 @@ class Event:
 
 class NullEvent:
     """
-    空事件单例类，保持与 Event 相同的最小接口，避免调用方访问属性时报错。
+    Null event singleton class; keeps the same minimal interface as Event so callers don't error when accessing attributes.
     """
     _instance = None
     
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            # 初始化一次即可
+            # Initialize only once
             cls._instance.month_stamp = MonthStamp(0)
             cls._instance.content = ""
             cls._instance.related_avatars = None
@@ -103,11 +103,11 @@ class NullEvent:
         return ""
     
     def __bool__(self) -> bool:
-        """使NullEvent实例在布尔上下文中为False"""
+        """Make NullEvent instances falsy in boolean context."""
         return False
     
     def to_dict(self) -> dict:
-        """保持序列化接口"""
+        """Keep the serialization interface."""
         return {
             "month_stamp": int(self.month_stamp),
             "content": self.content,
@@ -122,9 +122,9 @@ class NullEvent:
             "id": self.id,
         }
 
-# 全局单例实例
+# Global singleton instance
 NULL_EVENT = NullEvent()
 
 def is_null_event(event) -> bool:
-    """检查事件是否为空事件的便捷函数"""
+    """Convenience function to check whether an event is the null event."""
     return event is NULL_EVENT

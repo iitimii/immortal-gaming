@@ -59,12 +59,12 @@ def test_avatar_detail_api_exposes_goldfinger_fields(base_world):
         data = response.json()["data"]
         assert data["id"] == avatar.id
         assert data["goldfinger"] is not None
-        assert data["goldfinger"]["name"] == "穿越者"
+        assert data["goldfinger"]["name"] == "Transmigrator"
         assert data["goldfinger"]["mechanism_type"] == "story_driven"
-        assert "现代思维" in data["goldfinger"]["story_prompt"]
-        assert "另一个世界" in data["goldfinger"]["desc"]
+        assert "modern mindset" in data["goldfinger"]["story_prompt"]
+        assert "another world" in data["goldfinger"]["desc"]
         assert data["goldfinger"]["state"] == {"story_focus": "modern_mindset"}
-        assert "外挂 [穿越者]" in data["current_effects"]
+        assert "Goldfinger [Transmigrator]" in data["current_effects"]
         assert "pic_id" in data
     finally:
         main.game_instance.update(original_instance)
@@ -88,8 +88,8 @@ def test_avatar_detail_api_exposes_cultivation_alias_fields(base_world):
         assert data["cultivation"]["profile_id"] == "sanxiu"
         assert data["cultivation"]["realm_id"] == "FOUNDATION_ESTABLISHMENT"
         assert data["cultivation"]["stage_id"] == "MIDDLE_STAGE"
-        assert data["cultivation"]["display_full_name"] == "筑基中期"
-        assert data["cultivation"]["canonical_full_name"] == "筑基中期"
+        assert data["cultivation"]["display_full_name"] == "Foundation Establishment Middle Stage"
+        assert data["cultivation"]["canonical_full_name"] == "Foundation Establishment Middle Stage"
     finally:
         main.game_instance.update(original_instance)
 
@@ -99,10 +99,10 @@ def test_avatar_detail_api_exposes_fate_revelation(base_world):
     try:
         avatar = _make_avatar(base_world)
         avatar.fate_revelation = {
-            "trigger_text": "青溪渡口忽有逆流成圆，几片残叶贴着水面缓缓不散。",
-            "oracle_text": "千山暮雪倾东海，初日潮头又上来",
+            "trigger_text": "At Clearbrook Ferry the current suddenly swirled backward into a circle, and a few fallen leaves clung to the water without drifting apart.",
+            "oracle_text": "Dusk snow on a thousand peaks pours into the eastern sea; with the first sun, the tide rises again.",
             "revealed_month": int(base_world.month_stamp),
-            "location": "青溪渡口",
+            "location": "Clearbrook Ferry",
         }
         main.game_instance["world"] = base_world
 
@@ -138,8 +138,8 @@ def test_avatar_detail_api_surfaces_randomly_initialized_goldfinger(base_world, 
         data = response.json()["data"]
         assert data["goldfinger"] is not None
         assert data["goldfinger"]["key"] == "CHILD_OF_FORTUNE"
-        assert data["goldfinger"]["name"] == "气运之子"
-        assert "天地眷顾" in data["goldfinger"]["desc"]
+        assert data["goldfinger"]["name"] == "Child of Fortune"
+        assert "favored by heaven and earth" in data["goldfinger"]["desc"]
     finally:
         main.game_instance.update(original_instance)
 

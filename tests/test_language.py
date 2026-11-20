@@ -17,58 +17,57 @@ class TestLanguage:
         language_manager.set_language(get_default_locale())
 
     def test_language_manager_defaults(self):
-        """测试语言管理器默认状态"""
+        """Default state of the language manager."""
         default_locale = get_default_locale()
         assert language_manager.current == default_locale
         assert str(language_manager) == default_locale
 
     def test_language_manager_switch(self):
-        """测试语言切换"""
+        """Switching language."""
         target_locale = get_fallback_locale()
         language_manager.set_language(target_locale)
         assert language_manager.current == target_locale
         assert str(language_manager) == target_locale
         
-        # 测试无效语言回退
+        # An invalid language falls back to the default
         language_manager.set_language("invalid-lang")
         assert language_manager.current == get_default_locale()
 
     def test_config_path_update(self):
-        """测试路径更新逻辑"""
+        """Path update logic."""
         target_locale = get_fallback_locale()
         language_manager.set_language(target_locale)
         update_paths_for_language(target_locale)
         
-        # 重构后，game_configs 指向单一源 static/game_configs
+        # game_configs points at the single source static/game_configs
         expected_game_configs = get_project_root() / "static" / "game_configs"
-        # 注意：Path 比较在不同系统上可能需要 resolve
+        # Note: Path comparison may need resolve() across platforms
         assert CONFIG.paths.game_configs.resolve() == expected_game_configs.resolve()
         assert CONFIG.paths.shared_game_configs.resolve() == expected_game_configs.resolve()
 
         default_locale = get_default_locale()
         language_manager.set_language(default_locale)
         update_paths_for_language(default_locale)
-        # 依然指向单一源
-        expected_zh = get_project_root() / "static" / "game_configs"
-        assert CONFIG.paths.game_configs.resolve() == expected_zh.resolve()
+        # Still points at the single source
+        assert CONFIG.paths.game_configs.resolve() == expected_game_configs.resolve()
 
     def test_game_config_loading_and_override(self, tmp_path):
-        """测试配置加载的 I18n 翻译逻辑"""
-        # 1. 准备目录结构
-        # 现在不再有 shared/localized 分离，只有一个 game_configs 目录
+        """I18n translation logic during config loading."""
+        # 1. Prepare the directory layout
+        # There is no shared/localized split any more, only one game_configs dir
         game_configs_dir = tmp_path / "game_configs"
         game_configs_dir.mkdir()
         
-        # 2. 创建测试文件 test.csv
-        # 包含 name_id/desc_id
+        # 2. Create the test file test.csv
+        # with name_id/desc_id columns
         csv_content = (
             "id,name_id,name,desc_id,desc\n"
-            "名称ID,名称,描述ID,描述\n"
-            "test_item,TEST_ITEM_NAME,TestItemCN,TEST_ITEM_DESC,TestDescCN"
+            "Name ID,Name,Desc ID,Desc\n"
+            "test_item,TEST_ITEM_NAME,TestItemSource,TEST_ITEM_DESC,TestDescSource"
         )
         (game_configs_dir / "test.csv").write_text(csv_content, encoding="utf-8")
         
-        # 3. 临时修改 CONFIG.paths 指向测试目录
+        # 3. Temporarily point CONFIG.paths at the test dir
         original_game_configs = CONFIG.paths.game_configs
         original_shared = getattr(CONFIG.paths, "shared_game_configs", None)
         original_localized = getattr(CONFIG.paths, "localized_game_configs", None)
@@ -82,18 +81,18 @@ class TestLanguage:
             # We need to patch 'src.utils.df.t'
             from unittest.mock import patch
             
-            # Case 1: Translation exists (Simulating English)
+            # Case 1: a translation exists
             with patch('src.utils.df.t') as mock_t:
-                mock_t.side_effect = lambda x: "TestItemEN" if x == "TEST_ITEM_NAME" else ("TestDescEN" if x == "TEST_ITEM_DESC" else x)
+                mock_t.side_effect = lambda x: "TestItemTranslated" if x == "TEST_ITEM_NAME" else ("TestDescTranslated" if x == "TEST_ITEM_DESC" else x)
                 
                 loaded = load_game_configs()
                 
                 assert "test" in loaded
                 item = loaded["test"][0]
-                assert item["name"] == "TestItemEN"
-                assert item["desc"] == "TestDescEN"
+                assert item["name"] == "TestItemTranslated"
+                assert item["desc"] == "TestDescTranslated"
                 
-            # Case 2: No translation (Simulating Fallback/Chinese)
+            # Case 2: no translation (fallback)
             with patch('src.utils.df.t') as mock_t:
                 # If t returns the key itself (or empty), df.py keeps the original CSV value
                 mock_t.side_effect = lambda x: x 
@@ -102,11 +101,11 @@ class TestLanguage:
                 
                 item = loaded["test"][0]
                 # Should fallback to CSV values
-                assert item["name"] == "TestItemCN"
-                assert item["desc"] == "TestDescCN"
+                assert item["name"] == "TestItemSource"
+                assert item["desc"] == "TestDescSource"
             
         finally:
-            # 恢复配置
+            # Restore config
             CONFIG.paths.game_configs = original_game_configs
             if original_shared:
                 CONFIG.paths.shared_game_configs = original_shared
@@ -114,18 +113,18 @@ class TestLanguage:
                 CONFIG.paths.localized_game_configs = original_localized
 
     def test_reload_game_configs_integration(self):
-        """集成测试：测试 reload_game_configs 是否真的更新了全局变量"""
-        # 这个测试依赖于真实的 static 目录，只做简单检查
-        # 确保不会报错
+        """Integration: reload_game_configs really updates the global configs."""
+        # Relies on the real static dir; only a simple check
+        # make sure it does not raise
         try:
             reload_game_configs()
-            # 至少应该加载到当前核心配置表。
+            # At least the core config tables should be loaded.
             assert "sect" in game_configs
         except Exception as e:
             pytest.fail(f"reload_game_configs failed: {e}")
 
     def test_i18n_objects_output(self):
-        """测试对象输出的国际化"""
+        """Localized object output."""
         from src.classes.language import language_manager
         from src.i18n import t, reload_translations
         from src.classes.items.magic_stone import MagicStone
@@ -138,8 +137,7 @@ class TestLanguage:
         from src.classes.appearance import get_appearance_by_level
         from unittest.mock import MagicMock
 
-        # 切换到英文
-        language_manager.set_language(get_fallback_locale())
+        language_manager.set_language(get_default_locale())
         reload_translations()
 
         try:
@@ -203,37 +201,21 @@ class TestLanguage:
             assert info["Emotion"] == "Calm"
             
             # 5. Root (New check)
-            # The logic in format_root_cn removes "Root" suffix, so we expect "Thunder"
+            # The root info lists its element names, e.g. "Thunder"
             assert "Thunder" in Root.THUNDER.get_info()
             assert "Water" in Root.THUNDER.get_info()
             assert "Earth" in Root.THUNDER.get_info()
             
             # 6. Appearance (New check)
-            app = get_appearance_by_level(7) # 7 is 俊美/Handsome
+            app = get_appearance_by_level(7) # 7 is Handsome
             assert "Handsome" in app.get_info()
 
             # 7. Cultivation Progress (New check)
             from src.systems.cultivation import CultivationProgress
             cp = CultivationProgress(1)
-            # In English, we expect space separated translated values
+            # Expect space-separated translated values
             assert cp.get_info() == "Qi Refinement Early Stage"
 
-            # 切换回中文验证
-            language_manager.set_language(get_default_locale())
-            reload_translations()
-            
-            assert str(ms) == "100灵石"
-            assert "普通区域" in str(region)
-            assert "效果：TestEffect" in p.get_detailed_info()
-            info_zh = get_avatar_info(avatar)
-            assert info_zh["情绪"] == "平静"
-            # 中文逻辑去掉了"灵根"后缀
-            assert "雷" in Root.THUNDER.get_info()
-            assert "俊美" in app.get_info()
-            
-            # In Chinese, we now expect translated values with space
-            assert cp.get_info() == "练气 前期"
-            
         finally:
             # Restore to default just in case
             language_manager.set_language(get_default_locale())

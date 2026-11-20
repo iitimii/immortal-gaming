@@ -49,8 +49,8 @@ describe('HiddenDomainOverviewModal', () => {
     mockActiveDomains = [
       {
         id: '1',
-        name: '紫竹秘境',
-        desc: '适合中阶修士试炼。',
+        name: 'Purple Bamboo Hidden Domain',
+        desc: 'Suited to trials for mid-level cultivators.',
         required_realm: 'CORE_FORMATION',
         danger_prob: 0.3,
         drop_prob: 0.5,
@@ -64,7 +64,7 @@ describe('HiddenDomainOverviewModal', () => {
     })
 
     expect(wrapper.find('.domain-card').exists()).toBe(true)
-    expect(wrapper.text()).toContain('紫竹秘境')
+    expect(wrapper.text()).toContain('Purple Bamboo Hidden Domain')
     expect(wrapper.text()).toContain('game.status_bar.hidden_domain.required_realm')
   })
 

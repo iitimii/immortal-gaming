@@ -40,15 +40,15 @@ def test_race_config_loads_human_and_yao_effects(base_world):
 
     assert human.id == "human"
     assert human.effects == {}
-    assert human.get_info(detailed=True)["desc"] == "你是一个普通的人类"
+    assert human.get_info(detailed=True)["desc"] == "You are an ordinary human."
 
     avatar = _make_avatar(base_world, race_id="wolf")
     assert is_yao_avatar(avatar)
     assert avatar.effects.get("extra_battle_strength_points") == 2
     assert avatar.effects.get("extra_hunt_materials") == 2
     assert avatar.effects.get("extra_eat_mortals_exp_multiplier") == 0.5
-    assert wolf.get_info()["name"] == "狼族"
-    assert "领地" in wolf.get_info(detailed=True)["behavior_desc"]
+    assert wolf.get_info()["name"] == "Wolf Yao"
+    assert "territory" in wolf.get_info(detailed=True)["behavior_desc"]
 
 
 def test_roll_avatar_race_probability_edges():
@@ -57,7 +57,7 @@ def test_roll_avatar_race_probability_edges():
 
 
 def test_sect_race_policy_blocks_haoran_academy(base_world):
-    academy = sects_by_name["浩然书院"]
+    academy = sects_by_name["Haoran Academy"]
     wolf_avatar = _make_avatar(base_world, race_id="wolf")
     human_avatar = _make_avatar(base_world, race_id="human")
 
@@ -113,4 +113,4 @@ def test_race_behavior_priority_enters_avatar_ai_context(base_world):
     assert race_info["id"] == "turtle"
     assert "behavior_desc" in race_info
     assert "race_behavior_priority" in context["self_profile"]
-    assert "不应频繁移动" in context["self_profile"]["race_behavior_priority"]
+    assert "should not move frequently" in context["self_profile"]["race_behavior_priority"]

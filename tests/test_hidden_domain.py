@@ -153,9 +153,7 @@ async def test_execute_entry_restriction(hidden_domain, base_world, dummy_avatar
     assert any("Low Realm Domain" in t for t in event_texts)
     
     # Check loot event for eligible avatar
-    # Since tests run in zh-CN (forced by fixture), we check for Chinese text
-    # "found a treasure" -> "觅得宝物"
-    assert any("觅得宝物" in t for t in event_texts)
+    assert any("found a treasure" in t for t in event_texts)
     assert any(dummy_avatar.name in t for t in event_texts)
     
     # Check NO event for ineligible avatar
@@ -187,8 +185,7 @@ async def test_execute_danger_death(hidden_domain, base_world, dummy_avatar):
         
         # Verify event log
         event_texts = [e.content for e in events]
-        # "perished" -> "葬身于"
-        assert any("葬身于" in t for t in event_texts)
+        assert any("perished in the hidden domain" in t for t in event_texts)
 
 @pytest.mark.asyncio
 async def test_execute_loot_drop(hidden_domain, base_world, dummy_avatar):
@@ -250,8 +247,8 @@ async def test_execute_empty_handed(hidden_domain, base_world, dummy_avatar):
     event_texts = [e.content for e in events]
     
     # Verify "empty-handed" event exists
-    # Based on zh-CN: "{names} 在秘境【{domain}】中一无所获，空手而归。"
-    expected_text_part = "一无所获，空手而归"
+    # en-US: "{names} returned from {domain} empty-handed."
+    expected_text_part = "empty-handed"
     assert any(expected_text_part in t for t in event_texts), f"Expected '{expected_text_part}' in events: {event_texts}"
     assert any(dummy_avatar.name in t for t in event_texts)
     

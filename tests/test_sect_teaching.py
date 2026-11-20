@@ -34,18 +34,18 @@ def test_build_sect_teaching_context_text_summarizes_decision_context(base_world
     world = base_world
     sect = Sect(
         id=1,
-        name="明心剑宗",
-        desc="守正明心",
-        member_act_style="稳重",
+        name="High Heaven Sword Sect",
+        desc="Upholds righteousness and a clear heart",
+        member_act_style="steady",
         alignment=Alignment.NEUTRAL,
-        headquarter=SectHeadQuarter(name="山门", desc="云海之间", image=Path("")),
+        headquarter=SectHeadQuarter(name="Mountain Gate", desc="Amid a sea of clouds", image=Path("")),
         technique_names=[],
     )
-    teacher = _create_member(world, sect, "teacher_1", "讲师甲", 61, SectRank.Elder)
+    teacher = _create_member(world, sect, "teacher_1", "Lecturer A", 61, SectRank.Elder)
     world.event_manager._storage = MagicMock()
 
     mock_ctx = MagicMock()
-    mock_ctx.active_wars = [{"other_sect_name": "赤炎宗", "status": "war"}]
+    mock_ctx.active_wars = [{"other_sect_name": "Crimson Flame Sect", "status": "war"}]
     mock_ctx.economy = {"treasury_pressure": "tight"}
     mock_ctx.self_assessment = {"war_readiness": "stretched", "alive_member_count": 7}
     mock_ctx.territory = {"border_pressure_ratio": 0.35, "tile_count": 12}
@@ -55,13 +55,13 @@ def test_build_sect_teaching_context_text_summarizes_decision_context(base_world
     with patch("src.classes.core.sect.get_sect_decision_context", return_value=mock_ctx):
         text = conference._build_sect_teaching_context_text(sect, teacher)
 
-    assert "明心剑宗" in text
-    assert "与 赤炎宗 交战中" in text
-    assert "财库偏紧" in text
-    assert "备战状态 stretched" in text
-    assert "边境压力：35%" in text
-    assert "存活门人 7 人" in text
-    assert "总战力约 88" in text
+    assert "High Heaven Sword Sect" in text
+    assert "at war with Crimson Flame Sect" in text
+    assert "treasury tight" in text
+    assert "war readiness stretched" in text
+    assert "Border pressure: 35%" in text
+    assert "7 living members" in text
+    assert "battle strength about 88" in text
 
 
 @pytest.mark.asyncio
@@ -69,21 +69,21 @@ async def test_generate_story_uses_refined_sect_context_in_details(base_world):
     world = base_world
     sect = Sect(
         id=1,
-        name="太虚门",
-        desc="清静无为",
-        member_act_style="淡然",
+        name="Great Void Gate",
+        desc="Tranquil and actionless",
+        member_act_style="serene",
         alignment=Alignment.NEUTRAL,
-        headquarter=SectHeadQuarter(name="云台", desc="高台观星", image=Path("")),
+        headquarter=SectHeadQuarter(name="Cloud Terrace", desc="A high terrace for stargazing", image=Path("")),
         technique_names=[],
     )
-    teacher = _create_member(world, sect, "teacher_1", "师尊甲", 61, SectRank.Elder)
-    student = _create_member(world, sect, "student_1", "弟子乙", 1, SectRank.OuterDisciple)
+    teacher = _create_member(world, sect, "teacher_1", "Master A", 61, SectRank.Elder)
+    student = _create_member(world, sect, "student_1", "Disciple B", 1, SectRank.OuterDisciple)
 
     conference = SectTeachingConference()
     with patch.object(
         conference,
         "_build_sect_teaching_context_text",
-        return_value="【宗门背景】当前与玄霜宗交战，财库平稳。",
+        return_value="[Sect background] Currently at war with the Mystic Frost Sect; the treasury is stable.",
     ), patch(
         "src.classes.gathering.sect_teaching.StoryEventService.maybe_create_gathering_story",
         new=AsyncMock(return_value=None),
@@ -98,6 +98,6 @@ async def test_generate_story_uses_refined_sect_context_in_details(base_world):
         )
 
     details_text = mock_story.await_args.kwargs["details_text"]
-    assert "【宗门背景】当前与玄霜宗交战，财库平稳。" in details_text
-    assert "师尊甲:" in details_text
-    assert "- 弟子乙:" in details_text
+    assert "[Sect background] Currently at war with the Mystic Frost Sect; the treasury is stable." in details_text
+    assert "Master A:" in details_text
+    assert "- Disciple B:" in details_text

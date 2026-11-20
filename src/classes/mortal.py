@@ -6,19 +6,19 @@ from src.systems.time import MonthStamp
 @dataclass
 class Mortal:
     """
-    轻量级的凡人/子女数据结构。
-    仅用于存储非修仙者的子女信息，不参与复杂模拟。
+    Lightweight mortal/child data structure.
+    Only stores info about non-cultivator children; doesn't take part in complex simulation.
     """
-    id: str                 # 唯一标识
-    name: str               # 姓名
-    gender: Gender          # 性别
-    birth_month_stamp: MonthStamp  # 出生时间戳
+    id: str                 # Unique ID
+    name: str               # Name
+    gender: Gender          # Gender
+    birth_month_stamp: MonthStamp  # Birth timestamp
     race: Race = field(default_factory=lambda: get_race("human"))
-    parents: list[str] = field(default_factory=list)      # 父母的 Avatar ID
-    born_region_id: int = -1  # 出身地区域ID (-1表示未知)
+    parents: list[str] = field(default_factory=list)      # Parents' Avatar IDs
+    born_region_id: int = -1  # Birthplace region ID (-1 means unknown)
 
     def to_dict(self) -> dict:
-        """转换为字典"""
+        """Convert to a dict."""
         return {
             "id": self.id,
             "name": self.name,
@@ -31,7 +31,7 @@ class Mortal:
 
     @classmethod
     def from_dict(cls, data: dict) -> "Mortal":
-        """从字典还原"""
+        """Restore from a dict."""
         return cls(
             id=data["id"],
             name=data["name"],

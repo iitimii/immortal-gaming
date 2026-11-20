@@ -8,19 +8,19 @@ from src.systems.cultivation import Realm
 @dataclass
 class Lode:
     """
-    矿脉
+    Ore vein
     """
     id: int
     name: str
     desc: str
     realm: Realm
-    material_ids: list[int] = field(default_factory=list)  # 该矿脉对应的物品IDs
+    material_ids: list[int] = field(default_factory=list)  # Item IDs for this ore vein
     
-    # 这些字段将在__post_init__中设置
-    materials: list[Material] = field(init=False, default_factory=list)  # 该矿脉对应的物品实例
+    # These fields are set in __post_init__
+    materials: list[Material] = field(init=False, default_factory=list)  # Item instances for this ore vein
     
     def __post_init__(self):
-        """初始化物品实例"""
+        """Initialize item instances."""
         for material_id in self.material_ids:
             if material_id in materials_by_id:
                 self.materials.append(materials_by_id[material_id])
@@ -33,10 +33,10 @@ class Lode:
     
     def get_info(self) -> str:
         """
-        获取矿脉的详细信息
+        Get the ore vein's detailed info
         """
         from src.i18n import t
-        # 使用格式化字符串 msgid
+        # Use a format-string msgid
         base_info = t("[{name}] ({realm})", name=self.name, realm=str(self.realm))
         info_parts = [base_info, self.desc]
         
@@ -59,11 +59,11 @@ class Lode:
         }
 
 def _load_lodes() -> tuple[dict[int, Lode], dict[str, Lode]]:
-    """从配表加载lode数据"""
+    """Load lode data from the config table."""
     lodes_by_id: dict[int, Lode] = {}
     lodes_by_name: dict[str, Lode] = {}
     
-    # 检查配置是否存在，避免初始化错误
+    # Check that the config exists to avoid initialization errors
     if "lode" not in game_configs:
         return {}, {}
     
@@ -87,7 +87,7 @@ lodes_by_id: dict[int, Lode] = {}
 lodes_by_name: dict[str, Lode] = {}
 
 def reload():
-    """重新加载数据，保留全局字典引用"""
+    """Reload data while preserving the global dict references."""
     new_id, new_name = _load_lodes()
     
     lodes_by_id.clear()
@@ -96,9 +96,9 @@ def reload():
     lodes_by_name.clear()
     lodes_by_name.update(new_name)
     
-    # 更新 ORE_MATERIAL_IDS
+    # Update ORE_MATERIAL_IDS
     global ORE_MATERIAL_IDS
     ORE_MATERIAL_IDS = {material_id for lode in lodes_by_id.values() for material_id in lode.material_ids}
 
-# 模块初始化时执行一次
+# Run once at module import
 reload()

@@ -38,7 +38,7 @@ def finalize_step(ctx: SimulationStepContext) -> list[Event]:
             if subject is None:
                 continue
             params = dict(event.render_params or {})
-            params.setdefault("subject_name", getattr(subject, "name", "某人"))
+            params.setdefault("subject_name", getattr(subject, "name", "Someone"))
             event.render_params = params
             append_close_relation_major_observations(
                 event,

@@ -12,22 +12,22 @@ from src.utils.resolution import resolve_query
 
 class MoveToAvatar(DefineAction, ActualActionMixin):
     """
-    朝另一个角色当前位置移动。
+    Move toward another avatar's current position.
     """
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "move_to_avatar_action_name"
     DESC_ID = "move_to_avatar_description"
     REQUIREMENTS_ID = "move_to_avatar_requirements"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "🏃"
     PARAMS = {"avatar_name": "str"}
     PARAM_OPTION_SOURCES = {"avatar_name": ParamOptionSource.OBSERVABLE_AVATAR_NAME}
 
     def _get_target(self, avatar_name: str):
         """
-        根据名字或 ID 查找目标角色；找不到返回 None。
+        Find the target avatar by name or ID; return None if not found.
         """
         from src.classes.core.avatar import Avatar
 

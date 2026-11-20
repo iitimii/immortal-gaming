@@ -184,7 +184,7 @@ describe('SectDetail', () => {
           relation_value: 0,
         },
       ],
-      periodic_thinking: '我宗观天下势力分化加剧，当先稳住边界与资源脉络，再图联盟突破，以争中局主动。',
+      periodic_thinking: 'Our sect sees the powers of the world splintering further; we should first secure our borders and resource veins, then seek a breakthrough through alliances to seize the initiative.',
     }
 
     const wrapper = mount(SectDetail, {
@@ -217,7 +217,7 @@ describe('SectDetail', () => {
     expect(text).toContain('At war for 1 years')
     expect(text).toContain('Neutral Sect')
     expect(text).toContain('At peace for 3 years')
-    expect(text).toContain('我宗观天下势力分化加剧')
+    expect(text).toContain('Our sect sees the powers of the world splintering further')
     expect(text).not.toContain('18 months')
   })
 })

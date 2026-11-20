@@ -49,10 +49,10 @@ msgstr "Automatically accept the new item."
 
 # Decision Interface
 msgid ""
-"【Current Situation】: {context}\n"
+"[Current Situation]: {context}\n"
 "\n"
 "{choices}"
 msgstr ""
-"【Current Situation】: {context}\n"
+"[Current Situation]: {context}\n"
 "\n"
 "{choices}"

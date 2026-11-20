@@ -64,7 +64,7 @@ function handleShowChange(value: boolean) {
                 <div class="domain-desc">{{ item.desc }}</div>
               </div>
               <n-tag size="small" :bordered="false" class="realm-tag">
-                {{ t('game.status_bar.hidden_domain.required_realm') }}：{{ formatRealmLabel(item.required_realm, t) }}
+                {{ t('game.status_bar.hidden_domain.required_realm') }}: {{ formatRealmLabel(item.required_realm, t) }}
               </n-tag>
             </div>
 

@@ -64,9 +64,9 @@ async def phase_handle_sect_wars(simulator, living_avatars) -> list[Event]:
 
             s_att, s_def = get_effective_strength_pair(attacker, defender)
             start_text = (
-                f"{attacker_sect.name} 与 {defender_sect.name} 交战中，"
-                f"{attacker.name} 与 {defender.name} 狭路相逢，立即爆发战斗"
-                f"（战力：{attacker.name} {int(s_att)} vs {defender.name} {int(s_def)}）。"
+                f"With {attacker_sect.name} and {defender_sect.name} at war, "
+                f"{attacker.name} and {defender.name} cross paths and a battle breaks out at once "
+                f"(Strength: {attacker.name} {int(s_att)} vs {defender.name} {int(s_def)})."
             )
             events.append(
                 Event(
@@ -88,7 +88,7 @@ async def phase_handle_sect_wars(simulator, living_avatars) -> list[Event]:
                 defender,
                 (winner, loser, loser_damage, winner_damage),
                 start_text,
-                "请描写一次宗门战争中的遭遇战，突出双方所属宗门的敌意与战场余波。",
+                "Describe a skirmish during a sect war, highlighting the hostility between the two sects and the aftermath of the battlefield.",
                 check_loot=False,
             )
             for event in war_events:
@@ -120,7 +120,7 @@ async def phase_handle_sect_wars(simulator, living_avatars) -> list[Event]:
                 events.append(
                     Event(
                         month_stamp=world.month_stamp,
-                        content=f"{loser.name} 战败后被迫撤回 {loser.sect.name} 总部休整。",
+                        content=f"After the defeat, {loser.name} is forced to retreat to the {loser.sect.name} headquarters to recover.",
                         related_avatars=[loser.id],
                         related_sects=[int(attacker_sect.id), int(defender_sect.id)],
                         is_major=False,

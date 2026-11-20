@@ -183,7 +183,7 @@ class TestParseErrors:
         with pytest.raises(ParseError) as exc_info:
             parse_json(text)
 
-        assert "无法解析 JSON" in str(exc_info.value)
+        assert "Unable to parse JSON" in str(exc_info.value)
 
     def test_empty_response(self):
         """Test handling of empty response."""
@@ -250,7 +250,7 @@ class TestRetryLogic:
 
             # Should have tried 3 times (initial + 2 retries).
             assert mock_call.call_count == 3
-            assert "重试" in str(exc_info.value)
+            assert "retries" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_no_retry_when_max_retries_zero(self):
@@ -324,7 +324,7 @@ class TestConnectivityTest:
             success, error = llm_test_connectivity(config=mock_config)
 
         assert success is False
-        assert "身份验证失败(401)" in error
+        assert "Authentication failed (401)" in error
 
     def test_connectivity_forbidden(self):
         """Test connectivity check with 403 Forbidden."""
@@ -345,7 +345,7 @@ class TestConnectivityTest:
             success, error = llm_test_connectivity(config=mock_config)
 
         assert success is False
-        assert "访问被拒绝(403)" in error
+        assert "Access denied (403)" in error
 
     def test_connectivity_not_found(self):
         """Test connectivity check with 404 Not Found."""
@@ -366,7 +366,7 @@ class TestConnectivityTest:
             success, error = llm_test_connectivity(config=mock_config)
 
         assert success is False
-        assert "找不到服务(404)" in error
+        assert "Service not found (404)" in error
 
     def test_connectivity_timeout(self):
         """Test connectivity check with timeout."""
@@ -380,7 +380,7 @@ class TestConnectivityTest:
             success, error = llm_test_connectivity(config=mock_config)
 
         assert success is False
-        assert "网络连接失败" in error
+        assert "Network connection failed" in error
 
     def test_connectivity_connection_error(self):
         """Test connectivity check with connection error."""
@@ -394,7 +394,7 @@ class TestConnectivityTest:
             success, error = llm_test_connectivity(config=mock_config)
 
         assert success is False
-        assert "网络连接失败" in error
+        assert "Network connection failed" in error
 
     def test_connectivity_with_mode_instead_of_config(self):
         """Test connectivity using mode parameter (config=None path)."""
@@ -458,7 +458,7 @@ class TestConnectivityTest:
             success, error = llm_test_connectivity(config=mock_config)
 
         assert success is False
-        assert "身份验证失败(401)" in error
+        assert "Authentication failed (401)" in error
         assert "invalid x-api-key" in error
 
 
@@ -484,7 +484,7 @@ class TestLLMFailureClassification:
 
         assert failure.kind == LLMFailureKind.RATE_LIMITED
         assert failure.is_config_required is True
-        assert "LongCat API Key 免费 Token 配额不足" in failure.user_message
+        assert "LongCat API Key has run out of free token quota" in failure.user_message
         assert "API Key quota is insufficient" in failure.user_message
 
     def test_classifies_payment_required_balance_as_rate_limited(self):
@@ -494,17 +494,19 @@ class TestLLMFailureClassification:
 
         assert failure.kind == LLMFailureKind.RATE_LIMITED
         assert failure.is_config_required is True
-        assert "额度不足或计费受限(402)" in failure.user_message
+        assert "Insufficient quota or billing restricted (402)" in failure.user_message
         assert "Insufficient Balance" in failure.user_message
 
     def test_classifies_400_balance_keyword_as_rate_limited(self):
+        # Chinese-language providers report "insufficient account balance, please top up";
+        # the text is written as escapes to keep the test source English-only.
         failure = classify_llm_error(
-            'HTTP_400::{"message":"账户余额不足，请充值后重试"}'
+            'HTTP_400::{"message":"\u8d26\u6237\u4f59\u989d\u4e0d\u8db3\uff0c\u8bf7\u5145\u503c\u540e\u91cd\u8bd5"}'
         )
 
         assert failure.kind == LLMFailureKind.RATE_LIMITED
         assert failure.is_config_required is True
-        assert "余额不足" in failure.user_message
+        assert "\u4f59\u989d\u4e0d\u8db3" in failure.user_message
 
     def test_does_not_classify_5xx_quota_text_as_config_required(self):
         failure = classify_llm_error(
@@ -543,7 +545,7 @@ class TestLLMFailureClassification:
             register_llm_failure_handler(None)
 
         assert len(messages) == 1
-        assert "身份验证失败(401)" in messages[0]
+        assert "Authentication failed (401)" in messages[0]
 
     @pytest.mark.asyncio
     async def test_call_llm_notifies_config_required_for_longcat_quota_failure(self):
@@ -574,7 +576,7 @@ class TestLLMFailureClassification:
             register_llm_failure_handler(None)
 
         assert len(messages) == 1
-        assert "LongCat API Key 免费 Token 配额不足" in messages[0]
+        assert "LongCat API Key has run out of free token quota" in messages[0]
 
     @pytest.mark.asyncio
     async def test_call_llm_does_not_notify_for_provider_5xx(self):

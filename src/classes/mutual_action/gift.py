@@ -18,21 +18,21 @@ if TYPE_CHECKING:
 
 
 class Gift(InvitationAction):
-    """赠送：向目标赠送灵石或物品。
+    """Gift: give spirit stones or items to a target.
 
-    - 支持赠送灵石、素材、装备。
-    - 目标在交互范围内。
-    - 目标可以感知具体赠送的物品并选择 接受 或 拒绝。
-    - 若接受：物品从发起者转移给目标（装备会自动穿戴并顶替旧装备）。
-    - 非灵石物品一次只能赠送1个。
+    - Supports gifting spirit stones, materials and equipment.
+    - The target is within interaction range.
+    - The target can see the specific gift and choose to accept or refuse.
+    - If accepted: the item moves from the initiator to the target (equipment is auto-equipped, replacing the old one).
+    - Non-spirit-stone items can only be gifted one at a time.
     """
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "gift_action_name"
     DESC_ID = "gift_description"
     REQUIREMENTS_ID = "gift_requirements"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "🎁"
     SPIRIT_STONE_KEY = "SPIRIT_STONE"
     
@@ -49,7 +49,7 @@ class Gift(InvitationAction):
 
     def __init__(self, avatar: "Avatar", world: "World"):
         super().__init__(avatar, world)
-        # 暂存当前赠送上下文，用于 step 跨帧和 build_prompt_infos
+        # Temporarily store the current gift context, used across step frames and by build_prompt_infos
         self._current_gift_context: dict[str, Any] = {}
         self._gift_success = False
 
@@ -58,47 +58,47 @@ class Gift(InvitationAction):
 
     def _resolve_gift(self, item_id_str: str, amount: int) -> tuple[Any, str, int]:
         """
-        解析赠送意图，返回 (物品对象/None, 显示名称, 实际数量)。
-        物品对象为 None 代表是灵石。
+        Resolve the gift intent; return (item object/None, display name, actual quantity).
+        An item object of None means spirit stones.
         """
-        # 1. 灵石
+        # 1. Spirit stones
         if not item_id_str or str(item_id_str).strip().upper() == self.SPIRIT_STONE_KEY:
             return None, t("spirit stones"), max(1, amount)
         
-        # 非灵石强制数量为 1
+        # Non-spirit-stone gifts are forced to quantity 1
         forced_amount = 1
         
-        # 解析 ID
+        # Parse the ID
         try:
             target_id = int(item_id_str)
         except (ValueError, TypeError):
-            # ID 必须是数字，否则视为无效
+            # The ID must be numeric, otherwise it is invalid
             return None, "", 0
         
-        # 2. 检查装备 (Weapon/Auxiliary)
+        # 2. Check equipment (Weapon/Auxiliary)
         if self.avatar.weapon and self.avatar.weapon.id == target_id:
             return self.avatar.weapon, self.avatar.weapon.name, forced_amount
         if self.avatar.auxiliary and self.avatar.auxiliary.id == target_id:
             return self.avatar.auxiliary, self.avatar.auxiliary.name, forced_amount
             
-        # 3. 检查背包素材 (Materials)
+        # 3. Check inventory materials (Materials)
         for mat, qty in self.avatar.materials.items():
             if mat.id == target_id:
                 return mat, mat.name, forced_amount
                 
-        # 未找到
+        # Not found
         return None, "", 0
 
     def _get_gift_description(self) -> str:
-        name = self._current_gift_context.get("name", "未知物品")
+        name = self._current_gift_context.get("name", "Unknown item")
         amount = self._current_gift_context.get("amount", 0)
         obj = self._current_gift_context.get("obj")
         
         from src.classes.items.weapon import Weapon
         from src.classes.items.auxiliary import Auxiliary
         
-        if obj is None: # 灵石
-            return f"{amount} 灵石"
+        if obj is None: # Spirit stones
+            return f"{amount} {t('spirit stones')}"
         elif isinstance(obj, (Weapon, Auxiliary)):
             return f"[{name}]"
         else:
@@ -106,10 +106,10 @@ class Gift(InvitationAction):
 
     def step(self, target_avatar: "Avatar|str", item_id: str = "SPIRIT_STONE", amount: int = 100) -> ActionResult:
         """
-        重写 step 以接收额外参数。
-        将参数存入 self，然后调用父类 step 执行通用逻辑（LLM交互）。
+        Override step to receive extra params.
+        Store the params on self, then call the parent step for the generic logic (LLM interaction).
         """
-        # 每一帧都会传入参数，更新上下文
+        # Params are passed in every frame; update the context
         obj, name, real_amount = self._resolve_gift(item_id, amount)
         
         self._current_gift_context = {
@@ -119,17 +119,17 @@ class Gift(InvitationAction):
             "original_item_id": item_id
         }
         
-        # 调用父类 step，父类会调用 _build_prompt_infos -> _can_start 等
+        # Call the parent step, which calls _build_prompt_infos -> _can_start, etc.
         return super().step(target_avatar)
 
     def _can_start(self, target: "Avatar") -> tuple[bool, str]:
-        """检查赠送条件：物品是否存在且足够"""
+        """Check gift conditions: whether the item exists and is sufficient."""
         obj = self._current_gift_context.get("obj")
         name = self._current_gift_context.get("name")
         amount = self._current_gift_context.get("amount", 0)
         original_id = self._current_gift_context.get("original_item_id")
         
-        # 修复：如果上下文未初始化（step/start 尚未执行），尝试从当前动作参数回溯
+        # Fix: if the context isn't initialized (step/start not run yet), try to recover it from the current action params
         if name is None and original_id is None:
             cur = self.avatar.current_action
             if cur and cur.action is self:
@@ -140,11 +140,11 @@ class Gift(InvitationAction):
             else:
                 return True, ""
         
-        # 如果 name 为空，说明 resolve 失败
+        # An empty name means resolve failed
         if not name:
             return False, t("Item not found: {name}", name=original_id)
 
-        # 1. 灵石
+        # 1. Spirit stones
         spirit_stones_text = t("spirit stones")
         if obj is None and name == spirit_stones_text:
             if self.avatar.magic_stone < amount:
@@ -152,7 +152,7 @@ class Gift(InvitationAction):
                               current=self.avatar.magic_stone, need=amount)
             return True, ""
             
-        # 2. 物品 (装备/素材)
+        # 2. Items (equipment/materials)
         from src.classes.items.weapon import Weapon
         from src.classes.items.auxiliary import Auxiliary
         from src.classes.items.elixir import Elixir
@@ -171,14 +171,14 @@ class Gift(InvitationAction):
         else:
              return False, t("Item not found: {name}", name=original_id)
 
-        # 检查交互范围 (父类 MutualAction.can_start 已经检查了，但这里是 _can_start 额外检查)
+        # Check interaction range (the parent MutualAction.can_start already checks; this is the extra _can_start check)
         from src.classes.observe import is_within_observation
             
         return True, ""
 
     def _build_prompt_infos(self, target_avatar: "Avatar") -> dict:
         """
-        重写：构建传给 LLM 的 prompt 信息。
+        Override: build the prompt info passed to the LLM.
         """
         infos = super()._build_prompt_infos(target_avatar)
         
@@ -188,7 +188,7 @@ class Gift(InvitationAction):
         return infos
 
     def start(self, target_avatar: "Avatar|str", item_id: str = "SPIRIT_STONE", amount: int = 100) -> Event:
-        # start 也会接收参数，同样需要设置上下文
+        # start also receives params and needs the context set as well
         obj, name, real_amount = self._resolve_gift(item_id, amount)
         self._current_gift_context = {
             "obj": obj, 
@@ -226,12 +226,12 @@ class Gift(InvitationAction):
             self._gift_success = False
 
     def _apply_gift(self, target: "Avatar") -> None:
-        """执行物品转移"""
+        """Execute the item transfer."""
         obj = self._current_gift_context.get("obj")
         amount = self._current_gift_context.get("amount", 0)
         
         if obj is None:
-            # 灵石
+            # Spirit stones
             if self.avatar.magic_stone >= amount:
                 self.avatar.magic_stone -= amount
                 target.magic_stone += amount
@@ -240,15 +240,15 @@ class Gift(InvitationAction):
             from src.classes.items.auxiliary import Auxiliary
             
             if isinstance(obj, (Weapon, Auxiliary)):
-                # 装备：发起者卸下 -> 目标装备（旧装备自动处理）
+                # Equipment: initiator unequips -> target equips (old equipment handled automatically)
                 if self.avatar.weapon is obj:
                     self.avatar.weapon = None
                 elif self.avatar.auxiliary is obj:
                     self.avatar.auxiliary = None
                 else:
-                    return # 已经不在身上了
+                    return # No longer equipped
                 
-                # 目标装备
+                # Target equips
                 new_equip = obj 
                 
                 old_item = None
@@ -259,8 +259,8 @@ class Gift(InvitationAction):
                     old_item = target.auxiliary
                     target.auxiliary = new_equip
                 
-                # 旧装备处理：直接调用 sell_X 接口
-                # 这样既能获得灵石，也能自动触发 CirculationManager 记录流出物品
+                # Old equipment: call the sell_X interface directly
+                # This both yields spirit stones and makes CirculationManager record the outgoing item
                 if old_item:
                     if isinstance(old_item, Weapon):
                         target.sell_weapon(old_item)
@@ -268,7 +268,7 @@ class Gift(InvitationAction):
                         target.sell_auxiliary(old_item)
                     
             else:
-                # 素材：发起者移除 -> 目标添加
+                # Materials: initiator removes -> target adds
                 if self.avatar.remove_material(obj, amount):
                     target.add_material(obj, amount)
 

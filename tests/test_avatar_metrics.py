@@ -1,5 +1,5 @@
 """
-测试 Avatar 状态追踪功能
+Tests for Avatar metrics tracking.
 """
 import pytest
 from src.classes.avatar_metrics import AvatarMetrics, MetricTag
@@ -7,7 +7,7 @@ from src.systems.time import MonthStamp
 
 
 def test_avatar_metrics_creation():
-    """测试状态快照创建"""
+    """Test metrics snapshot creation."""
     metrics = AvatarMetrics(
         timestamp=MonthStamp(100),
         age=20,
@@ -34,7 +34,7 @@ def test_avatar_metrics_creation():
 
 
 def test_avatar_metrics_serialization():
-    """测试序列化与反序列化"""
+    """Test serialization and deserialization."""
     original = AvatarMetrics(
         timestamp=MonthStamp(200),
         age=30,
@@ -48,7 +48,7 @@ def test_avatar_metrics_serialization():
         tags=["injured", "battle"],
     )
 
-    # 序列化
+    # Serialize
     data = original.to_save_dict()
     assert isinstance(data, dict)
     assert data["age"] == 30
@@ -56,7 +56,7 @@ def test_avatar_metrics_serialization():
     assert "injured" in data["tags"]
     assert "battle" in data["tags"]
 
-    # 反序列化
+    # Deserialize
     restored = AvatarMetrics.from_save_dict(data)
     assert restored.age == original.age
     assert restored.cultivation_level == original.cultivation_level
@@ -66,7 +66,7 @@ def test_avatar_metrics_serialization():
 
 
 def test_metric_tag_enum():
-    """测试 MetricTag 枚举"""
+    """Test the MetricTag enum."""
     assert MetricTag.BREAKTHROUGH.value == "breakthrough"
     assert MetricTag.INJURED.value == "injured"
     assert MetricTag.RECOVERED.value == "recovered"
@@ -79,7 +79,7 @@ def test_metric_tag_enum():
 
 
 def test_avatar_metrics_with_standard_tags():
-    """测试使用标准标签"""
+    """Test using standard tags."""
     metrics = AvatarMetrics(
         timestamp=MonthStamp(50),
         age=25,
@@ -99,7 +99,7 @@ def test_avatar_metrics_with_standard_tags():
 
 
 def test_avatar_metrics_empty_tags():
-    """测试空标签列表"""
+    """Test an empty tag list."""
     metrics = AvatarMetrics(
         timestamp=MonthStamp(0),
         age=0,
@@ -118,12 +118,12 @@ def test_avatar_metrics_empty_tags():
 
 
 def test_avatar_metrics_multiple_tags():
-    """测试多个标签"""
+    """Test multiple tags."""
     tags = [
         MetricTag.BREAKTHROUGH.value,
         MetricTag.INJURED.value,
         MetricTag.BATTLE.value,
-        "custom_event",  # 允许自定义标签
+        "custom_event",  # custom tags are allowed
     ]
 
     metrics = AvatarMetrics(

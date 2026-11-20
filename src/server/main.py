@@ -1,7 +1,7 @@
 import sys
 import os
 
-# 确保可以导入 src 模块，并尽早修复跨语言环境下的标准流编码。
+# Make sure the src package is importable, and fix standard stream encoding across locales as early as possible.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from src.server.encoding_runtime import configure_process_encoding
@@ -172,7 +172,7 @@ from src.server.serialization import (
     serialize_phenomenon,
 )
 
-# 全局游戏实例
+# Global game instance
 game_instance = create_default_game_state()
 runtime = GameSessionRuntime(game_instance)
 
@@ -184,12 +184,12 @@ AVATAR_ASSETS = {
     }
 }
 
-# 简易的命令行参数检查 (不使用 argparse 以避免冲突和时序问题)
+# Simple command-line argument check (argparse is avoided to prevent conflicts and ordering issues)
 IS_DEV_MODE = "--dev" in sys.argv
 
 
 def apply_runtime_content_locale(lang_code: str) -> None:
-    """兼容保留：按当前主运行时切换内容语言。"""
+    """Kept for compatibility: switch content language via the current main runtime."""
     _apply_runtime_content_locale(
         runtime=runtime,
         language_manager=language_manager,
@@ -198,14 +198,14 @@ def apply_runtime_content_locale(lang_code: str) -> None:
 
 
 def get_current_config():
-    """返回当前配置模块中的最新 CONFIG，避免 reload 后持有陈旧引用。"""
+    """Return the latest CONFIG from the config module, avoiding stale references after reload."""
     from src.utils.config import CONFIG as current_config
 
     return current_config
 
 
 def get_fallback_saves_dirs():
-    """收集可能有效的存档目录，兼容 main.CONFIG 与 reload 后的新 CONFIG。"""
+    """Collect possibly valid save directories, covering both main.CONFIG and a reloaded CONFIG."""
     candidates = []
     seen = set()
 
@@ -449,12 +449,12 @@ runtime_hooks = create_runtime_hooks(
     get_logger=_get_logger,
 )
 def update_init_progress(phase: int, phase_name: str = ""):
-    """兼容保留：更新初始化进度。"""
+    """Kept for compatibility: update initialization progress."""
     _update_init_progress(runtime=runtime, phase=phase, phase_name=phase_name)
 
 
 async def init_game_async():
-    """兼容保留：调用时读取 main 模块上的可 patch 依赖。"""
+    """Kept for compatibility: read patchable dependencies from the main module at call time."""
     await perform_game_initialization(
         runtime=runtime,
         avatar_assets=AVATAR_ASSETS,
@@ -486,12 +486,12 @@ async def init_game_async():
 
 
 def trigger_auto_save(world, sim):
-    """兼容保留：触发当前对局自动存档。"""
+    """Kept for compatibility: trigger an autosave of the current run."""
     _trigger_auto_save(world=world, sim=sim, sects_by_id=sects_by_id)
 
 
 async def game_loop():
-    """兼容保留：后台自动运行游戏循环。"""
+    """Kept for compatibility: run the game loop automatically in the background."""
     await run_game_loop_forever(
         game_instance=game_instance,
         runtime=runtime,
@@ -520,7 +520,7 @@ async def game_loop():
     )
 
 def get_settings() -> dict:
-    """兼容保留：返回当前应用设置视图。"""
+    """Kept for compatibility: return the current app settings view."""
     return settings_handlers.get_settings()
 
 
@@ -540,7 +540,7 @@ def _patch_settings_model(req):
 
 
 def patch_settings(req) -> dict:
-    """兼容保留：更新应用设置。"""
+    """Kept for compatibility: update app settings."""
     return _model_to_dict(_patch_settings_model(req))
 
 
@@ -560,22 +560,22 @@ def _reset_settings_model():
 
 
 def reset_settings() -> dict:
-    """兼容保留：重置应用设置，并同步全局语言。"""
+    """Kept for compatibility: reset app settings and sync the global language."""
     return _model_to_dict(_reset_settings_model())
 
 
 async def start_game(req: GameStartRequest) -> dict:
-    """兼容保留：启动游戏初始化流程。"""
+    """Kept for compatibility: start the game initialization flow."""
     return await command_service.start_game(req)
 
 
 async def api_load_game(req: LoadGameRequest) -> dict:
-    """兼容保留：加载指定存档。"""
+    """Kept for compatibility: load the given save."""
     return await command_service.load_game(filename=req.filename)
 
 
 def get_runtime_run_config() -> object:
-    """兼容保留：获取当前运行配置。"""
+    """Kept for compatibility: get the current run config."""
     return _get_runtime_run_config(runtime)
 
 
@@ -587,12 +587,12 @@ llm_handlers = create_llm_runtime_handlers(
     test_connectivity_impl=_test_connectivity,
 )
 def test_connectivity(config):
-    """兼容保留：转发到底层 LLM 连通性测试。"""
+    """Kept for compatibility: forward to the underlying LLM connectivity test."""
     return _test_connectivity(config=config)
 
 
 def test_llm_connection(req) -> dict:
-    """兼容保留：使用当前保存的密钥测试 LLM 配置。"""
+    """Kept for compatibility: test the LLM config with the currently saved key."""
     profile, api_key, fast_api_key = settings_service.get_llm_test_payload(req)
     success, error_msg = check_llm_profile_connectivity(
         profile=profile,
@@ -601,7 +601,7 @@ def test_llm_connection(req) -> dict:
         test_connectivity=lambda *, config: test_connectivity(config),
     )
     if success:
-        return {"status": "ok", "message": "连接成功"}
+        return {"status": "ok", "message": "Connection successful"}
     return {"status": "error", "message": error_msg}
 
 handle_llm_updated = llm_handlers.handle_llm_updated
@@ -640,7 +640,7 @@ host_dependencies = HostDependencies(
 app, lifespan = create_configured_app(context=server_context, host=host_dependencies)
 
 def start():
-    """启动服务的入口函数"""
+    """Entry point for starting the server."""
     start_server(
         patch_sys_streams=patch_sys_streams,
         resolve_server_binding=resolve_server_binding,

@@ -10,14 +10,13 @@ const emit = defineEmits<{
 
 const {
   mapContainer,
-  locale,
   visibleRegionLabels,
   getRegionTextStyle,
   handleRegionSelect,
 } = useMapLayerRenderer(emit)
 
-function getRegionLabelHitArea(label: string, type: string, locale: string) {
-  const { width, height } = estimateRegionLabelSize(label, type, locale)
+function getRegionLabelHitArea(label: string, type: string) {
+  const { width, height } = estimateRegionLabelSize(label, type)
   return new Rectangle(-width / 2, -height / 2, width, height)
 }
 
@@ -36,7 +35,7 @@ function getRegionLabelHitArea(label: string, type: string, locale: string) {
             :key="r.id"
             :x="r.labelX"
             :y="r.labelY"
-            :hitArea="getRegionLabelHitArea(r.displayName, r.type, locale)"
+            :hitArea="getRegionLabelHitArea(r.displayName, r.type)"
             event-mode="static"
             cursor="pointer"
             @pointertap="handleRegionSelect(r)"
@@ -45,7 +44,7 @@ function getRegionLabelHitArea(label: string, type: string, locale: string) {
             <text
                 :text="r.displayName"
                 :anchor="0.5"
-                :style="getRegionTextStyle(r.type, locale)"
+                :style="getRegionTextStyle(r.type)"
                 event-mode="none"
             />
         </container>

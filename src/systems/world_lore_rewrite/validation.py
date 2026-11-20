@@ -10,14 +10,15 @@ class WorldLoreValidationError(ValueError):
     pass
 
 
+# Matched case-insensitively as substrings of the description.
 _FORBIDDEN_TEXT = (
-    "玩家",
-    "系统",
-    "游戏",
-    "机制",
-    "攻击力",
-    "防御力",
-    "加成",
+    "player",
+    "system",
+    "game",
+    "mechanic",
+    "attack power",
+    "defense power",
+    "bonus",
     "+",
     "%",
 )
@@ -101,9 +102,9 @@ def _validate_entities(
         desc = _clean_text(item.get("desc"))
         if not name or not desc:
             raise WorldLoreValidationError(f"{field_name} id {entity_id} requires non-empty name and desc")
-        if len(name) > 40:
+        if len(name) > 80:
             raise WorldLoreValidationError(f"{field_name} id {entity_id} name is too long")
-        if len(desc) > 260:
+        if len(desc) > 600:
             raise WorldLoreValidationError(f"{field_name} id {entity_id} desc is too long")
         if _contains_forbidden_text(desc):
             raise WorldLoreValidationError(f"{field_name} id {entity_id} desc contains mechanics text")
@@ -134,4 +135,5 @@ def _clean_text(value: object) -> str:
 
 
 def _contains_forbidden_text(value: str) -> bool:
-    return any(token in value for token in _FORBIDDEN_TEXT)
+    lowered = value.lower()
+    return any(token in lowered for token in _FORBIDDEN_TEXT)

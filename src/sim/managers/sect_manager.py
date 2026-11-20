@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class SectTerritorySnapshot:
-    """宗门势力范围快照，用于在多个系统之间复用计算结果。"""
+    """Snapshot of sect influence areas, reused across multiple systems."""
 
     active_sects: List["Sect"]
     sect_centers: Dict[int, Tuple[int, int]]
@@ -28,8 +28,8 @@ class SectTerritorySnapshot:
 
 class SectManager:
     """
-    宗门管理器。
-    负责宗门的战力计算、势力范围更新、灵石结算。
+    Sect manager.
+    Handles sect strength calculation, influence area updates, and spirit stone settlement.
     """
 
     def __init__(self, world: "World"):
@@ -42,8 +42,8 @@ class SectManager:
         return (a, b) if a <= b else (b, a)
 
     def _collect_active_sects(self) -> List["Sect"]:
-        """获取当前仍然存续且激活的宗门列表。"""
-        # 优先通过 World.sect_context 统一获取本局启用宗门
+        """Get the list of sects that still exist and are active."""
+        # Prefer World.sect_context to get the sects enabled for this run
         sects: Iterable["Sect"] = []
         sect_context = getattr(self.world, "sect_context", None)
         if sect_context is not None:
@@ -51,7 +51,7 @@ class SectManager:
         else:
             sects = getattr(self.world, "existed_sects", []) or []
 
-        # 兜底：若仍为空，则回退到全局 sects_by_id
+        # Fallback: if still empty, fall back to the global sects_by_id
         if not sects:
             from src.classes.core.sect import sects_by_id as _sects_by_id
             sects = list(_sects_by_id.values())
@@ -60,19 +60,19 @@ class SectManager:
 
     def _update_sect_strength_and_radius(self, sect: "Sect") -> None:
         """
-        计算并更新宗门的总战力与势力半径。
-        半径公式由配置驱动，默认等价于 int(total_strength) // 10 + 1。
+        Calculate and update a sect's total strength and influence radius.
+        The radius formula is config-driven; by default it is equivalent to int(total_strength) // 10 + 1.
         """
-        # 直接通过宗门的 members 属性获取存活的成员
+        # Get living members directly via the sect's members property
         members = [m for m in sect.members.values() if not getattr(m, "is_dead", False)]
 
-        # 计算总战力: log(sum(exp(成员战力)))，使用 max trick 保持数值稳定
+        # Total strength: log(sum(exp(member strength))), using the max trick for numerical stability
         total_strength = 0.0
         if members:
             strengths = [float(get_base_strength(m)) for m in members]
             if strengths:
                 max_str = max(strengths)
-                # 防止 exp 溢出，限制上限
+                # Prevent exp overflow by capping the value
                 sum_exp = sum(
                     math.exp(max(-500.0, min(s - max_str, 500.0)))
                     for s in strengths
@@ -89,12 +89,12 @@ class SectManager:
         self, sects: List["Sect"], game_map: "Map"
     ) -> Dict[int, Tuple[int, int]]:
         """
-        基于地图上的 SectRegion，计算每个宗门总部的中心坐标。
-        返回 dict: sect_id -> (x, y)
+        Compute the center coordinates of each sect headquarters based on SectRegions on the map.
+        Returns dict: sect_id -> (x, y)
         """
         centers: Dict[int, Tuple[int, int]] = {}
 
-        # 构建 sect_id -> 对应 SectRegion 的所有坐标
+        # Build sect_id -> all coordinates of the corresponding SectRegion
         region_cors = getattr(game_map, "region_cors", {}) or {}
         for region in getattr(game_map, "sect_regions", {}).values():
             sect_id = getattr(region, "sect_id", -1)
@@ -107,7 +107,7 @@ class SectManager:
 
             centers[sect_id] = game_map.get_center_locs(cors)
 
-        # 只保留当前实际存在的宗门
+        # Keep only sects that currently exist
         return {sect.id: centers[sect.id] for sect in sects if sect.id in centers}
 
     def _get_claim_score(
@@ -122,12 +122,12 @@ class SectManager:
         total_battle_strength: float,
     ) -> float:
         """
-        计算宗门对某个格子的势力归属分数。
+        Compute a sect's influence ownership score for a tile.
 
-        规则：
-        - 距离仍是主导项，保证势力范围整体围绕总部扩张。
-        - 战力提供接壤区域的竞争优势，使强宗门更容易压缩边界。
-        - 使用稳定的确定性噪声，让边界呈现锯齿感，但不会每年无故抖动。
+        Rules:
+        - Distance remains the dominant term, so influence expands around the headquarters.
+        - Strength provides a competitive edge in border areas, letting strong sects push borders back.
+        - Stable deterministic noise gives borders a jagged look without jittering for no reason every year.
         """
         distance = abs(tile_x - center_x) + abs(tile_y - center_y)
         if distance > radius:
@@ -202,12 +202,12 @@ class SectManager:
 
     def _compute_snapshot(self) -> SectTerritorySnapshot:
         """
-        计算当前世界下宗门势力范围的快照。
-        统一完成：
-        - active_sects 收集
-        - 战力与半径更新
-        - 总部中心坐标
-        - tile_owners 填充
+        Compute a snapshot of sect influence areas for the current world.
+        Handles in one place:
+        - collecting active_sects
+        - updating strength and radius
+        - headquarters center coordinates
+        - filling tile_owners
         """
         active_sects = self._collect_active_sects()
         tile_owners: Dict[Tuple[int, int], List[int]] = {}
@@ -229,14 +229,14 @@ class SectManager:
                 boundary_edges_by_sect=boundary_edges_by_sect,
             )
 
-        # 1. 更新战力与半径
+        # 1. Update strength and radius
         for sect in active_sects:
             self._update_sect_strength_and_radius(sect)
 
-        # 2. 计算总部中心坐标
+        # 2. Compute headquarters center coordinates
         sect_centers = self._compute_sect_centers(active_sects, game_map)
         if not sect_centers:
-            # 与旧逻辑保持一致：若无法确定中心，则不再枚举 tile_owners
+            # Consistent with the old logic: if no center can be determined, do not enumerate tile_owners
             return SectTerritorySnapshot(
                 active_sects=active_sects,
                 sect_centers=sect_centers,
@@ -247,7 +247,7 @@ class SectManager:
                 boundary_edges_by_sect=boundary_edges_by_sect,
             )
 
-        # 3. 以“唯一归属”的方式为每个有效格子选出一个最强势力拥有者
+        # 3. Pick a single strongest owner for each valid tile ("unique ownership")
         sect_candidates = []
         for sect in active_sects:
             center = sect_centers.get(sect.id)
@@ -304,24 +304,24 @@ class SectManager:
 
     def get_snapshot(self) -> SectTerritorySnapshot:
         """
-        返回当前世界下宗门势力范围的快照。
+        Return a snapshot of sect influence areas for the current world.
 
-        - 统一封装 _compute_sect_centers / _iter_influence_tiles 等内部细节；
-        - 供其他系统（关系计算、决策上下文等）复用，避免在多处重复实现相同逻辑。
+        - Encapsulates internal details such as _compute_sect_centers / _iter_influence_tiles;
+        - Reused by other systems (relation calculation, decision context, etc.) to avoid duplicating the same logic.
         """
         return self._compute_snapshot()
 
     def get_tile_owners(self) -> Tuple[List["Sect"], Dict[Tuple[int, int], List[int]]]:
         """
-        计算当前活跃宗门的势力范围分布。
+        Compute the influence distribution of currently active sects.
 
-        返回:
+        Returns:
             (active_sects, tile_owners)
-            - active_sects: 当前仍然存续且激活的宗门列表
+            - active_sects: list of sects that still exist and are active
             - tile_owners: (x, y) -> [sect_id, ...]
         """
         snapshot = self.get_snapshot()
-        # 保持与旧行为一致：若无法确定中心，则返回空的 tile_owners，但 active_sects 仍返回
+        # Keep the old behavior: if no center can be determined, return empty tile_owners but still return active_sects
         return snapshot.active_sects, snapshot.tile_owners
 
     def calculate_income_by_sect(self, snapshot: SectTerritorySnapshot | None = None) -> Dict[int, float]:
@@ -353,13 +353,13 @@ class SectManager:
 
     def update_sects(self) -> List[Event]:
         """
-        每年底（或初）结算一次。
-        流程：
-        1. 计算活跃宗门的总战力与势力半径。
-        2. 确定每个宗门总部中心坐标。
-        3. 第一遍遍历：按宗门半径枚举势力菱形范围，为每个格子记录所有占据宗门。
-        4. 第二遍遍历：根据“冲突平均分”规则，把每个格子的基础灵石产出分配给相关宗门。
-        5. 为每个宗门累加收入并生成年度事件。
+        Settled once at the end (or start) of each year.
+        Flow:
+        1. Compute total strength and influence radius of active sects.
+        2. Determine the center coordinates of each sect headquarters.
+        3. First pass: enumerate each sect's diamond-shaped influence area by radius and record all sects occupying each tile.
+        4. Second pass: split each tile's base spirit stone output among the involved sects using the "split evenly on conflict" rule.
+        5. Accumulate income for each sect and generate yearly events.
         """
         events: List[Event] = []
 
@@ -367,18 +367,18 @@ class SectManager:
         active_sects = snapshot.active_sects
         tile_owners = snapshot.tile_owners
 
-        # 若无活跃宗门或无法确定中心，则与旧逻辑一样直接返回
+        # If there are no active sects or no center can be determined, return directly as in the old logic
         if not active_sects or not snapshot.sect_centers:
             return events
 
         if not tile_owners:
-            # 即便没有任何格子，也仍然生成“战力更新”事件，只是收入为 0
+            # Even without any tiles, still generate the "strength update" event, just with 0 income
             pass
 
-        # 4. 第二遍：按冲突规则结算各宗门的收入
+        # 4. Second pass: settle each sect's income using the conflict rule
         income_by_sect_id = self.calculate_income_by_sect(snapshot)
 
-        # 5. 为每个宗门累加收入并生成事件
+        # 5. Accumulate income for each sect and generate events
         from src.i18n import t
 
         for sect in active_sects:

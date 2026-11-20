@@ -60,7 +60,7 @@ def test_action_infos_expose_contextual_param_options(
     base_world.map.regions[city.id] = city
     avatar_in_city.known_regions.add(city.id)
 
-    cave = CultivateRegion(id=2, name="青云洞府", desc="灵气充盈", cors=[(1, 1)])
+    cave = CultivateRegion(id=2, name="Azure Cloud Cave Abode", desc="Rich spiritual qi", cors=[(1, 1)])
     base_world.map.regions[cave.id] = cave
     avatar_in_city.known_regions.add(cave.id)
 
@@ -72,13 +72,13 @@ def test_action_infos_expose_contextual_param_options(
     infos = get_action_infos(avatar_in_city)
 
     buy_options = infos["Buy"]["param_options"]["target_name"]
-    assert {"聚气丹", "青云剑", "铁矿石"} <= _names(buy_options)
-    assert {"聚气丹", "青云剑", "铁矿石"} <= _values(buy_options)
+    assert {"Qi Gathering Pill", "Azure Cloud Sword", "Iron Ore"} <= _names(buy_options)
+    assert {"Qi Gathering Pill", "Azure Cloud Sword", "Iron Ore"} <= _values(buy_options)
     assert all("price" in option for option in buy_options)
 
     sell_options = infos["Sell"]["param_options"]["target_name"]
-    assert {"铁矿石", "青云剑", "聚灵珠"} <= _names(sell_options)
-    assert {"铁矿石", "青云剑", "聚灵珠"} <= _values(sell_options)
+    assert {"Iron Ore", "Azure Cloud Sword", "Spirit Gathering Orb"} <= _names(sell_options)
+    assert {"Iron Ore", "Azure Cloud Sword", "Spirit Gathering Orb"} <= _values(sell_options)
 
     gift_options = infos["Gift"]["param_options"]["item_id"]
     assert {"SPIRIT_STONE", str(mock_item_data["obj_material"].id), str(mock_item_data["obj_weapon"].id)} <= _ids(gift_options)
@@ -90,12 +90,12 @@ def test_action_infos_expose_contextual_param_options(
     assert "NearbyNPC" in _values(target_options)
 
     region_options = infos["MoveToRegion"]["param_options"]["region"]
-    assert {"TestCity", "青云洞府"} <= _names(region_options)
-    assert {"TestCity", "青云洞府"} <= _values(region_options)
+    assert {"TestCity", "Azure Cloud Cave Abode"} <= _names(region_options)
+    assert {"TestCity", "Azure Cloud Cave Abode"} <= _values(region_options)
 
     occupy_options = infos["Occupy"]["param_options"]["region_name"]
-    assert "青云洞府" in _names(occupy_options)
-    assert "青云洞府" in _values(occupy_options)
+    assert "Azure Cloud Cave Abode" in _names(occupy_options)
+    assert "Azure Cloud Cave Abode" in _values(occupy_options)
     assert "TestCity" not in _names(occupy_options)
 
     direction_options = infos["MoveToDirection"]["param_options"]["direction"]
@@ -130,12 +130,12 @@ def test_action_param_options_are_derived_from_live_world_state(
     avatar_in_city.known_regions.add(city.id)
 
     before = get_action_infos(avatar_in_city)
-    assert "玄铁剑" not in _names(before["Buy"]["param_options"]["target_name"])
+    assert "Dark Iron Sword" not in _names(before["Buy"]["param_options"]["target_name"])
 
-    city.store_items.append(create_test_weapon("玄铁剑", Realm.Qi_Refinement, weapon_id=90210))
+    city.store_items.append(create_test_weapon("Dark Iron Sword", Realm.Qi_Refinement, weapon_id=90210))
 
     after = get_action_infos(avatar_in_city)
-    assert "玄铁剑" in _names(after["Buy"]["param_options"]["target_name"])
+    assert "Dark Iron Sword" in _names(after["Buy"]["param_options"]["target_name"])
 
 
 def test_contextual_action_parameters_are_grounded_or_left_numeric(
@@ -147,7 +147,7 @@ def test_contextual_action_parameters_are_grounded_or_left_numeric(
     city.store_items = [mock_item_data["obj_elixir"], mock_item_data["obj_material"]]
     base_world.map.regions[city.id] = city
     avatar_in_city.known_regions.add(city.id)
-    cave = CultivateRegion(id=2, name="青云洞府", desc="灵气充盈", cors=[(1, 1)])
+    cave = CultivateRegion(id=2, name="Azure Cloud Cave Abode", desc="Rich spiritual qi", cors=[(1, 1)])
     base_world.map.regions[cave.id] = cave
     avatar_in_city.known_regions.add(cave.id)
     avatar_in_city.add_material(mock_item_data["obj_material"], quantity=5)
@@ -199,7 +199,7 @@ def test_inflict_gu_param_options_expose_all_gu_types(avatar_in_city):
     options = infos["InflictGu"]["param_options"]["gu_type"]
 
     assert _values(options) == {"qianxin", "shixue", "shiyuan", "luanxin"}
-    assert {"牵心蛊", "噬血蛊", "蚀元蛊", "乱心蛊"} <= _names(options)
+    assert {"Heartlink Gu", "Bloodgnaw Gu", "Essence-Eroding Gu", "Mind-Disorder Gu"} <= _names(options)
 
 
 def test_observable_avatar_options_do_not_fallback_to_all_living_when_empty(
@@ -244,10 +244,10 @@ def test_occupy_options_exclude_owned_regions_and_include_host_context(
     avatar_in_city,
     base_world,
 ):
-    owned_cave = CultivateRegion(id=2, name="自家洞府", desc="已占据", cors=[(1, 1)])
-    contested_cave = CultivateRegion(id=3, name="他人洞府", desc="有主", cors=[(2, 2)])
+    owned_cave = CultivateRegion(id=2, name="Own Cave Abode", desc="Occupied", cors=[(1, 1)])
+    contested_cave = CultivateRegion(id=3, name="Contested Cave Abode", desc="Owned", cors=[(2, 2)])
     host = _register_nearby_avatar(base_world, avatar_in_city)
-    host.name = "洞府主人"
+    host.name = "Cave Abode Host"
     contested_cave.host_avatar = host
     avatar_in_city.occupy_region(owned_cave)
 
@@ -258,8 +258,8 @@ def test_occupy_options_exclude_owned_regions_and_include_host_context(
     infos = get_action_infos(avatar_in_city)
     options = infos["Occupy"]["param_options"]["region_name"]
 
-    assert "自家洞府" not in _names(options)
-    assert "他人洞府" in _names(options)
-    contested_option = next(option for option in options if option["name"] == "他人洞府")
-    assert contested_option["value"] == "他人洞府"
-    assert contested_option["host_avatar"] == {"id": str(host.id), "name": "洞府主人"}
+    assert "Own Cave Abode" not in _names(options)
+    assert "Contested Cave Abode" in _names(options)
+    contested_option = next(option for option in options if option["name"] == "Contested Cave Abode")
+    assert contested_option["value"] == "Contested Cave Abode"
+    assert contested_option["host_avatar"] == {"id": str(host.id), "name": "Cave Abode Host"}

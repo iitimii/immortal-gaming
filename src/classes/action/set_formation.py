@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 
 class SetFormation(InstantAction):
-    """布置阵法：装备阵盘后，在当前 region 布置一个限时区域效果。"""
+    """Set formation: with a formation disk equipped, set up a time-limited area effect in the current region."""
 
     ACTION_NAME_ID = "set_formation_action_name"
     DESC_ID = "set_formation_description"

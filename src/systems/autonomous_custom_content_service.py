@@ -58,16 +58,16 @@ class AutonomousCustomContentService:
     @staticmethod
     def _build_user_prompt(avatar: Avatar, category: str) -> str:
         category_label_map = {
-            "technique": "功法",
-            "weapon": "兵器",
-            "auxiliary": "辅助装备",
+            "technique": "technique",
+            "weapon": "weapon",
+            "auxiliary": "auxiliary equipment",
         }
         avatar_info = json.dumps(avatar.get_expanded_info(detailed=True), ensure_ascii=False)
         return (
-            f"以下是这个角色的完整信息，请基于这些信息，为他创作一个新的{category_label_map[category]}。\n"
-            "不需要追求全面，请你自行判断这个角色最独特、最值得抓住的一个方面，并围绕这一个方面来设计。\n"
-            "尽量突出角色自己的经历、身份、性格、已有功法或装备风格，但不要面面俱到。\n\n"
-            f"角色完整信息：\n{avatar_info}"
+            f"Below is this character's complete information. Based on it, create a new {category_label_map[category]} for them.\n"
+            "Do not try to cover everything; judge for yourself the single most distinctive aspect of this character worth capturing, and design around that one aspect.\n"
+            "Emphasize the character's own experiences, identity, personality, and existing technique or equipment style where possible, without trying to include all of them.\n\n"
+            f"Character's complete information:\n{avatar_info}"
         )
 
     @classmethod

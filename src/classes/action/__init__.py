@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-# 基类与工具
+# Base classes and utilities
 from .action import (
     Action,
     DefineAction,
@@ -13,7 +13,7 @@ from .action import (
 )
 from .registry import register_action
 
-# 具体动作（按文件拆分）
+# Concrete actions (split by file)
 from .move import Move
 from .move_to_region import MoveToRegion
 from .move_to_poi import MoveToPOI
@@ -54,7 +54,7 @@ from .set_formation import SetFormation
 from .dig_grave import DigGrave
 from .take_treasure import TakeTreasure
 
-# 注册到 ActionRegistry（标注是否为实际可执行动作）
+# Register with ActionRegistry (marking whether each is an actually executable action)
 register_action(actual=False)(Action)
 register_action(actual=False)(DefineAction)
 register_action(actual=False)(LLMAction)
@@ -105,10 +105,10 @@ register_action(actual=True)(InflictGu)
 register_action(actual=True)(SetFormation)
 register_action(actual=True)(DigGrave)
 register_action(actual=True)(TakeTreasure)
-# Talk 已移动到 mutual_action 模块，在那里注册
+# Talk has moved to the mutual_action module and is registered there
 
 __all__ = [
-    # 基类
+    # Base classes
     "Action",
     "DefineAction",
     "LLMAction",
@@ -117,7 +117,7 @@ __all__ = [
     "InstantAction",
     "TimedAction",
     "long_action",
-    # 派生类
+    # Derived classes
     "Move",
     "MoveToRegion",
     "MoveToPOI",

@@ -1,9 +1,9 @@
 /**
  * HTTP API Client
- * 封装基础的 fetch 请求
+ * Thin wrapper around fetch
  */
 
-// 使用环境变量作为 API 基础路径，如果没有配置则默认为空（相对路径）
+// API base URL from env; empty (relative paths) if unset
 const API_BASE = import.meta.env.VITE_API_TARGET || '';
 const DEFAULT_TIMEOUT_MS = 30000;
 const REQUEST_TIMEOUT_REASON = 'cws-request-timeout';
@@ -68,13 +68,13 @@ async function request<T>(
   }
 
   if (!response.ok) {
-    // 尝试解析错误响应的 JSON
+    // Try to parse the error response as JSON
     let errorData: unknown = null;
     let errorMessage = `Request failed: ${response.statusText}`;
     
     try {
       errorData = await response.json();
-      // 如果后端返回了 detail 字段，使用它作为错误消息
+      // Use the backend's detail field as the error message if present
       if (errorData && typeof errorData === 'object' && 'detail' in errorData) {
         const detail = (errorData as { detail?: unknown }).detail;
         if (typeof detail === 'string') {
@@ -89,13 +89,13 @@ async function request<T>(
         }
       }
     } catch {
-      // 如果解析失败，使用默认错误消息
+      // Fall back to the default message if parsing fails
     }
     
     throw new ApiError(response.status, errorMessage, errorData);
   }
 
-  // 假设后端总是返回 JSON
+  // Assume the backend always returns JSON
   const data: unknown = await response.json();
   if (
     data &&

@@ -327,8 +327,8 @@ def test_main_patch_settings_syncs_runtime_locale_and_run_config(monkeypatch):
     applied_locales: list[str] = []
 
     monkeypatch.setattr(main, "apply_runtime_content_locale", lambda lang_code: applied_locales.append(lang_code))
-    monkeypatch.setattr(main, "language_manager", "zh-CN")
-    monkeypatch.setitem(main.game_instance, "run_config", {"content_locale": "zh-CN"})
+    monkeypatch.setattr(main, "language_manager", "xx-XX")
+    monkeypatch.setitem(main.game_instance, "run_config", {"content_locale": "xx-XX"})
 
     res = main.patch_settings(
         AppSettingsPatch(
@@ -348,8 +348,8 @@ def test_settings_patch_api_returns_200_when_router_serializes_model(monkeypatch
     applied_locales: list[str] = []
 
     monkeypatch.setattr(main, "apply_runtime_content_locale", lambda lang_code: applied_locales.append(lang_code))
-    monkeypatch.setattr(main, "language_manager", "zh-CN")
-    monkeypatch.setitem(main.game_instance, "run_config", {"content_locale": "zh-CN"})
+    monkeypatch.setattr(main, "language_manager", "xx-XX")
+    monkeypatch.setitem(main.game_instance, "run_config", {"content_locale": "xx-XX"})
 
     client = TestClient(main.app)
     response = client.patch(
@@ -384,8 +384,8 @@ def test_settings_reset_api_returns_200_when_router_serializes_model(monkeypatch
     applied_locales: list[str] = []
 
     monkeypatch.setattr(main, "apply_runtime_content_locale", lambda lang_code: applied_locales.append(lang_code))
-    monkeypatch.setattr(main, "language_manager", "en-US")
-    monkeypatch.setitem(main.game_instance, "run_config", {"content_locale": "en-US"})
+    run_config = {"content_locale": "stale-locale"}
+    monkeypatch.setitem(main.game_instance, "run_config", run_config)
 
     client = TestClient(main.app)
     response = client.post("/api/settings/reset")
@@ -394,14 +394,17 @@ def test_settings_reset_api_returns_200_when_router_serializes_model(monkeypatch
     payload = response.json()
     assert payload["ui"]["locale"] == get_default_locale()
     assert payload["new_game_defaults"]["content_locale"] == get_default_locale()
-    assert applied_locales == [get_default_locale()]
+    # The runtime already uses the only (default) locale, so no reapply is needed,
+    # but the live run config is still normalized to the reset locale.
+    assert applied_locales == []
+    assert run_config["content_locale"] == get_default_locale()
 
 
 def test_llm_status_api_reports_runtime_failure(monkeypatch):
     from src.server import main
 
     monkeypatch.setitem(main.game_instance, "llm_check_failed", True)
-    monkeypatch.setitem(main.game_instance, "llm_error_message", "身份验证失败")
+    monkeypatch.setitem(main.game_instance, "llm_error_message", "Authentication failed (401)")
 
     client = TestClient(main.app)
     response = client.get("/api/settings/llm/status")
@@ -409,7 +412,7 @@ def test_llm_status_api_reports_runtime_failure(monkeypatch):
     assert response.status_code == 200
     payload = response.json()
     assert payload["requires_config"] is True
-    assert payload["last_failure"] == "身份验证失败"
+    assert payload["last_failure"] == "Authentication failed (401)"
 
 
 def test_llm_status_api_treats_local_openai_endpoint_as_configured_without_key():

@@ -33,19 +33,19 @@ vi.mock('@/stores/ui', () => ({
 function createRoleplayI18n() {
   return createI18n({
     legacy: false,
-    locale: 'zh',
+    locale: 'en-US',
     messages: {
-      zh: {
+      'en-US': {
         game: {
           roleplay: {
             panel: {
-              start: '扮演',
-              stop: '退出扮演',
-              controlled_by: '当前正在扮演：{avatar}',
-              go_to_controlled: '前往该角色',
+              start: 'Roleplay',
+              stop: 'Stop Roleplay',
+              controlled_by: 'Currently roleplaying: {avatar}',
+              go_to_controlled: 'Go to Character',
             },
             fallback: {
-              avatar_name: '角色',
+              avatar_name: 'Character',
             },
           },
         },
@@ -76,7 +76,7 @@ describe('RoleplayPanel', () => {
     await nextTick()
 
     const button = wrapper.get('button.roleplay-btn')
-    expect(button.text()).toBe('扮演')
+    expect(button.text()).toBe('Roleplay')
 
     await button.trigger('click')
     expect(roleplayStoreMock.startRoleplay).toHaveBeenCalledWith('avatar-1')
@@ -106,7 +106,7 @@ describe('RoleplayPanel', () => {
     await nextTick()
 
     const button = wrapper.get('button.roleplay-btn')
-    expect(button.text()).toBe('退出扮演')
+    expect(button.text()).toBe('Stop Roleplay')
 
     await button.trigger('click')
     expect(roleplayStoreMock.stopRoleplay).toHaveBeenCalledWith('avatar-1')
@@ -114,7 +114,7 @@ describe('RoleplayPanel', () => {
 
   it('disables start button when another avatar is already controlled', async () => {
     roleplayStoreMock.session.controlled_avatar_id = 'avatar-2'
-    roleplayStoreMock.session.last_prompt_context = { avatar_name: '冷清雅' }
+    roleplayStoreMock.session.last_prompt_context = { avatar_name: 'Leng Qingya' }
 
     const wrapper = mount(RoleplayPanel, {
       global: { plugins: [createRoleplayI18n()] },
@@ -125,9 +125,9 @@ describe('RoleplayPanel', () => {
     await nextTick()
 
     const button = wrapper.get('button.roleplay-btn')
-    expect(button.text()).toBe('扮演')
+    expect(button.text()).toBe('Roleplay')
     expect(button.attributes('disabled')).toBeDefined()
-    expect(wrapper.text()).toContain('当前正在扮演：冷清雅')
+    expect(wrapper.text()).toContain('Currently roleplaying: Leng Qingya')
 
     await wrapper.get('button.roleplay-btn--ghost').trigger('click')
     expect(uiStoreMock.select).toHaveBeenCalledWith('avatar', 'avatar-2')

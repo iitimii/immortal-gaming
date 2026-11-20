@@ -7,7 +7,7 @@ from src.classes.environment.tile import get_avatar_distance
 from src.classes.observe import get_observable_avatars
 from src.utils.normalize import normalize_avatar_name
 from src.utils.resolution import resolve_query
-# 注意：避免在此处直接引入 Avatar 导致循环引用，使用 TYPE_CHECKING
+# Note: avoid importing Avatar directly here to prevent circular imports; use TYPE_CHECKING
 
 if TYPE_CHECKING:
     from src.classes.core.avatar import Avatar
@@ -15,18 +15,18 @@ if TYPE_CHECKING:
 
 class TargetingMixin:
     """
-    目标与距离等通用工具：为动作类提供统一的查找与抢占能力。
+    Targeting and distance utilities: give action classes unified lookup and preemption abilities.
 
-    注意：不做异常吞噬，失败路径返回 None 或 False，由调用方决策。
+    Note: exceptions are not swallowed; failure paths return None or False and the caller decides.
     """
     def find_avatar_by_name(self, name: str) -> "Avatar|None":
         """
-        根据名字查找角色。
-        会自动规范化名字（去除括号等附加信息）以提高容错性。
+        Find an avatar by name.
+        Normalizes the name automatically (removing parentheses and other extra info) for better tolerance.
         """
             
-        # 动态导入 Avatar 类以进行类型检查，或者直接依赖 resolve_query 的内部逻辑
-        # 这里 resolve_query 需要 world 上下文
+        # Dynamically import the Avatar class for type checking, or rely directly on resolve_query's internal logic
+        # resolve_query needs the world context here
         from src.classes.core.avatar import Avatar
         res = resolve_query(name, self.world, expected_types=[Avatar])
         return res.obj
@@ -53,27 +53,27 @@ class TargetingMixin:
         return self.world.avatar_manager.get_observable_avatars(avatar)
 
     def preempt_avatar(self, avatar: "Avatar") -> None:
-        """抢占目标：清空其计划并中断当前动作。"""
+        """Preempt the target: clear its plans and interrupt its current action."""
         avatar.clear_plans()
         avatar.current_action = None
 
     def set_immediate_action(self, avatar: "Avatar", action_name: str, params: dict) -> None:
-        """将动作立即加载并提交为当前动作，触发开始事件。"""
+        """Load the action immediately and commit it as the current action, triggering the start event."""
         avatar.load_decide_result_chain([(action_name, params)], avatar.thinking, "")
         avatar.commit_next_plan()
 
     def validate_target_avatar(self, name: str | None) -> tuple["Avatar | None", bool, str]:
         """
-        验证目标角色是否有效（存在且存活）。
+        Validate that the target avatar is valid (exists and is alive).
 
         Args:
-            name: 目标角色名。
+            name: target avatar name.
 
         Returns:
             (target, can_proceed, reason)
-            - target: 找到的角色对象，无效时为 None。
-            - can_proceed: 是否可以继续。
-            - reason: 失败原因（成功时为空字符串）。
+            - target: the found avatar object, None if invalid.
+            - can_proceed: whether to proceed.
+            - reason: failure reason (empty string on success).
         """
         if not name:
             return None, False, t("Missing target parameter")

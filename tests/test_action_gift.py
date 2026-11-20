@@ -15,7 +15,7 @@ from src.systems.time import create_month_stamp, Year, Month
 
 @pytest.fixture
 def target_avatar(base_world):
-    """创建第二个角色作为赠送目标"""
+    """Create a second avatar to receive gifts."""
     av = Avatar(
         world=base_world,
         name="TargetNPC",
@@ -25,35 +25,35 @@ def target_avatar(base_world):
         gender=Gender.FEMALE,
         pos_x=0,
         pos_y=0,
-        personas=[],  # 显式清空特质，避免随机特质影响价格测试
+        personas=[],  # Explicitly clear personas so random ones do not affect price tests
     )
-    # 强制重算一次效果，确保属性干净
+    # Force an effect recalculation so attributes are clean
     av.recalc_effects()
     return av
 
 @pytest.fixture
 def gift_action(dummy_avatar, base_world):
-    """初始化 Gift 动作"""
-    # 模拟 _call_llm_response，避免 step 中调用 asyncio.get_running_loop()
+    """Initialize the Gift action."""
+    # Mock _call_llm_response so step() does not call asyncio.get_running_loop()
     with patch.object(Gift, '_call_llm_response', new_callable=MagicMock) as mock_llm:
-         # 返回一个 mock task，确保 task.done() 初始为 False，
-         # 但在这里我们主要是为了让 step 不报错
+         # Return a mock task so task.done() is initially False,
+         # but here the main goal is just to keep step() from failing
          mock_llm.return_value = {} 
          
          action = Gift(dummy_avatar, base_world)
          
-         # 我们直接 Mock 掉 step 里的异步创建任务逻辑，
-         # 因为我们主要测试的是：
-         # 1. 参数是否正确解析 (step -> _resolve_gift)
-         # 2. _can_start 逻辑
-         # 3. 响应结算逻辑 _settle_response / _apply_gift
+         # We mock out the async task creation inside step(),
+         # because what we mainly test is:
+         # 1. Parameters are parsed correctly (step -> _resolve_gift)
+         # 2. _can_start logic
+         # 3. Response settlement logic _settle_response / _apply_gift
          
-         # 但 step 本身有逻辑：
-         # 1. 解析参数
-         # 2. 检查 target
-         # 3. 创建 task (这里会报错)
+         # But step() itself does:
+         # 1. Parse parameters
+         # 2. Check the target
+         # 3. Create a task (this would fail here)
          
-         # 我们采用 patch asyncio.get_running_loop 的方式更简单
+         # Patching asyncio.get_running_loop is the simpler approach
          yield action
 
 # -----------------------------------------------------------------------------
@@ -62,10 +62,10 @@ def gift_action(dummy_avatar, base_world):
 
 class TestGiftAction:
 
-    # --- 1. 赠送灵石 ---
+    # --- 1. Gifting spirit stones ---
 
     def test_gift_spirit_stone_success(self, gift_action, dummy_avatar, target_avatar):
-        """测试赠送灵石成功"""
+        """Gifting spirit stones succeeds."""
         dummy_avatar.magic_stone = 1000
         target_avatar.magic_stone = 0
         
@@ -76,7 +76,7 @@ class TestGiftAction:
         can_start, reason = gift_action._can_start(target_avatar)
         assert can_start is True, f"Should be able to start: {reason}"
         
-        # 模拟接受
+        # Simulate acceptance
         gift_action._settle_response(target_avatar, "Accept")
         
         assert dummy_avatar.magic_stone == 900
@@ -84,7 +84,7 @@ class TestGiftAction:
         assert gift_action._gift_success is True
 
     def test_gift_spirit_stone_insufficient(self, gift_action, dummy_avatar, target_avatar):
-        """测试灵石不足"""
+        """Not enough spirit stones."""
         dummy_avatar.magic_stone = 50
         
         with patch("asyncio.get_running_loop", return_value=MagicMock()):
@@ -93,17 +93,17 @@ class TestGiftAction:
         can_start, reason = gift_action._can_start(target_avatar)
         
         assert can_start is False
-        assert "灵石不足" in reason
+        assert "Insufficient spirit stones" in reason
 
-    # --- 2. 赠送素材 ---
+    # --- 2. Gifting materials ---
 
     def test_gift_material_success(self, gift_action, dummy_avatar, target_avatar, mock_item_data):
-        """测试赠送素材成功"""
+        """Gifting a material succeeds."""
         test_material = mock_item_data["obj_material"]
         dummy_avatar.add_material(test_material, quantity=5)
         
         with patch("asyncio.get_running_loop", return_value=MagicMock()):
-            # 非灵石强制数量 1
+            # Non-stone gifts are forced to quantity 1
             gift_action.step(target_avatar, item_id=str(test_material.id), amount=999) 
         
         can_start, reason = gift_action._can_start(target_avatar)
@@ -116,7 +116,7 @@ class TestGiftAction:
         assert gift_action._current_gift_context["amount"] == 1
 
     def test_gift_material_not_owned(self, gift_action, dummy_avatar, target_avatar, mock_item_data):
-        """测试赠送未持有的素材"""
+        """Gifting a material that is not owned."""
         test_material = mock_item_data["obj_material"]
         
         with patch("asyncio.get_running_loop", return_value=MagicMock()):
@@ -125,10 +125,10 @@ class TestGiftAction:
         can_start, reason = gift_action._can_start(target_avatar)
         assert can_start is False
 
-    # --- 3. 赠送装备 ---
+    # --- 3. Gifting equipment ---
 
     def test_gift_weapon_success_and_auto_equip(self, gift_action, dummy_avatar, target_avatar, mock_item_data):
-        """测试赠送装备成功，且目标自动装备"""
+        """Gifting equipment succeeds and the target auto-equips it."""
         test_weapon = mock_item_data["obj_weapon"]
         dummy_avatar.weapon = test_weapon
         assert target_avatar.weapon is None
@@ -145,7 +145,7 @@ class TestGiftAction:
         assert target_avatar.weapon == test_weapon
 
     def test_gift_weapon_fail_not_equipped(self, gift_action, dummy_avatar, target_avatar, mock_item_data):
-        """测试赠送未装备的装备"""
+        """Gifting equipment that is not equipped."""
         test_weapon = mock_item_data["obj_weapon"]
         
         with patch("asyncio.get_running_loop", return_value=MagicMock()):
@@ -155,15 +155,15 @@ class TestGiftAction:
         assert can_start is False
 
     def test_gift_weapon_target_trade_in(self, gift_action, dummy_avatar, target_avatar, mock_item_data):
-        """测试目标已有装备时，收到新装备会自动折价卖出旧的"""
+        """When the target already has equipment, the old one is sold at a discount."""
         from tests.conftest import create_test_weapon
         from src.systems.cultivation import Realm
         
         new_weapon = mock_item_data["obj_weapon"]
         dummy_avatar.weapon = new_weapon
         
-        old_weapon = create_test_weapon("旧铁剑", Realm.Qi_Refinement, weapon_id=999)     
-        # old_weapon.price = 100 # Prices 系统接管后，价格由 Realm 决定 (练气期=150)，不再手动指定
+        old_weapon = create_test_weapon("Old Iron Sword", Realm.Qi_Refinement, weapon_id=999)     
+        # old_weapon.price = 100 # Prices are now set by realm (Qi Refinement = 150), not manually
         target_avatar.weapon = old_weapon
         target_avatar.magic_stone = 0
         
@@ -173,13 +173,13 @@ class TestGiftAction:
         gift_action._settle_response(target_avatar, "Accept")
         
         assert target_avatar.weapon == new_weapon
-        # 练气期武器基准价 150，卖出倍率 1.0 (无特质加成) -> 150
+        # Qi Refinement weapon base price 150, sell multiplier 1.0 (no persona bonus) -> 150
         assert target_avatar.magic_stone == 150
 
-    # --- 4. 上下文与描述 ---
+    # --- 4. Context and description ---
 
     def test_prompt_info_description(self, gift_action, dummy_avatar, target_avatar, mock_item_data):
-        """验证传给 LLM 的 prompt 中包含具体物品描述"""
+        """The prompt sent to the LLM includes the specific item description."""
         test_weapon = mock_item_data["obj_weapon"]
         dummy_avatar.weapon = test_weapon
         
@@ -189,7 +189,7 @@ class TestGiftAction:
         infos = gift_action._build_prompt_infos(target_avatar)
         
         assert f"[{test_weapon.name}]" in infos["action_info"]
-        assert "赠送" in infos["action_info"]
+        assert "Gift you" in infos["action_info"]
 
     def test_prompt_info_description_stones(self, gift_action, dummy_avatar, target_avatar):
         dummy_avatar.magic_stone = 1000
@@ -198,13 +198,13 @@ class TestGiftAction:
             gift_action.step(target_avatar, item_id="SPIRIT_STONE", amount=500)
             
         infos = gift_action._build_prompt_infos(target_avatar)
-        assert "500 灵石" in infos["action_info"]
+        assert "500 spirit stones" in infos["action_info"]
     
     def test_gift_invalid_id(self, gift_action, dummy_avatar, target_avatar):
-        """测试传入无效 ID"""
+        """Passing an invalid ID."""
         with patch("asyncio.get_running_loop", return_value=MagicMock()):
             gift_action.step(target_avatar, item_id="invalid_id_999", amount=1)
             
         can_start, reason = gift_action._can_start(target_avatar)
         assert can_start is False
-        assert "Item not found" in reason or "未找到物品" in reason
+        assert "Item not found" in reason

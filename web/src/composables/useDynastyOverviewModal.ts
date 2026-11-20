@@ -26,7 +26,7 @@ export function useDynastyOverviewModal(show: () => boolean) {
   const effectLines = computed(() => {
     const text = overview.value.effect_desc || ''
     if (!text) return []
-    return text.split(/[;\n；]/).map((line) => line.trim()).filter(Boolean)
+    return text.split(/[;\n]/).map((line) => line.trim()).filter(Boolean)
   })
 
   function jumpToAvatar(id: string) {

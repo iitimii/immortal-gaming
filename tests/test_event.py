@@ -9,7 +9,7 @@ class TestEventLogic:
     @pytest.fixture
     def avatar_a(self, dummy_avatar):
         dummy_avatar.id = "avatar_a"
-        dummy_avatar.name = "角色A"
+        dummy_avatar.name = "Avatar A"
         return dummy_avatar
 
     @pytest.fixture
@@ -23,7 +23,7 @@ class TestEventLogic:
 
         return Avatar(
             world=base_world,
-            name="角色B",
+            name="Avatar B",
             id="avatar_b",
             birth_month_stamp=MonthStamp(0),
             age=Age(20, Realm.Qi_Refinement),
@@ -38,7 +38,7 @@ class TestEventLogic:
     def test_process_interaction_from_event_is_noop(self, avatar_a, avatar_b):
         event = Event(
             month_stamp=avatar_a.world.month_stamp,
-            content="A与B发生了互动",
+            content="A and B interacted",
             related_avatars=[avatar_a.id, avatar_b.id],
         )
 
@@ -53,7 +53,7 @@ class TestEventLogic:
         base_world.avatar_manager.register_avatar(avatar_b)
 
         processed_ids = set()
-        event = Event(base_world.month_stamp, "事件1", related_avatars=[avatar_a.id, avatar_b.id])
+        event = Event(base_world.month_stamp, "Event 1", related_avatars=[avatar_a.id, avatar_b.id])
 
         social.phase_handle_interactions(base_world.avatar_manager, [event], processed_ids)
 

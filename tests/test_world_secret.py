@@ -32,8 +32,8 @@ def test_world_secret_loader_includes_none_random_and_fragments():
     options = get_world_secret_options()
 
     assert WORLD_SECRET_NONE_ID in definitions
-    assert options[0] == {"id": "none", "title": "无"}
-    assert options[1] == {"id": "random", "title": "随机"}
+    assert options[0] == {"id": "none", "title": "None"}
+    assert options[1] == {"id": "random", "title": "Random"}
     assert "fake_sky" in definitions
     assert len(definitions["fake_sky"].fragments) == 6
     assert {fragment.trigger_kind for fragment in definitions["fake_sky"].fragments} >= {"region", "city", "insight"}
@@ -45,10 +45,6 @@ def test_world_secret_content_uses_localized_game_config_overrides():
 
     checks = {
         "en-US": ("This World's Sky Is False", "Misaligned Stars"),
-        "zh-TW": ("本世界的天空是虛假的", "星辰錯位"),
-        "ja-JP": ("この世界の空は偽物である", "星辰のずれ"),
-        "vi-VN": ("Bầu trời của thế giới này là giả", "Sao trời lệch vị"),
-        "fr-FR": ("Le ciel de ce monde est faux", "Étoiles décalées"),
     }
     locales_dir = Path("static/locales")
 
@@ -64,11 +60,6 @@ def test_world_secret_content_uses_localized_game_config_overrides():
         assert len(fragment_rows) == 73
         assert secret_by_id["fake_sky"]["title"] == expected_title
         assert fragment_by_id["fake_sky_1"]["angle"] == expected_angle
-        if locale in {"ja-JP", "vi-VN", "fr-FR"}:
-            assert secret_by_id["fake_sky"]["title"] != "This World's Sky Is False"
-        if locale == "zh-TW":
-            assert "虚" not in secret_by_id["fake_sky"]["title"]
-            assert "错" not in fragment_by_id["fake_sky_1"]["angle"]
 
 
 def test_world_secret_runtime_text_is_localized(dummy_avatar):
@@ -82,8 +73,9 @@ def test_world_secret_runtime_text_is_localized(dummy_avatar):
     avatar.weapon = None
     world.avatar_manager.avatars[avatar.id] = avatar
 
+    original_language = str(language_manager)
     try:
-        language_manager.set_language("fr-FR")
+        language_manager.set_language("en-US")
         reload_game_configs()
         runtime = initialize_world_secret(world, "fake_sky")
         definition = get_world_secret_definition("fake_sky")
@@ -97,14 +89,12 @@ def test_world_secret_runtime_text_is_localized(dummy_avatar):
         )
         request = WorldSecretDisclosureScenario(world, avatar, definition).build_request()
 
-        assert "a remarqué un indice inhabituel" in event.content
-        assert "察觉" not in event.content
-        assert request.title == "Révéler le secret du monde ?"
-        assert request.options[0].title == "Le dire à tous"
-        assert request.options[1].title == "Le porter en silence"
-        assert "是否公开" not in request.title
+        assert "noticed an unusual clue" in event.content
+        assert request.title == "Reveal the world secret?"
+        assert request.options[0].title == "Tell everyone"
+        assert request.options[1].title == "Bear it silently"
     finally:
-        language_manager.set_language("zh-CN")
+        language_manager.set_language(original_language)
         reload_game_configs()
 
 
@@ -174,7 +164,7 @@ async def test_full_secret_share_public_syncs_all_avatars(dummy_avatar):
     async def fake_resolve(_scenario):
         decision = SingleChoiceDecision(
             selected_key=DISCLOSURE_SHARE_ALL,
-            thinking="公开真相",
+            thinking="Reveal the truth",
             source=ChoiceSource.LLM,
             raw_response=None,
             used_fallback=False,
@@ -253,7 +243,7 @@ def _clone_avatar_for_world(source, world, avatar_id):
 
     avatar = Avatar(
         world=world,
-        name=f"{source.name}二",
+        name=f"{source.name} II",
         id=avatar_id,
         birth_month_stamp=source.birth_month_stamp,
         age=source.age,

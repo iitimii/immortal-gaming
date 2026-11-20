@@ -1,7 +1,7 @@
 """
-Avatar 信息展示模块
+Avatar info presentation module
 
-将信息格式化逻辑从 Avatar 类中分离，作为独立函数提供。
+Separates info-formatting logic from the Avatar class into standalone functions.
 """
 from __future__ import annotations
 
@@ -43,7 +43,7 @@ def _get_race_behavior_desc(avatar: "Avatar") -> str:
 
 
 def _get_effects_text(avatar: "Avatar") -> str:
-    """获取格式化的效果文本"""
+    """Get the formatted effects text."""
     from src.i18n import t
     from src.classes.effect import format_effects_to_text
     breakdown = avatar.get_effect_breakdown()
@@ -84,7 +84,7 @@ def _get_world_secret_knowledge_payload(avatar: "Avatar") -> dict | None:
 
 def get_avatar_info(avatar: "Avatar", detailed: bool = False) -> dict:
     """
-    获取 avatar 的信息，返回 dict；根据 detailed 控制信息粒度。
+    Get avatar info as a dict; detailed controls the granularity.
     """
     from src.i18n import t
     region = avatar.tile.region if avatar.tile is not None else None
@@ -101,7 +101,7 @@ def get_avatar_info(avatar: "Avatar", detailed: bool = False) -> dict:
 
     from src.classes.core.sect import get_sect_info_with_rank
     
-    # [新增] 道统 (Orthodoxy)
+    # [New] Orthodoxy
     orthodoxy_info = t(avatar.orthodoxy.name) if avatar.orthodoxy else t("None")
 
     if detailed:
@@ -168,17 +168,9 @@ def get_avatar_info(avatar: "Avatar", detailed: bool = False) -> dict:
     if rank_info:
         r_type, r_num = rank_info
         
-        is_zh = any('\u4e00' <= c <= '\u9fff' for c in t("Ranking"))
-        if is_zh:
-            zh_type_map = {"heaven": "天榜", "earth": "地榜", "human": "人榜"}
-            zh_nums = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
-            list_name = zh_type_map.get(r_type, r_type)
-            display_num = zh_nums[r_num] if 1 <= r_num <= 10 else str(r_num)
-            info_dict[t("Ranking")] = f"{list_name}第{display_num}"
-        else:
-            en_type_map = {"heaven": "Heaven List", "earth": "Earth List", "human": "Human List"}
-            list_name = en_type_map.get(r_type, r_type)
-            info_dict[t("Ranking")] = f"{list_name} Rank {r_num}"
+        en_type_map = {"heaven": "Heaven List", "earth": "Earth List", "human": "Human List"}
+        list_name = en_type_map.get(r_type, r_type)
+        info_dict[t("Ranking")] = f"{list_name} Rank {r_num}"
     
     if detailed:
         info_dict[t("Current Effects")] = _get_effects_text(avatar)
@@ -194,10 +186,10 @@ def get_avatar_info(avatar: "Avatar", detailed: bool = False) -> dict:
         if fate and fate.get("trigger_text"):
             info_dict[t("Fate Revelation")] = str(fate.get("trigger_text", ""))
 
-    # 绰号：仅在存在时显示
+    # Nickname: shown only when present
     if avatar.nickname is not None:
         info_dict[t("Nickname")] = avatar.nickname.value
-    # 灵兽：仅在存在时显示
+    # Spirit animal: shown only when present
     if avatar.spirit_animal is not None:
         info_dict[t("Spirit Animal")] = spirit_animal_info
     return info_dict
@@ -205,9 +197,9 @@ def get_avatar_info(avatar: "Avatar", detailed: bool = False) -> dict:
 
 def get_avatar_structured_info(avatar: "Avatar") -> dict:
     """
-    获取结构化的角色信息，用于前端展示和交互。
+    Get structured avatar info for frontend display and interaction.
     """
-    # 基础信息
+    # Basic info
     from src.i18n import t
     from src.classes.observe import get_avatar_observation_radius
     from src.classes.relation.relations import iter_display_relation_entries
@@ -273,19 +265,19 @@ def get_avatar_structured_info(avatar: "Avatar") -> dict:
     if rank_info:
         info["ranking"] = {"type": rank_info[0], "rank": rank_info[1]}
 
-    # 1. 特质 (Personas)
+    # 1. Personas
     info["personas"] = [p.get_structured_info() for p in avatar.personas]
 
-    # 2. 外挂 (Goldfinger)
+    # 2. Goldfinger
     info["goldfinger"] = _get_goldfinger_structured_payload(avatar)
 
-    # 3. 功法 (Technique)
+    # 3. Technique
     if avatar.technique:
         info["technique"] = avatar.technique.get_structured_info()
     else:
         info["technique"] = None
 
-    # 4. 宗门 (Sect)
+    # 4. Sect
     if avatar.sect:
         sect_info = avatar.sect.get_structured_info()
         if avatar.sect_rank:
@@ -335,14 +327,14 @@ def get_avatar_structured_info(avatar: "Avatar") -> dict:
         }
     info["sect_status_summary"] = sect_status_summary
         
-    # [新增] 道统 (Orthodoxy)
-    # 无论有无宗门，都返回道统信息（散修返回"天地"道统）
+    # [New] Orthodoxy
+    # Return orthodoxy info whether or not the avatar has a sect (rogue cultivators get the default orthodoxy)
     if avatar.orthodoxy:
         info["orthodoxy"] = avatar.orthodoxy.get_info(detailed=True)
     else:
         info["orthodoxy"] = None
         
-    # 补充：阵营详情
+    # Extra: alignment details
     from src.classes.alignment import alignment_info_msg_ids
     info["alignment"] = str(avatar.alignment) if avatar.alignment else t("Unknown")
     if avatar.alignment:
@@ -352,7 +344,7 @@ def get_avatar_structured_info(avatar: "Avatar") -> dict:
             "desc": t(desc_id) if desc_id else "",
         }
 
-    # 5. 装备 (Weapon & Auxiliary)
+    # 5. Equipment (Weapon & Auxiliary)
     if avatar.weapon:
         w_info = avatar.weapon.get_structured_info()
         w_info["proficiency"] = f"{avatar.weapon_proficiency:.1f}%"
@@ -365,7 +357,7 @@ def get_avatar_structured_info(avatar: "Avatar") -> dict:
     else:
         info["auxiliary"] = None
         
-    # 6. 材料 (Materials)
+    # 6. Materials
     materials_list = []
     for material, count in avatar.materials.items():
         m_info = material.get_structured_info()
@@ -373,10 +365,10 @@ def get_avatar_structured_info(avatar: "Avatar") -> dict:
         materials_list.append(m_info)
     info["materials"] = materials_list
     
-    # 7. 关系 (Relations)
+    # 7. Relations
     relations_list = []
     
-    # 6.1 添加现有的修仙者关系
+    # 6.1 Add existing cultivator relations
     existing_ids = set()
     for other, relation_state, relation_scope in iter_display_relation_entries(avatar):
         existing_ids.add(other.id)
@@ -434,21 +426,21 @@ def get_avatar_structured_info(avatar: "Avatar") -> dict:
             "relation_scope": "computed",
         })
     
-    # 6.2 [新增] 添加凡人子女
+    # 6.2 [New] Add mortal children
     from src.classes.relation.relation import GENDERED_DISPLAY
     for child in avatar.children:
         if child.id not in existing_ids:
-            # 凡人子女: Owner is Parent -> relation should be Relation.PARENT
+            # Mortal children: Owner is Parent -> relation should be Relation.PARENT
             # Label should be Son/Daughter
             gender_val = child.gender.value
-            # 查找对应的翻译 key (Relation.PARENT, "male") -> "relation_son"
+            # Find the matching translation key (Relation.PARENT, "male") -> "relation_son"
             label_key = GENDERED_DISPLAY.get((Relation.IS_CHILD_OF, gender_val), "child")
             
             relations_list.append({
                 "target_id": child.id,
                 "name": child.name,
                 "relation": t(label_key), 
-                "relation_type": Relation.IS_CHILD_OF.value, # 这里的类型应该是 CHILD (Target is Child)
+                "relation_type": Relation.IS_CHILD_OF.value, # The type here should be CHILD (Target is Child)
                 "realm": t("Mortal"),
                 "sect": t("None"),
                 "is_mortal": True,
@@ -459,10 +451,10 @@ def get_avatar_structured_info(avatar: "Avatar") -> dict:
 
     info["relations"] = relations_list
     
-    # 8. 外貌
+    # 8. Appearance
     info["appearance"] = avatar.appearance.get_info()
     
-    # 9. 灵根
+    # 9. Spiritual root
     from src.classes.root import format_root_cn
     root_str = format_root_cn(avatar.root)
     info["root"] = root_str
@@ -472,11 +464,11 @@ def get_avatar_structured_info(avatar: "Avatar") -> dict:
          "effect_desc": avatar.root.effect_desc
     }
     
-    # 10. 灵兽
+    # 10. Spirit animal
     if avatar.spirit_animal:
          info["spirit_animal"] = avatar.spirit_animal.get_structured_info()
 
-    # 当前效果
+    # Current effects
     effects_text = _get_effects_text(avatar)
     info["current_effects"] = effects_text
     info[t("Current Effects")] = effects_text
@@ -501,13 +493,13 @@ def get_avatar_expanded_info(
     detailed: bool = False
 ) -> dict:
     """
-    获取角色的扩展信息，包含基础信息、观察到的角色和事件历史。
+    Get extended avatar info, including basic info, observed avatars and event history.
     
     Args:
-        avatar: 目标角色
-        co_region_avatars: 同区域的其他角色列表，用于"观察到的角色"字段
-        other_avatar: 另一个角色，如果提供则返回两人共同经历的事件，否则返回单人事件
-        detailed: 是否返回详细信息
+        avatar: target avatar
+        co_region_avatars: other avatars in the same region, used for the "observed avatars" field
+        other_avatar: another avatar; if given, return events the two shared, otherwise single-avatar events
+        detailed: whether to return detailed info
     """
     from src.i18n import t
     from src.systems.cultivation_display import build_avatar_cultivation_display
@@ -519,12 +511,12 @@ def get_avatar_expanded_info(
             cultivation = build_avatar_cultivation_display(other)
             observed.append(t("{name}, Realm: {realm}", name=other.name, realm=cultivation["display_full_name"]))
 
-    # 历史事件改为从全局事件管理器分类查询
+    # History events are now queried by category from the global event manager
     em = avatar.world.event_manager
     major_limit = CONFIG.social.major_event_context_num
     minor_limit = CONFIG.social.minor_event_context_num
     
-    # 根据是否提供 other_avatar 决定获取单人事件还是双人共同事件
+    # Decide between single-avatar and shared events depending on other_avatar
     if other_avatar is not None:
         major_events = em.get_major_events_between(avatar.id, other_avatar.id, limit=major_limit)
         minor_events = em.get_minor_events_between(avatar.id, other_avatar.id, limit=minor_limit)

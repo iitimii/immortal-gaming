@@ -178,4 +178,4 @@ def test_profile_connectivity_labels_fast_model_failure():
     )
 
     assert success is False
-    assert error == "快速模型连接失败：model not found"
+    assert error == "Fast model connection failed: model not found"

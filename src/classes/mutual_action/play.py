@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 def try_trigger_play_benefit(avatar: Avatar) -> str:
     """
-    尝试触发消遣收益 (复用单人消遣的逻辑)
+    Try to trigger leisure benefits (reusing the solo leisure logic)
     """
     prob = CONFIG.play.base_benefit_probability if hasattr(CONFIG, 'play') else 0.05
     
@@ -25,7 +25,7 @@ def try_trigger_play_benefit(avatar: Avatar) -> str:
     return ""
 
 class TeaParty(InvitationAction):
-    """茶会：双人互动"""
+    """Tea party: two-person interaction"""
     ACTION_NAME_ID = "action_tea_party"
     DESC_ID = "action_tea_party_desc"
     STORY_PROMPT_ID = "action_tea_party_story_prompt"
@@ -39,7 +39,7 @@ class TeaParty(InvitationAction):
     
     def _settle_response(self, target_avatar: Avatar, response_name: str) -> None:
         if response_name == "Accept":
-            # 尝试给双方触发收益
+            # Try to trigger benefits for both sides
             try_trigger_play_benefit(self.avatar)
             try_trigger_play_benefit(target_avatar)
             self._play_success = True
@@ -77,7 +77,7 @@ class TeaParty(InvitationAction):
         return events
 
 class Chess(InvitationAction):
-    """下棋：双人互动"""
+    """Go (weiqi): two-person interaction"""
     ACTION_NAME_ID = "action_chess"
     DESC_ID = "action_chess_desc"
     STORY_PROMPT_ID = "action_chess_story_prompt"
@@ -91,7 +91,7 @@ class Chess(InvitationAction):
 
     def _settle_response(self, target_avatar: Avatar, response_name: str) -> None:
         if response_name == "Accept":
-            # 尝试给双方触发收益
+            # Try to trigger benefits for both sides
             try_trigger_play_benefit(self.avatar)
             try_trigger_play_benefit(target_avatar)
             self._play_success = True

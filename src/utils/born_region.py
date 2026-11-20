@@ -13,12 +13,12 @@ def get_born_region_id(
     race: object | None = None,
 ) -> int:
     """
-    确定角色的出生地ID。
-    规则：
-    1. 妖族优先出生在父母所在的野外区域，否则随机野外区域。
-    2. 如果有宗门（或父母有宗门），优先出生在宗门驻地。
-    3. 否则，如果父母在某地，出生在离父母最近的城市。
-    4. 否则，随机出生在一个城市。
+    Determine the avatar's birth region ID.
+    Rules:
+    1. Yao races prefer the parents' wild region, otherwise a random wild region.
+    2. If the avatar (or a parent) has a sect, prefer the sect headquarters.
+    3. Otherwise, if a parent has a location, the city nearest to the parent.
+    4. Otherwise, a random city.
     """
     from src.classes.race import is_yao_race
 
@@ -30,7 +30,7 @@ def get_born_region_id(
         if wild_region_id != -1:
             return wild_region_id
 
-    # 1. 尝试从宗门获取
+    # 1. Try the sect
     target_sect = sect
     if not target_sect and parents:
         for p in parents:
@@ -45,7 +45,7 @@ def get_born_region_id(
         if sect_region_id is not None:
             return sect_region_id
 
-    # 2. 尝试从父母位置获取最近城市
+    # 2. Try the city nearest to a parent's location
     parent_loc = None
     if parents:
         for p in parents:
@@ -54,14 +54,14 @@ def get_born_region_id(
                 break
     
     if parent_loc:
-        # 寻找最近的城市
+        # Find the nearest city
         from src.classes.environment.region import CityRegion
         from src.utils.distance import chebyshev_distance
         
         min_dist = float('inf')
         nearest_city_id = -1
         
-        # world.map.regions 包含了所有区域
+        # world.map.regions contains every region
         for rid, region in world.map.regions.items():
             if isinstance(region, CityRegion):
                 dist = chebyshev_distance(parent_loc, region.center_loc)
@@ -72,7 +72,7 @@ def get_born_region_id(
         if nearest_city_id != -1:
             return nearest_city_id
 
-    # 3. 随机城市
+    # 3. Random city
     from src.classes.environment.region import CityRegion
     city_ids = [rid for rid, r in world.map.regions.items() if isinstance(r, CityRegion)]
     if city_ids:
