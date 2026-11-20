@@ -4,20 +4,15 @@ import asyncio
 from dataclasses import dataclass
 from typing import Any, Callable
 
-from .tick_payload import TickPayloadBuilder
+from .stepper import SimulationStepper
 from src.server.runtime.speed import DEFAULT_SIMULATION_SPEED, step_interval_for_speed
-from src.utils.llm.runtime_mode import is_world_test_mode, llm_test_mode_scope
 
 
 @dataclass(slots=True)
 class GameLoopRunner:
     game_instance: dict[str, Any]
     runtime: Any
-    manager: Any
-    tick_payload_builder: TickPayloadBuilder
-    should_trigger_auto_save: Callable[[Any], tuple[bool, int, int]]
-    trigger_auto_save: Callable[[Any, Any], None]
-    build_auto_save_toast: Callable[[], dict[str, Any]]
+    stepper: SimulationStepper
     get_logger: Callable[[], Any]
     sleep: Callable[[float], Any] = asyncio.sleep
     # Waits are split into short slices so speed changes take effect quickly.
@@ -70,26 +65,7 @@ class GameLoopRunner:
             if self.runtime.get("init_status") != "ready":
                 return
 
-            sim = self.runtime.get("sim")
-            world = self.runtime.get("world")
-            if not sim or not world:
-                return
-
-            async def _step_in_run_scope():
-                with llm_test_mode_scope(is_world_test_mode(world)):
-                    return await sim.step()
-
-            events = await self.runtime.run_mutation(_step_in_run_scope)
-            if getattr(self.runtime, "is_reset_requested", lambda: False)():
-                return
-            await self.manager.broadcast(self.tick_payload_builder.build(events=events, world=world))
-
-            should_auto_save, year, _month = self.should_trigger_auto_save(world)
-            if should_auto_save:
-                print(f"[Auto-Save] Triggering auto save for year {year}...")
-                await asyncio.to_thread(self.trigger_auto_save, world, sim)
-                await self.manager.broadcast(self.build_auto_save_toast())
-                print("[Auto-Save] Auto save completed.")
+            await self.stepper.step_and_broadcast()
         except Exception as exc:
             print(f"Game loop error: {exc}")
             self.get_logger().logger.error(f"Game loop error: {exc}", exc_info=True)

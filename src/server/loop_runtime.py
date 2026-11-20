@@ -6,7 +6,7 @@ from typing import Any, Callable
 from src.config import get_settings_service
 from src.config.providers import RuntimeConfigProvider
 from src.i18n import t
-from src.server.loop import GameLoopRunner, TickPayloadBuilder
+from src.server.loop import GameLoopRunner, SimulationStepper, TickPayloadBuilder
 from src.systems.cultivation_display import build_avatar_cultivation_display
 
 AVATAR_POSITION_UPDATE_LIMIT = 50
@@ -130,9 +130,8 @@ def build_auto_save_toast() -> dict[str, Any]:
     }
 
 
-async def run_game_loop_forever(
+def create_simulation_stepper(
     *,
-    game_instance: dict,
     runtime,
     manager,
     build_avatar_updates: Callable[[], list[dict[str, Any]]],
@@ -140,11 +139,9 @@ async def run_game_loop_forever(
     should_trigger_auto_save: Callable[[Any], tuple[bool, int, int]],
     trigger_auto_save,
     build_auto_save_toast: Callable[[], dict[str, Any]],
-    get_logger,
-) -> None:
-    """Run the background simulation loop forever once initialization succeeds."""
-    runner = GameLoopRunner(
-        game_instance=game_instance,
+) -> SimulationStepper:
+    """Build the single step-and-broadcast helper shared by the loop and manual steps."""
+    return SimulationStepper(
         runtime=runtime,
         manager=manager,
         tick_payload_builder=TickPayloadBuilder(
@@ -154,6 +151,21 @@ async def run_game_loop_forever(
         should_trigger_auto_save=should_trigger_auto_save,
         trigger_auto_save=trigger_auto_save,
         build_auto_save_toast=build_auto_save_toast,
+    )
+
+
+async def run_game_loop_forever(
+    *,
+    game_instance: dict,
+    runtime,
+    stepper: SimulationStepper,
+    get_logger,
+) -> None:
+    """Run the background simulation loop forever once initialization succeeds."""
+    runner = GameLoopRunner(
+        game_instance=game_instance,
+        runtime=runtime,
+        stepper=stepper,
         get_logger=get_logger,
     )
     await runner.run_forever()

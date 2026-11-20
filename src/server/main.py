@@ -152,6 +152,7 @@ from src.server.loop_runtime import (
     build_auto_save_toast,
     build_avatar_updates,
     build_tick_state,
+    create_simulation_stepper,
     run_game_loop_forever,
     should_trigger_auto_save,
 )
@@ -376,6 +377,7 @@ command_dependencies = GameCommandDependencies(
     get_load_game=lambda: load_game,
     get_events_db_path=get_events_db_path,
     roleplay_commands=roleplay_command_service,
+    get_simulation_stepper=lambda: simulation_stepper,
 )
 
 server_context = create_server_context(
@@ -494,32 +496,38 @@ def trigger_auto_save(world, sim):
     _trigger_auto_save(world=world, sim=sim, sects_by_id=sects_by_id)
 
 
+simulation_stepper = create_simulation_stepper(
+    runtime=runtime,
+    manager=manager,
+    build_avatar_updates=lambda: build_avatar_updates(
+        world=runtime.get("world"),
+        resolve_avatar_pic_id=lambda avatar: resolve_avatar_pic_id(
+            avatar_assets=AVATAR_ASSETS,
+            avatar=avatar,
+        ),
+        resolve_avatar_action_emoji=resolve_avatar_action_emoji,
+    ),
+    build_tick_state=lambda avatar_updates, events, world: build_tick_state(
+        world=world,
+        events=events,
+        avatar_updates=avatar_updates,
+        serialize_events_for_client=serialize_events_for_client,
+        serialize_phenomenon=serialize_phenomenon,
+        serialize_active_domains=serialize_active_domains,
+        world_revision=runtime.world_revision,
+    ),
+    should_trigger_auto_save=lambda world: should_trigger_auto_save(world=world),
+    trigger_auto_save=lambda world, sim: trigger_auto_save(world, sim),
+    build_auto_save_toast=build_auto_save_toast,
+)
+
+
 async def game_loop():
     """Kept for compatibility: run the game loop automatically in the background."""
     await run_game_loop_forever(
         game_instance=game_instance,
         runtime=runtime,
-        manager=manager,
-        build_avatar_updates=lambda: build_avatar_updates(
-            world=runtime.get("world"),
-            resolve_avatar_pic_id=lambda avatar: resolve_avatar_pic_id(
-                avatar_assets=AVATAR_ASSETS,
-                avatar=avatar,
-            ),
-            resolve_avatar_action_emoji=resolve_avatar_action_emoji,
-        ),
-        build_tick_state=lambda avatar_updates, events, world: build_tick_state(
-            world=world,
-            events=events,
-            avatar_updates=avatar_updates,
-            serialize_events_for_client=serialize_events_for_client,
-            serialize_phenomenon=serialize_phenomenon,
-            serialize_active_domains=serialize_active_domains,
-            world_revision=runtime.world_revision,
-        ),
-        should_trigger_auto_save=lambda world: should_trigger_auto_save(world=world),
-        trigger_auto_save=trigger_auto_save,
-        build_auto_save_toast=build_auto_save_toast,
+        stepper=simulation_stepper,
         get_logger=_get_logger,
     )
 

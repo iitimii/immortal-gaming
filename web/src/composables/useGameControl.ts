@@ -1,7 +1,8 @@
-import { watch, type Ref } from 'vue'
+import { computed, watch, type Ref } from 'vue'
 import { useUiStore } from '@/stores/ui'
 import { useSystemStore } from '@/stores/system'
 import { useSocketStore } from '@/stores/socket'
+import { useRoleplayStore } from '@/stores/roleplay'
 import { logError } from '@/utils/appError'
 import { storeToRefs } from 'pinia'
 
@@ -17,8 +18,9 @@ export function useGameControl(options: UseGameControlOptions) {
   const uiStore = useUiStore()
   const systemStore = useSystemStore()
   const socketStore = useSocketStore()
-  
-  const { isManualPaused, simulationSpeed, allowedSpeeds } = storeToRefs(systemStore)
+  const roleplayStore = useRoleplayStore()
+
+  const { isManualPaused, simulationSpeed, allowedSpeeds, isStepping } = storeToRefs(systemStore)
   const { isConnected } = storeToRefs(socketStore)
 
   // Unified pause control:
@@ -69,6 +71,18 @@ export function useGameControl(options: UseGameControlOptions) {
     systemStore.setSpeed(speed).catch((e) => logError('GameControl set speed', e))
   }
 
+  // The backend rejects manual steps while roleplay waits for player input.
+  const isRoleplayWaiting = computed(() => {
+    const status = roleplayStore.session.status
+    return status !== 'inactive' && status !== 'observing'
+  })
+  const canStepOnce = computed(() => systemStore.canStepOnce && !isRoleplayWaiting.value)
+
+  function stepOnce() {
+    if (!canStepOnce.value) return
+    systemStore.stepOnce().catch((e) => logError('GameControl step once', e))
+  }
+
   return {
     isManualPaused,
     simulationSpeed,
@@ -76,5 +90,8 @@ export function useGameControl(options: UseGameControlOptions) {
     handleKeydown,
     toggleManualPause,
     setSimulationSpeed,
+    isStepping,
+    canStepOnce,
+    stepOnce,
   }
 }

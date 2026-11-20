@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from src.server.loop import GameLoopRunner
+from src.server.loop import GameLoopRunner, SimulationStepper
 from src.server.runtime import DEFAULT_GAME_STATE, GameSessionRuntime
 from src.server.runtime.speed import BASE_STEP_INTERVAL_SECONDS
 
@@ -15,11 +15,14 @@ def _make_runner(runtime, sleep):
     return GameLoopRunner(
         game_instance={"init_status": "ready"},
         runtime=runtime,
-        manager=SimpleNamespace(broadcast=None),
-        tick_payload_builder=SimpleNamespace(build=lambda **_kwargs: {}),
-        should_trigger_auto_save=lambda _world: (False, 0, 0),
-        trigger_auto_save=lambda _world, _sim: None,
-        build_auto_save_toast=lambda: {},
+        stepper=SimulationStepper(
+            runtime=runtime,
+            manager=SimpleNamespace(broadcast=None),
+            tick_payload_builder=SimpleNamespace(build=lambda **_kwargs: {}),
+            should_trigger_auto_save=lambda _world: (False, 0, 0),
+            trigger_auto_save=lambda _world, _sim: None,
+            build_auto_save_toast=lambda: {},
+        ),
         get_logger=lambda: SimpleNamespace(logger=SimpleNamespace(error=lambda *a, **k: None)),
         sleep=sleep,
     )

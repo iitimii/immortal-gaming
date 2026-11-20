@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { systemApi } from '../api';
-import type { InitStatusDTO } from '../types/api';
+import type { InitStatusDTO, StepOnceResponseDTO } from '../types/api';
 import { logError } from '../utils/appError';
 
 export const useSystemStore = defineStore('system', () => {
@@ -12,6 +12,7 @@ export const useSystemStore = defineStore('system', () => {
   const isGameRunning = ref(false); // Game is in the Running phase (init status ready)
   const simulationSpeed = ref(1); // Runtime speed multiplier, synced from the backend
   const allowedSpeeds = ref<number[]>([]); // Backend-provided speed options
+  const isStepping = ref(false); // A manual "step one month" request is in flight
 
   // Request counter to handle race conditions.
   let fetchStatusRequestId = 0;
@@ -30,6 +31,9 @@ export const useSystemStore = defineStore('system', () => {
   const isReady = computed(() => {
     return initStatus.value?.status === 'ready' && isInitialized.value;
   });
+
+  // Manual stepping is only offered while the user has paused a ready game.
+  const canStepOnce = computed(() => isReady.value && isManualPaused.value && !isStepping.value);
 
   // --- Actions ---
   
@@ -93,6 +97,21 @@ export const useSystemStore = defineStore('system', () => {
     }
   }
 
+  // Advance the paused world by exactly one month. The tick itself arrives over
+  // the websocket like a normal loop step; the response only summarises it.
+  async function stepOnce(): Promise<StepOnceResponseDTO | null> {
+    if (!canStepOnce.value) return null;
+    isStepping.value = true;
+    try {
+      return await systemApi.stepOnce();
+    } catch (e) {
+      logError('SystemStore step once', e);
+      return null;
+    } finally {
+      isStepping.value = false;
+    }
+  }
+
   function setInitialized(val: boolean) {
     isInitialized.value = val;
   }
@@ -138,13 +157,16 @@ export const useSystemStore = defineStore('system', () => {
     isGameRunning,
     simulationSpeed,
     allowedSpeeds,
+    isStepping,
     isLoading,
     isReady,
+    canStepOnce,
     
     fetchInitStatus,
     setInitialized,
     togglePause,
     setSpeed,
+    stepOnce,
     pause,
     resume
   };

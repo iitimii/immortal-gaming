@@ -129,6 +129,7 @@ def create_public_command_router(
     run_pause_game_and_drain: Callable[[], object] | None = None,
     run_resume_game: Callable[[], object] | None = None,
     run_set_simulation_speed: Callable[..., object] | None = None,
+    run_step_once: Callable[[], object] | None = None,
     run_set_long_term_objective: Callable[[BaseModel], object] | None = None,
     run_clear_long_term_objective: Callable[[BaseModel], object] | None = None,
     run_create_avatar: Callable[[BaseModel], object] | None = None,
@@ -196,6 +197,12 @@ def create_public_command_router(
         if command_service is not None:
             return ok_response(await command_service.set_simulation_speed(speed=req.speed))
         return ok_response(await run_set_simulation_speed(speed=req.speed))
+
+    @router.post("/api/v1/command/game/step")
+    async def step_once_v1():
+        if command_service is not None:
+            return ok_response(await command_service.step_once())
+        return ok_response(await run_step_once())
 
     @router.post("/api/v1/command/avatar/set-long-term-objective")
     async def set_long_term_objective_v1(req: SetObjectiveRequest):
