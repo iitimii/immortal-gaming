@@ -132,7 +132,10 @@
     "resume": "Resume Game",
     "pause": "Pause Game",
     "paused": "Paused",
-    "closed_msg": "Game closed. You can safely close this tab."
+    "closed_msg": "Game closed. You can safely close this tab.",
+    "speed_label": "Simulation speed",
+    "speed_option": "{speed}x",
+    "speed_set": "Set simulation speed to {speed}x"
   },
   "event_panel": {
     "title": "Events",

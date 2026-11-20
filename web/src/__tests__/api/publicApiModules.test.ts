@@ -78,6 +78,16 @@ describe('public api module migration', () => {
     expect(postMock).toHaveBeenNthCalledWith(2, '/api/v1/command/game/load', { filename: 'save.json' })
   })
 
+  it('systemApi sets simulation speed through /api/v1 command endpoint', async () => {
+    const { systemApi } = await import('@/api/modules/system')
+    postMock.mockResolvedValue({ status: 'ok', speed: 2, allowed_speeds: [0.5, 1, 2, 4] })
+
+    const result = await systemApi.setSpeed(2)
+
+    expect(postMock).toHaveBeenCalledWith('/api/v1/command/game/set-speed', { speed: 2 })
+    expect(result.speed).toBe(2)
+  })
+
   it('systemApi startNewGame and shutdown use /api/v1 endpoints', async () => {
     const { systemApi } = await import('@/api/modules/system')
     postMock.mockResolvedValue({ status: 'ok' })

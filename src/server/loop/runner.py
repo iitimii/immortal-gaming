@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Any, Callable
 
 from .tick_payload import TickPayloadBuilder
+from src.server.runtime.speed import DEFAULT_SIMULATION_SPEED, step_interval_for_speed
 from src.utils.llm.runtime_mode import is_world_test_mode, llm_test_mode_scope
 
 
@@ -19,6 +20,8 @@ class GameLoopRunner:
     build_auto_save_toast: Callable[[], dict[str, Any]]
     get_logger: Callable[[], Any]
     sleep: Callable[[float], Any] = asyncio.sleep
+    # Waits are split into short slices so speed changes take effect quickly.
+    sleep_slice_seconds: float = 0.05
 
     async def wait_for_initialization(self) -> bool:
         print("Background game loop started, waiting for initialization...")
@@ -37,8 +40,28 @@ class GameLoopRunner:
             return
 
         while True:
-            await self.sleep(1.0)
+            await self.wait_for_next_step()
             await self.run_once()
+
+    def get_step_interval(self) -> float:
+        get_speed = getattr(self.runtime, "get_simulation_speed", None)
+        speed = get_speed() if callable(get_speed) else DEFAULT_SIMULATION_SPEED
+        return step_interval_for_speed(speed)
+
+    async def wait_for_next_step(self) -> None:
+        """Sleep until the interval for the current speed has elapsed.
+
+        The speed is re-read after every slice, so switching from a slow to a
+        fast speed shortens the wait that is already in progress.
+        """
+        elapsed = 0.0
+        while True:
+            remaining = self.get_step_interval() - elapsed
+            if remaining <= 1e-9:
+                return
+            chunk = min(self.sleep_slice_seconds, remaining)
+            await self.sleep(chunk)
+            elapsed += chunk
 
     async def run_once(self) -> None:
         try:

@@ -10,9 +10,14 @@ export const useSystemStore = defineStore('system', () => {
   const isInitialized = ref(false); // Frontend initialized (world store loaded, socket connected)
   const isManualPaused = ref(true); // Paused manually by the user
   const isGameRunning = ref(false); // Game is in the Running phase (init status ready)
+  const simulationSpeed = ref(1); // Runtime speed multiplier, synced from the backend
+  const allowedSpeeds = ref<number[]>([]); // Backend-provided speed options
 
   // Request counter to handle race conditions.
   let fetchStatusRequestId = 0;
+  // Bumped on every local speed change so in-flight status polls cannot revert it.
+  let speedChangeSeq = 0;
+  let pendingSpeedRequests = 0;
   
   // --- Getters ---
   const isLoading = computed(() => {
@@ -30,6 +35,7 @@ export const useSystemStore = defineStore('system', () => {
   
   async function fetchInitStatus() {
     const currentRequestId = ++fetchStatusRequestId;
+    const speedSeqAtRequest = speedChangeSeq;
     try {
       const res = await systemApi.fetchInitStatus();
       
@@ -39,6 +45,9 @@ export const useSystemStore = defineStore('system', () => {
       }
       
       initStatus.value = res;
+      if (speedSeqAtRequest === speedChangeSeq && pendingSpeedRequests === 0) {
+        applySpeedState(res.speed, res.allowed_speeds);
+      }
       
       if (res.status === 'ready') {
         isGameRunning.value = true;
@@ -51,6 +60,36 @@ export const useSystemStore = defineStore('system', () => {
         logError('SystemStore fetch init status', e);
       }
       return null;
+    }
+  }
+
+  function applySpeedState(speed?: number, allowed?: number[]) {
+    if (Array.isArray(allowed) && allowed.length > 0) {
+      allowedSpeeds.value = allowed;
+    }
+    if (typeof speed === 'number' && Number.isFinite(speed) && speed > 0) {
+      simulationSpeed.value = speed;
+    }
+  }
+
+  async function setSpeed(speed: number) {
+    if (speed === simulationSpeed.value) return;
+    const previous = simulationSpeed.value;
+    simulationSpeed.value = speed;
+    speedChangeSeq += 1;
+    pendingSpeedRequests += 1;
+    try {
+      const res = await systemApi.setSpeed(speed);
+      applySpeedState(res.speed, res.allowed_speeds);
+    } catch (e) {
+      // Roll back unless a newer change has already replaced this one.
+      if (simulationSpeed.value === speed) {
+        simulationSpeed.value = previous;
+      }
+      logError('SystemStore set speed', e);
+    } finally {
+      pendingSpeedRequests -= 1;
+      speedChangeSeq += 1;
     }
   }
 
@@ -97,12 +136,15 @@ export const useSystemStore = defineStore('system', () => {
     isInitialized,
     isManualPaused,
     isGameRunning,
+    simulationSpeed,
+    allowedSpeeds,
     isLoading,
     isReady,
     
     fetchInitStatus,
     setInitialized,
     togglePause,
+    setSpeed,
     pause,
     resume
   };

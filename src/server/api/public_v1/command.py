@@ -13,6 +13,10 @@ class GameStartRequest(RunConfig):
     pass
 
 
+class SetSimulationSpeedRequest(BaseModel):
+    speed: Any = None
+
+
 class SetObjectiveRequest(BaseModel):
     avatar_id: str
     content: str
@@ -124,6 +128,7 @@ def create_public_command_router(
     run_pause_game: Callable[[], object] | None = None,
     run_pause_game_and_drain: Callable[[], object] | None = None,
     run_resume_game: Callable[[], object] | None = None,
+    run_set_simulation_speed: Callable[..., object] | None = None,
     run_set_long_term_objective: Callable[[BaseModel], object] | None = None,
     run_clear_long_term_objective: Callable[[BaseModel], object] | None = None,
     run_create_avatar: Callable[[BaseModel], object] | None = None,
@@ -185,6 +190,12 @@ def create_public_command_router(
         if command_service is not None:
             return ok_response(await command_service.resume_game())
         return ok_response(await run_resume_game())
+
+    @router.post("/api/v1/command/game/set-speed")
+    async def set_simulation_speed_v1(req: SetSimulationSpeedRequest):
+        if command_service is not None:
+            return ok_response(await command_service.set_simulation_speed(speed=req.speed))
+        return ok_response(await run_set_simulation_speed(speed=req.speed))
 
     @router.post("/api/v1/command/avatar/set-long-term-objective")
     async def set_long_term_objective_v1(req: SetObjectiveRequest):

@@ -123,6 +123,22 @@ describe('useGameControl', () => {
     wrapper.unmount()
   })
 
+  it('exposes simulation speed state and forwards speed changes to the system store', () => {
+    const setSpeedSpy = vi.spyOn(systemStore, 'setSpeed').mockResolvedValue(undefined)
+    systemStore.simulationSpeed = 2
+    systemStore.allowedSpeeds = [0.5, 1, 2, 4]
+    const { component } = createTestComponent()
+    const wrapper = mount(component)
+
+    expect(wrapper.vm.simulationSpeed).toBe(2)
+    expect(wrapper.vm.allowedSpeeds).toEqual([0.5, 1, 2, 4])
+
+    wrapper.vm.setSimulationSpeed(4)
+
+    expect(setSpeedSpy).toHaveBeenCalledWith(4)
+    wrapper.unmount()
+  })
+
   it('resumes backend after websocket reconnect when game is active and not manually paused', async () => {
     const resumeSpy = vi.spyOn(systemStore, 'resume').mockResolvedValue(undefined)
     const { component, gameInitialized, showMenu } = createTestComponent()

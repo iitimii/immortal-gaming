@@ -9,6 +9,16 @@ from src.server.services.public_api_contract import raise_public_error
 from src.systems.cultivation_display import build_avatar_cultivation_display
 
 
+def _build_speed_fields(runtime) -> dict[str, Any]:
+    from src.server.runtime.speed import ALLOWED_SIMULATION_SPEEDS, DEFAULT_SIMULATION_SPEED
+
+    get_speed = getattr(runtime, "get_simulation_speed", None)
+    return {
+        "speed": get_speed() if callable(get_speed) else DEFAULT_SIMULATION_SPEED,
+        "allowed_speeds": list(ALLOWED_SIMULATION_SPEEDS),
+    }
+
+
 def get_runtime_status(runtime, version: str) -> dict[str, Any]:
     from src.server.services.roleplay_service import get_roleplay_session as build_roleplay_session
 
@@ -32,6 +42,7 @@ def get_runtime_status(runtime, version: str) -> dict[str, Any]:
         "llm_check_pending": runtime.get("llm_check_pending", False),
         "is_paused": runtime.is_effectively_paused() if hasattr(runtime, "is_effectively_paused") else runtime.get("is_paused", True),
         "pause_reason": runtime.get_pause_reason() if hasattr(runtime, "get_pause_reason") else ("paused" if runtime.get("is_paused", True) else ""),
+        **_build_speed_fields(runtime),
         "roleplay": build_roleplay_session(runtime) if hasattr(runtime, "get_roleplay_session") else None,
     }
 
@@ -371,6 +382,7 @@ def get_world_state(
         "active_domains": serialize_active_domains(world),
         "phenomenon": serialize_phenomenon(world.current_phenomenon),
         "is_paused": runtime.is_effectively_paused() if hasattr(runtime, "is_effectively_paused") else runtime.get("is_paused", False),
+        **_build_speed_fields(runtime),
     }
 
 

@@ -2,6 +2,7 @@ import { httpClient } from '../http';
 import type { 
   SaveFileDTO,
   InitStatusDTO,
+  SetSpeedResponseDTO,
   RunConfigDTO,
   AppSettingsDTO,
   AppSettingsPatchDTO
@@ -18,6 +19,10 @@ export const systemApi = {
 
   resumeGame() {
     return httpClient.post('/api/v1/command/game/resume', {});
+  },
+
+  setSpeed(speed: number) {
+    return httpClient.post<SetSpeedResponseDTO>('/api/v1/command/game/set-speed', { speed });
   },
 
   fetchSaves() {
