@@ -1,9 +1,6 @@
 # Cultivation World Simulator
 
 ![GitHub stars](https://img.shields.io/github/stars/4thfever/cultivation-world-simulator?style=social)
-[![LINUX DO](https://img.shields.io/badge/LINUX.DO-Community-2EA44F)](https://linux.do/t/topic/2439437)
-[![Bilibili](https://img.shields.io/badge/Bilibili-Watch_Video-FB7299?logo=bilibili)](https://space.bilibili.com/527346837)
-![QQ Group](https://img.shields.io/badge/QQ%20Group-1071821688-deepskyblue?logo=tencent-qq&logoColor=white)
 [![Discord](https://img.shields.io/badge/Discord-Join%20Us-7289da?logo=discord&logoColor=white)](https://discord.gg/3Wnjvc7K)
 [![Epic Games Store](https://img.shields.io/badge/Epic%20Games%20Store-Get%20It%20Free-313131?logo=epicgames&logoColor=white)](https://store.epicgames.com/p/ai-cultivation-world-simulator-adebb8)
 
@@ -24,7 +21,6 @@
 
 <table align="center">
   <tr>
-    <td align="center"><a href="https://hellogithub.com/repository/4thfever/cultivation-world-simulator" target="_blank"><img src="https://api.hellogithub.com/v1/widgets/recommend.svg?rid=d0d75240fb95445bba1d7af7574d8420&claim_uid=DogxfCROM1PBL89" alt="Featured|HelloGitHub" width="300" /></a></td>
     <td align="center"><a href="https://trendshift.io/repositories/20502" target="_blank"><img src="https://trendshift.io/api/badge/repositories/20502" alt="4thfever%2Fcultivation-world-simulator | Trendshift" width="300" /></a></td>
   </tr>
 </table>
@@ -224,11 +220,9 @@ I hope to create a pure, happy, direct, and living sense of immersion in the cul
 ## 📞 Contact
 If you have any questions or suggestions for the project, welcome to submit an Issue.
 
-- **Bilibili**: [Click to Follow](https://space.bilibili.com/527346837)
-- **QQ Group** (upstream, Chinese-speaking): `1071821688`
 - **Discord**: [Join Community](https://discord.gg/3Wnjvc7K)
 
-The community channels above belong to the upstream project.
+The Discord community belongs to the upstream project.
 
 ---
 
@@ -249,7 +243,6 @@ Thanks to contributors for sharing this repo and related projects.
 
 - [cultivation-world-simulator-api-skill](https://github.com/RealityError/cultivation-world-simulator-api-skill)
 - [cultivation-world-simulator-android](https://github.com/RealityError/cultivation-world-simulator-android)
-- [LINUX DO community post](https://linux.do/t/topic/2439437)
 
 ## 👥 Contributors
 
