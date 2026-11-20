@@ -247,7 +247,7 @@ class GameCommandService:
                 status_code=400,
                 detail={
                     "code": "TEST_MODE_LLM_UNAVAILABLE",
-                    "message": "测试模式下不提供 LLM 内容生成。",
+                    "message": "LLM content generation is not available in test mode.",
                 },
             )
         return await self._deps.generate_custom_content_command(

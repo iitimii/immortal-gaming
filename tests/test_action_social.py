@@ -17,12 +17,12 @@ class TestActionSocial:
         target.get_info.return_value = "Target Info"
         target.get_planned_actions_str.return_value = "None"
         target.thinking = ""
-        # 模拟 add_event
+        # Mock add_event
         target.events = []
         target.add_event = lambda e, to_sidebar=False: target.events.append(e)
-        # 模拟修炼进度（用于关系判断）
+        # Mock cultivation progress (used for relation checks)
         target.cultivation_progress.level = 10
-        target.gender = dummy_avatar.gender # 同性
+        target.gender = dummy_avatar.gender # same gender
         target.get_relation.return_value = None
         
         return target
@@ -30,49 +30,49 @@ class TestActionSocial:
     @pytest.mark.asyncio
     @patch("src.classes.mutual_action.mutual_action.call_llm_with_task_name", new_callable=AsyncMock)
     async def test_conversation_flow(self, mock_llm, dummy_avatar, target_avatar):
-        """测试对话流程：Step -> LLM -> Feedback"""
+        """Test the conversation flow: Step -> LLM -> Feedback."""
         
-        # 1. 准备 Mock LLM 返回
+        # 1. Prepare the mocked LLM response
         mock_response = {
             "FriendDummy": {
                 "thinking": "He is nice.",
                 "conversation_content": "Hello there!",
-                "feedback": "Accept" # Conversation 其实不强制 feedback，主要是 content
+                "feedback": "Accept" # Conversation does not require feedback; content is what matters
             }
         }
         mock_llm.return_value = mock_response
         
-        # 注入 World 查找
+        # Inject the World lookup
         dummy_avatar.world.avatar_manager.avatars = {target_avatar.name: target_avatar}
         
-        # Mock 自己的 level (避免 dummy_avatar 中也是 Mock 导致无法比较)
+        # Mock our own level (so a mocked value in dummy_avatar does not break comparisons)
         dummy_avatar.cultivation_progress.level = 10
 
-        # 2. 初始化 Action
+        # 2. Initialize the action
         action = Conversation(dummy_avatar, dummy_avatar.world)
         action._start_month_stamp = 100
         
-        # 3. 第一次 Step: 应该触发 LLM 任务并返回 RUNNING
+        # 3. First step: should start the LLM task and return RUNNING
         res1 = action.step(target_avatar=target_avatar)
         assert res1.status == ActionStatus.RUNNING
         assert action._response_task is not None
         
-        # 等待 Task 完成
+        # Wait for the task to finish
         await action._response_task
         
-        # 4. 第二次 Step: 消费结果
+        # 4. Second step: consume the result
         res2 = action.step(target_avatar=target_avatar)
         assert res2.status == ActionStatus.COMPLETED
         
-        # 5. 验证结果
-        # 应该有一个包含对话内容的事件
+        # 5. Verify the result
+        # There should be an event containing the conversation content
         assert len(res2.events) >= 1
         content_event = res2.events[0]
         assert "Hello there!" in content_event.content
         assert dummy_avatar.id in content_event.related_avatars
         assert target_avatar.id in content_event.related_avatars
         
-        # 验证 Target 思考被更新
+        # Verify the target's thinking was updated
         assert target_avatar.thinking == "He is nice."
 
     def test_conversation_no_target(self, dummy_avatar):
@@ -100,25 +100,25 @@ class TestActionSocial:
         runtime.get_roleplay_session()["pending_request"] = None
         runtime.get_roleplay_session()["conversation_session"]["status"] = "completed"
         runtime.get_roleplay_session()["conversation_session"]["last_summary"] = {
-            "summary": "两人简短交谈，试探了彼此来意。",
+            "summary": "The two spoke briefly, sounding out each other's intentions.",
             "relation_hint": "",
             "story_hint": "",
         }
-        runtime.get_roleplay_session()["conversation_session"]["last_ai_thinking"] = "先观察他的意图。"
+        runtime.get_roleplay_session()["conversation_session"]["last_ai_thinking"] = "Observe his intentions first."
 
         res2 = action.step(target_avatar=target_avatar)
         assert res2.status == ActionStatus.COMPLETED
         assert len(res2.events) == 1
-        assert "试探了彼此来意" in res2.events[0].content
-        assert target_avatar.thinking == "先观察他的意图。"
+        assert "sounding out each other's intentions" in res2.events[0].content
+        assert target_avatar.thinking == "Observe his intentions first."
 
     @pytest.mark.asyncio
     async def test_conversation_finish_uses_relation_and_story_hints(self, dummy_avatar, target_avatar):
         action = Conversation(dummy_avatar, dummy_avatar.world)
         action._conversation_target = target_avatar
-        action._conversation_result_text = "两人言谈渐缓，气氛不再像先前那般紧绷。"
-        action._conversation_relation_hint = "关系略有缓和"
-        action._conversation_story_hint = "这场交谈带着试探后的松动感。"
+        action._conversation_result_text = "The conversation slowed and the mood was no longer as tense as before."
+        action._conversation_relation_hint = "relations eased slightly"
+        action._conversation_story_hint = "The conversation carried a sense of easing after the probing."
 
         with patch(
             "src.classes.mutual_action.conversation.RelationDeltaService.resolve_event_text_delta",
@@ -136,6 +136,6 @@ class TestActionSocial:
 
         assert events == []
         assert mock_resolve_delta.await_count == 1
-        assert "[relation_hint=关系略有缓和]" in mock_resolve_delta.await_args.kwargs["event_text"]
-        assert mock_story.await_args.kwargs["prompt"] == "这场交谈带着试探后的松动感。"
+        assert "[relation_hint=relations eased slightly]" in mock_resolve_delta.await_args.kwargs["event_text"]
+        assert mock_story.await_args.kwargs["prompt"] == "The conversation carried a sense of easing after the probing."
         mock_apply_delta.assert_called_once_with(dummy_avatar, target_avatar, 1, 2)

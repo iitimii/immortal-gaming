@@ -12,22 +12,22 @@ describe('RegionDetail', () => {
   it('should render successfully', () => {
     const i18n = createI18n({
       legacy: false,
-      locale: 'zh-CN',
+      locale: 'en-US',
       messages: {
-        'zh-CN': {
+        'en-US': {
           game: {
-            population: '人口',
+            population: 'Population',
             mortal_system: {
-              population_ratio_value: '{current} / {capacity} 万',
+              population_ratio_value: '{current} / {capacity}',
             },
             info_panel: {
               region: {
                 type_explanations: {
-                  city: '城市说明',
-                  ruin: '遗迹说明',
-                  cave: '洞府说明',
-                  sect: '宗门说明',
-                  normal: '普通区域说明',
+                  city: 'City description',
+                  ruin: 'Ruin description',
+                  cave: 'Cave dwelling description',
+                  sect: 'Sect description',
+                  normal: 'Normal region description',
                 },
               },
             },
@@ -62,7 +62,7 @@ describe('RegionDetail', () => {
     })
 
     expect(wrapper.exists()).toBe(true)
-    expect(wrapper.text()).toContain('人口')
-    expect(wrapper.text()).toContain('120.0 / 200.0 万')
+    expect(wrapper.text()).toContain('Population')
+    expect(wrapper.text()).toContain('1.2M / 2M')
   })
 })

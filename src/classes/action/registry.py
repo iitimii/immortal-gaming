@@ -5,11 +5,11 @@ from typing import Callable, Dict, Type, Iterable
 
 class ActionRegistry:
     """
-    动作注册表：维护动作名到类的映射，并标注哪些是“可实际执行”的动作。
+    Action registry: maps action names to classes and marks which are "actually executable" actions.
 
-    - register(action_cls, actual): 注册一个动作类
-    - get(name): 按名称获取动作类
-    - all()/all_actual(): 获取全部/实际可执行的动作类集合
+    - register(action_cls, actual): register an action class
+    - get(name): get an action class by name
+    - all()/all_actual(): get all / actually executable action classes
     """
     _name_to_cls: Dict[str, type] = {}
     _actual_name_to_cls: Dict[str, type] = {}
@@ -27,7 +27,7 @@ class ActionRegistry:
 
     @classmethod
     def all(cls) -> Iterable[type]:
-        # 去重保持稳定顺序
+        # Deduplicate while keeping a stable order
         seen = set()
         ordered: list[type] = []
         for t in cls._name_to_cls.values():
@@ -38,7 +38,7 @@ class ActionRegistry:
 
     @classmethod
     def all_actual(cls) -> Iterable[type]:
-        # 去重保持稳定顺序
+        # Deduplicate while keeping a stable order
         seen = set()
         ordered: list[type] = []
         for t in cls._actual_name_to_cls.values():

@@ -9,8 +9,8 @@ from src.classes.alignment import Alignment
 
 class HelpPeople(TimedAction):
     """
-    在城镇救济百姓，消耗少量灵石。
-    仅正阵营可执行。
+    Help the populace in a town, spending a few spirit stones.
+    Only the Righteous alignment can do this.
     """
 
     ACTION_NAME_ID = "help_people_action_name"
@@ -46,7 +46,7 @@ class HelpPeople(TimedAction):
         content = t("{avatar} begins helping people in town", avatar=self.avatar.name)
         return Event(self.world.month_stamp, content, related_avatars=[self.avatar.id])
 
-    # TimedAction 已统一 step 逻辑
+    # TimedAction already unifies the step logic
 
     async def finish(self) -> list[Event]:
         region = self.avatar.tile.region

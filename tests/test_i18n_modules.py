@@ -10,7 +10,7 @@ def test_i18n_modules_structure():
     Test that the i18n modules structure is correct.
     """
     locale_dir = _get_locale_dir()
-    # Directory names now use hyphens (zh-CN) to match static assets convention
+    # Directory names use hyphens (en-US) to match the static assets convention
     languages = get_locale_codes()
     
     for lang in languages:
@@ -60,20 +60,17 @@ def test_translation_loading():
     """
     Test that translations are actually loaded and working.
     """
-    # This relies on the force_chinese_language fixture in conftest.py if run in full suite,
+    # This relies on the force_default_language fixture in conftest.py if run in full suite,
     # or we explicitly set it here.
     from src.classes.language import language_manager
     language_manager.set_language(get_source_locale())
     
     # Test a known key
-    # "attack_action_name" -> "发起战斗"
-    assert t("attack_action_name") == "发起战斗"
+    assert t("attack_action_name") == "Initiate Battle"
     
     # Test a formatted string
-    # "{winner} defeated {loser}" -> "{winner} 战胜了 {loser}"
-    # Note: the translation might be different, let's check exact value from file or flexible match
     res = t("{winner} defeated {loser}", winner="A", loser="B")
-    assert "战胜了" in res
+    assert res == "A defeated B"
 
 def test_split_po_script_exists():
     """

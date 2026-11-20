@@ -50,7 +50,7 @@ class LLMProfile(BaseModel):
     fast_base_url: str = ""
     fast_api_format: str = "openai"
     has_fast_api_key: bool = False
-    api_format: str = "openai"  # "openai" 或 "anthropic"
+    api_format: str = "openai"  # "openai" or "anthropic"
 
 
 class LLMConfigView(LLMProfile):
@@ -79,7 +79,7 @@ class LLMSettingsUpdate(BaseModel):
     fast_api_key: Optional[str] = None
     fast_api_format: str = "openai"
     clear_fast_api_key: bool = False
-    api_format: str = "openai"  # "openai" 或 "anthropic"
+    api_format: str = "openai"  # "openai" or "anthropic"
 
 
 class NewGameDefaults(BaseModel):

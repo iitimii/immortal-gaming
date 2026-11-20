@@ -36,28 +36,28 @@ from src.systems.single_choice import (
 
 
 class FortuneKind(Enum):
-    """奇遇类型"""
-    WEAPON = "weapon"               # 兵器奇遇
-    AUXILIARY = "auxiliary"         # 辅助装备奇遇
+    """Fortune (lucky encounter) types."""
+    WEAPON = "weapon"               # Weapon fortune
+    AUXILIARY = "auxiliary"         # Auxiliary equipment fortune
     TECHNIQUE = "technique"
     FIND_MASTER = "find_master"
-    SPIRIT_STONE = "spirit_stone"   # 灵石奇遇
-    CULTIVATION = "cultivation"     # 修为奇遇
+    SPIRIT_STONE = "spirit_stone"   # Spirit stone fortune
+    CULTIVATION = "cultivation"     # Cultivation fortune
 
 
 
 
 def _has_master(avatar: Avatar) -> bool:
-    """检查是否已有师傅"""
+    """Check whether the avatar already has a master."""
     return bool(get_live_related_avatars(avatar, identity_relation=Relation.IS_MASTER_OF))
 
 
 def _is_alignment_compatible(avatar: Avatar, other: Avatar) -> bool:
-    """检查两个角色的阵营是否兼容（不是敌对关系）"""
+    """Check whether two avatars' alignments are compatible (not hostile)."""
     from src.classes.alignment import Alignment
     if avatar.alignment is None or other.alignment is None:
         return True
-    # 正邪不相容
+    # Righteous and evil are incompatible
     if avatar.alignment == Alignment.RIGHTEOUS and other.alignment == Alignment.EVIL:
         return False
     if avatar.alignment == Alignment.EVIL and other.alignment == Alignment.RIGHTEOUS:
@@ -67,12 +67,12 @@ def _is_alignment_compatible(avatar: Avatar, other: Avatar) -> bool:
 
 def _find_potential_master(avatar: Avatar) -> Optional[Avatar]:
     """
-    在世界中寻找潜在的师傅。
-    规则：
-    1. 等级 > avatar.level + 20
-    2. 优先选择同宗门的高手
-    3. 如果没有同宗门的，选择阵营兼容的其他人
-    4. 不能拜敌对阵营的人为师
+    Find a potential master in the world.
+    Rules:
+    1. Level > avatar.level + 20
+    2. Prefer experts from the same sect
+    3. If none in the same sect, pick someone else with a compatible alignment
+    4. Cannot take someone from a hostile alignment as master
     """
     same_sect_candidates: list[Avatar] = []
     other_candidates: list[Avatar] = []
@@ -81,26 +81,26 @@ def _find_potential_master(avatar: Avatar) -> Optional[Avatar]:
         if other is avatar:
             continue
         
-        # 等级差检查
+        # Level gap check
         level_diff = other.cultivation_progress.level - avatar.cultivation_progress.level
         if level_diff < 20:
             continue
         
-        # 阵营兼容性检查
+        # Alignment compatibility check
         if not _is_alignment_compatible(avatar, other):
             continue
         
-        # 同宗门优先
+        # Same sect first
         if avatar.sect is not None and other.sect == avatar.sect:
             same_sect_candidates.append(other)
         else:
             other_candidates.append(other)
     
-    # 优先从同宗门选择
+    # Prefer choosing from the same sect
     if same_sect_candidates:
         return random.choice(same_sect_candidates)
     
-    # 没有同宗门的，从其他候选中选择
+    # No same-sect candidates; choose from the others
     if other_candidates:
         return random.choice(other_candidates)
     
@@ -108,14 +108,14 @@ def _find_potential_master(avatar: Avatar) -> Optional[Avatar]:
 
 
 def _can_get_weapon(avatar: Avatar) -> bool:
-    """检查是否可以获得兵器奇遇：当前兵器是练气级（练气）时可触发"""
+    """Check whether a weapon fortune is possible: triggers when the current weapon is Qi Refinement grade."""
     if avatar.weapon is None:
         return True
     return avatar.weapon.realm == Realm.Qi_Refinement
 
 
 def _can_get_auxiliary(avatar: Avatar) -> bool:
-    """检查是否可以获得辅助装备奇遇：无辅助装备或辅助装备是练气级时可触发"""
+    """Check whether an auxiliary fortune is possible: triggers with no auxiliary or a Qi Refinement grade one."""
     if avatar.auxiliary is None:
         return True
     return avatar.auxiliary.realm == Realm.Qi_Refinement
@@ -123,37 +123,37 @@ def _can_get_auxiliary(avatar: Avatar) -> bool:
 
 def _can_get_technique(avatar: Avatar) -> bool:
     """
-    检查是否可以获得功法奇遇
-    - 任何人功法非上品都可以触发
-    - 但实际能否获得功法，在获取时会有额外检查（宗门弟子有限制）
+    Check whether a technique fortune is possible.
+    - Anyone whose technique is not Upper grade can trigger it
+    - Whether a technique is actually obtained is checked again on acquisition (sect disciples are restricted)
     """
     tech_not_upper = (avatar.technique is None) or (avatar.technique.grade is not TechniqueGrade.UPPER)
     return tech_not_upper
 
 
 def _can_get_master(avatar: Avatar) -> bool:
-    """检查是否可以获得拜师奇遇"""
+    """Check whether a find-master fortune is possible."""
     if _has_master(avatar):
         return False
     return _find_potential_master(avatar) is not None
 
 
 def _can_get_spirit_stone(avatar: Avatar) -> bool:
-    """检查是否可以获得灵石奇遇"""
-    # 任何人都可以获得灵石
+    """Check whether a spirit stone fortune is possible."""
+    # Anyone can obtain spirit stones
     return True
 
 
 def _can_get_cultivation(avatar: Avatar) -> bool:
-    """检查是否可以获得修为奇遇"""
-    # 只有未达到瓶颈的人才能获得修为
+    """Check whether a cultivation fortune is possible."""
+    # Only those not at a bottleneck can gain cultivation
     return not avatar.cultivation_progress.is_in_bottleneck()
 
 
 def _choose_fortune_record(avatar: Avatar) -> Optional[dict]:
     """
-    从所有可能的奇遇中随机选择一个配置记录。
-    可能的奇遇取决于角色当前状态和境界。
+    Randomly pick one config record from all possible fortunes.
+    The possible fortunes depend on the avatar's current state and realm.
     """
     from src.utils.df import game_configs
     
@@ -179,7 +179,7 @@ def _choose_fortune_record(avatar: Avatar) -> Optional[dict]:
         if not (min_realm <= avatar.cultivation_progress.realm <= max_realm):
             continue
             
-        # 检查前置条件
+        # Check prerequisites
         can_trigger = False
         if kind == FortuneKind.WEAPON:
             can_trigger = _can_get_weapon(avatar)
@@ -208,10 +208,10 @@ def _choose_fortune_record(avatar: Avatar) -> Optional[dict]:
 
 def _get_weapon_for_avatar(avatar: Avatar) -> Optional[Weapon]:
     """
-    获取兵器：
-    奇遇通常提供比当前境界更好的兵器。
-    如果是练气期，提供筑基期兵器。
-    其他境界提供同境界兵器（因为高境界兵器本身就稀有且强）。
+    Get a weapon:
+    Fortunes usually offer a weapon better than the current realm.
+    In Qi Refinement, offer a Foundation Establishment weapon.
+    Other realms get a same-realm weapon (high-realm weapons are already rare and strong).
     """
     target_realm = avatar.cultivation_progress.realm
     if target_realm == Realm.Qi_Refinement:
@@ -222,8 +222,8 @@ def _get_weapon_for_avatar(avatar: Avatar) -> Optional[Weapon]:
 
 def _get_auxiliary_for_avatar(avatar: Avatar) -> Optional[Auxiliary]:
     """
-    获取辅助装备：
-    规则同兵器。
+    Get auxiliary equipment:
+    Same rules as weapons.
     """
     target_realm = avatar.cultivation_progress.realm
     if target_realm == Realm.Qi_Refinement:
@@ -234,37 +234,37 @@ def _get_auxiliary_for_avatar(avatar: Avatar) -> Optional[Auxiliary]:
 
 def _get_fortune_technique_for_avatar(avatar: Avatar) -> Optional[Technique]:
     """
-    为奇遇获取功法。
-    规则：
-    1. 散修：可以获得任何上品功法（与灵根/阵营/condition兼容）
-    2. 宗门弟子：只能获得本宗门或无宗门的上品功法
+    Get a technique for the fortune.
+    Rules:
+    1. Rogue cultivators: may obtain any Upper grade technique (compatible with spirit root/alignment/condition)
+    2. Sect disciples: may only obtain Upper grade techniques of their own sect or with no sect
     """
     candidates: list[Technique] = []
     
-    # 确定允许的宗门 ID 范围
+    # Determine the allowed sect IDs
     allowed_sect_ids: set[Optional[int]] = {None}
     if avatar.sect is not None:
         allowed_sect_ids.add(avatar.sect.id)
     
-    # 筛选功法
+    # Filter techniques
     for t in techniques_by_id.values():
-        # 必须是上品
+        # Must be Upper grade
         if t.grade != TechniqueGrade.UPPER:
             continue
         
-        # 宗门限制：宗门弟子只能获得本宗门或无宗门的功法
+        # Sect restriction: disciples may only get techniques of their sect or with no sect
         if t.sect_id not in allowed_sect_ids:
             continue
         
-        # condition 检查
+        # condition check
         if not t.is_allowed_for(avatar):
             continue
         
-        # 邪功法只能邪道修士修炼
+        # Evil techniques can only be practiced by evil cultivators
         if t.attribute == TechniqueAttribute.EVIL and avatar.alignment != Alignment.EVIL:
             continue
         
-        # 灵根兼容性
+        # Spirit root compatibility
         if not is_attribute_compatible_with_root(t.attribute, avatar.root):
             continue
         
@@ -273,13 +273,13 @@ def _get_fortune_technique_for_avatar(avatar: Avatar) -> Optional[Technique]:
     if not candidates:
         return None
     
-    # 按权重随机选择
+    # Weighted random choice
     weights = [max(0.0, t.weight) for t in candidates]
     return random.choices(candidates, weights=weights, k=1)[0]
 
 
 def _get_spirit_stone_amount(avatar: Avatar) -> int:
-    """根据境界返回灵石数量（相当于一年狩猎售卖的收入）"""
+    """Return spirit stones by realm (about one year of hunting and selling income)."""
     from src.systems.cultivation import Realm
     
     realm_ranges = {
@@ -290,13 +290,13 @@ def _get_spirit_stone_amount(avatar: Avatar) -> int:
     }
     range_tuple = realm_ranges.get(
         avatar.cultivation_progress.realm, 
-        (20, 30)  # 默认值
+        (20, 30)  # Default
     )
     return random.randint(*range_tuple)
 
 
 def get_cultivation_exp_reward(avatar: Avatar) -> int:
-    """根据境界返回修为经验（相当于一年修炼的收益）"""
+    """Return cultivation experience by realm (about one year of cultivation gains)."""
     from src.systems.cultivation import Realm
     
     realm_exp = {
@@ -307,30 +307,30 @@ def get_cultivation_exp_reward(avatar: Avatar) -> int:
     }
     return realm_exp.get(
         avatar.cultivation_progress.realm,
-        600  # 默认值
+        600  # Default
     )
 
 
 async def try_trigger_fortune(avatar: Avatar) -> list[Event]:
     """
-    在月度结算阶段尝试触发奇遇。
-    规则：
-    - 奇遇不是一个 action；仅在条件满足时以概率触发。
-    - 触发条件：
-      * 兵器奇遇：当前兵器是普通级
-      * 辅助装备奇遇：无辅助装备或辅助装备非法宝级
-      * 功法奇遇：功法非上品（不限散修/宗门，但宗门弟子只能获得本宗门或无宗门功法）
-      * 拜师奇遇：无师傅且世界中有合适的师傅（优先同宗门，不能拜敌对阵营）
-      * 灵石奇遇：任何人都可以触发
-      * 修为奇遇：未达到瓶颈的人可以触发
-    - 结果：
-      * 兵器：优先法宝（世界唯一）> 宝物（可重复）
-      * 辅助装备：优先法宝（世界唯一）> 宝物（可重复）
-      * 功法：可重复，优先上品，需与灵根兼容，宗门弟子受宗门限制
-      * 拜师：建立师徒关系
-      * 灵石：根据境界获得灵石（相当于一年狩猎售卖收入）
-      * 修为：根据境界增加修为经验（相当于一年修炼收益）
-    - 故事：仅给出主旨主题，由 LLM 自由发挥生成短故事。
+    Try to trigger a fortune during the monthly settlement phase.
+    Rules:
+    - A fortune is not an action; it only triggers with some probability when conditions are met.
+    - Trigger conditions:
+      * Weapon: the current weapon is common grade
+      * Auxiliary: no auxiliary equipment, or it is below treasure grade
+      * Technique: technique is not Upper grade (rogue or sect, but disciples only get own-sect or sectless techniques)
+      * Find master: no master and a suitable master exists in the world (same sect preferred, never a hostile alignment)
+      * Spirit stones: anyone can trigger
+      * Cultivation: anyone not at a bottleneck can trigger
+    - Results:
+      * Weapon: prefer a treasure (unique in the world) > a regular item (repeatable)
+      * Auxiliary: prefer a treasure (unique in the world) > a regular item (repeatable)
+      * Technique: repeatable, Upper grade preferred, must match spirit root, disciples restricted by sect
+      * Find master: establish a master-disciple relation
+      * Spirit stones: gain spirit stones by realm (about one year of hunting and selling income)
+      * Cultivation: gain cultivation experience by realm (about one year of cultivation gains)
+    - Story: only the theme is given; the LLM freely writes a short story.
     """
     base_prob = float(getattr(CONFIG.world, "fortune_probability", 0.0))
     extra_prob = float(avatar.effects.get("extra_fortune_probability", 0.0))
@@ -338,14 +338,14 @@ async def try_trigger_fortune(avatar: Avatar) -> list[Event]:
     if prob <= 0.0:
         return []
 
-    # 检查当前动作状态是否允许触发世界事件
+    # Check whether the current action state allows world events to trigger
     if not avatar.can_trigger_world_event:
         return []
     
     if random.random() >= prob:
         return []
 
-    # 从所有可能的奇遇中选择
+    # Choose from all possible fortunes
     record = _choose_fortune_record(avatar)
     if not record:
         return []
@@ -354,22 +354,22 @@ async def try_trigger_fortune(avatar: Avatar) -> list[Event]:
     
     res_text: str = ""
     related_avatars = [avatar.id]
-    actors_for_story = [avatar]  # 用于生成故事的角色列表
+    actors_for_story = [avatar]  # Avatars used for story generation
 
     
     if kind == FortuneKind.WEAPON:
         weapon = _get_weapon_for_avatar(avatar)
         if weapon is None:
-            # 回退到功法
+            # Fall back to a technique
             kind = FortuneKind.TECHNIQUE
             record["title_id"] = "fortune_title_technique"
         else:
             from src.i18n import t
-            # 使用 str() 来触发 Realm 的 __str__ 方法进行 i18n 翻译。
-            intro = t("You discovered a {realm} weapon『{weapon_name}』in your fortune.",
+            # Use str() so Realm.__str__ performs the i18n translation.
+            intro = t("You discovered a {realm} weapon '{weapon_name}' in your fortune.",
                      realm=str(weapon.realm), weapon_name=weapon.name)
             if avatar.weapon:
-                intro += t(" But you already have『{weapon_name}』.", weapon_name=avatar.weapon.name)
+                intro += t(" But you already have '{weapon_name}'.", weapon_name=avatar.weapon.name)
 
             outcome = await resolve_item_exchange(
                 ItemExchangeRequest(
@@ -382,7 +382,7 @@ async def try_trigger_fortune(avatar: Avatar) -> list[Event]:
                 )
             )
             res_text = t(
-                "Discovered weapon『{weapon_name}』, {exchange_text}",
+                "Discovered weapon '{weapon_name}', {exchange_text}",
                 weapon_name=weapon.name,
                 exchange_text=outcome.result_text,
             )
@@ -390,16 +390,16 @@ async def try_trigger_fortune(avatar: Avatar) -> list[Event]:
     elif kind == FortuneKind.AUXILIARY:
         auxiliary = _get_auxiliary_for_avatar(avatar)
         if auxiliary is None:
-            # 回退到功法
+            # Fall back to a technique
             kind = FortuneKind.TECHNIQUE
             record["title_id"] = "fortune_title_technique"
         else:
             from src.i18n import t
-            # 使用 str() 来触发 Realm 的 __str__ 方法进行 i18n 翻译。
-            intro = t("You discovered a {realm} auxiliary『{auxiliary_name}』in your fortune.",
+            # Use str() so Realm.__str__ performs the i18n translation.
+            intro = t("You discovered a {realm} auxiliary '{auxiliary_name}' in your fortune.",
                      realm=str(auxiliary.realm), auxiliary_name=auxiliary.name)
             if avatar.auxiliary:
-                intro += t(" But you already have『{auxiliary_name}』.", auxiliary_name=avatar.auxiliary.name)
+                intro += t(" But you already have '{auxiliary_name}'.", auxiliary_name=avatar.auxiliary.name)
 
             outcome = await resolve_item_exchange(
                 ItemExchangeRequest(
@@ -412,7 +412,7 @@ async def try_trigger_fortune(avatar: Avatar) -> list[Event]:
                 )
             )
             res_text = t(
-                "Discovered auxiliary『{auxiliary_name}』, {exchange_text}",
+                "Discovered auxiliary '{auxiliary_name}', {exchange_text}",
                 auxiliary_name=auxiliary.name,
                 exchange_text=outcome.result_text,
             )
@@ -423,10 +423,10 @@ async def try_trigger_fortune(avatar: Avatar) -> list[Event]:
             return []
         
         from src.i18n import t
-        intro = t("You comprehended an upper-grade technique『{technique_name}』in your fortune.",
+        intro = t("You comprehended an upper-grade technique '{technique_name}' in your fortune.",
                  technique_name=tech.name)
         if avatar.technique:
-            intro += t(" This conflicts with your current technique『{technique_name}』.",
+            intro += t(" This conflicts with your current technique '{technique_name}'.",
                       technique_name=avatar.technique.name)
 
         outcome = await resolve_item_exchange(
@@ -440,7 +440,7 @@ async def try_trigger_fortune(avatar: Avatar) -> list[Event]:
             )
         )
         res_text = t(
-            "Comprehended technique『{technique_name}』, {exchange_text}",
+            "Comprehended technique '{technique_name}', {exchange_text}",
             technique_name=tech.name,
             exchange_text=outcome.result_text,
         )
@@ -448,16 +448,16 @@ async def try_trigger_fortune(avatar: Avatar) -> list[Event]:
     elif kind == FortuneKind.FIND_MASTER:
         master = _find_potential_master(avatar)
         if master is None:
-            # 找不到合适的师傅
+            # No suitable master found
             return []
-        # 建立师徒关系：avatar 是徒弟，master 是师傅
-        # avatar 视 master 为 MASTER，master 视 avatar 为 DISCIPLE（自动设置对偶）。
+        # Establish master-disciple relation: avatar is the disciple, master is the master
+        # avatar sees master as MASTER, master sees avatar as DISCIPLE (the counterpart is set automatically).
         avatar.acknowledge_master(master)
         from src.i18n import t
         res_text = t("{avatar_name} became disciple of {master_name}",
                     avatar_name=avatar.name, master_name=master.name)
         related_avatars.append(master.id)
-        actors_for_story = [avatar, master]  # 拜师奇遇需要两个人的信息
+        actors_for_story = [avatar, master]  # The find-master fortune needs info for both avatars
 
     elif kind == FortuneKind.SPIRIT_STONE:
         amount = _get_spirit_stone_amount(avatar)
@@ -473,7 +473,7 @@ async def try_trigger_fortune(avatar: Avatar) -> list[Event]:
         res_text = t("{avatar_name} gained {exp_gain} cultivation experience",
                     avatar_name=avatar.name, exp_gain=exp_gain)
 
-    # 提取角色正在进行的行为
+    # Extract the action the avatar is currently performing
     action_desc = t("wandering aimlessly")
     if avatar.current_action and avatar.current_action.action:
         action_name = avatar.current_action.action.__class__.__name__
@@ -481,7 +481,7 @@ async def try_trigger_fortune(avatar: Avatar) -> list[Event]:
         
     location_name = avatar.tile.region.name if avatar.tile and avatar.tile.region else t("unknown location")
 
-    # 生成故事（异步，等待完成）
+    # Generate the story (async, awaited)
     title_text = t(record.get("title_id", "fortune_title_mystery"))
     event_text = t("fortune_event_base",
                    title=title_text, result=res_text)
@@ -508,8 +508,8 @@ async def try_trigger_fortune(avatar: Avatar) -> list[Event]:
         apply_positive_bond_warmth(subject=disciple, other_party=master, event_type=event_type)
         apply_positive_bond_warmth(subject=master, other_party=disciple, event_type=event_type)
 
-    # 生成故事事件
-    # 奇遇强制单人模式，不改变关系（因为关系已经在硬逻辑中处理了）
+    # Generate the story event
+    # Fortunes force single-avatar mode and do not change relations (already handled by hard logic)
     story_event = await StoryEventService.maybe_create_story(
         kind=StoryEventKind.WORLD_FORTUNE,
         month_stamp=month_at_finish,
@@ -528,16 +528,16 @@ async def try_trigger_fortune(avatar: Avatar) -> list[Event]:
 
 
 class MisfortuneKind(Enum):
-    """霉运类型"""
-    LOSS_SPIRIT_STONE = "loss_spirit_stone" # 破财
-    INJURY = "injury"                       # 受伤
-    CULTIVATION_BACKLASH = "backlash"       # 修为倒退
+    """Misfortune types."""
+    LOSS_SPIRIT_STONE = "loss_spirit_stone" # Lose spirit stones
+    INJURY = "injury"                       # Injury
+    CULTIVATION_BACKLASH = "backlash"       # Cultivation backlash
 
 
 
 
 def _choose_misfortune_record(avatar: Avatar) -> Optional[dict]:
-    """选择霉运配置记录"""
+    """Choose a misfortune config record."""
     from src.utils.df import game_configs
     
     possible_records = []
@@ -584,13 +584,13 @@ def _choose_misfortune_record(avatar: Avatar) -> Optional[dict]:
 
 async def try_trigger_misfortune(avatar: Avatar) -> list[Event]:
     """
-    触发霉运
-    规则：
-    - 概率：config + effects
-    - 类型：破财、受伤、修为倒退
-    - 破财：随机数，不超过总量
-    - 受伤：扣减HP，可能致死（由simulator结算）
-    - 修为倒退：扣减经验，不降级（经验值可为负？）-> 此处逻辑：扣减当前经验，最小为0
+    Trigger a misfortune.
+    Rules:
+    - Probability: config + effects
+    - Types: lose spirit stones, injury, cultivation backlash
+    - Lose spirit stones: random amount, never more than the total
+    - Injury: reduce HP, possibly fatal (resolved by the simulator)
+    - Cultivation backlash: reduce experience without dropping a level; here current exp is reduced, minimum 0
     """
     base_prob = float(getattr(CONFIG.world, "misfortune_probability", 0.0))
     extra_prob = float(avatar.effects.get("extra_misfortune_probability", 0.0))
@@ -598,7 +598,7 @@ async def try_trigger_misfortune(avatar: Avatar) -> list[Event]:
     if prob <= 0.0:
         return []
 
-    # 检查当前动作状态是否允许触发世界事件
+    # Check whether the current action state allows world events to trigger
     if not avatar.can_trigger_world_event:
         return []
     
@@ -615,40 +615,40 @@ async def try_trigger_misfortune(avatar: Avatar) -> list[Event]:
     from src.i18n import t
 
     if kind == MisfortuneKind.LOSS_SPIRIT_STONE:
-        # 破财：随机数，不超过总量
+        # Lose spirit stones: random amount, never more than the total
         max_loss = avatar.magic_stone.value
-        # 设定一个随机范围，例如 10~500，但受 max_loss 限制
-        # 或者完全随机
+        # Pick a random range (e.g. 10-500), capped by max_loss
+        # or fully random
         loss = random.randint(50, 300)
         loss = min(loss, max_loss)
         avatar.magic_stone.value -= loss
         res_text = t("misfortune_result_loss_spirit_stone", name=avatar.name, amount=loss)
         
     elif kind == MisfortuneKind.INJURY:
-        # 受伤：扣减HP
-        # 扣减量：最大生命值的 10%~30% + 固定值
+        # Injury: reduce HP
+        # Amount: 10%-30% of max HP plus a flat value
         max_hp = avatar.hp.max
         ratio = random.uniform(0.1, 0.3)
         damage = int(max_hp * ratio) + random.randint(10, 50)
         
         avatar.hp.cur -= damage
-        # 注意：这里可能扣成负数，simulator 会在 _phase_resolve_death 中处理
+        # Note: this may go negative; the simulator handles it in _phase_resolve_death
         res_text = t("misfortune_result_injury", name=avatar.name, damage=damage, current=avatar.hp.cur, max=max_hp)
         
     elif kind == MisfortuneKind.CULTIVATION_BACKLASH:
-        # 修为倒退
-        # 扣减量：100~500
+        # Cultivation backlash
+        # Amount: 100-500
         loss = random.randint(100, 500)
         
-        # 确保不扣到负数（或者允许负数？通常经验不为负）
-        # 这里只扣减当前经验，不掉级
+        # Make sure it does not go negative (experience is normally non-negative)
+        # Only reduce current experience; never drop a level
         current_exp = avatar.cultivation_progress.exp
         actual_loss = min(current_exp, loss)
         avatar.cultivation_progress.exp -= actual_loss
         
         res_text = t("misfortune_result_backlash", name=avatar.name, amount=actual_loss)
         
-    # 提取角色正在进行的行为
+    # Extract the action the avatar is currently performing
     action_desc = t("wandering aimlessly")
     if avatar.current_action and avatar.current_action.action:
         action_name = avatar.current_action.action.__class__.__name__
@@ -656,7 +656,7 @@ async def try_trigger_misfortune(avatar: Avatar) -> list[Event]:
         
     location_name = avatar.tile.region.name if avatar.tile and avatar.tile.region else t("unknown location")
 
-    # 生成故事
+    # Generate the story
     title_text = t(record.get("title_id", "misfortune_title_mystery"))
     event_text = t("misfortune_event_base", title=title_text, result=res_text)
     

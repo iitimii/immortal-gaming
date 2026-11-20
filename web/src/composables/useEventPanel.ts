@@ -61,7 +61,7 @@ export function useEventPanel() {
       sectStore.activeSectOptions,
       t('game.event_panel.filter_all_sects'),
       'game.event_panel.filter_all_sects',
-      '所有宗门',
+      'All Sects',
       'all',
     )
   })

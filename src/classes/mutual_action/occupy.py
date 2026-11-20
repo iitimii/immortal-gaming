@@ -22,34 +22,34 @@ if TYPE_CHECKING:
 @register_action(actual=True)
 class Occupy(PressureAction):
     """
-    占据动作（互动版）：
-    占据指定的洞府。如果是无主洞府直接占据；如果是有主洞府，则发起抢夺。
-    对方拒绝则进入战斗，进攻方胜利则洞府易主。
+    Occupy action (mutual version):
+    Occupy the specified cave dwelling. An unowned one is occupied directly; an owned one triggers a seizure attempt.
+    If the owner refuses, a battle starts; if the attacker wins, the cave dwelling changes hands.
     """
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "occupy_action_name"
     DESC_ID = "occupy_description"
     REQUIREMENTS_ID = "occupy_requirements"
     STORY_PROMPT_ID = "occupy_story_prompt"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "🚩"
     PARAMS = {"region_name": "str"}
     PARAM_OPTION_SOURCES = {"region_name": ParamOptionSource.KNOWN_CULTIVATE_REGION_NAME}
     RESPONSE_ACTIONS = ["Yield", "Reject"]
     
-    # 自定义反馈标签
+    # Custom feedback labels
     RESPONSE_LABEL_IDS = {"Yield": "feedback_yield", "Reject": "feedback_reject"}
     
     IS_MAJOR = True
     ACTION_CD_MONTHS = 6
 
     def _get_region_and_host(self, region_name: str) -> tuple[CultivateRegion | None, "Avatar | None", str]:
-        """解析区域并获取主人"""
+        """Resolve the region and get its owner."""
         res = resolve_query(region_name, self.world, expected_types=[CultivateRegion])
         
-        # resolve_query 可能返回普通 Region，这里需要严格检查是否为 CultivateRegion
+        # resolve_query may return a plain Region; strictly check for CultivateRegion here
         region = res.obj
         
         if not res.is_valid or region is None:
@@ -117,16 +117,16 @@ class Occupy(PressureAction):
         return super().step(target_avatar=host)
 
     def _settle_response(self, target_avatar: "Avatar", response_name: str) -> None:
-        """处理反馈结果"""
+        """Handle the feedback result."""
         region_name = getattr(self, "target_region_name", self.avatar.tile.location_name)
         region, _, _ = self._get_region_and_host(region_name)
         
         if response_name == "Yield":
-            # 对方让步：直接转移所有权
+            # The owner yields: transfer ownership directly
             if region:
                 self.avatar.occupy_region(region)
             
-            # 共用一个事件
+            # Share one event
             event_text = t("{initiator} forced {target} to yield {region}",
                           initiator=self.avatar.name, target=target_avatar.name, region=region_name)
             event = Event(
@@ -135,18 +135,18 @@ class Occupy(PressureAction):
                 related_avatars=[self.avatar.id, target_avatar.id],
                 is_major=True
             )
-            # 统一推送，避免重复
+            # Push once, avoiding duplicates
             EventHelper.push_pair(event, initiator=self.avatar, target=target_avatar, to_sidebar_once=True)
             
             self._last_result = None
             
         elif response_name == "Reject":
-            # 对方拒绝：进入战斗
+            # The owner refuses: start a battle
             winner, loser, loser_dmg, winner_dmg = decide_battle(self.avatar, target_avatar)
             loser.hp.reduce(loser_dmg)
             winner.hp.reduce(winner_dmg)
             
-            # 进攻方胜利则洞府易主
+            # If the attacker wins, the cave dwelling changes hands
             attacker_won = winner == self.avatar
             if attacker_won and region:
                 self.avatar.occupy_region(region)
@@ -154,7 +154,7 @@ class Occupy(PressureAction):
             self._last_result = (winner, loser, loser_dmg, winner_dmg, region_name, attacker_won)
 
     async def finish(self, region_name: str) -> list[Event]:
-        """完成动作，生成战斗故事并处理死亡"""
+        """Finish the action: generate the battle story and handle deaths."""
         res = self._last_result if hasattr(self, '_last_result') else None
         if res is None:
             return []
@@ -177,7 +177,7 @@ class Occupy(PressureAction):
             target,
             battle_res,
             start_text,
-            self.get_story_prompt(),  # 使用 classmethod
+            self.get_story_prompt(),  # Use classmethod
             action_desc=t("defeated"),
             postfix=postfix
         )

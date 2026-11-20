@@ -1,6 +1,6 @@
 /**
  * WebSocket Client
- * 纯粹的 Socket 封装，不依赖 Store
+ * Plain socket wrapper with no store dependency
  */
 
 import { logError, logWarn } from '@/utils/appError'
@@ -144,6 +144,6 @@ function parseSocketServerMessage(raw: string): SocketServerMessageDTO | null {
   }
 }
 
-// 单例实例
+// Singleton instance
 export const gameSocket = new GameSocket();
 

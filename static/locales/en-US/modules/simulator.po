@@ -15,14 +15,8 @@ msgstr ""
 msgid "(Choosing to replace will sell the old {label})"
 msgstr "(Choosing to replace will sell the old {label})"
 
-msgid ", keep current '{old_name}'"
-msgstr ", keep current '{old_name}'"
-
 msgid ", replace old {label} '{old_name}'"
 msgstr ", replace old {label} '{old_name}'"
-
-msgid ", sell old {label} '{old_name}'"
-msgstr ", sell old {label} '{old_name}'"
 
 # Simulator & Event Translations
 msgid ""

@@ -29,9 +29,9 @@ def _make_sect(
 
 
 def test_compute_sect_relations_alignment_orthodoxy_and_territory():
-    """宗门关系数值应综合阵营、道统与边界接触压力。"""
-    sect_a = _make_sect(1, "正道宗", Alignment.RIGHTEOUS, orthodoxy_id="dao")
-    sect_b = _make_sect(2, "魔道宗", Alignment.EVIL, orthodoxy_id="dao")
+    """Sect relation values combine alignment, orthodoxy and border-contact pressure."""
+    sect_a = _make_sect(1, "Righteous Sect", Alignment.RIGHTEOUS, orthodoxy_id="dao")
+    sect_b = _make_sect(2, "Demonic Sect", Alignment.EVIL, orthodoxy_id="dao")
 
     tile_owners = {
         (0, 0): [1],
@@ -50,10 +50,10 @@ def test_compute_sect_relations_alignment_orthodoxy_and_territory():
     assert rel["sect_a_id"] == 1
     assert rel["sect_b_id"] == 2
 
-    # 期望得分：阵营相反 -40，道统相同 +10，1 条接壤边 -1 => -31
+    # Expected score: opposite alignment -40, same orthodoxy +10, 1 shared border edge -1 => -31
     assert rel["value"] == -31
 
-    # 从结构化的 reason_breakdown 中提取原因枚举值
+    # Extract reason enum values from the structured reason_breakdown
     reasons = {item["reason"] for item in rel["reason_breakdown"]}
     assert SectRelationReason.ALIGNMENT_OPPOSITE.value in reasons
     assert SectRelationReason.ORTHODOXY_SAME.value in reasons
@@ -61,18 +61,18 @@ def test_compute_sect_relations_alignment_orthodoxy_and_territory():
 
 
 def test_compute_sect_relations_no_overlap_neutral_alignment():
-    """中立或无边界接触时，仅由阵营/道统决定关系数值。"""
-    sect_a = _make_sect(1, "中立宗一", Alignment.NEUTRAL, orthodoxy_id="dao")
-    sect_b = _make_sect(2, "中立宗二", Alignment.NEUTRAL, orthodoxy_id="buddha")
+    """With neutral alignment or no border contact, only alignment/orthodoxy decide the value."""
+    sect_a = _make_sect(1, "Neutral Sect One", Alignment.NEUTRAL, orthodoxy_id="dao")
+    sect_b = _make_sect(2, "Neutral Sect Two", Alignment.NEUTRAL, orthodoxy_id="buddha")
 
-    # 无任何边界接触
+    # No border contact at all
     tile_owners = {}
 
     relations = compute_sect_relations([sect_a, sect_b], tile_owners)
     assert len(relations) == 1
     rel = relations[0]
 
-    # 阵营相同 +20，道统不同 -15，总计 +5
+    # Same alignment +20, different orthodoxy -15, total +5
     assert rel["value"] == 5
 
     reasons = {item["reason"] for item in rel["reason_breakdown"]}
@@ -82,8 +82,8 @@ def test_compute_sect_relations_no_overlap_neutral_alignment():
 
 
 def test_compute_sect_relations_supports_war_and_peace_breakdown():
-    sect_a = _make_sect(1, "甲宗", Alignment.RIGHTEOUS, orthodoxy_id="dao")
-    sect_b = _make_sect(2, "乙宗", Alignment.RIGHTEOUS, orthodoxy_id="dao")
+    sect_a = _make_sect(1, "Sect A", Alignment.RIGHTEOUS, orthodoxy_id="dao")
+    sect_b = _make_sect(2, "Sect B", Alignment.RIGHTEOUS, orthodoxy_id="dao")
 
     relations = compute_sect_relations(
         [sect_a, sect_b],

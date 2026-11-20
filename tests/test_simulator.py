@@ -82,7 +82,7 @@ async def test_simulator_interaction_events_do_not_use_legacy_counting(base_worl
 async def test_phase_passive_effects_collects_fate_revelation_event(base_world, dummy_avatar):
     event = Event(
         base_world.month_stamp,
-        "命格显现",
+        "Fate revealed",
         related_avatars=[dummy_avatar.id],
         is_major=True,
         event_type="fate_revelation",
@@ -212,7 +212,7 @@ async def test_phase_sect_periodic_thinking_generates_event_with_related_sect(ba
     sect.id = 77
     sect.name = "Test Sect"
     sect.periodic_thinking = ""
-    sect.last_decision_summary = "招徕散修 1 人。"
+    sect.last_decision_summary = "Recruited 1 rogue cultivator."
 
     base_world.existed_sects = [sect]
     base_world.event_manager._storage = MagicMock()
@@ -288,7 +288,7 @@ async def test_phase_sect_periodic_decision_emits_summary_event(base_world, mock
             return_value=SectDecisionResult(
                 events=[],
                 recruitment_count=1,
-                summary_text="Test Sect 本轮宗门决策：招徕散修 1 人。",
+                summary_text="Test Sect decision this round: recruited 1 rogue cultivator.",
             )
         ),
     ):
@@ -296,8 +296,8 @@ async def test_phase_sect_periodic_decision_emits_summary_event(base_world, mock
 
     assert len(events) == 1
     assert events[0].related_sects == [77]
-    assert "招徕散修 1 人" in events[0].content
-    assert sect.last_decision_summary == "Test Sect 本轮宗门决策：招徕散修 1 人。"
+    assert "recruited 1 rogue cultivator" in events[0].content
+    assert sect.last_decision_summary == "Test Sect decision this round: recruited 1 rogue cultivator."
 
 
 @pytest.mark.asyncio
@@ -305,8 +305,8 @@ async def test_phase_handle_sect_wars_auto_battles_and_teleports_loser(base_worl
     from src.classes.environment.sect_region import SectRegion
     from pathlib import Path
 
-    region_a = SectRegion(id=2001, name="甲宗总部", desc="", sect_id=1, sect_name="甲宗", cors=[(0, 0)])
-    region_b = SectRegion(id=2002, name="乙宗总部", desc="", sect_id=2, sect_name="乙宗", cors=[(4, 4)])
+    region_a = SectRegion(id=2001, name="Sect A HQ", desc="", sect_id=1, sect_name="Sect A", cors=[(0, 0)])
+    region_b = SectRegion(id=2002, name="Sect B HQ", desc="", sect_id=2, sect_name="Sect B", cors=[(4, 4)])
     base_world.map.regions[2001] = region_a
     base_world.map.region_cors[2001] = [(0, 0)]
     base_world.map.regions[2002] = region_b
@@ -315,20 +315,20 @@ async def test_phase_handle_sect_wars_auto_battles_and_teleports_loser(base_worl
 
     sect_a = Sect(
         id=1,
-        name="甲宗",
+        name="Sect A",
         desc="",
         member_act_style="",
         alignment=Alignment.RIGHTEOUS,
-        headquarter=SectHeadQuarter(name="甲宗总部", desc="", image=Path("")),
+        headquarter=SectHeadQuarter(name="Sect A HQ", desc="", image=Path("")),
         technique_names=[],
     )
     sect_b = Sect(
         id=2,
-        name="乙宗",
+        name="Sect B",
         desc="",
         member_act_style="",
         alignment=Alignment.EVIL,
-        headquarter=SectHeadQuarter(name="乙宗总部", desc="", image=Path("")),
+        headquarter=SectHeadQuarter(name="Sect B HQ", desc="", image=Path("")),
         technique_names=[],
     )
     base_world.existed_sects = [sect_a, sect_b]
@@ -337,7 +337,7 @@ async def test_phase_handle_sect_wars_auto_battles_and_teleports_loser(base_worl
 
     attacker = Avatar(
         world=base_world,
-        name="甲修",
+        name="Cultivator A",
         id="war_a",
         birth_month_stamp=create_month_stamp(Year(2000), Month.JANUARY),
         age=Age(20, Realm.Qi_Refinement),
@@ -349,7 +349,7 @@ async def test_phase_handle_sect_wars_auto_battles_and_teleports_loser(base_worl
     )
     defender = Avatar(
         world=base_world,
-        name="乙修",
+        name="Cultivator B",
         id="war_b",
         birth_month_stamp=create_month_stamp(Year(2000), Month.JANUARY),
         age=Age(20, Realm.Qi_Refinement),
@@ -375,6 +375,6 @@ async def test_phase_handle_sect_wars_auto_battles_and_teleports_loser(base_worl
     ):
         events = await sect_war.phase_handle_sect_wars(sim, [attacker, defender])
 
-    assert any("立即爆发战斗" in event.content for event in events)
+    assert any("a battle breaks out at once" in event.content for event in events)
     assert defender.pos_x == 4 and defender.pos_y == 4
     assert sect_b.war_weariness == 3

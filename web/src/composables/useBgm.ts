@@ -3,7 +3,7 @@ import { useSettingStore } from '../stores/setting';
 import { withBasePublicPath } from '@/utils/assetUrls';
 import { logWarn } from '@/utils/appError';
 
-// 配置
+// Config
 const BGM_CONFIG = {
   splash: ['Eastminster.mp3'],
   map: [
@@ -16,17 +16,17 @@ const BGM_CONFIG = {
 
 const FADE_DURATION = 2000; // 2 seconds crossfade
 
-// 类型定义
+// Types
 type BgmType = 'splash' | 'map' | null;
 
-// 模块级状态（单例模式）
+// Module-level state (singleton)
 let currentType: BgmType = null;
 let activeType: BgmType = null;
-let currentTrackIndex = 0; // 0 或 1
+let currentTrackIndex = 0; // 0 or 1
 let tracks: HTMLAudioElement[] = [];
 let initialized = false;
-let bag: string[] = []; // 随机播放池
-let currentSwitchId = 0; // 切换请求锁，用于防止并发竞争
+let bag: string[] = []; // Shuffle bag
+let currentSwitchId = 0; // Switch request token to prevent concurrent races
 let audioUnlocked = false;
 let unlockListenersBound = false;
 
@@ -36,14 +36,14 @@ export function useBgm() {
     function init() {
         if (initialized || typeof window === 'undefined') return;
         
-        // 创建双轨道
+        // Create two tracks
         tracks = [new Audio(), new Audio()];
         tracks.forEach((t, i) => {
-            t.loop = false; // 手动控制循环
+            t.loop = false; // Looping is handled manually
             t.addEventListener('ended', () => onTrackEnded(i));
         });
 
-        // 监听音量变化 - 使用 detached scope 防止被组件卸载时清理
+        // Watch volume changes in a detached scope so component unmounts do not dispose it
         const scope = effectScope(true);
         scope.run(() => {
             watch(() => settingStore.bgmVolume, (newVol) => {
@@ -51,7 +51,7 @@ export function useBgm() {
             });
         });
 
-        // 初始化音量
+        // Initialize volume
         updateVolume(settingStore.bgmVolume);
         bindUnlockListeners();
 
@@ -85,23 +85,23 @@ export function useBgm() {
 
     function updateVolume(vol: number) {
         tracks.forEach(t => {
-            // 如果正在淡入淡出，由动画循环控制音量，这里不打断
+            // During a crossfade the animation loop owns the volume; do not interfere
             if (!t.dataset.fading) {
                 t.volume = vol;
             }
         });
     }
 
-    // 轨道播放结束回调
+    // Track ended callback
     function onTrackEnded(index: number) {
-        // 只处理当前活跃轨道的结束事件
+        // Only handle the end of the active track
         if (index !== currentTrackIndex) return;
 
         if (currentType === 'map') {
-            // Map 模式：自然播放结束，切下一首（无需淡出旧的，因为已经结束了）
+            // Map mode: track finished naturally, play the next one (no fade-out needed)
             playNextRandom(false); 
         } else if (currentType === 'splash') {
-            // Splash 模式：单曲循环
+            // Splash mode: loop the single track
             const track = tracks[index];
             track.currentTime = 0;
             track.play().catch(() => {
@@ -111,7 +111,7 @@ export function useBgm() {
         }
     }
 
-    // 洗牌算法
+    // Shuffle
     function shuffleBag() {
         if (bag.length === 0) {
             bag = [...BGM_CONFIG.map];
@@ -130,17 +130,17 @@ export function useBgm() {
         return bag.pop()!;
     }
 
-    // 主播放接口
+    // Main play API
     async function play(type: BgmType) {
         if (!initialized) init();
         
-        // 如果传入 null 或者空，停止播放
+        // Stop playback when given null or empty
         if (!type) {
             stop();
             return;
         }
         
-        // 如果已经在播放同类型，忽略（保持当前播放）
+        // Ignore if the same type is already playing
         if (currentType === type && activeType === type) return;
 
         currentType = type;
@@ -150,18 +150,18 @@ export function useBgm() {
         }
 
         const songName = getNextSong(type);
-        // 切换类型时，旧轨道肯定在播放，需要淡出
+        // When switching type the old track is playing and must fade out
         await switchTrack(songName, activeType !== null);
     }
 
-    // 播放下一首随机曲目（Map模式专用）
+    // Play the next random track (map mode only)
     async function playNextRandom(crossfadeOutgoing: boolean = true) {
         if (currentType !== 'map') return;
         const songName = getNextSong('map');
         await switchTrack(songName, crossfadeOutgoing);
     }
 
-    // 核心切歌逻辑
+    // Core track-switch logic
     async function switchTrack(songName: string, crossfadeOutgoing: boolean) {
         const url = withBasePublicPath(`bgm/${songName}`);
         const nextIndex = (currentTrackIndex + 1) % 2;
@@ -169,14 +169,14 @@ export function useBgm() {
         const currentTrack = tracks[currentTrackIndex];
 
         nextTrack.src = url;
-        nextTrack.volume = 0; // 从静音开始淡入
+        nextTrack.volume = 0; // Fade in from silence
         
         currentSwitchId++;
         const mySwitchId = currentSwitchId;
         
         try {
             await nextTrack.play();
-            // 如果在等待 play 的过程中发起了新的切换，丢弃当前切换
+            // If a new switch started while awaiting play(), drop this one
             if (mySwitchId !== currentSwitchId) {
                 nextTrack.pause();
                 return;
@@ -204,7 +204,7 @@ export function useBgm() {
         }
     }
 
-    // 淡入淡出动画
+    // Crossfade animation
     function performCrossfade(fadeIn: HTMLAudioElement, fadeOut: HTMLAudioElement, fadeOutEnabled: boolean, mySwitchId: number) {
         const start = performance.now();
         // remove static targetVol capture
@@ -213,7 +213,7 @@ export function useBgm() {
         if (fadeOutEnabled) fadeOut.dataset.fading = 'true';
 
         function step(now: number) {
-            // 如果有新的切歌请求，立刻中止当前淡入淡出动画
+            // Abort the current crossfade if a newer switch was requested
             if (mySwitchId !== currentSwitchId) {
                 delete fadeIn.dataset.fading;
                 if (fadeOutEnabled) delete fadeOut.dataset.fading;
@@ -224,13 +224,13 @@ export function useBgm() {
             const progress = Math.min(elapsed / FADE_DURATION, 1);
             const currentTargetVol = settingStore.bgmVolume; // Dynamic volume check
 
-            // 淡入
+            // Fade in
             const newFadeInVol = progress * currentTargetVol;
             if (newFadeInVol >= 0 && newFadeInVol <= 1) {
                 fadeIn.volume = newFadeInVol;
             }
 
-            // 淡出
+            // Fade out
             if (fadeOutEnabled && !fadeOut.paused) {
                 const newFadeOutVol = Math.max(0, (1 - progress) * currentTargetVol);
                 if (newFadeOutVol >= 0 && newFadeOutVol <= 1) {
@@ -241,7 +241,7 @@ export function useBgm() {
             if (progress < 1) {
                 requestAnimationFrame(step);
             } else {
-                // 动画结束
+                // Animation finished
                 delete fadeIn.dataset.fading;
                 if (fadeOutEnabled) delete fadeOut.dataset.fading;
                 
@@ -249,7 +249,7 @@ export function useBgm() {
                     fadeOut.pause();
                     fadeOut.currentTime = 0;
                 }
-                // 确保最终音量准确
+                // Make sure the final volume is exact
                 fadeIn.volume = settingStore.bgmVolume;
             }
         }
@@ -264,11 +264,11 @@ export function useBgm() {
         const mySwitchId = currentSwitchId;
 
         tracks.forEach(t => {
-             // 快速淡出后停止
+             // Quick fade-out, then stop
              const startVol = t.volume;
              const start = performance.now();
              
-             // 标记正在 fade 以避免 volume watcher 干扰
+             // Mark as fading so the volume watcher stays out of the way
              t.dataset.fading = 'true';
 
              function fade(now: number) {
@@ -277,7 +277,7 @@ export function useBgm() {
                      return;
                  }
 
-                 const progress = Math.min((now - start) / 1000, 1); // 1秒淡出
+                 const progress = Math.min((now - start) / 1000, 1); // 1s fade-out
                  t.volume = Math.max(0, startVol * (1 - progress));
                  
                  if (progress < 1) {

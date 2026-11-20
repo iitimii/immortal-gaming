@@ -33,19 +33,20 @@ class OfficialRankDef:
     effects: dict[str, Any] | list[dict[str, Any]]
 
 
+# style_tag values in static/game_configs/dynasty.csv are these msgids.
 DYNASTY_STYLE_MSGIDS: dict[str, str] = {
-    "尚法重军": "dynasty_style_law_and_arms",
-    "清谈名教": "dynasty_style_pure_discourse_and_orthodoxy",
-    "重文理政": "dynasty_style_civil_governance",
-    "风流雅政": "dynasty_style_elegant_courtly_rule",
-    "山泽杂行": "dynasty_style_wild_marches",
-    "尚实通商": "dynasty_style_pragmatic_commerce",
-    "沉毅守边": "dynasty_style_stoic_frontier_guard",
-    "骑射尚武": "dynasty_style_horsemanship_and_arms",
-    "法密权重": "dynasty_style_strict_law_and_central_power",
-    "务本守成": "dynasty_style_pragmatic_conservatism",
-    "柔治机变": "dynasty_style_flexible_statecraft",
-    "坚忍后发": "dynasty_style_endure_and_strike_late",
+    "dynasty_style_law_and_arms": "dynasty_style_law_and_arms",
+    "dynasty_style_pure_discourse_and_orthodoxy": "dynasty_style_pure_discourse_and_orthodoxy",
+    "dynasty_style_civil_governance": "dynasty_style_civil_governance",
+    "dynasty_style_elegant_courtly_rule": "dynasty_style_elegant_courtly_rule",
+    "dynasty_style_wild_marches": "dynasty_style_wild_marches",
+    "dynasty_style_pragmatic_commerce": "dynasty_style_pragmatic_commerce",
+    "dynasty_style_stoic_frontier_guard": "dynasty_style_stoic_frontier_guard",
+    "dynasty_style_horsemanship_and_arms": "dynasty_style_horsemanship_and_arms",
+    "dynasty_style_strict_law_and_central_power": "dynasty_style_strict_law_and_central_power",
+    "dynasty_style_pragmatic_conservatism": "dynasty_style_pragmatic_conservatism",
+    "dynasty_style_flexible_statecraft": "dynasty_style_flexible_statecraft",
+    "dynasty_style_endure_and_strike_late": "dynasty_style_endure_and_strike_late",
 }
 
 

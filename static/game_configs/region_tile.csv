@@ -1,5 +1,5 @@
 region_id,tile,landmark_asset
-区域ID,底层地貌tile,大型视觉标记资源名，可空
+Region ID,Base terrain tile,Large landmark asset name (optional)
 101,plain,
 102,desert,
 103,rainforest,

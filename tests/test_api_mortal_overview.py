@@ -20,14 +20,14 @@ def _build_world_with_mortal_data():
 
     city_a = CityRegion(
         id=1,
-        name="青石城",
+        name="Bluestone City",
         desc="",
         population=100.0,
         population_capacity=200.0,
     )
     city_b = CityRegion(
         id=2,
-        name="白河城",
+        name="Whiteriver City",
         desc="",
         population=40.0,
         population_capacity=50.0,
@@ -39,7 +39,7 @@ def _build_world_with_mortal_data():
     world.mortal_manager.register_mortal(
         Mortal(
             id="mortal-young",
-            name="林小满",
+            name="Lin Xiaoman",
             gender=Gender.FEMALE,
             birth_month_stamp=MonthStamp(int(world.month_stamp) - 10 * 12),
             parents=["a1", "a2"],
@@ -49,7 +49,7 @@ def _build_world_with_mortal_data():
     world.mortal_manager.register_mortal(
         Mortal(
             id="mortal-awaken",
-            name="赵行舟",
+            name="Zhao Xingzhou",
             gender=Gender.MALE,
             birth_month_stamp=MonthStamp(int(world.month_stamp) - 20 * 12),
             parents=["b1", "b2"],
@@ -98,13 +98,13 @@ def test_get_mortal_overview_aggregates_cities_and_tracked_mortals():
         assert summary["awakening_candidate_count"] == 1
 
         cities = data["cities"]
-        assert [item["name"] for item in cities] == ["青石城", "白河城"]
+        assert [item["name"] for item in cities] == ["Bluestone City", "Whiteriver City"]
         assert cities[0]["natural_growth"] == 1.5
 
         tracked = data["tracked_mortals"]
-        assert [item["name"] for item in tracked] == ["赵行舟", "林小满"]
+        assert [item["name"] for item in tracked] == ["Zhao Xingzhou", "Lin Xiaoman"]
         assert tracked[0]["age"] == 20
-        assert tracked[0]["born_region_name"] == "白河城"
+        assert tracked[0]["born_region_name"] == "Whiteriver City"
         assert tracked[0]["is_awakening_candidate"] is True
         assert tracked[1]["is_awakening_candidate"] is False
     finally:

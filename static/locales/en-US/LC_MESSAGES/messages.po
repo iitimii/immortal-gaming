@@ -2371,8 +2371,8 @@ msgid "{avatar} discovered a point of interest at {location}: {poi}"
 msgstr "{avatar} discovered a point of interest at {location}: {poi}"
 
 # Execution Results
-msgid "{avatar_name} {done} {grade} {label}『{item_name}』."
-msgstr "{avatar_name} {done} {grade} {label}『{item_name}』."
+msgid "{avatar_name} {done} {grade} {label} '{item_name}'."
+msgstr "{avatar_name} {done} {grade} {label} '{item_name}'."
 
 msgid "{avatar} failed retreat and lost {years} years of lifespan."
 msgstr "{avatar} failed retreat and lost {years} years of lifespan."
@@ -2556,29 +2556,29 @@ msgstr " But you already have '{current_auxiliary}'."
 msgid " But you already have '{current_weapon}'."
 msgstr " But you already have '{current_weapon}'."
 
-msgid " But you already have『{auxiliary_name}』."
-msgstr " But you already have『{auxiliary_name}』."
+msgid " But you already have '{auxiliary_name}'."
+msgstr " But you already have '{auxiliary_name}'."
 
-msgid " But you already have『{weapon_name}』."
-msgstr " But you already have『{weapon_name}』."
+msgid " But you already have '{weapon_name}'."
+msgstr " But you already have '{weapon_name}'."
 
 msgid " This conflicts with your current technique '{current_technique}'."
 msgstr " This conflicts with your current technique '{current_technique}'."
 
-msgid " This conflicts with your current technique『{technique_name}』."
-msgstr " This conflicts with your current technique『{technique_name}』."
+msgid " This conflicts with your current technique '{technique_name}'."
+msgstr " This conflicts with your current technique '{technique_name}'."
 
 msgid "Comprehended technique '{technique}', {exchange_result}"
 msgstr "Comprehended technique '{technique}', {exchange_result}"
 
-msgid "Comprehended technique『{technique_name}』, {exchange_text}"
-msgstr "Comprehended technique『{technique_name}』, {exchange_text}"
+msgid "Comprehended technique '{technique_name}', {exchange_text}"
+msgstr "Comprehended technique '{technique_name}', {exchange_text}"
 
-msgid "Discovered auxiliary『{auxiliary_name}』, {exchange_text}"
-msgstr "Discovered auxiliary『{auxiliary_name}』, {exchange_text}"
+msgid "Discovered auxiliary '{auxiliary_name}', {exchange_text}"
+msgstr "Discovered auxiliary '{auxiliary_name}', {exchange_text}"
 
-msgid "Discovered weapon『{weapon_name}』, {exchange_text}"
-msgstr "Discovered weapon『{weapon_name}』, {exchange_text}"
+msgid "Discovered weapon '{weapon_name}', {exchange_text}"
+msgstr "Discovered weapon '{weapon_name}', {exchange_text}"
 
 msgid "Found auxiliary equipment '{auxiliary}', {exchange_result}"
 msgstr "Found auxiliary equipment '{auxiliary}', {exchange_result}"
@@ -2590,14 +2590,15 @@ msgstr "Found weapon '{weapon}', {exchange_result}"
 msgid "{weapon_name}, Proficiency: {proficiency}%"
 msgstr "{weapon_name}, Proficiency: {proficiency}%"
 
-msgid "【{name}】 {gender} {age} years old"
-msgstr "【{name}】 {gender} {age} years old"
+msgid "[{name}] {gender} {age} years old"
+msgstr "[{name}] {gender} {age} years old"
 
 # Fortune Event Text - Technique
 msgid ""
-"You comprehended an upper-grade technique『{technique_name}』in your fortune."
+"You comprehended an upper-grade technique '{technique_name}' in your "
+"fortune."
 msgstr ""
-"You comprehended a superior-grade technique『{technique_name}』in your "
+"You comprehended a superior-grade technique '{technique_name}' in your "
 "fortune."
 
 msgid "You comprehended superior technique '{technique}' during the fortune."
@@ -2611,16 +2612,17 @@ msgstr ""
 "fortune."
 
 # Fortune Event Text - Auxiliary
-msgid "You discovered a {realm} auxiliary『{auxiliary_name}』in your fortune."
-msgstr "You discovered a {realm} auxiliary『{auxiliary_name}』in your fortune."
+msgid "You discovered a {realm} auxiliary '{auxiliary_name}' in your fortune."
+msgstr ""
+"You discovered a {realm} auxiliary '{auxiliary_name}' in your fortune."
 
 # Fortune - discovery intro messages
 msgid "You discovered a {realm} weapon '{weapon}' during the fortune."
 msgstr "You discovered a {realm} weapon '{weapon}' during the fortune."
 
 # Fortune Event Text - Weapon
-msgid "You discovered a {realm} weapon『{weapon_name}』in your fortune."
-msgstr "You discovered a {realm} weapon『{weapon_name}』in your fortune."
+msgid "You discovered a {realm} weapon '{weapon_name}' in your fortune."
+msgstr "You discovered a {realm} weapon '{weapon_name}' in your fortune."
 
 msgid "fortune_dynamic_story_prompt"
 msgstr ""
@@ -2818,10 +2820,10 @@ msgstr ""
 
 msgid ""
 "\n"
-"【Related Avatars Information】"
+"[Related Avatars Information]"
 msgstr ""
 "\n"
-"【Related Avatars Information】"
+"[Related Avatars Information]"
 
 msgid "auxiliary"
 msgstr "auxiliary equipment"
@@ -2855,8 +2857,8 @@ msgid "item_verb_switched"
 msgstr "switched to"
 
 # Auto-equip Message
-msgid "{avatar_name} obtained {grade} {label}『{item_name}』and {action}."
-msgstr "{avatar_name} obtained {grade} {label}『{item_name}』and {action}."
+msgid "{avatar_name} obtained {grade} {label} '{item_name}' and {action}."
+msgstr "{avatar_name} obtained {grade} {label} '{item_name}' and {action}."
 
 # Item Labels
 msgid "item_label_weapon"
@@ -2870,8 +2872,8 @@ msgid "weapon"
 msgstr "weapon"
 
 # Labels
-msgid "【Auction Items Information】"
-msgstr "【Auction Items Information】"
+msgid "[Auction Items Information]"
+msgstr "[Auction Items Information]"
 
 msgid ""
 "\n"
@@ -3092,11 +3094,11 @@ msgstr "{name} lost {amount} spirit stones"
 msgid "{name} took {damage} damage, HP remaining {current}/{max}"
 msgstr "{name} took {damage} damage, HP remaining {current}/{max}"
 
-msgid ", sell old {label}『{old_name}』"
-msgstr ", sell old {label}『{old_name}』"
+msgid ", sell old {label} '{old_name}'"
+msgstr ", sell old {label} '{old_name}'"
 
-msgid ", {replace} old {label}『{old_name}』"
-msgstr ", {replace} old {label}『{old_name}』"
+msgid ", {replace} old {label} '{old_name}'"
+msgstr ", {replace} old {label} '{old_name}'"
 
 msgid "Already lovers"
 msgstr "Already lovers"
@@ -3479,22 +3481,22 @@ msgstr "Opportunity Chance +{value}"
 msgid "effect_source_opportunity"
 msgstr "Opportunity"
 
-msgid ", keep current『{old_name}』"
-msgstr ", keep current『{old_name}』"
+msgid ", keep current '{old_name}'"
+msgstr ", keep current '{old_name}'"
 
-msgid "Abandon『{new_name}』"
-msgstr "Abandon『{new_name}』"
+msgid "Abandon '{new_name}'"
+msgstr "Abandon '{new_name}'"
 
 # Option A
-msgid "{action} new {label}『{new_name}』"
-msgstr "{action} new {label}『{new_name}』"
+msgid "{action} new {label} '{new_name}'"
+msgstr "{action} new {label} '{new_name}'"
 
 msgid "Mortal"
 msgstr "Mortal"
 
 # Option B
-msgid "Sell new {label}『{new_name}』for spirit stones, keep current status"
-msgstr "Sell new {label}『{new_name}』for spirit stones, keep current status"
+msgid "Sell new {label} '{new_name}' for spirit stones, keep current status"
+msgstr "Sell new {label} '{new_name}' for spirit stones, keep current status"
 
 msgid "core_formation"
 msgstr "Core Formation"
@@ -4450,14 +4452,8 @@ msgstr "Sworn Sibling"
 msgid "(Choosing to replace will sell the old {label})"
 msgstr "(Choosing to replace will sell the old {label})"
 
-msgid ", keep current '{old_name}'"
-msgstr ", keep current '{old_name}'"
-
 msgid ", replace old {label} '{old_name}'"
 msgstr ", replace old {label} '{old_name}'"
-
-msgid ", sell old {label} '{old_name}'"
-msgstr ", sell old {label} '{old_name}'"
 
 # Simulator & Event Translations
 msgid ""
@@ -4530,11 +4526,11 @@ msgstr "Automatically accept the new item."
 
 # Decision Interface
 msgid ""
-"【Current Situation】: {context}\n"
+"[Current Situation]: {context}\n"
 "\n"
 "{choices}"
 msgstr ""
-"【Current Situation】: {context}\n"
+"[Current Situation]: {context}\n"
 "\n"
 "{choices}"
 
@@ -4832,10 +4828,10 @@ msgstr ""
 
 msgid ""
 "\n"
-"【Tournament Information】\n"
+"[Tournament Information]\n"
 msgstr ""
 "\n"
-"【Tournament Information】\n"
+"[Tournament Information]\n"
 
 msgid "List: {list_name}\n"
 msgstr "List: {list_name}\n"
@@ -4845,10 +4841,10 @@ msgstr "Winner: {winner}\n"
 
 msgid ""
 "\n"
-"【Finalists Information】\n"
+"[Finalists Information]\n"
 msgstr ""
 "\n"
-"【Finalists Information】\n"
+"[Finalists Information]\n"
 
 msgid "tournament_story_prompt"
 msgstr ""
@@ -4919,8 +4915,8 @@ msgstr "{avatar} successfully claimed {item} from {treasure}."
 msgid "{avatar} claimed {item} from {treasure}. {result}"
 msgstr "{avatar} claimed {item} from {treasure}. {result}"
 
-msgid "Leave『{new_name}』where it was found"
-msgstr "Leave『{new_name}』where it was found"
+msgid "Leave '{new_name}' where it was found"
+msgstr "Leave '{new_name}' where it was found"
 
 msgid "{avatar_name} left {item_name} where it was found."
 msgstr "{avatar_name} left {item_name} where it was found."

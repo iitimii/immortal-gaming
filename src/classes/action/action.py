@@ -15,28 +15,28 @@ if TYPE_CHECKING:
 
 def long_action(step_month: int):
     """
-    长态动作装饰器，用于为动作类自动添加时间管理功能
+    Long-running action decorator that automatically adds time management to action classes
 
     Args:
-        step_month: 动作需要的月份数
+        step_month: number of months the action takes
     """
     def decorator(cls):
-        # 设置类属性，供基类使用
+        # Set class attributes for the base class to use
         cls._step_month = step_month
 
         def is_finished(self, *args, **kwargs) -> bool:
             """
-            根据时间差判断动作是否完成
-            接受但忽略额外的参数以保持与其他动作类型的兼容性
+            Determine whether the action is finished from the elapsed time
+            Accepts but ignores extra params for compatibility with other action types
             """
             if self.start_monthstamp is None:
                 return False
-            # 修正逻辑：使用 >= step_month - 1 而不是 >= step_month
-            # 这样1个月的动作在第1个月完成（时间差0 >= 0），10个月的动作在第10个月完成（时间差9 >= 9）
-            # 避免了原来多执行一个月的bug
+            # Corrected logic: use >= step_month - 1 instead of >= step_month
+            # So a 1-month action completes in month 1 (diff 0 >= 0), a 10-month action completes in month 10 (diff 9 >= 9)
+            # This avoids the old bug of running one extra month
             return (self.world.month_stamp - self.start_monthstamp) >= self.step_month - 1
 
-        # 只添加 is_finished 方法
+        # Only add the is_finished method
         cls.is_finished = is_finished
 
         return cls
@@ -46,40 +46,40 @@ def long_action(step_month: int):
 
 class Action(ABC):
     """
-    角色可以执行的动作。
-    比如，移动、攻击、采集、建造、etc。
+    Actions an avatar can perform.
+    For example: move, attack, gather, build, etc.
     """
     
-    # 多语言支持的类变量（子类覆盖）
+    # i18n class variables (overridden by subclasses)
     ACTION_NAME_ID: str = ""
     DESC_ID: str = ""
     REQUIREMENTS_ID: str = ""
 
-    # 是否允许参与聚会（如拍卖会、大比）
+    # Whether joining gatherings is allowed (e.g. auctions, tournaments)
     ALLOW_GATHERING: bool | None = None
     
-    # 是否允许触发世界随机事件（如奇遇、霉运）
+    # Whether world random events may trigger (e.g. fortune, misfortune)
     ALLOW_WORLD_EVENTS: bool | None = None
 
     @classmethod
     def can_gather(cls) -> bool:
-        """是否允许参加聚会：如果显式配置了则使用配置，否则重大行为默认不允许，非重大行为默认允许"""
+        """Whether joining gatherings is allowed: use the explicit config if set; otherwise major actions disallow by default and non-major actions allow."""
         if cls.ALLOW_GATHERING is not None:
             return cls.ALLOW_GATHERING
         return not getattr(cls, 'IS_MAJOR', False)
 
     @classmethod
     def can_trigger_events(cls) -> bool:
-        """是否允许奇遇/霉运：如果显式配置了则使用配置，否则重大行为默认不允许，非重大行为默认允许"""
+        """Whether fortune/misfortune is allowed: use the explicit config if set; otherwise major actions disallow by default and non-major actions allow."""
         if cls.ALLOW_WORLD_EVENTS is not None:
             return cls.ALLOW_WORLD_EVENTS
         return not getattr(cls, 'IS_MAJOR', False)
 
     def __init__(self, avatar: Avatar, world: World):
         """
-        传一个avatar的ref
-        这样子实际执行的时候，可以知道avatar的能力和状态
-        可选传入world；若不传，则尝试从avatar.world获取。
+        Pass in a ref to the avatar
+        so that at execution time the avatar's abilities and state are known.
+        A world can optionally be passed; otherwise it is taken from avatar.world.
         """
         self.avatar = avatar
         self.world = world
@@ -91,7 +91,7 @@ class Action(ABC):
     @property
     def name(self) -> str:
         """
-        获取动作名称
+        Get the action name
         """
         return str(self.__class__.__name__)
 
@@ -99,37 +99,37 @@ class Action(ABC):
     
     @classmethod
     def get_action_name(cls) -> str:
-        """获取动作名称的翻译"""
+        """Get the translated action name."""
         if cls.ACTION_NAME_ID:
             return t(cls.ACTION_NAME_ID)
         return cls.__name__
     
     @classmethod
     def get_desc(cls) -> str:
-        """获取动作描述的翻译"""
+        """Get the translated action description."""
         if cls.DESC_ID:
             return t(cls.DESC_ID)
         return ""
     
     @classmethod
     def get_requirements(cls) -> str:
-        """获取可执行条件的翻译"""
+        """Get the translated executable conditions."""
         if cls.REQUIREMENTS_ID:
             return t(cls.REQUIREMENTS_ID)
         return ""
 
     def get_save_data(self) -> dict:
-        """获取需要存档的运行时数据"""
+        """Get runtime data that needs to be saved."""
         return {}
 
     def load_save_data(self, data: dict) -> None:
-        """加载运行时数据"""
+        """Load runtime data."""
         pass
 
     def can_possibly_start(self) -> bool:
         """
-        判断是否有可能开始执行该动作。
-        用于在AI决策时过滤掉绝对不可能执行的动作，以减小prompt长度。
+        Determine whether the action could possibly start.
+        Used during AI decisions to filter out actions that absolutely can't be executed, reducing prompt length.
         """
         return True
 
@@ -137,20 +137,20 @@ class Action(ABC):
 class DefineAction(Action):
     def __init__(self, avatar: Avatar, world: World):
         """
-        初始化动作，处理长态动作的属性设置
+        Initialize the action, handling long-running action attributes
         """
         super().__init__(avatar, world)
 
-        # 如果是长态动作，初始化相关属性
+        # If it's a long-running action, initialize related attributes
         if hasattr(self.__class__, '_step_month'):
             self.step_month = self.__class__._step_month
             self.start_monthstamp = None
 
     def execute(self, *args, **kwargs) -> None:
         """
-        执行动作，处理时间管理逻辑，然后调用具体的_execute实现
+        Execute the action, handling time management, then call the concrete _execute implementation
         """
-        # 如果是长态动作且第一次执行，记录开始时间
+        # If it's a long-running action executing for the first time, record the start time
         if hasattr(self, 'step_month') and self.start_monthstamp is None:
             self.start_monthstamp = self.world.month_stamp
 
@@ -159,13 +159,13 @@ class DefineAction(Action):
     @abstractmethod
     def _execute(self, *args, **kwargs) -> None:
         """
-        具体的动作执行逻辑，由子类实现
+        Concrete action execution logic, implemented by subclasses
         """
         pass
 
     def get_save_data(self) -> dict:
         data = super().get_save_data()
-        # 很多长态动作（包括MoveToDirection）都会设置此属性
+        # Many long-running actions (including MoveToDirection) set this attribute
         if hasattr(self, 'start_monthstamp'):
             val = self.start_monthstamp
             data['start_monthstamp'] = int(val) if val is not None else None
@@ -184,11 +184,11 @@ class DefineAction(Action):
 
 class LLMAction(Action):
     """
-    基于LLM的action，这种action一般是不需要实际的规则定义。
-    而是一种抽象的，仅有社会层面的后果的定义。
-    比如“折辱”“恶狠狠地盯着”“退婚”等
-    这种action会通过LLM生成并被执行，让NPC记忆并产生后果。
-    但是不需要规则侧做出反应来。
+    LLM-based actions; these generally don't need concrete rule definitions.
+    They're abstract definitions with only social consequences,
+    such as "humiliate", "glare viciously", "break off an engagement", etc.
+    Such actions are generated and executed via the LLM, so NPCs remember them and they have consequences,
+    but the rule side doesn't need to react.
     """
 
     pass
@@ -196,8 +196,8 @@ class LLMAction(Action):
 
 class ChunkActionMixin():
     """
-    动作片，可以理解成只是一种切分出来的动作。
-    不能被avatar直接执行，而是成为avatar执行某个动作的步骤。
+    Action segment: think of it as a sliced-out piece of an action.
+    It can't be executed directly by an avatar; it becomes a step of some action the avatar performs.
     """
 
     pass
@@ -205,31 +205,31 @@ class ChunkActionMixin():
 
 class ActualActionMixin():
     """
-    实际的可以被规则/LLM调用，让avatar去执行的动作。
-    不一定是多个step，也有可能就一个step。
+    An actual action that rules/LLM can call to have an avatar execute.
+    Not necessarily multi-step; it may be a single step.
 
-    新接口：子类必须实现 can_start/start/step/finish。
+    New interface: subclasses must implement can_start/start/step/finish.
     
-    类变量：
-    - IS_MAJOR: 是否为大事（长期记忆），默认False（小事/短期记忆）
+    Class variables:
+    - IS_MAJOR: whether it's a major event (long-term memory), default False (minor / short-term memory)
     """
     
-    # 默认为小事（短期记忆）
+    # Minor event (short-term memory) by default
     IS_MAJOR: bool = False
 
     def create_event(self, content: str, related_avatars=None) -> Event:
         """
-        创建事件的辅助方法，自动带上is_major属性
+        Helper to create an event, automatically carrying the is_major attribute
         
         Args:
-            content: 事件内容
-            related_avatars: 相关角色ID列表
+            content: event content
+            related_avatars: list of related avatar IDs
             
         Returns:
-            Event对象，is_major根据当前Action的IS_MAJOR类变量设置
+            An Event object, with is_major set from the current Action's IS_MAJOR class variable
         """
         from src.classes.action.action import Action
-        # 获取当前类的IS_MAJOR属性
+        # Get the current class's IS_MAJOR attribute
         is_major = self.__class__.IS_MAJOR if hasattr(self.__class__, 'IS_MAJOR') else False
         return Event(
             month_stamp=self.world.month_stamp,
@@ -257,7 +257,7 @@ class ActualActionMixin():
 
 class InstantAction(DefineAction, ActualActionMixin):
     """
-    一次性动作：在一次 step 内完成。子类仅需实现 _execute。
+    One-shot action: completes within one step. Subclasses only need to implement _execute.
     """
 
     def step(self, **params) -> ActionResult:
@@ -268,8 +268,8 @@ class InstantAction(DefineAction, ActualActionMixin):
 
 class TimedAction(DefineAction, ActualActionMixin):
     """
-    长态动作：通过类属性 duration_months 控制持续时间。
-    子类实现 _execute 作为每月的执行逻辑。
+    Long-running action: duration is controlled by the duration_months class attribute.
+    Subclasses implement _execute as the monthly execution logic.
     """
 
     duration_months: int = 1

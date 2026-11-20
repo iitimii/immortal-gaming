@@ -1,20 +1,20 @@
 id,name_id,desc_id,name,desc,animal_ids,plant_ids,lode_ids
-ID必须以1开头,名称ID,描述ID,,,该区域分布的动物物种IDs,该区域分布的植物物种IDs,该区域分布的矿脉IDs
-101,NORMAL_REGION_101_NAME,NORMAL_REGION_101_DESC,平原地带,位于大陆中部，地势平坦，灵气平和。是初学修炼者打基础和建立宗门的理想之地。,3.0,,
-102,NORMAL_REGION_102_NAME,NORMAL_REGION_102_DESC,西域流沙,位于大陆极西，茫茫大漠，黄沙漫天。此地气候干燥，日夜温差极大，是沙漠商队的必经之路。,,3.0,
-103,NORMAL_REGION_103_NAME,NORMAL_REGION_103_DESC,南疆蛮荒,位于大陆西南，古木参天，藤蔓缠绕。此地森林茂密，野兽众多，是采集药材和狩猎的危险之地。,4.0,,
-104,NORMAL_REGION_104_NAME,NORMAL_REGION_104_DESC,极北冰原,位于大陆极北，千里冰封，万年不化。此地严寒刺骨，风雪交加，只有最坚韧的冒险者才能在此生存。,,4.0,
-105,NORMAL_REGION_105_NAME,NORMAL_REGION_105_DESC,无边碧海,位于大陆极东，浩瀚无垠，波涛汹涌。此地风浪险恶，暗礁密布，是海商和渔民的挑战之海。,5.0,,
-106,NORMAL_REGION_106_NAME,NORMAL_REGION_106_DESC,天河奔流,横贯大陆东西，一江春水向东流，奔腾不息入东海。此河贯穿东西，水流湍急，是重要的交通要道。,,5.0,
-107,NORMAL_REGION_107_NAME,NORMAL_REGION_107_DESC,青峰山脉,位于大陆东部，连绵起伏，直插云霄。此地山势险峻，多有奇石异洞，是探险者寻宝的热门之地。,6.0,,1.0
-108,NORMAL_REGION_108_NAME,NORMAL_REGION_108_DESC,万丈雪峰,位于大陆西北，雪峰皑皑，寒风刺骨。此地终年积雪，山路崎岖，是登山者的终极挑战。,,6.0,
-109,NORMAL_REGION_109_NAME,NORMAL_REGION_109_DESC,碧野千里,位于大陆西部，芳草萋萋，一望无际。此地水草丰美，牛羊成群，是游牧民族的天然牧场。,7.0,,
-110,NORMAL_REGION_110_NAME,NORMAL_REGION_110_DESC,青云林海,位于大陆中部，古树参天，绿意盎然。此地森林广袤，物产丰富，是伐木工和猎人的主要活动区域。,,7.0,
-111,NORMAL_REGION_111_NAME,NORMAL_REGION_111_DESC,炎狱火山,位于大陆东北，烈焰冲天，岩浆奔流。此地火山活跃，地热丰富，是铁匠锻造的理想之地，但也极其危险。,8.0,,2.0
-112,NORMAL_REGION_112_NAME,NORMAL_REGION_112_DESC,沃土良田,位于大陆东部，土地肥沃，五谷丰登。此地土壤深厚，雨水充沛，是农民耕种的黄金宝地。,,8.0,
-113,NORMAL_REGION_113_NAME,NORMAL_REGION_113_DESC,幽冥毒泽,位于大陆正南，终年被五色瘴气笼罩，毒虫遍地。凡人入之即化为白骨，唯有修习毒功者视此处为无上洞天。,9.0,,
-114,NORMAL_REGION_114_NAME,NORMAL_REGION_114_DESC,十万大山,位于大陆南部，苍茫群山连绵不绝，乃是妖族祖地。山势险峻，道路难行。,10.0,,4.0
-115,NORMAL_REGION_115_NAME,NORMAL_REGION_115_DESC,紫竹幽境,位于大陆中北，紫竹成林，灵气清冽。风过林间若奏仙乐，在此静修可涤荡心魔，感悟天地自然之道。,,9.0,
-116,NORMAL_REGION_116_NAME,NORMAL_REGION_116_DESC,凛霜荒原,位于大陆东北，寸草不生，冻土千尺。此地生机绝灭，却蕴含着极致的阴寒灵气，偶有万年玄冰出世。,11.0,,
-117,NORMAL_REGION_117_NAME,NORMAL_REGION_117_DESC,碎星戈壁,位于大陆西南，飞沙走石，狂风如刀。传说曾有星辰陨落于此，至今仍残存着狂暴的星辰之力与天外陨铁。,,10.0,3.0
-118,NORMAL_REGION_118_NAME,NORMAL_REGION_118_DESC,蓬莱遗岛,位于极东海外，孤悬海外，云雾缭绕。岛上灵泉喷涌，奇花异草遍布，灵气浓郁远超内陆，是海外散修向往之地。,,11.0,
+ID must start with 1,Name ID,Description ID,,,Animal species IDs found in this region,Plant species IDs found in this region,Lode IDs found in this region
+101,NORMAL_REGION_101_NAME,NORMAL_REGION_101_DESC,Plains Region,"Located in the center of the continent, with flat terrain and peaceful spiritual qi. An ideal place for beginners to build a foundation and establish sects.",3.0,,
+102,NORMAL_REGION_102_NAME,NORMAL_REGION_102_DESC,Western Quicksand,"Located in the far west of the continent, a vast desert with yellow sand filling the sky. The climate is dry with a huge temperature difference between day and night, a mandatory route for desert caravans.",,3.0,
+103,NORMAL_REGION_103_NAME,NORMAL_REGION_103_DESC,Southern Wilds,"Located in the southwest of the continent, with ancient trees reaching the sky and vines entangling. The forest is dense with many wild beasts, a dangerous place for gathering medicinal herbs and hunting.",4.0,,
+104,NORMAL_REGION_104_NAME,NORMAL_REGION_104_DESC,Far North Ice Field,"Located in the far north of the continent, frozen for thousands of miles and unchanging for ten thousand years. It is bone-chillingly cold with wind and snow; only the most resilient adventurers can survive here.",,4.0,
+105,NORMAL_REGION_105_NAME,NORMAL_REGION_105_DESC,Boundless Azure Sea,"Located in the far east of the continent, vast and boundless with surging waves. The wind and waves are treacherous with hidden reefs; it is a sea of challenge for maritime merchants and fishermen.",5.0,,
+106,NORMAL_REGION_106_NAME,NORMAL_REGION_106_DESC,Tianhe River Flow,"Traverses the continent from east to west, a river of spring water flowing east, rushing endlessly into the East Sea. This river cuts across east and west with rapid flow, serving as an important transportation route.",,5.0,
+107,NORMAL_REGION_107_NAME,NORMAL_REGION_107_DESC,Qingfeng Mountains,"Located in the east of the continent, undulating and piercing into the clouds. The mountains are steep with many strange stones and caves, a popular place for adventurers to find treasures.",6.0,,1.0
+108,NORMAL_REGION_108_NAME,NORMAL_REGION_108_DESC,Ten Thousand Zhang Snow Peak,"Located in the northwest of the continent, with snowy peaks and bone-chilling winds. Shrouded in snow all year round with rugged mountain paths, the ultimate challenge for climbers.",,6.0,
+109,NORMAL_REGION_109_NAME,NORMAL_REGION_109_DESC,Thousands of Miles of Green Fields,"Located in the west of the continent, with lush grass stretching as far as the eye can see. The water and grass are abundant with herds of cattle and sheep, a natural pasture for nomadic peoples.",7.0,,
+110,NORMAL_REGION_110_NAME,NORMAL_REGION_110_DESC,Qingyun Forest Sea,"Located in the center of the continent, with ancient trees reaching the sky and vibrant greenery. The forest is vast and rich in resources, a main activity area for loggers and hunters.",,7.0,
+111,NORMAL_REGION_111_NAME,NORMAL_REGION_111_DESC,Lava Volcano,"Located in the northeast of the continent, with flames reaching the sky and magma flowing. The volcano is active with abundant geothermal energy, an ideal place for blacksmiths to forge, but also extremely dangerous.",8.0,,2.0
+112,NORMAL_REGION_112_NAME,NORMAL_REGION_112_DESC,Fertile Farmland,"Located in the east of the continent, with fertile land and abundant crops. The soil is deep and rain is plentiful, a golden treasure land for farmers to cultivate.",,8.0,
+113,NORMAL_REGION_113_NAME,NORMAL_REGION_113_DESC,Underworld Poisonous Swamp,"Located in the south of the continent, shrouded in five-colored miasma all year round with poisonous insects everywhere. Mortals dissolve into bones upon entry; only those practicing poisonous techniques view this as a supreme grotto-heaven.",9.0,,
+114,NORMAL_REGION_114_NAME,NORMAL_REGION_114_DESC,One Hundred Thousand Mountains,"Located in the south of the continent, vast mountains stretching endlessly, the ancestral land of the Yao tribe. The mountains are steep and the roads are difficult to traverse.",10.0,,4.0
+115,NORMAL_REGION_115_NAME,NORMAL_REGION_115_DESC,Purple Bamboo Secluded Realm,"Located in the north-central continent, with purple bamboo forming forests and clear spiritual qi. The wind through the forest sounds like immortal music; quiet cultivation here can cleanse heart demons and comprehend the Dao of heaven and earth.",,9.0,
+116,NORMAL_REGION_116_NAME,NORMAL_REGION_116_DESC,Freezing Frost Wasteland,"Located in the northeast of the continent, where no grass grows and the permafrost is a thousand feet deep. Life is extinguished here, yet it contains the ultimate cold spiritual qi, with ten-thousand-year profound ice occasionally appearing.",11.0,,
+117,NORMAL_REGION_117_NAME,NORMAL_REGION_117_DESC,Shattered Star Gobi,"Located in the southwest of the continent, with flying sand and stones and wind as sharp as a knife. Legend has it that stars once fell here, and violent star power and extraterrestrial meteoric iron still remain.",,10.0,3.0
+118,NORMAL_REGION_118_NAME,NORMAL_REGION_118_DESC,Penglai Lost Island,"Located in the far eastern overseas, hanging alone overseas and shrouded in clouds. Spiritual springs gush on the island, with strange flowers and herbs everywhere, and spiritual qi density far exceeding the mainland, a place yearned for by overseas rogue cultivators.",,11.0,

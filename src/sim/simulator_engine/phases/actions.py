@@ -14,8 +14,8 @@ async def phase_decide_actions(world, living_avatars: list[Avatar]) -> None:
         gateway.before_ai_decision(world)
     controlled_avatar_id = gateway.get_controlled_avatar_id() if gateway is not None else ""
 
-    # 只给“既没在执行动作，也没有待执行计划”的角色补决策，
-    # 避免 LLM 覆盖已经排好的行动链。
+    # Only make decisions for avatars that are neither executing an action nor have a pending plan,
+    # so the LLM does not overwrite an already scheduled action chain.
     avatars_to_decide = [
         avatar
         for avatar in living_avatars
@@ -39,8 +39,8 @@ def phase_commit_next_plans(living_avatars: list[Avatar]) -> list[Event]:
     events: list[Event] = []
     for avatar in living_avatars:
         if avatar.current_action is None:
-            # 这里仅负责把已存在的计划推进到 current_action，
-            # 不参与“该计划从哪来”的决策逻辑。
+            # This only advances an existing plan into current_action;
+            # it does not participate in deciding where the plan came from.
             start_event = avatar.commit_next_plan()
             if start_event is not None and not is_null_event(start_event):
                 events.append(start_event)
@@ -48,8 +48,8 @@ def phase_commit_next_plans(living_avatars: list[Avatar]) -> list[Event]:
 
 
 async def _tick_action_round(avatars: list[Avatar], log_label: str) -> tuple[list[Event], set[Avatar]]:
-    # 单轮动作执行。返回本轮事件，以及需要在同月继续补跑的角色。
-    # 之所以要单独拆出来，是为了把“首轮执行”和“后续重试轮”复用同一套异常处理。
+    # A single round of action execution. Returns this round's events and the avatars that need to keep running this month.
+    # It is split out so the "first round" and subsequent "retry rounds" share the same exception handling.
     events: list[Event] = []
     avatars_needing_retry: set[Avatar] = set()
 
@@ -80,7 +80,7 @@ async def phase_execute_actions(living_avatars: list[Avatar]) -> list[Event]:
     events: list[Event] = []
     max_local_rounds = StaticConfigProvider.current().max_action_rounds_per_turn()
 
-    # 第一轮先让所有在执行动作的角色各跑一次。
+    # In the first round, every avatar executing an action runs once.
     round_events, avatars_needing_retry = await _tick_action_round(
         living_avatars,
         "tick_action",
@@ -88,8 +88,8 @@ async def phase_execute_actions(living_avatars: list[Avatar]) -> list[Event]:
     events.extend(round_events)
 
     round_count = 1
-    # 某些动作会在 tick 内无缝接上新的 current_action。
-    # 这类角色会在同一个月内继续补跑，但要受全局上限保护，避免死循环。
+    # Some actions seamlessly chain into a new current_action within a tick.
+    # Such avatars keep running within the same month, guarded by a global cap to avoid infinite loops.
     while avatars_needing_retry and round_count < max_local_rounds:
         current_avatars = list(avatars_needing_retry)
         round_events, avatars_needing_retry = await _tick_action_round(

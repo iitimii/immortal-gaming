@@ -1,10 +1,10 @@
 /**
- * 核心领域模型 (Core Domain Models)
- * 这些类型代表了前端应用内部使用的“标准”数据结构。
- * 它们应该是完整的、经过清洗的数据，尽量减少 undefined 的使用。
+ * Core Domain Models
+ * These types are the canonical data structures used inside the frontend.
+ * They should be complete, cleaned data with as few undefined fields as possible.
  */
 
-// --- 基础实体 ---
+// --- Base entities ---
 
 export interface EntityBase {
   id: string;
@@ -16,7 +16,7 @@ export interface Coordinates {
   y: number;
 }
 
-// --- 物品与效果 ---
+// --- Items and effects ---
 
 export interface EffectEntity extends EntityBase {
   desc?: string;
@@ -25,10 +25,10 @@ export interface EffectEntity extends EntityBase {
   mechanism_type?: string;
   grade?: string;
   realm?: string;
-  rarity?: string; // e.g., 'SSR', 'R', '上品'
+  rarity?: string; // e.g., 'SSR', 'R', 'UPPER'
   type?: string;
-  type_name?: string; // 新增：中文类型名，如"丹药"、"破境"等
-  color?: string | number[]; // 某些实体自带颜色
+  type_name?: string; // Localized type name, e.g. "Elixir", "Breakthrough"
+  color?: string | number[]; // Some entities carry their own color
   attribute?: string;
   key?: string;
   icon_key?: string;
@@ -64,7 +64,7 @@ export interface FateRevelation {
   location?: string;
 }
 
-// --- 角色 (Avatar) ---
+// --- Avatar ---
 
 export interface AvatarSummary extends EntityBase, Coordinates {
   action?: string;
@@ -79,7 +79,7 @@ export interface AvatarSummary extends EntityBase, Coordinates {
 }
 
 export interface AvatarDetail extends EntityBase {
-  // 基础信息
+  // Basic info
   pic_id?: number | null;
   gender: string;
   race?: EffectEntity;
@@ -89,16 +89,16 @@ export interface AvatarDetail extends EntityBase {
   cultivation_start_month_stamp?: number;
   lifespan: number;
   nickname?: string;
-  appearance: string; // 外貌描述
+  appearance: string; // Appearance description
   is_dead?: boolean;
-  action_state?: string; // 当前正在进行的动作描述
+  action_state?: string; // Description of the current action
   death_info?: {
     time: number;
     reason: string;
     location: [number, number];
   };
   
-  // 修行状态
+  // Cultivation state
   realm: string;
   realm_id?: string;
   stage_id?: string;
@@ -115,29 +115,29 @@ export interface AvatarDetail extends EntityBase {
   base_battle_strength: number;
   ranking?: { type: string; rank: number };
   
-  // 情绪
+  // Emotion
   emotion: {
     name: string;
     emoji: string;
     desc: string;
   };
   
-  // 属性与资质
+  // Attributes and aptitude
   alignment: string;
   alignment_detail?: EffectEntity;
   root: string;
   root_detail?: EffectEntity;
   
-  // 思维与目标
+  // Thinking and goals
   thinking: string;
   short_term_objective: string;
   long_term_objective: string;
   backstory?: string | null;
   fate_revelation?: FateRevelation | null;
   
-  // 关联实体
+  // Related entities
   sect?: SectInfo;
-  orthodoxy?: EffectEntity; // 新增道统字段
+  orthodoxy?: EffectEntity; // Orthodoxy
   personas: EffectEntity[];
   goldfinger?: EffectEntity;
   technique?: EffectEntity;
@@ -145,13 +145,12 @@ export interface AvatarDetail extends EntityBase {
   auxiliary?: EffectEntity;
   spirit_animal?: EffectEntity;
   
-  // 列表数据
+  // Lists
   materials: Material[];
   relations: RelationInfo[];
   
-  // 附加信息
+  // Extra info
   current_effects?: string;
-  "当前效果"?: string;
   sect_status_summary?: {
     sect_name: string;
     sect_rank: string;
@@ -281,7 +280,7 @@ export interface RelationInfo {
   cultivation?: CultivationDisplay;
 }
 
-// --- 地图与区域 (Map & Region) ---
+// --- Map & Region ---
 
 export type MapMatrix = string[][];
 
@@ -290,7 +289,7 @@ export interface RegionSummary extends EntityBase, Coordinates {
   sect_id?: number;
   sect_name?: string;
   sect_color?: string;
-  // 是否为激活宗门（由后端地图查询接口提供，当前主路径为 /api/v1/query/world/map）。未提供时视为 true。
+  // Whether the sect is active (provided by the map query, currently /api/v1/query/world/map). Treated as true when absent.
   sect_is_active?: boolean;
   sub_type?: string; // for cultivate regions: "cave" or "ruin"
   formation?: RegionFormationInfo | null;
@@ -363,7 +362,7 @@ export interface RegionFormationInfo {
 export interface RegionDetail extends EntityBase {
   desc: string;
   type: string;
-  type_name: string; // 中文类型名
+  type_name: string; // Localized type name
   sub_type?: string;
   sect_id?: number;
   population?: number;
@@ -374,7 +373,7 @@ export interface RegionDetail extends EntityBase {
     density: number; 
   };
   
-  // 洞府主人（修炼区域特有）
+  // Cave dwelling owner (cultivation regions only)
   host?: {
     id: string;
     name: string;
@@ -387,7 +386,7 @@ export interface RegionDetail extends EntityBase {
   formation?: RegionFormationInfo | null;
 }
 
-// --- 天地灵机 ---
+// --- Celestial Phenomenon ---
 
 export interface CelestialPhenomenon {
   id: number;
@@ -400,16 +399,16 @@ export interface CelestialPhenomenon {
 
 // web/src/types/core.ts
 
-// 新增秘境信息接口
+// Hidden domain info
 export interface HiddenDomainInfo {
   id: string;
   name: string;
   desc: string;
-  required_realm: string; // 限制境界
-  danger_prob: number; // 凶险度 (0.0 - 1.0)
-  drop_prob: number;   // 机缘度 (0.0 - 1.0)
-  cd_years: number;    // CD 年份
-  open_prob: number;   // 开启概率
+  required_realm: string; // Required realm
+  danger_prob: number; // Danger (0.0 - 1.0)
+  drop_prob: number;   // Fortune (0.0 - 1.0)
+  cd_years: number;    // Cooldown in years
+  open_prob: number;   // Open probability
 }
 
 export interface TrackedMortalInfo {
@@ -501,7 +500,7 @@ export interface AvatarOverview {
   realmDistribution: AvatarRealmDistributionItem[];
 }
 
-// --- 事件 (Events) ---
+// --- Events ---
 
 export type EventSubject =
   | {
@@ -522,10 +521,10 @@ export type EventSubject =
 export interface GameEvent {
   id: string;
   text: string;
-  content?: string; // 详细描述
+  content?: string; // Full description
   year: number;
   month: number;
-  // 排序权重
+  // Sort weight
   timestamp: number; 
   relatedAvatarIds: string[];
   relatedSects?: number[];
@@ -535,9 +534,9 @@ export interface GameEvent {
   renderKey?: string;
   renderParams?: Record<string, string | number | boolean | null>;
   
-  // 真实创建时间 (用于精确排序)
+  // Real creation time (for precise ordering)
   createdAt?: number;
 
-  // 运行时辅助字段
+  // Runtime helper fields
   _seq?: number; 
 }

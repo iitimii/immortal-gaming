@@ -7,35 +7,35 @@ if TYPE_CHECKING:
     from src.classes.core.avatar import Avatar
 
 class TileType(Enum):
-    PLAIN = "plain" # 平原
-    WATER = "water" # 水域
-    SEA = "sea" # 海洋
-    MOUNTAIN = "mountain" # 山脉
-    FOREST = "forest" # 森林
-    CITY = "city" # 城市
-    DESERT = "desert" # 沙漠
-    RAINFOREST = "rainforest" # 热带雨林
-    GLACIER = "glacier" # 冰川/冰原
-    SNOW_MOUNTAIN = "snow_mountain" # 雪山
-    VOLCANO = "volcano" # 火山
-    GRASSLAND = "grassland" # 草原
-    SWAMP = "swamp" # 沼泽
-    CAVE = "cave" # 洞穴
-    RUIN = "ruin" # 遗迹
-    FARM = "farm" # 农田
-    SECT = "sect" # 宗门
-    ISLAND = "island" # 岛屿
-    BAMBOO = "bamboo" # 竹林
-    GOBI = "gobi" # 戈壁
-    TUNDRA = "tundra" # 苔原
-    MARSH = "marsh" # 湿地
+    PLAIN = "plain" # Plain
+    WATER = "water" # Water
+    SEA = "sea" # Sea
+    MOUNTAIN = "mountain" # Mountain
+    FOREST = "forest" # Forest
+    CITY = "city" # City
+    DESERT = "desert" # Desert
+    RAINFOREST = "rainforest" # Rainforest
+    GLACIER = "glacier" # Glacier/ice field
+    SNOW_MOUNTAIN = "snow_mountain" # Snow mountain
+    VOLCANO = "volcano" # Volcano
+    GRASSLAND = "grassland" # Grassland
+    SWAMP = "swamp" # Swamp
+    CAVE = "cave" # Cave
+    RUIN = "ruin" # Ruin
+    FARM = "farm" # Farmland
+    SECT = "sect" # Sect
+    ISLAND = "island" # Island
+    BAMBOO = "bamboo" # Bamboo forest
+    GOBI = "gobi" # Gobi
+    TUNDRA = "tundra" # Tundra
+    MARSH = "marsh" # Marsh
 
 
 # ============================================================
-# 2x2 大型Tile 配置
+# 2x2 large tile config
 # ============================================================
 
-# 固定的大型Tile类型 (基于 TileType)
+# Fixed large tile types (based on TileType)
 LARGE_TILE_TYPES: set[TileType] = {
     TileType.CAVE,
     TileType.RUIN,
@@ -43,55 +43,55 @@ LARGE_TILE_TYPES: set[TileType] = {
     TileType.CITY,
 }
 
-# 动态的大型Tile前缀 (用于宗门名、城市名等)
-# 地图存储的tile名称如果以这些类别开头的子文件夹对应，则视为大型Tile
+# Dynamic large tile prefixes (for sect names, city names, etc.)
+# If a tile name stored in the map starts with one of these category subfolders, it is treated as a large tile
 LARGE_TILE_CATEGORIES: set[str] = {"sect", "city"}
 
 
 def is_large_tile(tile_name: str) -> bool:
     """
-    判断一个tile名称是否为2x2大型tile。
+    Determine whether a tile name is a 2x2 large tile.
     
     Args:
-        tile_name: tile的名称（如 "cave", "明心剑宗", "青云城" 等）
+        tile_name: the tile's name (e.g. "cave", or a sect/city tile name)
     
     Returns:
-        是否为大型tile
+        Whether it is a large tile
     """
-    # 1. 检查是否为标准大型TileType
+    # 1. Check whether it's a standard large TileType
     try:
         t = TileType(tile_name.lower())
         return t in LARGE_TILE_TYPES
     except ValueError:
         pass
     
-    # 2. 非标准类型：宗门名、城市名等
-    # 这些tile的名称直接是中文名，它们的切片存在于 sects/ 或 cities/ 目录
-    # 由于无法在此静态判断，我们假设所有非标准TileType的名称都是大型tile
-    # (因为普通tile都在TileType枚举中)
+    # 2. Non-standard types: sect names, city names, etc.
+    # These tile names are sect/city identifiers whose slices live in the sects/ or cities/ directories
+    # Since this can't be determined statically, assume every non-standard TileType name is a large tile
+    # (because all normal tiles are in the TileType enum)
     return True
 
 
 def get_large_tile_slices(tile_name: str) -> list[str]:
     """
-    获取大型tile的4个切片名称。
+    Get the 4 slice names of a large tile.
     
     Args:
-        tile_name: 大型tile的名称
+        tile_name: the large tile's name
     
     Returns:
-        4个切片名称的列表 [TL, TR, BL, BR]
+        List of 4 slice names [TL, TR, BL, BR]
     """
     return [f"{tile_name}_{i}" for i in range(4)]
 
 
 @dataclass
 class Tile():
-    # 实际的地块
+    # The actual tile
     type: TileType
     x: int
     y: int
-    region: 'Region' = None # 可以是一个region的一部分，也可以不属于任何region
+    region: 'Region' = None # Can be part of a region, or belong to no region
 
     @property
     def coordinate(self) -> tuple[int, int]:
@@ -100,8 +100,8 @@ class Tile():
     @property
     def location_name(self) -> str:
         """
-        优雅地获取当前地点的名称。
-        如果属于某个区域，返回区域名；否则返回'荒野'。
+        Get the current location's name.
+        If it belongs to a region, return the region name; otherwise return 'Wilderness'.
         """
         from src.i18n import t
         return self.region.name if self.region else t("Wilderness")
@@ -111,13 +111,13 @@ from src.utils.distance import manhattan_distance
 
 def get_avatar_distance(avatar1: 'Avatar', avatar2: 'Avatar') -> int:
     """
-    计算两个 Avatar 之间的曼哈顿距离
+    Compute the Manhattan distance between two Avatars
     
     Args:
-        avatar1: 第一个角色
-        avatar2: 第二个角色
+        avatar1: the first avatar
+        avatar2: the second avatar
     
     Returns:
-        两个角色之间的距离
+        The distance between the two avatars
     """
     return manhattan_distance((avatar1.pos_x, avatar1.pos_y), (avatar2.pos_x, avatar2.pos_y))

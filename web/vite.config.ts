@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => {
       }
     },
     build: {
-      assetsDir: 'web_static', // 避免与游戏原本的 /assets 目录冲突
+      assetsDir: 'web_static', // Avoid clashing with the game's own /assets directory
       // Keep SVG/UI assets as real files instead of inlined data URLs.
       // Some packaged-runtime browser paths handle `mask-image: url(data:...)`
       // inconsistently, which can make icon masks disappear in the exe build.
@@ -44,7 +44,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
-      host: '0.0.0.0', // 允许局域网访问
+      host: '0.0.0.0', // Allow LAN access
       proxy: {
         '/api': {
           target: API_TARGET,

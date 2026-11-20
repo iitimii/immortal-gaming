@@ -1,8 +1,8 @@
 """
-存档功能模块。
+Save game module.
 
-顶层函数只负责路径、事件数据库复制、section 编排和文件 IO。具体 payload
-由 `src.sim.save.sections` 中的 section 负责，避免新增系统继续膨胀本文件。
+Top-level functions only handle paths, event database copying, section orchestration, and file IO. The concrete payload
+is owned by sections in `src.sim.save.sections`, so new systems don't keep bloating this file.
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
 
 def sanitize_save_name(name: str) -> str:
-    """清理存档名称，只保留安全字符。"""
+    """Sanitize the save name, keeping only safe characters."""
     safe_name = re.sub(r'[\\/:*?"<>|]', "", name)
     safe_name = re.sub(r"[^\w\u4e00-\u9fff]", "_", safe_name)
     return safe_name[:50] if safe_name else "save"
@@ -87,7 +87,7 @@ def save_game(
     custom_name: Optional[str] = None,
     is_auto_save: bool = False,
 ) -> tuple[bool, Optional[str]]:
-    """保存游戏状态到 JSON + SQLite 事件库。"""
+    """Save game state to JSON + a SQLite event database."""
     try:
         resolved_save_path = _resolve_save_path(
             world=world,
@@ -122,7 +122,7 @@ def save_game(
 
 
 def get_save_info(save_path: Path) -> Optional[dict]:
-    """读取存档文件的元信息。"""
+    """Read a save file's metadata."""
     try:
         with open(save_path, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -132,7 +132,7 @@ def get_save_info(save_path: Path) -> Optional[dict]:
 
 
 def list_saves(saves_dir: Optional[Path] = None) -> List[tuple[Path, dict]]:
-    """列出所有存档文件及其元信息。"""
+    """List all save files and their metadata."""
     if saves_dir is None:
         saves_dir = _get_current_saves_dir()
 

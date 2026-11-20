@@ -13,8 +13,8 @@ if TYPE_CHECKING:
 
 def _sect_runtime_source_label(source: str, language_manager: object) -> str:
     """
-    根据当前语言返回运行时宗门效果来源的可读标签。
-    逻辑与 /api/v1/query/detail 中 sect 分支保持一致。
+    Return a readable label for a runtime sect effect source in the current language.
+    Logic matches the sect branch of /api/v1/query/detail.
     """
     key = (source or "").strip().lower()
 
@@ -27,15 +27,15 @@ def _sect_runtime_source_label(source: str, language_manager: object) -> str:
 
 def build_sect_detail(sect: "Sect", world: "World", language_manager: object) -> Dict[str, Any]:
     """
-    组装宗门详情的完整结构化信息。
+    Assemble the full structured sect detail.
 
-    - 基础字段来自 sect.get_structured_info()
-    - 运行时效果字段与 /api/v1/query/detail 现有实现保持完全一致
+    - Base fields come from sect.get_structured_info()
+    - Runtime effect fields match the existing /api/v1/query/detail implementation exactly
     """
-    # 1. 先获取领域层提供的基础信息
+    # 1. Get the base info provided by the domain layer
     info: Dict[str, Any] = sect.get_structured_info()
 
-    # 2. 拼接运行时效果信息（与原 /api/v1/query/detail 保持等价）
+    # 2. Append runtime effect info (equivalent to the original /api/v1/query/detail)
     current_month = int(getattr(world, "month_stamp", 0))
     runtime_items: List[Dict[str, Any]] = []
 
@@ -90,7 +90,7 @@ def build_sect_detail(sect: "Sect", world: "World", language_manager: object) ->
     info["runtime_effect_items"] = runtime_items
     info["periodic_thinking"] = str(getattr(sect, "periodic_thinking", "") or "")
     info["war_weariness"] = int(getattr(sect, "war_weariness", 0) or 0)
-    # 前端仍标记为 deprecated 的别名，语义等同 periodic_thinking。
+    # Alias still marked deprecated on the frontend; same meaning as periodic_thinking.
     info["yearly_thinking"] = info["periodic_thinking"]
 
     sect_manager = SectManager(world)
@@ -109,7 +109,7 @@ def build_sect_detail(sect: "Sect", world: "World", language_manager: object) ->
         "tile_count": tile_count,
         "border_tile_count": border_tile_count,
         "border_pressure_ratio": (float(border_tile_count) / float(tile_count)) if tile_count > 0 else 0.0,
-        # 前端仍标记为 deprecated 的别名，语义等同 border_tile_count。
+        # Alias still marked deprecated on the frontend; same meaning as border_tile_count.
         "conflict_tile_count": border_tile_count,
         "headquarter_center": snapshot.sect_centers.get(int(sect.id)),
     }

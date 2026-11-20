@@ -22,6 +22,11 @@ class Emperor:
 
     @property
     def name(self) -> str:
+        from src.classes.language import language_manager
+        from src.i18n.locale_registry import uses_space_separated_names
+
+        if self.surname and self.given_name and uses_space_separated_names(language_manager.current):
+            return f"{self.surname} {self.given_name}"
         return f"{self.surname}{self.given_name}"
 
     def get_age(self, current_month_stamp: int) -> int:
@@ -110,14 +115,14 @@ class Dynasty:
         if not name:
             return ""
         translated = t("dynasty_title_format", name=name)
-        return translated if translated != "dynasty_title_format" else f"{name}朝"
+        return translated if translated != "dynasty_title_format" else f"{name} Dynasty"
 
     @property
     def royal_house_name(self) -> str:
         if not self.royal_surname:
             return ""
         translated = t("dynasty_royal_house_format", surname=self.royal_surname)
-        return translated if translated != "dynasty_royal_house_format" else f"{self.royal_surname}氏"
+        return translated if translated != "dynasty_royal_house_format" else f"House {self.royal_surname}"
 
     def create_runtime(self, royal_surname: str) -> "Dynasty":
         source_name = source_dynasty_names_by_id.get(int(self.id), str(self.name or ""))

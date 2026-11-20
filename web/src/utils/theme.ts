@@ -1,32 +1,22 @@
 /**
- * 主题与样式工具
- * 集中管理颜色映射、稀有度判断等逻辑
+ * Theme and style helpers.
+ * Centralizes color mapping and rarity detection.
  */
 
 import type { EffectEntity } from '../types/core';
 
-// 稀有度颜色映射
+// Rarity color mapping
 export const GRADE_COLORS: Record<string, string> = {
-  '上品': '#c488fd', // Purple
-  '宝物': '#c488fd',
-  'SR': '#c488fd',
+  'SR': '#c488fd', // Purple
   'Upper': '#c488fd',
   
-  '中品': '#88fdc4', // Green-ish
-  'R': '#88fdc4',
+  'R': '#88fdc4', // Green-ish
   'Middle': '#88fdc4',
   
-  '法宝': '#fddc88', // Gold
-  'SSR': '#fddc88',
+  'SSR': '#fddc88', // Gold
   'Artifact': '#fddc88',
   
   'Default': '#cccccc',
-
-  // 境界映射
-  '练气': '#cccccc', // White/Gray
-  '筑基': '#88fdc4', // Green
-  '金丹': '#c488fd', // Purple
-  '元婴': '#fddc88', // Gold
 };
 
 export type EntityGradeTone = 'default' | 'epic' | 'legendary';
@@ -34,38 +24,38 @@ export type EntityGradeTone = 'default' | 'epic' | 'legendary';
 export function getEntityGradeTone(grade?: string | null): EntityGradeTone {
   const value = String(grade || '').toUpperCase();
   if (!value) return 'default';
-  if (value.includes('SSR') || value.includes('ARTIFACT') || value.includes('法宝')) {
+  if (value.includes('SSR') || value.includes('ARTIFACT')) {
     return 'legendary';
   }
-  if (value.includes('SR') || value.includes('UPPER') || value.includes('上品') || value.includes('宝物')) {
+  if (value.includes('SR') || value.includes('UPPER')) {
     return 'epic';
   }
   return 'default';
 }
 
 /**
- * 获取实体的显示颜色
- * 优先使用实体自带的 color 属性，其次根据 grade/rarity 查找
+ * Resolve an entity's display color.
+ * Prefers the entity's own `color`, then falls back to its grade/rarity.
  */
 export function getEntityColor(entity: Partial<EffectEntity> | undefined | null): string | undefined {
   if (!entity) return undefined;
 
-  // 1. 直接颜色属性 (RGB数组)
+  // 1. Explicit color (RGB array)
   if (entity.color && Array.isArray(entity.color) && entity.color.length === 3) {
     const [r, g, b] = entity.color;
     return `rgb(${r},${g},${b})`;
   }
   
-  // 2. 直接颜色属性 (字符串)
+  // 2. Explicit color (string)
   if (typeof entity.color === 'string') {
     return entity.color;
   }
 
-  // 3. 根据稀有度/品级映射
+  // 3. Map by rarity/grade
   const grade = entity.grade || entity.rarity;
   if (!grade) return undefined;
   
-  // 简单的包含匹配
+  // Simple substring match
   for (const [key, color] of Object.entries(GRADE_COLORS)) {
     if (grade.includes(key)) return color;
   }

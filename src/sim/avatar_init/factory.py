@@ -16,7 +16,7 @@ from .relations import RelationApplier, SectRankAssigner
 
 class AvatarFactory:
     """
-    根据规划产出 Avatar，对装备、宗门职位和关系进行统一处理。
+    Produces Avatars from plans, handling equipment, sect positions, and relations in one place.
     """
 
     @staticmethod
@@ -58,13 +58,13 @@ class AvatarFactory:
         avatar.magic_stone = MagicStone(50)
         avatar.tile = world.map.get_tile(avatar.pos_x, avatar.pos_y)
 
-        # 确定出生地
+        # Determine birthplace
         parents_list = []
         if plan.parent_avatar:
             parents_list.append(plan.parent_avatar)
         avatar.born_region_id = get_born_region_id(world, parents=parents_list, sect=plan.sect, race=plan.race)
 
-        # 在构造 Avatar 实例后计算并赋值：
+        # Compute and assign after constructing the Avatar instance:
         if avatar.cultivation_start_month_stamp is None:
             avatar.cultivation_start_month_stamp = _roll_cultivation_start_month(
                 MonthStamp(birth_month_stamp),
@@ -208,7 +208,7 @@ class AvatarFactory:
 
             avatar.born_region_id = get_born_region_id(world, parents=[], sect=sect, race=race)
 
-            # 在构造 Avatar 实例后计算并赋值：
+            # Compute and assign after constructing the Avatar instance:
             if avatar.cultivation_start_month_stamp is None:
                 avatar.cultivation_start_month_stamp = _roll_cultivation_start_month(
                     MonthStamp(birth_month_stamp),
@@ -293,7 +293,7 @@ class AvatarFactory:
 
 def create_random_mortal(world: World, current_month_stamp: MonthStamp, name: str, age: Age, level: int = 1) -> Avatar:
     """
-    创建一个完全随机的新修士，包含可能的亲属/师徒关系。
+    Create a fully random new cultivator, possibly with family/master-disciple relations.
     """
     plan = MortalPlanner.plan(world, name=name, age=age, level=level, allow_relations=True)
     return AvatarFactory.build_from_plan(world, current_month_stamp, name=name, age=age, plan=plan)
@@ -309,4 +309,4 @@ def make_avatars(
     random_avatars = AvatarFactory.build_group(world, current_month_stamp, population_plan)
     return random_avatars
 
-# —— 指定参数创建：支持传入字符串并解析为对象 ——
+# -- Creation with specified params: accepts strings and resolves them into objects --

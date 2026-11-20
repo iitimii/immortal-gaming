@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 class Map():
     """
-    通过dict记录position 到 tile。
+    Records position -> tile via a dict.
     """
     def __init__(
         self,
@@ -29,27 +29,27 @@ class Map():
         self.landmarks: dict[int, dict[str, object]] = {}
         self.region_overrides: dict[int, dict[str, object]] = {}
         self.region_formations: dict[int, dict[str, object]] = {}
-        # 维护“最终归属”的每个 region 的坐标集合（由分配流程写入）
+        # Coordinate sets of each region's "final ownership" (written by the allocation process)
         # key: region.id, value: list[(x, y)]
         self.region_cors: dict[int, list[tuple[int, int]]] = {}
         
-        # 区域字典，由外部加载器 (load_map.py) 填充
-        # 只维护 regions[id] 作为唯一的 source of truth，按名称查找通过遍历实现
+        # Region dict, populated by the external loader (load_map.py)
+        # Only regions[id] is maintained as the single source of truth; lookup by name iterates
         self.regions = {}
         self.sect_regions = {}
         
-        # 分类索引由加载器按需填充；regions 仍是唯一语义真源。
+        # Category indexes are filled by the loader as needed; regions remains the only semantic source of truth.
         self.normal_regions = {}
         self.cultivate_regions = {}
         self.city_regions = {}
 
     def update_sect_regions(self) -> None:
-        """根据当前 self.regions 动态刷新宗门总部区域字典。"""
+        """Dynamically refresh the sect headquarters region dict from the current self.regions."""
         self.sect_regions = {rid: r for rid, r in self.regions.items() if isinstance(r, SectRegion)}
 
     def is_in_bounds(self, x: int, y: int) -> bool:
         """
-        判断坐标是否在地图边界内。
+        Determine whether a coordinate is within the map bounds.
         """
         return 0 <= x < self.width and 0 <= y < self.height
 
@@ -61,41 +61,41 @@ class Map():
 
     def get_center_locs(self, locs: list[tuple[int, int]]) -> tuple[int, int]:
         """
-        获取locs的中心位置。
-        如果几何中心恰好在位置列表中，返回几何中心；
-        否则返回距离几何中心最近的实际位置。
+        Get the center position of locs.
+        If the geometric center is in the position list, return it;
+        otherwise return the actual position nearest to the geometric center.
         """
         if not locs:
             return (0, 0)
         
-        # 分别计算x和y坐标的平均值
+        # Compute the average of the x and y coordinates separately
         avg_x = sum(loc[0] for loc in locs) // len(locs)
         avg_y = sum(loc[1] for loc in locs) // len(locs)
         center = (avg_x, avg_y)
 
-        # 如果几何中心恰好在位置列表中，直接返回
+        # If the geometric center is in the position list, return it directly
         if center in locs:
             return center
         
-        # 否则找到距离几何中心最近的实际位置
+        # Otherwise find the actual position nearest to the geometric center
         def distance_squared(loc: tuple[int, int]) -> int:
-            """计算到中心点的距离平方（避免开方运算）"""
+            """Compute the squared distance to the center (avoids a square root)."""
             return (loc[0] - avg_x) ** 2 + (loc[1] - avg_y) ** 2
         
         return min(locs, key=distance_squared)
 
     def get_region(self, x: int, y: int) -> Optional['Region']:
         """
-        获取一个region。
+        Get a region.
         """
         return self.tiles[(x, y)].region
 
     def get_info(self, detailed: bool = False, avatar: object = None) -> dict:
         """
-        返回地图信息（dict）。
-        avatar: 如果提供，将用于：
-               1. 过滤仅返回 avatar.known_regions 中的区域
-               2. 计算并在描述中追加从 avatar 当前位置到各区域的距离
+        Return map info (dict).
+        avatar: if given, used to:
+               1. filter to only regions in avatar.known_regions
+               2. compute and append the distance from the avatar's current position to each region in the description
         """
         if TYPE_CHECKING:
              from src.classes.core.avatar import Avatar

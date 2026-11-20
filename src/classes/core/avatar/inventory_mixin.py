@@ -1,5 +1,5 @@
 """
-Avatar 物品与装备管理 Mixin
+Avatar item and equipment management mixin
 """
 from __future__ import annotations
 
@@ -14,15 +14,15 @@ if TYPE_CHECKING:
 
 
 class InventoryMixin:
-    """物品与装备管理相关方法"""
+    """Item and equipment management methods."""
     
     def add_material(self: "Avatar", material: "Material", quantity: int = 1) -> None:
         """
-        添加物品到背包
+        Add an item to the inventory.
         
         Args:
-            material: 要添加的物品
-            quantity: 添加数量，默认为1
+            material: the item to add
+            quantity: quantity to add, default 1
         """
         if quantity <= 0:
             return
@@ -34,14 +34,14 @@ class InventoryMixin:
     
     def remove_material(self: "Avatar", material: "Material", quantity: int = 1) -> bool:
         """
-        从背包移除材料
+        Remove a material from the inventory.
         
         Args:
-            material: 要移除的材料
-            quantity: 移除数量，默认为1
+            material: the material to remove
+            quantity: quantity to remove, default 1
             
         Returns:
-            bool: 是否成功移除（如果材料不足则返回False）
+            bool: whether removal succeeded (False if there isn't enough)
         """
         if quantity <= 0:
             return True
@@ -54,7 +54,7 @@ class InventoryMixin:
             
         self.materials[material] -= quantity
         
-        # 如果数量为0，从字典中移除该物品
+        # If the quantity drops to 0, remove the item from the dict
         if self.materials[material] == 0:
             del self.materials[material]
             
@@ -62,22 +62,22 @@ class InventoryMixin:
     
     def get_material_quantity(self: "Avatar", material: "Material") -> int:
         """
-        获取指定材料的数量
+        Get the quantity of a given material.
         
         Args:
-            material: 要查询的材料
+            material: the material to query
             
         Returns:
-            int: 材料数量，如果没有该材料则返回0
+            int: material quantity, 0 if none
         """
         return self.materials.get(material, 0)
 
     def change_weapon(self: "Avatar", new_weapon: Optional["Weapon"]) -> None:
         """
-        更换兵器，熟练度归零，并重新计算长期效果
+        Change weapon: proficiency resets to zero and long-term effects are recalculated.
         
         Args:
-            new_weapon: 新的兵器
+            new_weapon: the new weapon
         """
         self.weapon = new_weapon
         self.weapon_proficiency = 0.0
@@ -85,32 +85,32 @@ class InventoryMixin:
     
     def change_auxiliary(self: "Avatar", new_auxiliary: Optional["Auxiliary"]) -> None:
         """
-        更换辅助装备，并重新计算长期效果
+        Change auxiliary equipment and recalculate long-term effects.
         
         Args:
-            new_auxiliary: 新的辅助装备（可为 None 表示卸下）
+            new_auxiliary: the new auxiliary (None means unequip)
         """
         self.auxiliary = new_auxiliary
         self.recalc_effects()
     
     def increase_weapon_proficiency(self: "Avatar", amount: float) -> None:
         """
-        增加兵器熟练度，上限100
+        Increase weapon proficiency, capped at 100.
         
         Args:
-            amount: 增加的熟练度值
+            amount: proficiency to add
         """
-        # 应用extra_weapon_proficiency_gain效果（倍率加成）
+        # Apply the extra_weapon_proficiency_gain effect (multiplier bonus)
         gain_multiplier = 1.0 + self.effects.get("extra_weapon_proficiency_gain", 0.0)
         actual_amount = amount * gain_multiplier
         self.weapon_proficiency = min(100.0, self.weapon_proficiency + actual_amount)
 
-    # ==================== 出售接口 ====================
+    # ==================== Selling ====================
     
     def sell_material(self: "Avatar", material: "Material", quantity: int = 1) -> int:
         """
-        出售材料物品，返回获得的灵石数量。
-        应用 extra_item_sell_price_multiplier 效果。
+        Sell materials and return the spirit stones earned.
+        Applies the extra_item_sell_price_multiplier effect.
         """
         from src.classes.prices import prices
         
@@ -119,7 +119,7 @@ class InventoryMixin:
         
         self.remove_material(material, quantity)
         
-        # 使用统一的卖出价格接口（包含所有加成逻辑）
+        # Use the unified sell price interface (includes all bonus logic)
         unit_price = prices.get_selling_price(material, self)
         total = unit_price * quantity
         
@@ -128,84 +128,84 @@ class InventoryMixin:
 
     def sell_weapon(self: "Avatar", weapon: "Weapon") -> int:
         """
-        出售兵器，返回获得的灵石数量。
-        注意：这是辅助方法，不会自动卸下当前装备。
+        Sell a weapon and return the spirit stones earned.
+        Note: this is a helper; it does not automatically unequip the current equipment.
         """
         from src.classes.prices import prices
         
-        # 记录流转
+        # Record circulation
         self.world.circulation.add_weapon(weapon)
 
-        # 使用统一的卖出价格接口
+        # Use the unified sell price interface
         total = prices.get_selling_price(weapon, self)
         self.magic_stone = self.magic_stone + total
         return total
 
     def sell_auxiliary(self: "Avatar", auxiliary: "Auxiliary") -> int:
         """
-        出售辅助装备，返回获得的灵石数量。
-        注意：这是辅助方法，不会自动卸下当前装备。
+        Sell an auxiliary and return the spirit stones earned.
+        Note: this is a helper; it does not automatically unequip the current equipment.
         """
         from src.classes.prices import prices
         
-        # 记录流转
+        # Record circulation
         self.world.circulation.add_auxiliary(auxiliary)
 
-        # 使用统一的卖出价格接口
+        # Use the unified sell price interface
         total = prices.get_selling_price(auxiliary, self)
         self.magic_stone = self.magic_stone + total
         return total
 
     def sell_elixir(self: "Avatar", elixir: "Elixir") -> int:
         """
-        出售丹药，返回获得的灵石数量。
+        Sell an elixir and return the spirit stones earned.
         """
         from src.classes.prices import prices
         
-        # 记录流转
+        # Record circulation
         self.world.circulation.add_elixir(elixir)
         
-        # 使用统一的卖出价格接口
+        # Use the unified sell price interface
         total = prices.get_selling_price(elixir, self)
         self.magic_stone = self.magic_stone + total
         return total
 
-    # ==================== 购买接口 ====================
+    # ==================== Buying ====================
 
     def can_buy_item(self: "Avatar", obj: Any) -> tuple[bool, str]:
         """
-        检查是否可以购买指定物品。
-        涵盖价格检查、境界限制、耐药性等。
+        Check whether the given item can be bought.
+        Covers price checks, realm limits, drug tolerance, etc.
         """
         from src.classes.items.elixir import Elixir
         from src.classes.prices import prices
         from src.systems.cultivation import Realm
         
-        # 1. 检查价格
+        # 1. Check the price
         price = prices.get_buying_price(obj, self)
         if self.magic_stone < price:
-            return False, f"灵石不足 (需要 {price})"
+            return False, f"Not enough spirit stones (need {price})"
 
-        # 2. 丹药特殊检查
+        # 2. Elixir-specific checks
         if isinstance(obj, Elixir):
-            # 境界限制
+            # Realm limit
             if obj.realm > self.cultivation_progress.realm:
-                # 使用 str() 来触发 Realm 的 __str__ 方法进行 i18n 翻译。
-                return False, f"境界不足，无法承受药力 ({str(obj.realm)})"
+                # Use str() to trigger Realm.__str__ for i18n translation.
+                return False, f"Realm too low to withstand the elixir's potency ({str(obj.realm)})"
 
-            # 耐药性/生效中检查
+            # Tolerance / already-active check
             for consumed in self.elixirs:
                 if consumed.elixir.id == obj.id:
                     if not consumed.is_completely_expired(int(self.world.month_stamp)):
-                        return False, "药效尚存，无法重复服用"
+                        return False, "The elixir's effect is still active; it cannot be taken again"
                 
         return True, ""
 
     def buy_item(self: "Avatar", obj: Any) -> dict:
         """
-        执行购买逻辑。
-        包括扣款、获得物品（服用/入包/装备）、以旧换新。
-        返回交易报告 dict。
+        Execute the purchase.
+        Includes payment, receiving the item (consume / add to inventory / equip), and trade-in.
+        Returns a transaction report dict.
         """
         from src.classes.items.elixir import Elixir
         from src.classes.items.weapon import Weapon
@@ -221,27 +221,27 @@ class InventoryMixin:
             "sold_item_refund": 0
         }
         
-        # 1. 扣款
+        # 1. Pay
         price = prices.get_buying_price(obj, self)
         self.magic_stone -= price
         report["cost"] = price
         
-        # 2. 交付
+        # 2. Deliver
         if isinstance(obj, Elixir):
-            # 购买即服用
+            # Consumed on purchase
             self.consume_elixir(obj)
             report["action_type"] = "consume"
             
         elif isinstance(obj, Material):
-            # 放入背包
+            # Add to inventory
             self.add_material(obj)
             report["action_type"] = "store"
             
         elif isinstance(obj, (Weapon, Auxiliary)):
-            # 装备需要深拷贝
+            # Equipment needs a deep copy
             new_equip = obj.instantiate()
             
-            # 尝试卖出旧装备并换上新装备
+            # Try to sell the old equipment and equip the new one
             sold_name, refund = self._equip_and_trade_in(new_equip)
             
             report["action_type"] = "equip"
@@ -253,8 +253,8 @@ class InventoryMixin:
 
     def _equip_and_trade_in(self: "Avatar", new_equip: Union["Weapon", "Auxiliary"]) -> tuple[str | None, int]:
         """
-        内部方法：装备新物品，并尝试卖出旧物品（如果有）。
-        返回: (旧物品名称, 卖出金额)
+        Internal: equip a new item and try to sell the old one (if any).
+        Returns: (old item name, sale amount)
         """
         from src.classes.items.weapon import Weapon
         from src.classes.items.auxiliary import Auxiliary
@@ -263,24 +263,24 @@ class InventoryMixin:
         refund = 0
         
         if isinstance(new_equip, Weapon):
-            # 检查是否有旧兵器
+            # Check for an old weapon
             if self.weapon:
                 sold_name = self.weapon.name
-                # sell_weapon 会把旧兵器加到 circulation 并加钱给 avatar
-                # 注意：sell_weapon 不会 clear self.weapon，也不会 deepcopy（因为是直接把引用给 circulation）
-                # 这是正确的，旧对象给系统，新对象上身
+                # sell_weapon adds the old weapon to circulation and pays the avatar
+                # Note: sell_weapon doesn't clear self.weapon or deepcopy (it hands the reference to circulation)
+                # This is correct: the old object goes to the system, the new one is equipped
                 refund = self.sell_weapon(self.weapon)
                 
-            # 换上新兵器 (覆盖 self.weapon)
+            # Equip the new weapon (overwrites self.weapon)
             self.change_weapon(new_equip)
             
         elif isinstance(new_equip, Auxiliary):
-            # 检查是否有旧法宝
+            # Check for an old auxiliary
             if self.auxiliary:
                 sold_name = self.auxiliary.name
                 refund = self.sell_auxiliary(self.auxiliary)
                 
-            # 换上新法宝
+            # Equip the new auxiliary
             self.change_auxiliary(new_equip)
             
         return sold_name, refund

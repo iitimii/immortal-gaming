@@ -61,7 +61,7 @@ def test_major_event_propagates_to_close_relation(base_world):
 
     memories = base_world.event_manager.get_major_events_by_avatar(parent.id)
     assert len(memories) == 1
-    assert "你得知 Child 发生了一件大事" in memories[0].content
+    assert "You learned that Child experienced a major event" in memories[0].content
     assert "broke through" in memories[0].content
 
 
@@ -89,7 +89,7 @@ async def test_kill_propagation_adds_memory_and_hatred(base_world):
         base_world.event_manager.add_event(event)
 
     memories = base_world.event_manager.get_major_events_by_avatar(parent.id)
-    assert any("Victim 被 Killer 杀害" in event.content for event in memories)
+    assert any("Victim was killed by Killer" in event.content for event in memories)
     assert parent.get_friendliness(killer) <= -80
 
 
@@ -114,7 +114,7 @@ async def test_positive_bond_propagates_memory_and_warmth(base_world):
         base_world.event_manager.add_event(event)
 
     memories = base_world.event_manager.get_major_events_by_avatar(parent.id)
-    assert any("你得知 LoverA 与 LoverB结为道侣。" in event.content for event in memories)
+    assert any("You learned that LoverA and LoverB became Dao companions." in event.content for event in memories)
     assert parent.get_friendliness(lover_b) >= 30
 
 
@@ -139,5 +139,5 @@ async def test_master_disciple_bond_propagates_memory_and_warmth(base_world):
         base_world.event_manager.add_event(event)
 
     memories = base_world.event_manager.get_major_events_by_avatar(parent.id)
-    assert any("你得知 Disciple 与 Master建立师徒关系。" in event.content for event in memories)
+    assert any("You learned that Disciple and Master formed a master-disciple bond." in event.content for event in memories)
     assert parent.get_friendliness(master) >= 15

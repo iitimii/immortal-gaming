@@ -60,36 +60,36 @@ describe('SectRelationsModal', () => {
     const flushPromises = () => Promise.resolve()
     const i18n = createI18n({
       legacy: false,
-      locale: 'zh-CN',
+      locale: 'en-US',
       messages: {
-        'zh-CN': {
+        'en-US': {
           game: {
             sect_relations: {
-              title: '宗门关系',
-              sect_a: '宗门 A',
-              sect_b: '宗门 B',
-              status: '外交状态',
-              value: '关系值',
-              reasons: '关系理由',
-              empty: '暂无关系数据',
-              status_war: '战争中',
-              status_peace: '和平',
-              duration_months: '{count}个月',
-              overlap_tiles: '接壤{count}边',
-              value_label_very_hostile: '极恶',
-              value_label_hostile: '敌对',
-              value_label_neutral: '中立',
-              value_label_friendly: '友善',
-              value_label_very_friendly: '极善',
+              title: 'Sect Relations',
+              sect_a: 'Sect A',
+              sect_b: 'Sect B',
+              status: 'Diplomatic Status',
+              value: 'Relation Value',
+              reasons: 'Reasons',
+              empty: 'No relation data',
+              status_war: 'At War',
+              status_peace: 'Peace',
+              duration_months: '{count} months',
+              overlap_tiles: 'overlap {count} tiles',
+              value_label_very_hostile: 'Very Hostile',
+              value_label_hostile: 'Hostile',
+              value_label_neutral: 'Neutral',
+              value_label_friendly: 'Friendly',
+              value_label_very_friendly: 'Very Friendly',
               reasons_map: {
-                ALIGNMENT_OPPOSITE: '阵营不同',
-                ALIGNMENT_SAME: '阵营相同',
-                ORTHODOXY_DIFFERENT: '道统不同',
-                ORTHODOXY_SAME: '道统相同',
-                TERRITORY_CONFLICT: '边界压力',
-                WAR_STATE: '战争状态',
-                PEACE_STATE: '和平状态',
-                LONG_PEACE: '长期和平',
+                ALIGNMENT_OPPOSITE: 'Opposite alignment',
+                ALIGNMENT_SAME: 'Same alignment',
+                ORTHODOXY_DIFFERENT: 'Different orthodoxy',
+                ORTHODOXY_SAME: 'Same orthodoxy',
+                TERRITORY_CONFLICT: 'Territory conflict',
+                WAR_STATE: 'State of war',
+                PEACE_STATE: 'State of peace',
+                LONG_PEACE: 'Long peace',
               },
             },
           },
@@ -101,9 +101,9 @@ describe('SectRelationsModal', () => {
       relations: [
         {
           sect_a_id: 1,
-          sect_a_name: '正道宗',
+          sect_a_name: 'Righteous Path Sect',
           sect_b_id: 2,
-          sect_b_name: '魔道宗',
+          sect_b_name: 'Demonic Path Sect',
           value: -32,
           diplomacy_status: 'war',
           diplomacy_duration_months: 18,
@@ -134,12 +134,12 @@ describe('SectRelationsModal', () => {
     const wrapper = await createWrapper()
     expect(wrapper.exists()).toBe(true)
     const text = wrapper.text()
-    expect(text).toContain('阵营不同')
+    expect(text).toContain('Opposite alignment')
     expect(text).toContain('-40')
-    expect(text).toContain('道统相同')
+    expect(text).toContain('Same orthodoxy')
     expect(text).toContain('+10')
-    expect(text).toContain('战争中')
-    expect(text).toContain('接壤1边')
+    expect(text).toContain('At War')
+    expect(text).toContain('overlap 1 tiles')
   })
 
   it('does not render peace-state reason tag text when status column already shows peace', async () => {
@@ -147,9 +147,9 @@ describe('SectRelationsModal', () => {
       relations: [
         {
           sect_a_id: 1,
-          sect_a_name: '正道宗',
+          sect_a_name: 'Righteous Path Sect',
           sect_b_id: 2,
-          sect_b_name: '清虚宗',
+          sect_b_name: 'Qingxu Sect',
           value: 12,
           diplomacy_status: 'peace',
           diplomacy_duration_months: 16,
@@ -163,9 +163,9 @@ describe('SectRelationsModal', () => {
 
     const wrapper = await createWrapper()
     const text = wrapper.text()
-    expect(text).toContain('和平')
-    expect(text).toContain('长期和平')
-    expect(text).not.toContain('和平状态')
-    expect(text).not.toContain('长期和平 (16个月)')
+    expect(text).toContain('Peace')
+    expect(text).toContain('Long peace')
+    expect(text).not.toContain('State of peace')
+    expect(text).not.toContain('Long peace (16 months)')
   })
 })

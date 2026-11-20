@@ -41,9 +41,9 @@ def test_new_personas_loaded():
     love_beauty = personas_by_id[1012]
     appearance_obsessed = personas_by_id[1013]
 
-    assert love_beauty.name == "爱美"
+    assert love_beauty.name == "Beauty-Conscious"
     assert love_beauty.effects == {}
-    assert appearance_obsessed.name == "悦己"
+    assert appearance_obsessed.name == "Self-Adoring"
     assert appearance_obsessed.effects["extra_appearance"] == 1
 
 
@@ -51,9 +51,9 @@ def test_new_beauty_elixirs_loaded():
     qi_elixir = elixirs_by_id[3017]
     nascent_elixir = elixirs_by_id[3020]
 
-    assert qi_elixir.name == "练气驻颜丹"
+    assert qi_elixir.name == "Qi Refinement Beauty-Preserving Pill"
     assert qi_elixir.effects["extra_appearance"] == 1
-    assert nascent_elixir.name == "元婴驻颜丹"
+    assert nascent_elixir.name == "Nascent Soul Beauty-Preserving Pill"
     assert nascent_elixir.effects["extra_appearance"] == 1
 
 
@@ -67,6 +67,6 @@ def test_consume_beauty_elixir_applies_extra_appearance(dummy_avatar):
     assert dummy_avatar.appearance.level == 6
 
 
-def test_format_effects_shows_appearance_in_zh_cn():
+def test_format_effects_shows_appearance():
     text = format_effects_to_text({"extra_appearance": 1})
-    assert text == "颜值 +1"
+    assert text == "Appearance +1"

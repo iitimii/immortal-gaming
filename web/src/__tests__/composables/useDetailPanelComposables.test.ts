@@ -57,29 +57,29 @@ vi.mock('@/composables/useWorldOverviewData', () => ({
 
 const i18n = createI18n({
   legacy: false,
-  locale: 'zh-CN',
+  locale: 'en-US',
   messages: {
-    'zh-CN': {
+    'en-US': {
       attributes: {
-        FIRE: '火',
-        WATER: '水',
+        FIRE: 'Fire',
+        WATER: 'Water',
       },
       game: {
         info_panel: {
           region: {
             type_explanations: {
-              city: '城市说明',
-              ruin: '遗迹说明',
-              cave: '洞府说明',
-              sect: '宗门说明',
-              normal: '普通区域说明',
+              city: 'City description',
+              ruin: 'Ruin description',
+              cave: 'Cave dwelling description',
+              sect: 'Sect description',
+              normal: 'Normal region description',
             },
           },
           avatar: {
             portrait: {
-              load_failed: '加载失败',
-              apply_failed: '应用失败',
-              apply_success: '应用成功',
+              load_failed: 'Failed to load',
+              apply_failed: 'Failed to apply',
+              apply_success: 'Applied successfully',
             },
           },
         },
@@ -117,11 +117,11 @@ describe('detail panel composables', () => {
   it('formats region details and routes entity jumps', () => {
     const region = reactive<RegionDetail>({
       id: 'r1',
-      name: '洞府',
+      name: 'Cave Dwelling',
       type: 'cultivate',
       sub_type: 'ruin',
-      type_name: '遗迹',
-      desc: '古老遗迹',
+      type_name: 'Ruin',
+      desc: 'Ancient ruin',
       animals: [],
       plants: [],
       lodes: [],
@@ -129,8 +129,8 @@ describe('detail panel composables', () => {
 
     const panel = mountComposable(() => useRegionDetailPanel(() => region))
 
-    expect(panel.formatEssenceType('fire, water, custom')).toBe('火、水、custom')
-    expect(panel.getRegionTypeExplanation()).toBe('遗迹说明')
+    expect(panel.formatEssenceType('fire, water, custom')).toBe('Fire, Water, custom')
+    expect(panel.getRegionTypeExplanation()).toBe('Ruin description')
     expect(panel.getPopulationBarColor(0.9)).toBe('#52c41a')
 
     panel.jumpToSect(12)
@@ -164,7 +164,7 @@ describe('detail panel composables', () => {
 
     expect(avatarApi.updateAvatarPortrait).toHaveBeenCalledWith({ avatar_id: 'a1', pic_id: 4 })
     expect(updateAvatarSummaryMock).toHaveBeenCalledWith('a1', { pic_id: 4 })
-    expect(messageMock.success).toHaveBeenCalledWith('应用成功')
+    expect(messageMock.success).toHaveBeenCalledWith('Applied successfully')
     expect(emit).toHaveBeenCalledWith('updated')
     expect(emit).toHaveBeenCalledWith('close')
   })

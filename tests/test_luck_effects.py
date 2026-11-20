@@ -49,12 +49,12 @@ def test_effect_breakdown_contains_luck_source_and_luck_derived_effects(dummy_av
 
     breakdown = dummy_avatar.get_effect_breakdown()
 
-    assert any("气运之子" in source and effects.get("extra_luck") == 20 for source, effects in breakdown)
+    assert any("Child of Fortune" in source and effects.get("extra_luck") == 20 for source, effects in breakdown)
     assert any(
         effects.get("extra_fortune_probability") == pytest.approx(0.02)
         and effects.get("extra_breakthrough_success_rate") == pytest.approx(0.05)
         for source, effects in breakdown
-        if source in {"气运", "Luck"}
+        if source in {"Luck"}
     )
 
 

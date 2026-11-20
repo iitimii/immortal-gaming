@@ -34,40 +34,40 @@ class World():
     map: Map
     month_stamp: MonthStamp
     avatar_manager: AvatarManager = field(default_factory=AvatarManager)
-    # 凡人管理器
+    # Mortal manager
     mortal_manager: MortalManager = field(default_factory=MortalManager)
-    # 全局事件管理器
+    # Global event manager
     event_manager: EventManager = field(default_factory=EventManager)
-    # 已故角色档案管理器（独立于 AvatarManager，不受 cleanup 影响）
+    # Deceased avatar archive manager (independent of AvatarManager, unaffected by cleanup)
     deceased_manager: DeceasedManager = field(default_factory=DeceasedManager)
-    # 运行时点位兴趣点，如墓碑、未来古碑/阵眼等
+    # Runtime points of interest, such as graves and future ancient steles / formation eyes
     poi_manager: POIManager = field(default_factory=POIManager)
-    # 当前天地灵机（世界级buff/debuff）
+    # Current celestial phenomenon (world-level buff/debuff)
     current_phenomenon: Optional["CelestialPhenomenon"] = None
-    # 当前王朝（凡人王朝）
+    # Current dynasty (mortal dynasty)
     dynasty: Optional["Dynasty"] = None
-    # 天地灵机开始年份（用于计算持续时间）
+    # Start year of the celestial phenomenon (used to compute duration)
     phenomenon_start_year: int = 0
-    # 出世物品流通管理器
+    # Manager for circulation of items released into the world
     circulation: CirculationManager = field(default_factory=CirculationManager)
-    # Gathering 管理器
+    # Gathering manager
     gathering_manager: GatheringManager = field(default_factory=GatheringManager)
-    # 本局世界观与历史输入
+    # World lore and history input for this run
     world_lore: "WorldLore" = field(default_factory=WorldLore)
-    # 世界观塑形后的静态对象快照，用于存档/读档恢复
+    # Snapshot of static objects after world-lore shaping, used for save/load restoration
     world_lore_snapshot: dict[str, Any] = field(default_factory=dict)
-    # 本局世界秘密运行时状态，独立于 world_lore
+    # Runtime state of this run's world secrets, independent of world_lore
     world_secret: WorldSecretRuntime = field(default_factory=WorldSecretRuntime)
-    # 世界开始年份
+    # World start year
     start_year: int = 0
-    # 榜单管理器
+    # Ranking manager
     ranking_manager: RankingManager = field(default_factory=RankingManager)
-    # 游玩单局 ID，用于区分存档
+    # Play-session ID, used to distinguish saves
     playthrough_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     sect_diplomacy: SectDiplomacyState = field(default_factory=SectDiplomacyState)
-    # 机缘管理器：维护单人限时机缘状态与冷却。
+    # Opportunity manager: tracks per-avatar time-limited opportunity state and cooldowns.
     opportunity_manager: OpportunityManager = field(default_factory=OpportunityManager)
-    # 宗门上下文（惰性初始化），用于统一本局启用宗门作用域
+    # Sect context (lazily initialized), unifies the scope of sects enabled in this run
     _sect_context: Any = field(default=None, init=False, repr=False)
 
     def __post_init__(self) -> None:
@@ -78,20 +78,20 @@ class World():
 
     def get_info(self, detailed: bool = False, avatar: Optional["Avatar"] = None) -> dict:
         """
-        返回世界信息（dict），其中包含地图信息（dict）。
-        如果指定了 avatar，将传给 map.get_info 用于过滤区域和计算距离。
+        Return world info (dict), including map info (dict).
+        If an avatar is given, it is passed to map.get_info to filter regions and compute distances.
         """
         static_info = self.static_info
         map_info = self.map.get_info(detailed=detailed, avatar=avatar)
         world_info = {**map_info, **static_info}
 
         if self.current_phenomenon:
-            # 使用翻译 Key
+            # Use translation keys
             key = t("Current World Phenomenon")
-            # 格式化内容，注意这里我们假设 name 和 desc 已经是当前语言的（它们是对象属性，加载时确定）
-            # 但如果需要在 Prompt 中有特定的格式（如中文用【】，英文不用），也可以引入 key
-            # 为了简单起见，我们把格式也放入翻译
-            # "phenomenon_format": "【{name}】{desc}" (ZH) vs "{name}: {desc}" (EN)
+            # Format the content; we assume name and desc are already in the current language (object attributes fixed at load time)
+            # If the prompt needs a specific format, a key could be introduced for that too
+            # For simplicity, the format is also put into the translation
+            # "phenomenon_format": "[{name}] {desc}" (ZH) vs "{name}: {desc}" (EN)
             value = t("phenomenon_format", name=self.current_phenomenon.name, desc=self.current_phenomenon.desc)
             world_info[key] = value
 
@@ -106,13 +106,13 @@ class World():
     @property
     def sect_context(self) -> "SectContext":
         """
-        提供统一的宗门作用域访问入口。
-        - active_sects 默认来自 existed_sects；
-        - 若不存在，则回退到全局 sects_by_id。
+        Unified access point for the sect scope.
+        - active_sects defaults to existed_sects;
+        - if missing, falls back to the global sects_by_id.
         """
         if self._sect_context is None:
             self._sect_context = SectContext(self)
-            # 使用当前世界上的 existed_sects 初始化上下文（若存在）
+            # Initialize the context with the current world's existed_sects (if present)
             existed = getattr(self, "existed_sects", None)
             if existed:
                 self._sect_context.from_existed_sects(existed)
@@ -214,7 +214,7 @@ class World():
         )
 
     def set_world_lore(self, lore_text: str) -> None:
-        """设置本局的世界观与历史输入文本。"""
+        """Set this run's world lore and history input text."""
         self.world_lore.text = lore_text
 
     @property
@@ -237,16 +237,16 @@ class World():
         start_year: int = 0,
     ) -> "World":
         """
-        工厂方法：创建使用 SQLite 持久化事件的 World 实例。
+        Factory method: create a World instance that persists events with SQLite.
 
         Args:
-            map: 地图对象。
-            month_stamp: 时间戳。
-            events_db_path: 事件数据库文件路径。
-            start_year: 世界开始年份。
+            map: the map object.
+            month_stamp: timestamp.
+            events_db_path: events database file path.
+            start_year: world start year.
 
         Returns:
-            配置好的 World 实例。
+            A configured World instance.
         """
         event_manager = EventManager.create_with_db(events_db_path)
         world = cls(
@@ -256,7 +256,7 @@ class World():
             start_year=start_year,
         )
         
-        # 初始化天下武道会的时间
+        # Initialize the World Martial Tournament schedule
         world.ranking_manager.init_tournament_info(
             start_year,
             month_stamp.get_year(),
@@ -268,8 +268,8 @@ class World():
 
 class SectContext:
     """
-    本局宗门上下文。
-    负责维护“本局启用且仍存续的宗门 ID 集合”，并提供统一的 active 宗门读取入口。
+    Sect context for this run.
+    Maintains the "set of sect IDs enabled in this run and still existing", and provides a unified accessor for active sects.
     """
 
     def __init__(self, world: World):
@@ -277,7 +277,7 @@ class SectContext:
         self.active_sect_ids: set[int] = set()
 
     def from_existed_sects(self, existed_sects: Iterable["Sect"]) -> None:
-        """根据本局启用宗门列表初始化 active_sect_ids。"""
+        """Initialize active_sect_ids from this run's enabled sect list."""
         self.active_sect_ids = {
             int(getattr(sect, "id", 0))
             for sect in existed_sects
@@ -285,7 +285,7 @@ class SectContext:
         }
 
     def mark_sect_inactive(self, sect_id: int) -> None:
-        """在上下文中标记某宗门为失效。"""
+        """Mark a sect as inactive in the context."""
         try:
             sid = int(sect_id)
         except (TypeError, ValueError):
@@ -294,14 +294,14 @@ class SectContext:
 
     def get_active_sects(self) -> list["Sect"]:
         """
-        返回当前本局仍然激活的宗门列表。
-        优先使用 world.existed_sects（保持与当前局实际挂载的 Sect 实例一致），
-        再结合 active_sect_ids 做过滤；若不存在，则回退到全局 sects_by_id。
+        Return the list of sects still active in this run.
+        Prefers world.existed_sects (consistent with the Sect instances actually mounted in this run),
+        then filters by active_sect_ids; if missing, falls back to the global sects_by_id.
         """
         from src.classes.core.sect import sects_by_id
         existed = getattr(self._world, "existed_sects", None) or []
 
-        # 1. 若世界上存在显式的 existed_sects，则以其为主（保持与当前局实例一致）
+        # 1. If the world has explicit existed_sects, use them as the primary source (consistent with this run's instances)
         if existed:
             if self.active_sect_ids:
                 return [
@@ -312,7 +312,7 @@ class SectContext:
                 ]
             return [sect for sect in existed if getattr(sect, "is_active", True)]
 
-        # 2. 不存在 existed_sects 时，再根据 active_sect_ids 过滤全局 sects_by_id
+        # 2. Without existed_sects, filter the global sects_by_id by active_sect_ids
         if self.active_sect_ids:
             return [
                 sect
@@ -320,5 +320,5 @@ class SectContext:
                 if sid in self.active_sect_ids and getattr(sect, "is_active", True)
             ]
 
-        # 3. 最后回退到全局 sects_by_id 的激活宗门
+        # 3. Finally fall back to the active sects in the global sects_by_id
         return [sect for sect in sects_by_id.values() if getattr(sect, "is_active", True)]

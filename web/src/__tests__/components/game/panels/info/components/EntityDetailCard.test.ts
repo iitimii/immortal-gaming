@@ -6,20 +6,20 @@ import EntityDetailCard from '@/components/game/panels/info/components/EntityDet
 function buildI18n() {
   return createI18n({
     legacy: false,
-    locale: 'zh-CN',
+    locale: 'en-US',
     messages: {
-      'zh-CN': {
+      'en-US': {
         game: {
           info_panel: {
             popup: {
-              effect: '效果',
-              drops: '掉落',
-              hq: '总部',
+              effect: 'Effect',
+              drops: 'Drops',
+              hq: 'Headquarters',
             },
           },
         },
         technique_grades: {
-          UPPER: '上品',
+          UPPER: 'Upper Grade',
         },
       },
     },
@@ -32,8 +32,8 @@ describe('EntityDetailCard', () => {
       props: {
         item: {
           id: '1',
-          name: '穿越者',
-          desc: '现代思维仍在影响修仙视角',
+          name: 'Transmigrator',
+          desc: 'Modern thinking still colors their view of cultivation',
           rarity: 'SR',
         } as any,
       },
@@ -53,9 +53,9 @@ describe('EntityDetailCard', () => {
       props: {
         item: {
           id: '3',
-          name: '气运之子',
+          name: 'Child of Fortune',
           rarity: 'SSR',
-          desc: '你仿佛生来便被天地眷顾，很多人求而不得的机缘总会向你靠近。',
+          desc: 'You seem born under the favor of heaven and earth; opportunities others never find keep drifting your way.',
         } as any,
       },
       global: {
@@ -63,7 +63,7 @@ describe('EntityDetailCard', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('你仿佛生来便被天地眷顾')
+    expect(wrapper.text()).toContain('You seem born under the favor of heaven and earth')
   })
 
   it('renders legendary badge style for SSR entities', () => {
@@ -71,8 +71,8 @@ describe('EntityDetailCard', () => {
       props: {
         item: {
           id: '2',
-          name: '气运之子',
-          desc: '天命偏爱，机缘主动靠近',
+          name: 'Child of Fortune',
+          desc: 'Favored by fate; opportunities come to you',
           rarity: 'SSR',
         } as any,
       },

@@ -91,8 +91,8 @@ class StoryEventService:
         prompt: str = "",
         allow_relation_changes: bool = False,
     ) -> Event | None:
-        # 历史命名沿用中；当前仅用于让 StoryTeller 选择双人故事模板，
-        # 不代表故事阶段会直接修改角色关系。
+        # Historical name kept; currently it only makes StoryTeller choose the two-person story template,
+        # and doesn't mean the story phase modifies avatar relations directly.
         if not cls.should_trigger(kind):
             return None
 

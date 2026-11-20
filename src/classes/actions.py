@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 from src.classes.action.registry import ActionRegistry
 from src.classes.action.param_options import build_param_options
-# 确保在收集注册表前加载所有动作模块（含 mutual actions）
+# Make sure all action modules (including mutual actions) are loaded before collecting the registry
 import src.classes.action  # noqa: F401
 import src.classes.mutual_action  # noqa: F401
 
@@ -38,13 +38,13 @@ def _build_action_info(action, avatar: "Avatar" | None = None):
 
 def get_action_infos(avatar: "Avatar" | None = None) -> Dict[str, Any]:
     """
-    动态获取当前语言环境下的动作描述信息。
-    如果提供了 avatar，则会过滤掉该角色绝对不可能执行的动作。
+    Dynamically get action descriptions for the current locale.
+    If an avatar is given, actions that avatar can't possibly perform are filtered out.
     """
     infos = {}
     for action_cls in ALL_ACTUAL_ACTION_CLASSES:
         if avatar is not None:
-            # 实例化动作以检查是否可能执行
+            # Instantiate the action to check whether it could possibly execute
             action_inst = action_cls(avatar, avatar.world)
             if not action_inst.can_possibly_start():
                 continue
@@ -53,6 +53,6 @@ def get_action_infos(avatar: "Avatar" | None = None) -> Dict[str, Any]:
 
 def get_action_infos_str(avatar: "Avatar" | None = None) -> str:
     """
-    获取JSON格式的动作描述字符串
+    Get the action descriptions as a JSON string
     """
     return json.dumps(get_action_infos(avatar), ensure_ascii=False, indent=2)

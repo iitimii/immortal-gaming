@@ -178,7 +178,7 @@ def create_avatar_in_world(
                 final_name = f"{surname}{given_name}"
             have_name = True
         elif surname:
-            final_name = f"{surname}某"
+            final_name = surname
             have_name = True
         else:
             final_name = given_name

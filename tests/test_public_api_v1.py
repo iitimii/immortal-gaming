@@ -400,7 +400,7 @@ def test_v1_saves_query_uses_ok_envelope(temp_save_dir):
         world = World(map=game_map, month_stamp=create_month_stamp(Year(100), Month.JANUARY))
         sim = main.Simulator(world)
         save_path = temp_save_dir / "v1_list.json"
-        main.save_game(world, sim, [], save_path, custom_name="v1列表")
+        main.save_game(world, sim, [], save_path, custom_name="v1 list")
 
         with patch.object(main.CONFIG.paths, "saves", temp_save_dir):
             client = TestClient(main.app)
@@ -427,13 +427,13 @@ def test_v1_save_command_uses_ok_envelope(temp_save_dir):
 
         with patch.object(main.CONFIG.paths, "saves", temp_save_dir):
             client = TestClient(main.app)
-            response = client.post("/api/v1/command/game/save", json={"custom_name": "v1存档"})
+            response = client.post("/api/v1/command/game/save", json={"custom_name": "v1save"})
 
         assert response.status_code == 200
         payload = response.json()
         assert payload["ok"] is True
         assert payload["data"]["status"] == "ok"
-        assert "v1存档" in payload["data"]["filename"]
+        assert "v1save" in payload["data"]["filename"]
     finally:
         main.game_instance.clear()
         main.game_instance.update(original)
@@ -487,7 +487,7 @@ def test_v1_create_avatar_returns_ok_envelope(base_world):
         client = TestClient(main.app)
         response = client.post(
             "/api/v1/command/avatar/create",
-            json={"given_name": "云舟", "gender": "男", "age": 18, "level": 1},
+            json={"given_name": "Yunzhou", "gender": "male", "age": 18, "level": 1},
         )
 
         assert response.status_code == 200
@@ -497,7 +497,7 @@ def test_v1_create_avatar_returns_ok_envelope(base_world):
         assert payload["data"]["avatar_id"]
         assert payload["data"]["avatar"] == {
             "id": payload["data"]["avatar_id"],
-            "name": "云舟",
+            "name": "Yunzhou",
             "x": payload["data"]["avatar"]["x"],
             "y": payload["data"]["avatar"]["y"],
             "action": payload["data"]["avatar"]["action"],
@@ -521,11 +521,11 @@ def test_v1_create_avatar_rejects_age_above_selected_realm_limit(base_world):
 
         response = client.post(
             "/api/v1/command/avatar/create",
-            json={"given_name": "越界", "gender": "男", "age": 66, "level": 1},
+            json={"given_name": "Overage", "gender": "male", "age": 66, "level": 1},
         )
 
         assert response.status_code == 400
-        assert "最大年龄为 65" in response.json()["detail"]
+        assert "maximum 65" in response.json()["detail"]
     finally:
         main.game_instance.clear()
         main.game_instance.update(original)
@@ -540,8 +540,8 @@ def test_v1_world_secret_meta_uses_ok_envelope():
         assert response.status_code == 200
         payload = response.json()
         assert payload["ok"] is True
-        assert payload["data"]["options"][0] == {"id": "none", "title": "无"}
-        assert payload["data"]["options"][1] == {"id": "random", "title": "随机"}
+        assert payload["data"]["options"][0] == {"id": "none", "title": "None"}
+        assert payload["data"]["options"][1] == {"id": "random", "title": "Random"}
     finally:
         main.game_instance.clear()
         main.game_instance.update(original)
@@ -551,11 +551,11 @@ def test_v1_world_secret_meta_localizes_special_options():
     original = _reset_state()
     original_language = str(main.language_manager)
     try:
-        main.apply_runtime_content_locale("fr-FR")
+        main.apply_runtime_content_locale("en-US")
         data = main.query_service.get_world_secret_meta()
 
-        assert data["options"][0] == {"id": "none", "title": "Aucun"}
-        assert data["options"][1] == {"id": "random", "title": "Aléatoire"}
+        assert data["options"][0] == {"id": "none", "title": "None"}
+        assert data["options"][1] == {"id": "random", "title": "Random"}
     finally:
         main.language_manager.set_language(original_language)
         main.game_instance.clear()
@@ -586,20 +586,20 @@ def test_v1_map_presets_accepts_ui_locale_without_switching_runtime_language():
     original = _reset_state()
     original_language = str(main.language_manager)
     try:
-        main.language_manager.set_language("zh-CN")
+        main.language_manager.set_language("en-US")
         client = TestClient(main.app)
 
-        response = client.get("/api/v1/query/world/map-presets?locale=fr-FR")
+        response = client.get("/api/v1/query/world/map-presets?locale=en-US")
 
         assert response.status_code == 200
         payload = response.json()
         assert payload["ok"] is True
         maps = {item["id"]: item for item in payload["data"]["maps"]}
-        assert maps["classic"]["name"] == "Les Neuf Provinces Centrales"
+        assert maps["classic"]["name"] == "Central Nine Provinces"
         assert maps["island_seas"]["desc"] == (
-            "Les mers ouvertes divisent les îles, donnant au monde un sentiment d'espace plus large."
+            "Open seas divide the isles, giving the world a broader sense of space."
         )
-        assert str(main.language_manager) == "zh-CN"
+        assert str(main.language_manager) == "en-US"
     finally:
         main.language_manager.set_language(original_language)
         main.game_instance.clear()
@@ -704,7 +704,7 @@ def test_v1_generate_custom_content_uses_ok_envelope():
         mock_generate.return_value = {
             "category": "weapon",
             "realm": "CORE_FORMATION",
-            "name": "曜火巡天剑",
+            "name": "Blazing Sun Sky-Patrol Sword",
             "is_custom": True,
         }
 
@@ -713,7 +713,7 @@ def test_v1_generate_custom_content_uses_ok_envelope():
             json={
                 "category": "weapon",
                 "realm": "CORE_FORMATION",
-                "user_prompt": "我想要一把偏爆发的金丹剑",
+                "user_prompt": "I want a burst-focused Core Formation sword",
             },
         )
 
@@ -721,7 +721,7 @@ def test_v1_generate_custom_content_uses_ok_envelope():
     payload = response.json()
     assert payload["ok"] is True
     assert payload["data"]["status"] == "ok"
-    assert payload["data"]["draft"]["name"] == "曜火巡天剑"
+    assert payload["data"]["draft"]["name"] == "Blazing Sun Sky-Patrol Sword"
     assert mock_generate.await_count == 1
 
 
@@ -738,8 +738,8 @@ def test_v1_create_custom_content_uses_ok_envelope():
                 "category": "technique",
                 "draft": {
                     "category": "technique",
-                    "name": "九曜焚息诀",
-                    "desc": "火行吐纳功法",
+                    "name": "Nine Luminaries Breath-Burning Art",
+                    "desc": "A fire-element breathing technique",
                     "effects": {
                         "extra_respire_exp_multiplier": 0.2,
                         "extra_breakthrough_success_rate": 0.1,
@@ -761,7 +761,7 @@ def test_v1_create_custom_content_uses_ok_envelope():
 
 
 def test_v1_deceased_list_returns_ok_envelope_when_world_missing():
-    """GET /api/v1/query/deceased 在世界未初始化时返回 503。"""
+    """GET /api/v1/query/deceased returns 503 before the world is initialized."""
     original = _reset_state()
     try:
         client = TestClient(main.app)
@@ -776,7 +776,7 @@ def test_v1_deceased_list_returns_ok_envelope_when_world_missing():
 
 
 def test_v1_deceased_list_returns_ok_with_world():
-    """GET /api/v1/query/deceased 在世界初始化后返回 ok + deceased 列表。"""
+    """GET /api/v1/query/deceased returns ok + the deceased list once the world is initialized."""
     original = _reset_state()
     try:
         mock_world = MagicMock()
@@ -846,9 +846,9 @@ def test_v1_roleplay_submit_decision_loads_plans():
         with patch("src.server.services.roleplay_service.call_llm_with_task_name", new_callable=AsyncMock) as mock_llm:
             mock_llm.return_value = {
                 avatar.name: {
-                    "avatar_thinking": "我先调息，再去探索。",
+                    "avatar_thinking": "I will regulate my breath first, then explore.",
                     "current_emotion": "emotion_calm",
-                    "short_term_objective": "恢复状态并探索机缘",
+                    "short_term_objective": "Recover and seek opportunities",
                     "action_name_params_pairs": [
                         ["Respire", {}],
                     ],
@@ -859,7 +859,7 @@ def test_v1_roleplay_submit_decision_loads_plans():
                 json={
                     "avatar_id": avatar.id,
                     "request_id": request_id,
-                    "command_text": "先调息恢复一下",
+                    "command_text": "Regulate breath and recover first",
                 },
             )
 
@@ -872,7 +872,7 @@ def test_v1_roleplay_submit_decision_loads_plans():
         session_payload = client.get("/api/v1/query/roleplay/session").json()["data"]
         assert len(session_payload["interaction_history"]) == 2
         assert session_payload["interaction_history"][0]["type"] == "command"
-        assert session_payload["interaction_history"][0]["text"] == "先调息恢复一下"
+        assert session_payload["interaction_history"][0]["text"] == "Regulate breath and recover first"
         assert session_payload["interaction_history"][1]["type"] == "action_chain"
         assert session_payload["interaction_history"][1]["actions"][0]["tokens"][0]["text"]
     finally:
@@ -898,7 +898,7 @@ def test_v1_roleplay_submit_decision_records_failed_resolution():
         with patch("src.server.services.roleplay_service.call_llm_with_task_name", new_callable=AsyncMock) as mock_llm:
             mock_llm.return_value = {
                 avatar.name: {
-                    "avatar_thinking": "我再看看。",
+                    "avatar_thinking": "Let me look around more.",
                     "action_name_params_pairs": [],
                 }
             }
@@ -907,15 +907,15 @@ def test_v1_roleplay_submit_decision_records_failed_resolution():
                 json={
                     "avatar_id": avatar.id,
                     "request_id": request_id,
-                    "command_text": "去一个我也不知道的地方",
+                    "command_text": "Go somewhere even I do not know",
                 },
             )
 
         assert submit_response.status_code == 422
         session_payload = client.get("/api/v1/query/roleplay/session").json()["data"]
         assert [item["type"] for item in session_payload["interaction_history"]] == ["command", "error"]
-        assert session_payload["interaction_history"][0]["text"] == "去一个我也不知道的地方"
-        assert "未能从该指令生成有效行动计划" in session_payload["interaction_history"][1]["text"]
+        assert session_payload["interaction_history"][0]["text"] == "Go somewhere even I do not know"
+        assert "Failed to generate a valid action plan from this command" in session_payload["interaction_history"][1]["text"]
     finally:
         main.game_instance.clear()
         main.game_instance.update(original)
@@ -1024,7 +1024,7 @@ def test_v1_roleplay_conversation_send_and_end_updates_session():
         world = World(map=game_map, month_stamp=create_month_stamp(Year(100), Month.JANUARY))
         avatar = _make_avatar(world)
         target = _make_avatar(world)
-        target.name = "对话目标"
+        target.name = "Conversation Target"
         world.runtime = main.runtime
         main.game_instance["world"] = world
         main.game_instance["sim"] = main.Simulator(world)
@@ -1038,8 +1038,8 @@ def test_v1_roleplay_conversation_send_and_end_updates_session():
             "type": "conversation",
             "avatar_id": avatar.id,
             "target_avatar_id": target.id,
-            "title": "对话中",
-            "description": "等待发言",
+            "title": "In conversation",
+            "description": "Waiting to speak",
             "messages": [],
             "can_end": True,
         }
@@ -1063,13 +1063,13 @@ def test_v1_roleplay_conversation_send_and_end_updates_session():
             mock_llm.side_effect = [
                 {
                     target.name: {
-                        "reply_content": "我可以听听你的来意。",
-                        "speaker_thinking": "先听他说什么。",
+                        "reply_content": "I can hear out why you came.",
+                        "speaker_thinking": "Hear what he has to say first.",
                     }
                 },
                 {
-                    "summary": "二人简单交换了来意，对后续接触留下余地。",
-                    "relation_hint": "关系略有缓和",
+                    "summary": "The two briefly exchanged their intentions, leaving room for future contact.",
+                    "relation_hint": "relations eased slightly",
                     "story_hint": "",
                 },
             ]
@@ -1078,7 +1078,7 @@ def test_v1_roleplay_conversation_send_and_end_updates_session():
                 json={
                     "avatar_id": avatar.id,
                     "request_id": "conversation-test-1",
-                    "message": "我想与你聊聊。",
+                    "message": "I would like to talk with you.",
                 },
             )
             end_response = client.post(
@@ -1092,7 +1092,7 @@ def test_v1_roleplay_conversation_send_and_end_updates_session():
         assert send_response.status_code == 200
         send_payload = send_response.json()
         assert send_payload["ok"] is True
-        assert send_payload["data"]["reply"] == "我可以听听你的来意。"
+        assert send_payload["data"]["reply"] == "I can hear out why you came."
         assert len(send_payload["data"]["messages"]) == 2
         session_payload_after_send = client.get("/api/v1/query/roleplay/session").json()["data"]
         history_types_after_send = [item["type"] for item in session_payload_after_send["interaction_history"]]
@@ -1102,12 +1102,12 @@ def test_v1_roleplay_conversation_send_and_end_updates_session():
         assert end_response.status_code == 200
         end_payload = end_response.json()
         assert end_payload["ok"] is True
-        assert "交换了来意" in end_payload["data"]["summary"]
+        assert "exchanged their intentions" in end_payload["data"]["summary"]
         assert main.runtime.get_roleplay_session()["pending_request"] is None
         assert main.runtime.get_roleplay_session()["conversation_session"]["status"] == "completed"
         session_payload_after_end = client.get("/api/v1/query/roleplay/session").json()["data"]
         assert session_payload_after_end["interaction_history"][-1]["type"] == "conversation_summary"
-        assert "交换了来意" in session_payload_after_end["interaction_history"][-1]["text"]
+        assert "exchanged their intentions" in session_payload_after_end["interaction_history"][-1]["text"]
     finally:
         main.game_instance.clear()
         main.game_instance.update(original)
@@ -1132,7 +1132,7 @@ def test_v1_roleplay_start_rejects_when_another_avatar_is_controlled():
         second_response = client.post("/api/v1/command/roleplay/start", json={"avatar_id": avatar_2.id})
 
         assert second_response.status_code == 409
-        assert second_response.json()["detail"] == "已有其他角色正在被扮演"
+        assert second_response.json()["detail"] == "There is already another avatar under roleplay control"
     finally:
         main.game_instance.clear()
         main.game_instance.update(original)
@@ -1185,7 +1185,7 @@ def test_v1_roleplay_submit_choice_rejects_stale_request_after_stop():
         )
 
         assert submit_response.status_code == 409
-        assert submit_response.json()["detail"] == "扮演目标不匹配"
+        assert submit_response.json()["detail"] == "Roleplay target does not match"
         assert pending_future.cancelled() is True
         loop.close()
     finally:
@@ -1213,23 +1213,23 @@ def test_v1_avatar_overview_returns_ok_with_world():
         mock_record = MagicMock()
         mock_record.to_dict.return_value = {
             "id": "dead-1",
-            "name": "陨落者",
-            "gender": "男",
+            "name": "Fallen One",
+            "gender": "male",
             "age_at_death": 88,
-            "realm_at_death": "金丹",
-            "stage_at_death": "前期",
-            "death_reason": "战死",
+            "realm_at_death": "Core Formation",
+            "stage_at_death": "Early Stage",
+            "death_reason": "Killed in battle",
             "death_time": 35,
-            "sect_name_at_death": "青云宗",
-            "alignment_at_death": "正道",
+            "sect_name_at_death": "Azure Cloud Sect",
+            "alignment_at_death": "Righteous",
             "backstory": None,
             "custom_pic_id": None,
         }
         living_avatar = MagicMock()
-        living_avatar.cultivation_progress.realm = "练气"
+        living_avatar.cultivation_progress.realm = Realm.Qi_Refinement
         living_avatar.sect = MagicMock()
         rogue_avatar = MagicMock()
-        rogue_avatar.cultivation_progress.realm = "练气"
+        rogue_avatar.cultivation_progress.realm = Realm.Qi_Refinement
         rogue_avatar.sect = None
 
         mock_world = MagicMock()
@@ -1249,7 +1249,7 @@ def test_v1_avatar_overview_returns_ok_with_world():
         assert payload["data"]["summary"]["sect_member_count"] == 1
         assert payload["data"]["summary"]["rogue_count"] == 1
         assert payload["data"]["realm_distribution"][0] == {
-            "realm": "练气",
+            "realm": "Qi Refinement",
             "realm_id": "QI_REFINEMENT",
             "count": 2,
         }

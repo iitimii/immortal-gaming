@@ -1,5 +1,5 @@
 """
-Nickname 数据类
+Nickname data class
 """
 from dataclasses import dataclass, asdict
 from typing import Optional
@@ -7,8 +7,8 @@ from typing import Optional
 @dataclass
 class Nickname:
     """
-    绰号数据类
-    包含绰号本身及其来源原因
+    Nickname data class
+    Holds the nickname and the reason behind it
     """
     value: str
     reason: str

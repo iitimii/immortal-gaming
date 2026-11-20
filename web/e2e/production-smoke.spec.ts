@@ -9,7 +9,7 @@ const allowConsolePatterns = [
 const mockSettings = {
   schema_version: 1,
   ui: {
-    locale: 'zh-CN',
+    locale: 'en-US',
     audio: {
       bgm_volume: 0,
       sfx_volume: 0,
@@ -31,7 +31,7 @@ const mockSettings = {
     },
   },
   new_game_defaults: {
-    content_locale: 'zh-CN',
+    content_locale: 'en-US',
     init_npc_num: 9,
     sect_num: 3,
     npc_awakening_rate_per_month: 0.01,
@@ -63,7 +63,7 @@ const mockMapPresets = {
     maps: [
       {
         id: 'classic',
-        name: '九州中土',
+        name: 'Central Nine Provinces',
         desc: '',
         size_label: '',
         is_default: true,
@@ -74,8 +74,8 @@ const mockMapPresets = {
 
 const mockWorldSecretMeta = {
   options: [
-    { id: 'none', title: '无' },
-    { id: 'random', title: '随机' },
+    { id: 'none', title: 'None' },
+    { id: 'random', title: 'Random' },
   ],
 }
 

@@ -5,10 +5,10 @@ from src.systems.cultivation import Realm
 @dataclass
 class HP:
     """
-    血量。
-    会因为战斗，天灾或者其他原因降低cur。
-    会随时间或者服用丹药等补充cur。
-    会因为突破境界，服用丹药等增加max。
+    Hit points.
+    cur decreases due to battle, disasters or other causes.
+    cur is replenished over time or by taking elixirs, etc.
+    max increases from realm breakthroughs, elixirs, etc.
     """
     max: int 
     cur: int 
@@ -36,7 +36,7 @@ class HP:
     def __repr__(self) -> str:
         return self.__str__()
     
-    # 比较运算符，使用cur进行比较
+    # Comparison operators compare using cur
     def __eq__(self, other) -> bool:
         if isinstance(other, HP):
             return self.cur == other.cur
@@ -68,12 +68,12 @@ class HP:
         return self.cur >= other
     
     def to_dict(self) -> dict:
-        """转换为可序列化的字典"""
+        """Convert to a serializable dict."""
         return {"max": self.max, "cur": self.cur}
     
     @classmethod
     def from_dict(cls, data: dict) -> "HP":
-        """从字典重建HP"""
+        """Rebuild HP from a dict."""
         return cls(max=data["max"], cur=data["cur"])
         
 HP_MAX_BY_REALM = {

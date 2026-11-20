@@ -13,7 +13,7 @@ from src.i18n.story_styles import get_random_story_style
 
 class StoryTeller:
     """
-    故事生成器：基于模板与 LLM，将给定事件扩展为简短的小故事。
+    Story teller: expands given events into short stories using templates and the LLM.
     """
     
     TEMPLATE_SINGLE_FILE = "story_single.txt"
@@ -22,15 +22,15 @@ class StoryTeller:
 
     @staticmethod
     def _get_template_path(filename: str) -> Path:
-        """获取当前语言环境下的模板路径"""
+        """Get the template path for the current locale."""
         return CONFIG.paths.templates / filename
 
     @staticmethod
     def _build_avatar_infos(*actors: "Avatar") -> Dict[str, dict]:
         """
-        构建角色信息字典。
-        - 双人故事：第一个角色使用 expanded_info（包含共同事件），第二个使用普通 info
-        - 单人故事：使用 expanded_info
+        Build the avatar info dict.
+        - Two-person story: the first avatar uses expanded_info (including shared events), the second uses normal info
+        - Single-person story: uses expanded_info
         """
         non_null = [a for a in actors if a is not None]
         avatar_infos: Dict[str, dict] = {}
@@ -45,15 +45,15 @@ class StoryTeller:
 
     @staticmethod
     def _build_template_data(event: str, res: str, avatar_infos: Dict[str, dict], prompt: str, *actors: "Avatar") -> dict:
-        """构建模板渲染所需的数据字典"""
+        """Build the data dict needed for template rendering."""
         
-        # 默认空关系列表
+        # Default empty relation list
         avatar_name_1 = ""
         avatar_name_2 = ""
         
         world_info = actors[0].world.static_info
         
-        # 如果有两个有效角色，计算可能的关系
+        # If there are two valid avatars, compute possible relations
         non_null = [a for a in actors if a is not None]
         if len(non_null) >= 2:
             avatar_name_1 = non_null[0].name
@@ -73,30 +73,30 @@ class StoryTeller:
 
     @staticmethod
     def _make_fallback_story(event: str, res: str, style: str) -> str:
-        """生成降级文案"""
-        # 不再显示 style，避免出戏
-        return f"{event}。{res}。"
+        """Generate fallback text."""
+        # Style is no longer shown, to avoid breaking immersion
+        return f"{event.rstrip('.')}. {res.rstrip('.')}."
 
     @staticmethod
     async def tell_story(event: str, res: str, *actors: "Avatar", prompt: str = "", allow_relation_changes: bool = False) -> str:
         """
-        生成小故事（异步版本）。
-        根据 allow_relation_changes 参数选择模板：
-        - True: 使用 story_dual.txt（双人故事模板，需要至少2个角色）
-        - False: 使用 story_single.txt（通用故事模板）
+        Generate a short story (async version).
+        The template is chosen by the allow_relation_changes param:
+        - True: use story_dual.txt (two-person story template; requires at least 2 avatars)
+        - False: use story_single.txt (generic story template)
         
         Args:
-            event: 事件描述
-            res: 结果描述
-            *actors: 参与的角色（1-2个）
-            prompt: 可选的故事提示词
+            event: event description
+            res: result description
+            *actors: participating avatars (1-2)
+            prompt: optional story prompt
             allow_relation_changes:
-                历史命名，当前仅用于切换双人/单人故事模板，
-                并不会直接写回角色关系。
+                Historical name; currently only switches between the two-person and single-person templates,
+                and does not write back avatar relations directly.
         """
         non_null = [a for a in actors if a is not None]
         
-        # 历史命名沿用中；当前语义只是“是否使用双人故事模板”。
+        # Historical name kept; the current semantics are only "whether to use the two-person story template".
         is_dual = allow_relation_changes and len(non_null) >= 2
         
         template_file = StoryTeller.TEMPLATE_DUAL_FILE if is_dual else StoryTeller.TEMPLATE_SINGLE_FILE
@@ -105,7 +105,7 @@ class StoryTeller:
         avatar_infos = StoryTeller._build_avatar_infos(*actors)
         infos = StoryTeller._build_template_data(event, res, avatar_infos, prompt, *actors)
         
-        # 移除了 try-except 块，允许异常向上冒泡，以便 Fail Fast
+        # The try-except block was removed so exceptions bubble up (fail fast)
         data = await call_llm_with_task_name("story_teller", template_path, infos)
         story = data.get("story", "").strip()
 
@@ -123,20 +123,20 @@ class StoryTeller:
         prompt: str = ""
     ) -> str:
         """
-        生成聚会/拍卖会等多人事件的故事。
-        通用接口，适配 story_gathering.txt 模板。
+        Generate stories for multi-avatar events such as gatherings/auctions.
+        Generic interface for the story_gathering.txt template.
         
         Args:
-            gathering_info: 事件本身的设定信息（如地点、背景、规则等）
-            events_text: 发生的具体事件/交互记录
-            details_text: 详细信息（包括角色信息、物品信息等）
-            related_avatars: 参与的角色列表（主要用于获取世界背景信息）
-            prompt: 额外提示词
+            gathering_info: the event's setting info (e.g. location, background, rules)
+            events_text: the concrete events/interaction records that happened
+            details_text: detailed info (including avatar info, item info, etc.)
+            related_avatars: participating avatars (mainly used to get world background info)
+            prompt: extra prompt
         """
         if not related_avatars:
             return events_text
 
-        # 使用第一个角色的世界信息
+        # Use the first avatar's world info
         world_info = related_avatars[0].world.static_info
             
         infos = {
@@ -149,7 +149,7 @@ class StoryTeller:
             "story_prompt": prompt
         }
         
-        # 增加 token 上限以支持长故事
+        # Raise the token limit to support long stories
         template_path = StoryTeller._get_template_path(StoryTeller.TEMPLATE_GATHERING_FILE)
         data = await call_llm_with_task_name("story_teller", template_path, infos)
         story = data.get("story", "").strip()

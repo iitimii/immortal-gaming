@@ -4,27 +4,18 @@ import { getEntityColor, getEntityGradeTone } from '@/utils/theme';
 import type { EffectEntity } from '@/types/core';
 import { useI18n } from 'vue-i18n';
 import { formatEntityGrade } from '@/utils/cultivationText';
-import { getEntityRowDetailLayout } from '@/utils/infoPanelLocaleConfig';
 import { getItemIconUrl } from '@/utils/itemIcons';
 
 const props = defineProps<{
   item: EffectEntity;
-  meta?: string; // e.g. "熟练度 50%"
+  meta?: string; // e.g. "Proficiency 50%"
   compact?: boolean;
   detailsBelow?: boolean;
 }>();
 
 defineEmits(['click']);
 
-const { t, locale } = useI18n();
-
-const detailLayoutMode = computed<'inline-preferred' | 'stacked'>(() => {
-  return getEntityRowDetailLayout(locale.value);
-});
-
-const detailLayoutClass = computed(() => {
-  return props.detailsBelow ? `details-${detailLayoutMode.value}` : null;
-});
+const { t } = useI18n();
 
 const displayGrade = computed(() => {
   return props.item.grade || props.item.rarity || '';
@@ -40,10 +31,7 @@ const iconUrl = computed(() => getItemIconUrl(props.item));
 <template>
   <div 
     class="entity-row" 
-    :class="[
-      { 'compact': compact, 'details-below': detailsBelow },
-      detailLayoutClass,
-    ]"
+    :class="{ 'compact': compact, 'details-below': detailsBelow }"
     @click="$emit('click')"
     v-sound
   >
@@ -62,15 +50,8 @@ const iconUrl = computed(() => getItemIconUrl(props.item));
           <span class="name" :style="{ color: getEntityColor(item) }">
             {{ item.name }}
           </span>
-          <span
-            v-if="(meta || displayGrade) && detailLayoutMode === 'inline-preferred'"
-            class="info inline-info"
-          >
-            <span v-if="displayGrade" class="grade" :class="gradeBadgeClass">{{ formatEntityGrade(displayGrade, t) }}</span>
-            <span v-if="meta" class="meta">{{ meta }}</span>
-          </span>
         </div>
-        <span v-if="(meta || displayGrade) && detailLayoutMode === 'stacked'" class="info details-line">
+        <span v-if="meta || displayGrade" class="info details-line">
           <span v-if="displayGrade" class="grade" :class="gradeBadgeClass">{{ formatEntityGrade(displayGrade, t) }}</span>
           <span v-if="meta" class="meta">{{ meta }}</span>
         </span>
@@ -163,19 +144,7 @@ const iconUrl = computed(() => getItemIconUrl(props.item));
   justify-content: flex-start;
 }
 
-.entity-row.details-inline-preferred .primary-line {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.entity-row.details-inline-preferred .inline-info {
-  justify-content: flex-start;
-  flex-wrap: wrap;
-}
-
-.entity-row.details-stacked .primary-line {
+.entity-row.details-below .primary-line {
   display: block;
 }
 

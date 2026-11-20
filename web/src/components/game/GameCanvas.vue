@@ -43,7 +43,7 @@ function handlePoiSelected(payload: { type: 'avatar' | 'poi'; id: string; kind?:
   emit('poiSelected', payload)
 }
 
-const devicePixelRatio = 1 // 强制为 1，避免像素风游戏在高分屏下的坐标和缩放问题
+const devicePixelRatio = 1 // Force 1 to avoid coordinate/scaling issues for pixel art on high-DPI screens
 
 onMounted(() => {
   loadBaseTextures()
@@ -53,8 +53,8 @@ onMounted(() => {
 <template>
   <div ref="container" class="game-canvas-container">
     <!-- 
-      antialias: false (像素风必须关闭)
-      resolution: devicePixelRatio (保证清晰度)
+      antialias: false (must be off for pixel art)
+      resolution: devicePixelRatio (keeps it crisp)
       background-color: 0x000000
     -->
     <Application
@@ -74,11 +74,11 @@ onMounted(() => {
         :world-height="mapSize.height"
       >
         <!-- 
-          注意：之前使用的 store.worldVersion 已移除。
-          如果需要重新渲染 MapLayer（例如读档后），
-          现在依赖于 worldStore.initialize() 触发 mapData 变更，
-          以及 MapLayer 内部对 worldStore.isLoaded 的监听。
-          如果发现读档不刷新的问题，可以在 MapLayer 增加 key。
+          Note: the old store.worldVersion has been removed.
+          Re-rendering MapLayer (e.g. after loading a save)
+          now relies on worldStore.initialize() changing mapData,
+          plus MapLayer's own watcher on worldStore.isLoaded.
+          If loading a save does not refresh it, add a key to MapLayer.
         -->
         <MapLayer 
           @mapLoaded="onMapLoaded" 

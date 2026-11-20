@@ -13,23 +13,23 @@ if TYPE_CHECKING:
     from src.classes.core.avatar import Avatar
 
 class Attack(InstantAction, TargetingMixin):
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "attack_action_name"
     DESC_ID = "attack_description"
     REQUIREMENTS_ID = "attack_requirements"
     STORY_PROMPT_ID = "attack_story_prompt"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "⚔️"
     PARAMS = {"avatar_name": "AvatarName"}
     PARAM_OPTION_SOURCES = {"avatar_name": ParamOptionSource.OBSERVABLE_AVATAR_NAME}
     
-    # 战斗是大事（长期记忆）
+    # Battle is a major event (long-term memory)
     IS_MAJOR: bool = True
     
     @classmethod
     def get_story_prompt(cls) -> str:
-        """获取故事提示词的翻译"""
+        """Get the translated story prompt."""
         return t(cls.STORY_PROMPT_ID)
 
     def _execute(self, avatar_name: str) -> None:
@@ -38,11 +38,11 @@ class Attack(InstantAction, TargetingMixin):
         if target is None:
             return
         winner, loser, loser_damage, winner_damage = decide_battle(self.avatar, target)
-        # 应用双方伤害
+        # Apply damage to both sides
         loser.hp.reduce(loser_damage)
         winner.hp.reduce(winner_damage)
         
-        # 增加双方兵器熟练度（战斗经验）
+        # Increase both sides' weapon proficiency (battle experience)
         import random
         proficiency_gain = random.uniform(1.0, 3.0)
         self.avatar.increase_weapon_proficiency(proficiency_gain)
@@ -68,7 +68,7 @@ class Attack(InstantAction, TargetingMixin):
         from src.classes.core.avatar import Avatar
         target = resolve_query(avatar_name, self.world, expected_types=[Avatar]).obj
         target_name = target.name if target is not None else avatar_name
-        # 展示双方折算战斗力（基于对手、含克制）
+        # Show both sides' converted battle strength (relative to the opponent, including counters)
         s_att, s_def = get_effective_strength_pair(self.avatar, target)
         rel_ids = [self.avatar.id]
         if target is not None:
@@ -80,11 +80,11 @@ class Attack(InstantAction, TargetingMixin):
                    attacker=self.avatar.name, target=target_name, 
                    att_power=int(s_att), def_power=int(s_def))
         event = Event(self.world.month_stamp, content, related_avatars=rel_ids, is_major=False)
-        # 记录开始事件内容，供故事生成使用
+        # Record the start event content for story generation
         self._start_event_content = event.content
         return event
 
-    # InstantAction 已实现 step 完成
+    # InstantAction already completes in step
 
     async def finish(self, avatar_name: str) -> list[Event]:
         res = self._last_result

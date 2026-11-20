@@ -1,3 +1,3 @@
-"""通用工具模块。"""
+"""General utility modules."""
 
 

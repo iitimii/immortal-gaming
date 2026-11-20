@@ -10,78 +10,77 @@ from src.systems.time import MonthStamp
 
 def test_couple_birth_logic(base_world, dummy_avatar):
     """
-    测试道侣生子逻辑：
-    1. 建立关系
-    2. 检查时间限制
-    3. 检查触发生成
-    4. 检查数量限制
+    Test the Dao-companion childbirth logic:
+    1. Establish the relation
+    2. Check the time restriction
+    3. Check that a child is generated
+    4. Check the child count limit
     """
-    # 1. 准备父母
+    # 1. Prepare the parents
     father = dummy_avatar
     father.gender = Gender.MALE
-    father.name = "张三"
+    father.name = "Zhang San"
     
-    # 注册 father 到 avatar_manager
+    # Register father with avatar_manager
     base_world.avatar_manager.register_avatar(father)
     
-    # 创建 mother
+    # Create mother
     mother = copy.deepcopy(dummy_avatar)
     mother.id = "mother_id"
     mother.gender = Gender.FEMALE
-    mother.name = "李四"
-    # 清空可能复制过来的数据
+    mother.name = "Li Si"
+    # Clear data that may have been copied over
     mother.children = []
     mother.relation_start_dates = {}
     mother.relations = {}
     
     base_world.avatar_manager.register_avatar(mother)
     
-    # 2. 建立关系并回溯时间
+    # 2. Establish the relation and backdate it
     father.become_lovers_with(mother)
     
-    # 验证关系建立时记录了时间
+    # The relation start time is recorded
     current_time = int(base_world.month_stamp)
     assert father.relation_start_dates[mother.id] == current_time
     assert mother.relation_start_dates[father.id] == current_time
     
-    # 手动修改开始时间为 13 个月前，以满足 > 12 个月的条件
+    # Move the start time back 13 months to satisfy the > 12 month condition
     start_time = current_time - 13
     father.relation_start_dates[mother.id] = start_time
     mother.relation_start_dates[father.id] = start_time
     
-    # 3. Mock 配置和概率，确保必中
+    # 3. Mock config and probability so birth is guaranteed
     CONFIG.world.birth_rate_per_month = 1.0
     CONFIG.world.max_children_per_couple = 1
     
-    # 4. 运行模拟器步骤
+    # 4. Run the simulator phase
     sim = Simulator(base_world)
     
-    # 第一次运行，应该生一个
-    # 确保 awakening_rate 为 0 避免干扰
+    # The first run should produce one child
+    # Keep awakening_rate at 0 to avoid interference
     sim.awakening_rate = 0
     
-    with patch("random.random", return_value=0.0): # 确保概率判定通过
+    with patch("random.random", return_value=0.0): # make the probability roll pass
         living_avatars = base_world.avatar_manager.get_living_avatars()
         events = phase_update_age_and_birth(base_world, living_avatars)
         
-    # 5. 验证生成结果
+    # 5. Verify the result
     assert len(father.children) == 1
     child = father.children[0]
     
-    # 验证姓名：随父姓 (张)
-    assert child.name.startswith("张")
+    # Name: takes the father's surname (Zhang)
+    assert child.name.startswith("Zhang ")
     
-    # 验证双向绑定
+    # Bidirectional binding
     assert child in mother.children
     assert str(father.id) in child.parents
     assert str(mother.id) in child.parents
     
-    # 验证事件
-    # 兼容中英文环境
-    birth_events = [e for e in events if "gave birth to a" in str(e) or "诞下" in str(e)]
+    # Birth event
+    birth_events = [e for e in events if "gave birth to a" in str(e)]
     assert len(birth_events) > 0
     
-    # 6. 验证上限 (再次运行不应新增，因为 max_children_per_couple = 1)
+    # 6. Limit: a second run adds nothing because max_children_per_couple = 1
     with patch("random.random", return_value=0.0):
         living_avatars = base_world.avatar_manager.get_living_avatars()
         phase_update_age_and_birth(base_world, living_avatars)
@@ -90,7 +89,7 @@ def test_couple_birth_logic(base_world, dummy_avatar):
     
 def test_birth_time_restriction(base_world, dummy_avatar):
     """
-    测试时间限制：关系不满一年不生
+    Time restriction: no child before the relation is one year old
     """
     father = dummy_avatar
     base_world.avatar_manager.register_avatar(father)
@@ -101,7 +100,7 @@ def test_birth_time_restriction(base_world, dummy_avatar):
     
     father.become_lovers_with(mother)
     
-    # 此时时间刚刚建立，不满一年
+    # The relation was just established, less than a year ago
     CONFIG.world.birth_rate_per_month = 1.0
     sim = Simulator(base_world)
     sim.awakening_rate = 0

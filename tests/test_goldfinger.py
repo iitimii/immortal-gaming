@@ -14,7 +14,7 @@ def _find_goldfinger_by_key(key: str):
 
 def test_goldfinger_configs_are_loaded():
     assert goldfingers_by_id
-    assert _find_goldfinger_by_key("CHILD_OF_FORTUNE").name == "气运之子"
+    assert _find_goldfinger_by_key("CHILD_OF_FORTUNE").name == "Child of Fortune"
     assert _find_goldfinger_by_key("TRANSMIGRATOR").mechanism_type == "story_driven"
 
 
@@ -23,7 +23,7 @@ def test_goldfinger_effects_participate_in_breakdown(dummy_avatar):
 
     breakdown = dummy_avatar.get_effect_breakdown()
 
-    assert any("气运之子" in source and effects.get("extra_luck") == 20 for source, effects in breakdown)
+    assert any("Child of Fortune" in source and effects.get("extra_luck") == 20 for source, effects in breakdown)
 
 
 def test_avatar_structured_info_contains_goldfinger(dummy_avatar):
@@ -33,7 +33,7 @@ def test_avatar_structured_info_contains_goldfinger(dummy_avatar):
     info = dummy_avatar.get_structured_info()
 
     assert info["goldfinger"] is not None
-    assert info["goldfinger"]["name"] == "随身老爷爷"
+    assert info["goldfinger"]["name"] == "Old Grandpa in the Ring"
     assert info["goldfinger"]["mechanism_type"] == "story_driven"
     assert info["goldfinger"]["state"] == {"mentor_mood": "stern"}
     assert info["goldfinger"]["source_of_truth"] == "avatar.goldfinger"
@@ -47,7 +47,7 @@ def test_avatar_expanded_info_contains_structured_goldfinger_context(dummy_avata
     info = dummy_avatar.get_expanded_info(detailed=True)
 
     assert info["goldfinger_context"] is not None
-    assert info["goldfinger_context"]["name"] == "穿越者"
+    assert info["goldfinger_context"]["name"] == "Transmigrator"
     assert info["goldfinger_context"]["story_prompt"] == dummy_avatar.goldfinger.story_prompt
     assert info["goldfinger_context"]["state"] == {"story_focus": "modern_mindset"}
 
@@ -61,7 +61,7 @@ def test_avatar_ai_context_uses_structured_goldfinger_source(dummy_avatar):
     context = get_avatar_ai_context(dummy_avatar)
 
     assert context["self_profile"]["goldfinger"] is not None
-    assert context["self_profile"]["goldfinger"]["name"] == "重生者"
+    assert context["self_profile"]["goldfinger"]["name"] == "Reincarnator"
     assert context["self_profile"]["goldfinger"]["state"] == {"last_regret": "late_breakthrough"}
     assert context["self_profile"]["goldfinger"]["source_of_truth"] == "avatar.goldfinger"
 
@@ -93,8 +93,8 @@ def test_build_goldfinger_story_hint_collects_all_actor_prompts(dummy_avatar):
 
     hint = build_goldfinger_story_hint(dummy_avatar, another_avatar)
 
-    assert "穿越者" in hint
-    assert "随身老爷爷" in hint
+    assert "Transmigrator" in hint
+    assert "Old Grandpa in the Ring" in hint
     assert dummy_avatar.goldfinger.story_prompt in hint
     assert another_avatar.goldfinger.story_prompt in hint
 
@@ -102,9 +102,9 @@ def test_build_goldfinger_story_hint_collects_all_actor_prompts(dummy_avatar):
 def test_merge_story_prompt_with_goldfinger_preserves_base_prompt(dummy_avatar):
     dummy_avatar.goldfinger = _find_goldfinger_by_key("REINCARNATOR")
 
-    merged = merge_story_prompt_with_goldfinger("基础故事提示", dummy_avatar)
+    merged = merge_story_prompt_with_goldfinger("Base story hint", dummy_avatar)
 
-    assert "基础故事提示" in merged
-    assert "外挂相关重点" in merged
-    assert "重生者" in merged
+    assert "Base story hint" in merged
+    assert "Goldfinger focus" in merged
+    assert "Reincarnator" in merged
     assert dummy_avatar.goldfinger.story_prompt in merged

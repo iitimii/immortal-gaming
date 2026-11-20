@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 @register_gathering
 class Tournament(Gathering):
     """
-    天下武道会事件
+    World Martial Tournament event
     """
     
     # LLM Prompt ID
@@ -24,7 +24,7 @@ class Tournament(Gathering):
 
     def is_start(self, world: "World") -> bool:
         """
-        十年一次。第一次在游戏开始第2年。
+        Held once every ten years. The first one is in the 2nd year of the game.
         """
         year = world.month_stamp.get_year()
         month = world.month_stamp.get_month()
@@ -39,7 +39,7 @@ class Tournament(Gathering):
         return False
 
     def get_related_avatars(self, world: "World") -> List[int]:
-        # 所有存活且能参加聚会的角色都有资格
+        # All living avatars that can join gatherings are eligible
         return [avatar.id for avatar in world.avatar_manager.get_living_avatars() if self._can_avatar_join(avatar)]
 
     def get_info(self, world: "World") -> str:
@@ -200,12 +200,12 @@ class Tournament(Gathering):
                 list_name_i18n = t(f"tournament_{target['list_name']}")
                 gathering_info = t("Event Type: World Martial Arts Tournament\nScene Setting: The tournament is held to determine the strongest cultivators of the realm.")
                 
-                details_text = t("\n【Tournament Information】\n")
+                details_text = t("\n[Tournament Information]\n")
                 details_text += t("List: {list_name}\n", list_name=list_name_i18n)
                 details_text += t("Final Match: {winner} vs {loser}\n", winner=target["winner"].name, loser=target["loser"].name)
                 details_text += t("Winner: {winner}\n", winner=target["winner"].name)
                 
-                details_text += t("\n【Finalists Information】\n")
+                details_text += t("\n[Finalists Information]\n")
                 details_text += f"{target['winner'].name}:\n"
                 details_text += f"{target['winner'].get_info(detailed=True)}\n\n"
                 details_text += f"{target['loser'].name}:\n"

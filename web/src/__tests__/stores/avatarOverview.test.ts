@@ -25,7 +25,7 @@ describe('useAvatarOverviewStore', () => {
         sectMemberCount: 7,
         rogueCount: 2,
       },
-      realmDistribution: [{ realm: '练气', count: 6 }],
+      realmDistribution: [{ realm: 'QI_REFINEMENT', count: 6 }],
     })
 
     const store = useAvatarOverviewStore()

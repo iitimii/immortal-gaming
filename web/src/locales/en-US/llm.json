@@ -77,7 +77,7 @@
     "q1_content": "API (Application Programming Interface) is like a 'phone line'. This game itself doesn't have thinking capabilities; it connects to a remote AI 'brain' (like Qwen or DeepSeek servers) through this line. When the game settles monthly and decides NPC actions, it sends relevant information through the API to the AI, which thinks and returns the result.",
     "q2_title": "⚡ 2. Recommended Models (2025)",
     "q2_qwen": "Major domestic player (Alibaba), stable with large free quotas, good for beginners.",
-    "q2_deepseek": "Extremely high cost-performance, logic fits Chinese context well.",
+    "q2_deepseek": "Extremely cost-effective, with strong reasoning.",
     "q2_gemini": "Produced by Google, top-tier comprehensive performance.",
     "q3_title": "📝 3. How to fill configuration?",
     "q3_content": "Once you have an API, you need to fill in these three core parameters. Usually, you can find them in the provider's documentation:",

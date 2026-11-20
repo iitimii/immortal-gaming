@@ -12,12 +12,12 @@ logger = get_logger().logger
 
 def can_get_backstory(avatar: "Avatar") -> bool:
     """
-    判断角色是否需要生成身世。
+    Determine whether the avatar needs a backstory generated.
     """
     if avatar.is_dead:
         return False
     
-    # 如果已经有身世了，就不再生成
+    # If there's already a backstory, don't generate another
     if avatar.backstory is not None:
         return False
         
@@ -25,7 +25,7 @@ def can_get_backstory(avatar: "Avatar") -> bool:
 
 async def generate_backstory(avatar: "Avatar") -> Optional[str]:
     """
-    调用 LLM 生成角色身世。
+    Call the LLM to generate the avatar's backstory.
     """
     try:
         from src.classes.core.world import World
@@ -38,12 +38,12 @@ async def generate_backstory(avatar: "Avatar") -> Optional[str]:
         if getattr(avatar, "is_yao", False):
             from src.i18n import t
 
-            race_name = str(getattr(getattr(avatar, "race", None), "get_info", lambda detailed=False: {"name": "妖族"})(detailed=False).get("name", "妖族"))
+            race_name = str(getattr(getattr(avatar, "race", None), "get_info", lambda detailed=False: {"name": "Yao"})(detailed=False).get("name", "Yao"))
             infos["avatar_info"] += "\n" + t("yao_backstory_constraint", race=race_name)
         
         template_path = CONFIG.paths.templates / "backstory.txt"
         
-        # 调用 LLM，使用配置中的 backstory task (默认 fast)
+        # Call the LLM using the backstory task from config (fast by default)
         response_data = await call_llm_with_task_name("backstory", template_path, infos)
         
         backstory = response_data.get("backstory", "").strip()
@@ -51,17 +51,17 @@ async def generate_backstory(avatar: "Avatar") -> Optional[str]:
         if not backstory:
             return None
             
-        logger.info(f"为角色 {avatar.name} 生成身世：{backstory}")
+        logger.info(f"Generated backstory for avatar {avatar.name}: {backstory}")
         return backstory
         
     except Exception as e:
-        logger.error(f"生成身世失败 {avatar.name}: {e}")
+        logger.error(f"Failed to generate backstory for {avatar.name}: {e}")
         return None
 
 async def process_avatar_backstory(avatar: "Avatar") -> None:
     """
-    为角色生成并设置身世（如果不满足条件则跳过）。
-    无返回值，直接修改 avatar 属性。
+    Generate and set the avatar's backstory (skipped if conditions aren't met).
+    Returns nothing; modifies the avatar attributes directly.
     """
     if not can_get_backstory(avatar):
         return

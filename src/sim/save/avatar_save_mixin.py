@@ -1,30 +1,30 @@
 """
-Avatar存档序列化Mixin
+Avatar save (serialization) mixin
 
-将Avatar的序列化逻辑从avatar.py分离出来，保持核心类的清晰性。
+Separates Avatar serialization logic from avatar.py to keep the core class clean.
 
-存档策略：
-- 引用对象（Technique, Material等）：保存id，加载时从全局字典获取
-- relations：转换为dict[str, str]（avatar_id -> relation_value）
-- materials：转换为dict[int, int]（material_id -> quantity）
-- current_action：保存动作类名和参数
-- weapon/auxiliary：需要深拷贝（因为special_data是实例特有的）
+Save strategy:
+- Referenced objects (Technique, Material, etc.): save the id; fetch from global dicts on load
+- relations: converted to dict[str, str] (avatar_id -> relation_value)
+- materials: converted to dict[int, int] (material_id -> quantity)
+- current_action: save the action class name and params
+- weapon/auxiliary: need a deep copy (special_data is instance-specific)
 """
 
 
 class AvatarSaveMixin:
-    """Avatar存档序列化Mixin
+    """Avatar save (serialization) mixin
     
-    提供to_save_dict方法，将Avatar转换为可JSON序列化的字典
+    Provides the to_save_dict method, converting an Avatar into a JSON-serializable dict
     """
     
     def to_save_dict(self) -> dict:
-        """转换为可序列化的字典（用于存档）
+        """Convert to a serializable dict (used for saving)
         
         Returns:
-            包含Avatar完整状态的字典，可直接JSON序列化
+            A dict containing the Avatar's full state, directly JSON-serializable
         """
-        # 序列化relations: dict[Avatar, Relation] -> dict[str, str]
+        # Serialize relations: dict[Avatar, Relation] -> dict[str, str]
         relations_dict = {
             other.id: relation_state.to_save_dict()
             for other, relation_state in self.relations.items()
@@ -34,13 +34,13 @@ class AvatarSaveMixin:
             for other, relation_state in getattr(self, "archived_relations", {}).items()
         }
         
-        # 序列化materials: dict[Material, int] -> dict[int, int]
+        # Serialize materials: dict[Material, int] -> dict[int, int]
         materials_dict = {
             material.id: quantity
             for material, quantity in self.materials.items()
         }
         
-        # 序列化current_action
+        # Serialize current_action
         current_action_dict = None
         if self.current_action is not None:
             current_action_dict = {
@@ -50,12 +50,12 @@ class AvatarSaveMixin:
                 "state": self.current_action.action.get_save_data()
             }
         
-        # 序列化planned_actions
+        # Serialize planned_actions
         planned_actions_list = [plan.to_dict() for plan in self.planned_actions]
 
         from src.classes.world_secret import serialize_avatar_world_secret_knowledge
         
-        # 序列化spirit_animal
+        # Serialize spirit_animal
         spirit_animal_dict = None
         if self.spirit_animal is not None:
             spirit_animal_dict = {
@@ -64,7 +64,7 @@ class AvatarSaveMixin:
             }
         
         return {
-            # 基础信息
+            # Basic info
             "id": self.id,
             "name": self.name,
             "birth_month_stamp": int(self.birth_month_stamp),
@@ -75,14 +75,14 @@ class AvatarSaveMixin:
             "born_region_id": self.born_region_id,
             "cultivation_start_month_stamp": int(self.cultivation_start_month_stamp) if self.cultivation_start_month_stamp is not None else None,
             
-            # 修炼相关
+            # Cultivation
             "age": self.age.to_dict(),
             "cultivation_progress": self.cultivation_progress.to_dict(),
             "root": self.root.name,
             "technique_id": self.technique.id if self.technique else None,
             "hp": self.hp.to_dict(),
             
-            # 物品与资源
+            # Items and resources
             "magic_stone": self.magic_stone.value,
             "materials": materials_dict,
             "weapon_id": self.weapon.id if self.weapon else None,
@@ -92,7 +92,7 @@ class AvatarSaveMixin:
             "auxiliary_special_data": self.auxiliary.special_data if self.auxiliary else {},
             "spirit_animal": spirit_animal_dict,
             
-            # 社交与状态
+            # Social info and status
             "relations": relations_dict,
             "archived_relations": archived_relations_dict,
             "sect_id": self.sect.id if self.sect else None,
@@ -113,7 +113,7 @@ class AvatarSaveMixin:
             "is_dead": self.is_dead,
             "death_info": self.death_info,
             
-            # 行动与AI
+            # Actions and AI
             "current_action": current_action_dict,
             "planned_actions": planned_actions_list,
             "thinking": self.thinking,
@@ -127,14 +127,14 @@ class AvatarSaveMixin:
             "known_regions": list(self.known_regions),
             "world_secret_knowledge": serialize_avatar_world_secret_knowledge(self),
 
-            # 状态追踪
+            # State tracking
             "metrics_history": [
                 metrics.to_save_dict()
                 for metrics in self.metrics_history
             ] if self.enable_metrics_tracking else [],
             "enable_metrics_tracking": self.enable_metrics_tracking,
 
-            # 丹药
+            # Elixirs
             "elixirs": [
                 {
                     "id": consumed.elixir.id,
@@ -145,7 +145,7 @@ class AvatarSaveMixin:
             "temporary_effects": self.temporary_effects,
             "persistent_effects": self.persistent_effects,
             
-            # 生育相关
+            # Reproduction
             "children": [child.to_dict() for child in self.children],
             "relation_start_dates": self.relation_start_dates,
         }

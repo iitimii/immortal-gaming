@@ -30,13 +30,13 @@ def _should_run_sect_thinking_cycle(world) -> bool:
 
 
 async def run_annual_maintenance(simulator, ctx) -> None:
-    # 年度维护统一收口在这里，避免一月专属逻辑散落在 step() 的多个分支里。
-    # 顺序上保持：
-    # 1. 刷新排行榜
-    # 2. 更新宗门状态
-    # 3. 执行配置驱动的宗门决策周期
-    # 4. 生成宗门周期思考
-    # 5. 清理长期死亡角色、已故档案与过期 POI
+    # Yearly maintenance is consolidated here so January-only logic is not scattered across branches of step().
+    # Order:
+    # 1. Refresh rankings
+    # 2. Update sect state
+    # 3. Run the config-driven sect decision cycle
+    # 4. Generate periodic sect thinking
+    # 5. Clean up long-dead avatars, deceased records, and expired POIs
     if not ctx.is_january:
         return
 
@@ -149,7 +149,7 @@ async def phase_sect_periodic_thinking(simulator) -> list[Event]:
 
     async def _decide_one(sect):
         try:
-            # 每个宗门单独构造决策上下文，并行生成 periodic_thinking。
+            # Build a decision context per sect and generate periodic_thinking in parallel.
             ctx = get_sect_decision_context(
                 sect=sect,
                 world=world,

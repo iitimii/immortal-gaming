@@ -29,18 +29,18 @@ def check_llm_profile_connectivity(
     resolved_fast_api_key = fast_api_key if use_separate_fast_config else api_key
 
     if not base_url:
-        return False, "LLM 配置不完整：请填写 Base URL"
+        return False, "Incomplete LLM configuration: please enter the Base URL"
     if not model_name:
-        return False, "LLM 配置不完整：请填写智能模型名称"
+        return False, "Incomplete LLM configuration: please enter the smart model name"
     if not fast_model_name:
-        return False, "LLM 配置不完整：请填写快速模型名称"
+        return False, "Incomplete LLM configuration: please enter the fast model name"
     if not fast_base_url:
-        return False, "LLM 配置不完整：请填写快速模型 Base URL"
+        return False, "Incomplete LLM configuration: please enter the fast model Base URL"
     if llm_requires_api_key(base_url=base_url, api_format=api_format) and not api_key:
-        return False, "LLM 配置不完整：请填写 API Key"
+        return False, "Incomplete LLM configuration: please enter the API Key"
 
     if llm_requires_api_key(base_url=fast_base_url, api_format=fast_api_format) and not resolved_fast_api_key:
-        return False, "LLM 配置不完整：请填写快速模型 API Key"
+        return False, "Incomplete LLM configuration: please enter the fast model API Key"
 
     normal_config = LLMConfig(
         base_url=base_url,
@@ -50,7 +50,7 @@ def check_llm_profile_connectivity(
     )
     success, error_msg = test_connectivity(config=normal_config)
     if not success:
-        return False, f"智能模型连接失败：{error_msg}"
+        return False, f"Smart model connection failed: {error_msg}"
 
     if (
         fast_model_name == model_name
@@ -68,6 +68,6 @@ def check_llm_profile_connectivity(
     )
     success, error_msg = test_connectivity(config=fast_config)
     if not success:
-        return False, f"快速模型连接失败：{error_msg}"
+        return False, f"Fast model connection failed: {error_msg}"
 
     return True, ""

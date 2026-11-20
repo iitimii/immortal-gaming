@@ -4,7 +4,7 @@ from typing import Union
 
 class MagicStone(int):
     """
-    灵石，实际上是一个int类，代表持有的灵石的数量。
+    Spirit stones; effectively an int representing the number of spirit stones held.
     """
     def __init__(self, value: int):
         self.value = value

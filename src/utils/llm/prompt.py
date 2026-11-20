@@ -1,4 +1,4 @@
-"""提示词处理"""
+"""Prompt handling."""
 
 from pathlib import Path
 from src.utils.strings import intentify_prompt_infos
@@ -6,14 +6,14 @@ from src.utils.strings import intentify_prompt_infos
 
 def build_prompt(template: str, infos: dict) -> str:
     """
-    根据模板构建提示词
+    Build a prompt from a template.
     
     Args:
-        template: 提示词模板
-        infos: 要填充的信息字典
+        template: prompt template
+        infos: dict of values to fill in
         
     Returns:
-        str: 构建好的提示词
+        str: the built prompt
     """
     processed = intentify_prompt_infos(infos)
     return template.format(**processed)
@@ -21,13 +21,13 @@ def build_prompt(template: str, infos: dict) -> str:
 
 def load_template(path: Path | str) -> str:
     """
-    加载模板文件
+    Load a template file.
     
     Args:
-        path: 模板文件路径
+        path: template file path
         
     Returns:
-        str: 模板内容
+        str: template contents
     """
     path = Path(path)
     return path.read_text(encoding="utf-8")

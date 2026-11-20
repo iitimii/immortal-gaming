@@ -122,9 +122,9 @@ const i18n = createI18n({
 const createMockSave = (overrides: Partial<SaveFileDTO> = {}): SaveFileDTO => ({
   filename: 'test_save.json',
   save_time: '2026-01-01T12:00:00',
-  game_time: '100年1月',
+  game_time: 'Year 100, Month 1',
   version: '1.0.0',
-  language: 'zh-CN',
+  language: 'en-US',
   avatar_count: 10,
   alive_count: 8,
   dead_count: 2,
@@ -196,8 +196,8 @@ describe('SaveLoadPanel', () => {
   describe('Load Mode', () => {
     it('should render save list in load mode', async () => {
       const mockSaves = [
-        createMockSave({ filename: 'save1.json', custom_name: '我的存档' }),
-        createMockSave({ filename: 'save2.json', game_time: '200年6月' }),
+        createMockSave({ filename: 'save1.json', custom_name: 'My Save' }),
+        createMockSave({ filename: 'save2.json', game_time: 'Year 200, Month 6' }),
       ]
       vi.mocked(systemApi.fetchSaves).mockResolvedValue(mockSaves)
 
@@ -209,7 +209,7 @@ describe('SaveLoadPanel', () => {
       await flushPromises()
 
       expect(wrapper.findAll('.save-item')).toHaveLength(2)
-      expect(wrapper.text()).toContain('我的存档')
+      expect(wrapper.text()).toContain('My Save')
       expect(wrapper.text()).toContain('Load')
     })
 
@@ -264,7 +264,7 @@ describe('SaveLoadPanel', () => {
 
   describe('Save Display', () => {
     it('should display custom name when available', async () => {
-      const mockSaves = [createMockSave({ custom_name: '自定义名称', filename: 'test.json' })]
+      const mockSaves = [createMockSave({ custom_name: 'Custom Name', filename: 'test.json' })]
       vi.mocked(systemApi.fetchSaves).mockResolvedValue(mockSaves)
 
       const wrapper = mount(SaveLoadPanel, {
@@ -274,7 +274,7 @@ describe('SaveLoadPanel', () => {
 
       await flushPromises()
 
-      expect(wrapper.find('.save-name').text()).toBe('自定义名称')
+      expect(wrapper.find('.save-name').text()).toBe('Custom Name')
     })
 
     it('should display filename when no custom name', async () => {
@@ -384,7 +384,7 @@ describe('SaveLoadPanel', () => {
       expect(wrapper.text()).toContain('Invalid characters')
     })
 
-    it('should allow valid Chinese name', async () => {
+    it('should allow a valid name with letters, digits and underscores', async () => {
       vi.mocked(systemApi.fetchSaves).mockResolvedValue([])
 
       const wrapper = mount(SaveLoadPanel, {
@@ -397,7 +397,7 @@ describe('SaveLoadPanel', () => {
       await flushPromises()
 
       const input = wrapper.find('.n-input')
-      await input.setValue('我的存档')
+      await input.setValue('My_Save_01')
       await flushPromises()
 
       expect(wrapper.find('.error-text').exists()).toBe(false)

@@ -75,59 +75,59 @@ vi.mock('@/api', () => ({
 
 const i18n = createI18n({
   legacy: false,
-  locale: 'zh-CN',
+  locale: 'en-US',
   messages: {
-    'zh-CN': {
+    'en-US': {
       common: {
-        none: '无',
-        cancel: '取消',
+        none: 'None',
+        cancel: 'Cancel',
       },
       save_load: {
-        delete: '删除',
+        delete: 'Delete',
       },
       realms: {
-        QI_REFINEMENT: '炼气',
-        FOUNDATION_ESTABLISHMENT: '筑基',
-        CORE_FORMATION: '金丹',
-        NASCENT_SOUL: '元婴',
+        QI_REFINEMENT: 'Qi Refinement',
+        FOUNDATION_ESTABLISHMENT: 'Foundation Establishment',
+        CORE_FORMATION: 'Core Formation',
+        NASCENT_SOUL: 'Nascent Soul',
       },
       attributes: {
-        FIRE: '火',
+        FIRE: 'Fire',
       },
       technique_grades: {
-        high: '上品',
+        high: 'Upper Grade',
       },
       game: {
         info_panel: {
           popup: {
             types: {
-              sword: '剑',
+              sword: 'Sword',
             },
           },
           avatar: {
             adjust: {
-              title: '调整{category}',
-              current: '当前',
-              select: '选择',
-              search_placeholder: '搜索',
-              load_failed: '加载失败',
-              apply_success: '应用成功',
-              apply_failed: '应用失败',
-              apply_personas: '应用人格',
+              title: 'Adjust {category}',
+              current: 'Current',
+              select: 'Select',
+              search_placeholder: 'Search',
+              load_failed: 'Failed to load',
+              apply_success: 'Applied',
+              apply_failed: 'Failed to apply',
+              apply_personas: 'Apply Personas',
               categories: {
-                technique: '功法',
-                weapon: '武器',
-                auxiliary: '辅修',
-                personas: '人格',
-                goldfinger: '金手指',
+                technique: 'Technique',
+                weapon: 'Weapon',
+                auxiliary: 'Auxiliary',
+                personas: 'Personas',
+                goldfinger: 'Goldfinger',
               },
               custom: {
-                title: '自定义',
-                unnamed: '未命名',
-                prompt_required: '请输入提示',
-                generate_failed: '生成失败',
-                create_failed: '保存失败',
-                create_success: '保存成功',
+                title: 'Custom',
+                unnamed: 'Unnamed',
+                prompt_required: 'Please enter a prompt',
+                generate_failed: 'Generation failed',
+                create_failed: 'Save failed',
+                create_success: 'Saved',
               },
             },
           },
@@ -135,25 +135,25 @@ const i18n = createI18n({
       },
       ui: {
         create_avatar: {
-          fetch_failed: '加载失败',
-          create_success: '创建成功',
-          create_failed: '创建失败 {error}',
+          fetch_failed: 'Failed to load',
+          create_success: 'Created',
+          create_failed: 'Creation failed {error}',
           relation_labels: {
-            parent: '父母',
-            child: '子女',
-            sibling: '手足',
-            master: '师父',
-            disciple: '徒弟',
-            lover: '道侣',
-            friend: '朋友',
-            enemy: '敌人',
+            parent: 'Parent',
+            child: 'Child',
+            sibling: 'Sibling',
+            master: 'Master',
+            disciple: 'Disciple',
+            lover: 'Dao Partner',
+            friend: 'Friend',
+            enemy: 'Enemy',
           },
         },
         delete_avatar: {
-          fetch_failed: '加载失败',
-          delete_success: '删除成功',
-          delete_failed: '删除失败',
-          delete_confirm: '删除{name}？',
+          fetch_failed: 'Failed to load',
+          delete_success: 'Deleted',
+          delete_failed: 'Delete failed',
+          delete_confirm: 'Delete {name}?',
         },
       },
     },
@@ -183,13 +183,13 @@ async function settle() {
 
 const adjustCatalog = {
   techniques: [
-    { id: '1', name: '火云诀', desc: '灼热', grade: 'high', attribute: 'FIRE' },
+    { id: '1', name: 'Fire Cloud Art', desc: 'Scorching', grade: 'high', attribute: 'FIRE' },
   ],
   weapons: [],
   auxiliaries: [],
   personas: [
-    { id: '7', name: '沉稳', desc: '冷静' },
-    { id: '8', name: '锋锐', desc: '果断' },
+    { id: '7', name: 'Steady', desc: 'Calm' },
+    { id: '8', name: 'Sharp', desc: 'Decisive' },
   ],
   goldfingers: [],
 }
@@ -210,30 +210,30 @@ describe('avatar panel composables', () => {
       draft: {
         id: 'draft',
         category: 'technique',
-        name: '自创功法',
-        desc: '测试',
+        name: 'Self-made Technique',
+        desc: 'Test',
         effects: {},
       },
     })
     vi.mocked(avatarApi.createCustomContent).mockResolvedValue({
       status: 'ok',
-      item: { id: '9', name: '自创功法', desc: '测试' },
+      item: { id: '9', name: 'Self-made Technique', desc: 'Test' },
     })
     vi.mocked(avatarApi.fetchGameData).mockResolvedValue({
       sects: [
-        { id: 1, name: '青云宗', alignment: 'GOOD', accepts_yao: true },
-        { id: 2, name: '浩然书院', alignment: 'GOOD', accepts_yao: false },
+        { id: 1, name: 'Azure Cloud Sect', alignment: 'GOOD', accepts_yao: true },
+        { id: 2, name: 'Haoran Academy', alignment: 'GOOD', accepts_yao: false },
       ],
       races: [
-        { id: 'human', label: '人族', is_yao: false },
-        { id: 'fox', label: '狐族', is_yao: true },
+        { id: 'human', label: 'Human', is_yao: false },
+        { id: 'fox', label: 'Fox', is_yao: true },
       ],
-      personas: [{ id: 2, name: '沉稳', desc: '冷静', rarity: 'common' }],
+      personas: [{ id: 2, name: 'Steady', desc: 'Calm', rarity: 'common' }],
       realms: ['QI_REFINEMENT', 'FOUNDATION_ESTABLISHMENT'],
-      techniques: [{ id: 3, name: '火云诀', grade: 'high', attribute: 'FIRE', sect: null }],
-      weapons: [{ id: 4, name: '青锋剑', grade: 'high', type: 'sword' }],
-      auxiliaries: [{ id: 5, name: '炼丹术', grade: 'high' }],
-      alignments: [{ value: 'GOOD', label: '正道' }],
+      techniques: [{ id: 3, name: 'Fire Cloud Art', grade: 'high', attribute: 'FIRE', sect: null }],
+      weapons: [{ id: 4, name: 'Azure Edge Sword', grade: 'high', type: 'sword' }],
+      auxiliaries: [{ id: 5, name: 'Alchemy', grade: 'high' }],
+      alignments: [{ value: 'GOOD', label: 'Righteous' }],
       avatar_creation: {
         age: {
           min: 16,
@@ -251,7 +251,7 @@ describe('avatar panel composables', () => {
       fox: { male: [3], female: [4] },
     })
     vi.mocked(avatarApi.fetchAvatarList).mockResolvedValue([
-      { id: 'a1', name: '李青', sect_name: '青云宗', realm: 'QI_REFINEMENT', gender: '男', age: 18 },
+      { id: 'a1', name: 'Li Qing', sect_name: 'Azure Cloud Sect', realm: 'QI_REFINEMENT', gender: 'male', age: 18 },
     ])
     vi.mocked(avatarApi.createAvatar).mockResolvedValue({
       status: 'ok',
@@ -259,7 +259,7 @@ describe('avatar panel composables', () => {
       avatar_id: 'new',
       avatar: {
         id: 'new',
-        name: '李青',
+        name: 'Li Qing',
         x: 1,
         y: 2,
         gender: 'male',
@@ -280,7 +280,7 @@ describe('avatar panel composables', () => {
     const panel = mountComposable(() => useAvatarAdjustmentPanel(props, callbacks))
 
     await settle()
-    expect(panel.filteredOptions.value.map(option => option.name)).toEqual(['无', '火云诀'])
+    expect(panel.filteredOptions.value.map(option => option.name)).toEqual(['None', 'Fire Cloud Art'])
 
     await panel.handleSingleSelect(panel.filteredOptions.value[1])
     expect(avatarApi.updateAvatarAdjustment).toHaveBeenCalledWith({
@@ -296,7 +296,7 @@ describe('avatar panel composables', () => {
     const props: AvatarAdjustmentPanelProps = {
       avatarId: 'a1',
       category: 'personas',
-      currentPersonas: [{ id: '7', name: '沉稳' }],
+      currentPersonas: [{ id: '7', name: 'Steady' }],
     }
     const panel = mountComposable(() => useAvatarAdjustmentPanel(props, {
       onClose: vi.fn(),
@@ -322,9 +322,9 @@ describe('avatar panel composables', () => {
     ))
 
     await settle()
-    panel.customPrompt.value = '做一个火系功法'
+    panel.customPrompt.value = 'Make a fire technique'
     await panel.generateCustomDraft()
-    expect(panel.customDraft.value?.name).toBe('自创功法')
+    expect(panel.customDraft.value?.name).toBe('Self-made Technique')
 
     await panel.saveCustomDraft()
     expect(avatarApi.createCustomContent).toHaveBeenCalled()
@@ -340,22 +340,22 @@ describe('avatar panel composables', () => {
     const panel = mountComposable(() => useCreateAvatarPanel(onCreated))
 
     await settle()
-    expect(panel.realmOptions.value[0]).toEqual({ label: '炼气', value: 1 })
+    expect(panel.realmOptions.value[0]).toEqual({ label: 'Qi Refinement', value: 1 })
     expect(panel.createForm.value.level).toBe(1)
     expect(panel.createForm.value.appearance).toBe(5)
 
-    panel.createForm.value.surname = '李'
-    panel.createForm.value.given_name = '青'
+    panel.createForm.value.surname = 'Li'
+    panel.createForm.value.given_name = 'Qing'
     await panel.handleCreateAvatar()
 
     expect(avatarApi.createAvatar).toHaveBeenCalledWith(expect.objectContaining({
-      surname: '李',
-      given_name: '青',
+      surname: 'Li',
+      given_name: 'Qing',
       alignment: 'NEUTRAL',
     }))
     expect(updateAvatarsMock).toHaveBeenCalledWith([expect.objectContaining({
       id: 'new',
-      name: '李青',
+      name: 'Li Qing',
     })])
     expect(preloadAvatarTexturesMock).toHaveBeenCalledWith([expect.objectContaining({
       id: 'new',
@@ -389,7 +389,7 @@ describe('avatar panel composables', () => {
     panel.createForm.value.race = 'fox'
     await nextTick()
 
-    expect(panel.sectOptions.value).toEqual([{ label: '青云宗', value: 1 }])
+    expect(panel.sectOptions.value).toEqual([{ label: 'Azure Cloud Sect', value: 1 }])
     expect(panel.createForm.value.sect_id).toBeUndefined()
   })
 
@@ -404,8 +404,8 @@ describe('avatar panel composables', () => {
     await settle()
 
     expect(panel.raceOptions.value).toEqual([
-      { label: '人族', value: 'human' },
-      { label: '狐族', value: 'fox' },
+      { label: 'Human', value: 'human' },
+      { label: 'Fox', value: 'fox' },
     ])
   })
 
@@ -414,7 +414,7 @@ describe('avatar panel composables', () => {
     await settle()
 
     panel.createForm.value.pic_id = 1
-    panel.createForm.value.gender = '女'
+    panel.createForm.value.gender = 'female'
     await nextTick()
 
     expect(panel.createForm.value.pic_id).toBeUndefined()
@@ -453,10 +453,10 @@ describe('avatar panel composables', () => {
     const panel = mountComposable(() => useDeleteAvatarPanel(() => true))
     await settle()
 
-    panel.avatarSearch.value = '李'
+    panel.avatarSearch.value = 'Li'
     expect(panel.filteredAvatars.value).toHaveLength(1)
 
-    await panel.handleDeleteAvatar('a1', '李青')
+    await panel.handleDeleteAvatar('a1', 'Li Qing')
     expect(avatarApi.deleteAvatar).toHaveBeenCalledWith('a1')
     expect(fetchStateMock).not.toHaveBeenCalled()
     expect(acceptMutationRevisionMock).toHaveBeenCalledWith(43)
@@ -469,7 +469,7 @@ describe('avatar panel composables', () => {
     const panel = mountComposable(() => useDeleteAvatarPanel())
     await settle()
 
-    panel.handleDeleteAvatar('a1', '李青')
+    panel.handleDeleteAvatar('a1', 'Li Qing')
     const dialogOptions = dialogMock.warning.mock.calls[0][0]
     await dialogOptions.onPositiveClick()
 
@@ -495,8 +495,8 @@ describe('avatar panel composables', () => {
     }))
     const panel = mountComposable(() => useDeleteAvatarPanel(() => true))
 
-    await panel.handleDeleteAvatar('a1', '李青')
-    resolveList([{ id: 'a1', name: '李青', sect_name: '青云宗', realm: 'QI_REFINEMENT', gender: '男', age: 18 }])
+    await panel.handleDeleteAvatar('a1', 'Li Qing')
+    resolveList([{ id: 'a1', name: 'Li Qing', sect_name: 'Azure Cloud Sect', realm: 'QI_REFINEMENT', gender: 'male', age: 18 }])
     await settle()
 
     expect(panel.filteredAvatars.value).toHaveLength(0)
@@ -507,7 +507,7 @@ describe('avatar panel composables', () => {
     const panel = mountComposable(() => useDeleteAvatarPanel(() => false))
     await settle()
 
-    await panel.handleDeleteAvatar('a1', '李青')
+    await panel.handleDeleteAvatar('a1', 'Li Qing')
     expect(avatarApi.deleteAvatar).not.toHaveBeenCalled()
   })
 })

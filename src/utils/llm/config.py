@@ -1,4 +1,4 @@
-"""LLM 配置管理"""
+"""LLM configuration management."""
 
 from enum import Enum
 from dataclasses import dataclass
@@ -7,7 +7,7 @@ from src.config import get_settings_service
 from src.utils.config import CONFIG
 
 class LLMMode(str, Enum):
-    """LLM 调用模式"""
+    """LLM call mode."""
     NORMAL = "normal"
     FAST = "fast"
     DEFAULT = "default"
@@ -15,22 +15,22 @@ class LLMMode(str, Enum):
 
 @dataclass(frozen=True)
 class LLMConfig:
-    """LLM 配置数据类"""
+    """LLM configuration dataclass."""
     model_name: str
     api_key: str
     base_url: str
-    api_format: str = "openai"  # "openai" 或 "anthropic"
+    api_format: str = "openai"  # "openai" or "anthropic"
 
     @classmethod
     def from_mode(cls, mode: LLMMode) -> 'LLMConfig':
         """
-        根据模式创建配置，从 CONFIG 读取
+        Create a config for the given mode, read from CONFIG.
 
         Args:
-            mode: LLM 调用模式
+            mode: LLM call mode
 
         Returns:
-            LLMConfig: 配置对象
+            LLMConfig: config object
         """
         profile, api_key = get_settings_service().get_llm_runtime_config()
         base_url = profile.base_url
@@ -38,7 +38,7 @@ class LLMConfig:
         # Profiles saved before api_format was introduced use the OpenAI-compatible API.
         api_format = getattr(profile, "api_format", "openai") or "openai"
 
-        # 根据模式选择模型
+        # Pick the model by mode
         model_name = ""
         if mode == LLMMode.FAST:
             model_name = profile.fast_model_name
@@ -60,9 +60,9 @@ class LLMConfig:
 
 def get_task_mode(task_name: str) -> LLMMode:
     """
-    根据任务名称获取 LLM 模式
+    Get the LLM mode for a task name.
     """
-    # 从 CONFIG 读取全局模式
+    # Read the global mode from CONFIG
     profile, _ = get_settings_service().get_llm_runtime_config()
     global_mode = (profile.mode or "default").lower()
     
@@ -71,8 +71,8 @@ def get_task_mode(task_name: str) -> LLMMode:
     elif global_mode == "fast":
         return LLMMode.FAST
     
-    # Default 模式：根据 task_name 从细粒度配置中获取
-    # 如果配置了 default_modes，则根据任务名称返回对应模式
+    # Default mode: look up task_name in the fine-grained config
+    # If default_modes is configured, return the mode for the task name
     default_modes = getattr(CONFIG.llm, "default_modes", {})
     if default_modes and task_name in default_modes:
         task_mode = default_modes[task_name].lower()
@@ -81,5 +81,5 @@ def get_task_mode(task_name: str) -> LLMMode:
         else:
             return LLMMode.NORMAL
     
-    # 如果没有配置，默认返回 NORMAL
+    # Not configured: default to NORMAL
     return LLMMode.NORMAL

@@ -42,8 +42,8 @@ msgstr "{avatar} successfully claimed {item} from {treasure}."
 msgid "{avatar} claimed {item} from {treasure}. {result}"
 msgstr "{avatar} claimed {item} from {treasure}. {result}"
 
-msgid "Leave『{new_name}』where it was found"
-msgstr "Leave『{new_name}』where it was found"
+msgid "Leave '{new_name}' where it was found"
+msgstr "Leave '{new_name}' where it was found"
 
 msgid "{avatar_name} left {item_name} where it was found."
 msgstr "{avatar_name} left {item_name} where it was found."

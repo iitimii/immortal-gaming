@@ -30,9 +30,9 @@ from src.classes.official_rank import (
 
 
 def phase_update_perception_and_knowledge(world, living_avatars: list[Avatar]) -> list[Event]:
-    # 这个 phase 同时承担两件事：
-    # 1. 根据观察半径刷新 known_regions
-    # 2. 让尚无洞府的角色在观察到无主修炼地时尝试占据
+    # This phase handles two things:
+    # 1. Refresh known_regions based on observation radius
+    # 2. Let avatars without a cave dwelling try to occupy unowned cultivation sites they observe
     events: list[Event] = []
     avatars_with_home = set()
 
@@ -48,7 +48,7 @@ def phase_update_perception_and_knowledge(world, living_avatars: list[Avatar]) -
     for avatar in living_avatars:
         radius = get_avatar_observation_radius(avatar)
 
-        # 先按包围盒缩小搜索范围，再用曼哈顿距离判断真正可见区域。
+        # First narrow the search with a bounding box, then use Manhattan distance to determine truly visible regions.
         start_x = max(0, avatar.pos_x - radius)
         end_x = min(world.map.width - 1, avatar.pos_x + radius)
         start_y = max(0, avatar.pos_y - radius)
@@ -67,7 +67,7 @@ def phase_update_perception_and_knowledge(world, living_avatars: list[Avatar]) -
         for region in observed_regions:
             avatar.known_regions.add(region.id)
 
-            # 占地逻辑只允许“无主修炼区 + 角色尚无洞府”的组合进入。
+            # Occupation logic only allows the combination "unowned cultivation region + avatar has no cave dwelling".
             if not isinstance(region, CultivateRegion):
                 continue
             if region.host_avatar is not None:
@@ -95,7 +95,7 @@ def phase_update_perception_and_knowledge(world, living_avatars: list[Avatar]) -
 async def phase_passive_effects(world, living_avatars: list[Avatar]) -> list[Event]:
     events: list[Event] = []
     for avatar in living_avatars:
-        # 先处理本地状态副作用，再统一并发世界事件。
+        # Handle local state side effects first, then run world events concurrently.
         avatar.process_elixir_expiration(int(world.month_stamp))
         events.extend(process_avatar_gu_effects(avatar, int(world.month_stamp)))
         avatar.update_time_effect()
@@ -112,7 +112,7 @@ async def phase_passive_effects(world, living_avatars: list[Avatar]) -> list[Eve
 
 
 async def phase_random_minor_events(world, living_avatars: list[Avatar]) -> list[Event]:
-    # 小随机事件和 fortune/misfortune 分开，便于分别控制概率与测试。
+    # Minor random events are kept separate from fortune/misfortune so probabilities and tests can be controlled independently.
     target_avatars = [avatar for avatar in living_avatars if avatar.can_trigger_world_event]
     results = await asyncio.gather(
         *[try_trigger_random_minor_event(avatar, world) for avatar in target_avatars]
@@ -142,7 +142,7 @@ def phase_treasure_lifecycle(world) -> list[Event]:
 
 
 async def phase_process_gatherings(world) -> list[Event]:
-    # 开局年份不触发聚会，避免世界尚未稳定时就生成大规模社交事件。
+    # No gatherings in the starting year, to avoid large-scale social events before the world has stabilized.
     if world.month_stamp.get_year() <= world.start_year:
         return []
 
@@ -150,7 +150,7 @@ async def phase_process_gatherings(world) -> list[Event]:
 
 
 def phase_update_celestial_phenomenon(world) -> list[Event]:
-    # 天象只在初始化时生成一次，或在每年一月检查是否到期切换。
+    # Celestial phenomena are generated once at initialization, or checked for expiry/switching each January.
     events: list[Event] = []
     current_year = world.month_stamp.get_year()
     current_month = world.month_stamp.get_month()
@@ -174,7 +174,7 @@ def phase_update_celestial_phenomenon(world) -> list[Event]:
     if not new_phenomenon:
         return events
 
-    # 切换世界级环境状态后，再补一条公开事件供前端和历史系统消费。
+    # After switching the world-level environment state, add a public event for the frontend and history systems.
     world.current_phenomenon = new_phenomenon
     world.phenomenon_start_year = current_year
 
@@ -197,7 +197,7 @@ def phase_update_celestial_phenomenon(world) -> list[Event]:
 
 
 def phase_update_city_population(world) -> None:
-    # 城市人口使用 logistic 公式按月自然变化。
+    # City population changes naturally each month using a logistic formula.
     for region in world.map.regions.values():
         if isinstance(region, CityRegion):
             region.update_population_monthly()

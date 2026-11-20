@@ -159,7 +159,7 @@ async def _run_llm_check_background(
         runtime.set_llm_check_state(
             pending=False,
             failed=True,
-            error_message=f"连通性检测异常：{exc}",
+            error_message=f"Connectivity check error: {exc}",
         )
         print(f"[Warning] LLM connectivity check failed: {exc}")
 

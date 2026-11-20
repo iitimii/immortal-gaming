@@ -11,9 +11,9 @@ STATUS_PEACE = "peace"
 @dataclass(slots=True)
 class SectWar:
     """
-    世界级宗门外交状态记录。
+    World-level sect diplomacy status record.
 
-    第一版只区分战争/和平两种状态，并保留开始、最近战斗、和平开始等关键时间点。
+    The first version only distinguishes war/peace, keeping key timestamps such as start, latest battle and peace start.
     """
 
     sect_a_id: int

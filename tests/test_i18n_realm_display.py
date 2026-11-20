@@ -1,7 +1,7 @@
 """
 Integration tests for realm/stage i18n display in item exchange messages.
 
-Verifies that user-facing messages show translated realm names (e.g., "筑基")
+Verifies that user-facing messages show translated realm names (e.g., "Foundation Establishment")
 instead of raw enum values (e.g., "FOUNDATION_ESTABLISHMENT").
 
 Coverage:
@@ -226,7 +226,7 @@ def test_fortune_weapon_intro_uses_translated_realm():
     weapon = get_real_weapon()
     # Simulate what fortune.py does.
     intro = t(
-        "You discovered a {realm} weapon『{weapon_name}』in your fortune.",
+        "You discovered a {realm} weapon '{weapon_name}' in your fortune.",
         realm=str(weapon.realm),
         weapon_name=weapon.name
     )
@@ -252,7 +252,7 @@ def test_fortune_auxiliary_intro_uses_translated_realm():
 
     # Simulate what fortune.py does.
     intro = t(
-        "You discovered a {realm} auxiliary『{auxiliary_name}』in your fortune.",
+        "You discovered a {realm} auxiliary '{auxiliary_name}' in your fortune.",
         realm=str(auxiliary.realm),
         auxiliary_name=auxiliary.name
     )
@@ -282,7 +282,7 @@ def test_can_buy_item_error_message_shows_translated_realm():
         pytest.skip("No high-realm elixir found in game data")
 
     # Simulate the error message generation from inventory_mixin.py.
-    error_msg = f"境界不足，无法承受药力 ({str(high_realm_elixir.realm)})"
+    error_msg = f"Realm too low to withstand the elixir's potency ({str(high_realm_elixir.realm)})"
 
     # Error message should NOT contain raw enum values.
     for raw_value in RAW_REALM_VALUES:

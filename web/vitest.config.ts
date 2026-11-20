@@ -10,7 +10,7 @@ export default defineConfig({
     setupFiles: ['./src/__tests__/setup.ts'],
     include: ['src/**/*.test.ts'],
     env: {
-      // 在测试环境中设置 API Base URL，避免 fetch 报错 Invalid URL
+      // Set an API base URL in tests so fetch does not throw "Invalid URL"
       VITE_API_TARGET: 'http://localhost:3000' 
     },
     coverage: {

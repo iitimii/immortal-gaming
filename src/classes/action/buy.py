@@ -20,19 +20,19 @@ if TYPE_CHECKING:
 
 class Buy(InstantAction):
     """
-    在城镇购买物品。
+    Buy items in a town.
     
-    如果是丹药：购买后强制立即服用。
-    如果是其他物品：购买后放入背包。
-    如果是装备（兵器/法宝）：购买后直接装备（替换原有装备，旧装备折价售出）。
+    Elixirs: consumed immediately after purchase.
+    Other items: added to the inventory after purchase.
+    Equipment (weapons/treasures): equipped directly after purchase (replacing the current one; the old one is sold at a discount).
     """
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "buy_action_name"
     DESC_ID = "buy_description"
     REQUIREMENTS_ID = "buy_requirements"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "💸"
     PARAMS = {"target_name": "str"}
     PARAM_OPTION_SOURCES = {"target_name": ParamOptionSource.CURRENT_CITY_STORE_ITEM_NAME}
@@ -46,16 +46,16 @@ class Buy(InstantAction):
         if not res.is_valid:
             return False, t("Unknown item: {name}", name=target_name)
 
-        # 检查商店是否售卖
-        # 必须是 StoreMixin (CityRegion 混入了 StoreMixin)
+        # Check whether the store sells it
+        # Must be a StoreMixin (CityRegion mixes in StoreMixin)
         if hasattr(region, "is_selling"):
             if not region.is_selling(res.obj.name):
                 return False, t("{region} does not sell {item}", region=region.name, item=res.obj.name)
         else:
-            # 如果不是商店区域（虽然前面已经检查了 CityRegion，但为了安全）
+            # Not a store region (CityRegion was already checked above, but for safety)
             return False, t("This area has no shop")
 
-        # 核心逻辑委托给 Avatar
+        # Core logic is delegated to Avatar
         return self.avatar.can_buy_item(res.obj)
 
     def _execute(self, target_name: str) -> None:
@@ -63,7 +63,7 @@ class Buy(InstantAction):
         if not res.is_valid:
             return
             
-        # 真正执行购买 (含扣款、服用/装备/卖旧)
+        # Actually execute the purchase (payment, consume/equip/sell old)
         self.avatar.buy_item(res.obj)
 
     def start(self, target_name: str) -> Event:
@@ -71,10 +71,10 @@ class Buy(InstantAction):
         obj = res.obj
         display_name = res.name
         
-        # 预先获取一些信息用于生成文本 (不修改状态)
+        # Pre-fetch some info for generating text (without changing state)
         price = prices.get_buying_price(obj, self.avatar)
         
-        # 构造描述
+        # Build the description
         action_desc = t("bought")
         suffix = ""
         
@@ -82,7 +82,7 @@ class Buy(InstantAction):
             action_desc = t("bought and consumed")
         elif isinstance(obj, (Weapon, Auxiliary)):
             action_desc = t("bought and equipped")
-            # 预测是否会有卖旧行为，生成对应描述
+            # Predict whether an old item will be sold and generate the matching description
             if isinstance(obj, Weapon) and self.avatar.weapon:
                 suffix = t(" (and sold old {item} at reduced price)", item=self.avatar.weapon.name)
             elif isinstance(obj, Auxiliary) and self.avatar.auxiliary:

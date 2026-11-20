@@ -6,6 +6,7 @@ from typing import Set, Dict
 
 from src.utils.df import load_game_configs
 from src.i18n import t
+from src.i18n.locale_registry import get_source_locale
 
 # =============================================================================
 # Helper Functions & Constants
@@ -31,17 +32,17 @@ def get_project_root() -> Path:
 
 def test_all_csv_ids_have_translations():
     """
-    遍历加载的所有游戏配置 CSV，检查所有以 _id 结尾的字段（如 name_id, desc_id, title_id），
-    确保它们在中文环境下都有对应的翻译。
-    
-    如果 t(key) 返回的结果等于 key 本身，且 key 是全大写（典型的 ID 格式），则视为缺失翻译。
+    Walk every loaded game config CSV and check all fields ending in _id (name_id, desc_id, title_id, ...)
+    to make sure each has a translation in the default locale.
+
+    If t(key) returns the key itself and the key is all upper case (typical ID format), it is missing.
     """
-    # 1. 加载配置 (force_chinese_language fixture 已经在 session 级别生效)
+    # 1. Load configs (the force_default_language fixture is already active)
     configs = load_game_configs()
     
     missing_keys = []
     
-    # 2. 遍历所有配置表
+    # 2. Walk every config table
     for config_name, rows in configs.items():
         if not rows:
             continue
@@ -49,24 +50,22 @@ def test_all_csv_ids_have_translations():
         print(f"Checking config: {config_name}.csv ({len(rows)} rows)")
         
         for i, row in enumerate(rows):
-            # 遍历行中的所有键值对
+            # Walk every key/value pair in the row
             for key, value in row.items():
-                # 检查 Key 是否以 _id 结尾 (例如 title_id)
-                # 并且 Value 是字符串且非空
+                # Check whether the key ends with _id (e.g. title_id)
+                # and the value is a non-empty string
                 if key.lower().endswith("id") and isinstance(value, str) and value.strip():
-                    # 也可以进一步过滤，例如只检查全大写的 Value，或者特定前缀
-                    # 这里假设所有需要翻译的 ID 都是全大写且包含下划线
+                    # Assume every translatable ID is upper case and contains an underscore
                     if value.isupper() and "_" in value:
                         translated = t(value)
                         
-                        # 如果翻译结果和原文一样，且原文不是空的，视为缺失
-                        # 注意：有些 ID 本身就是英文显示（极少），这里主要针对需要转中文的情况
+                        # If the translation equals the key itself, treat it as missing
                         if translated == value:
                             missing_keys.append(f"[{config_name}.csv Row {i+1}] {key}={value}")
 
-    # 3. 断言
+    # 3. Assert
     if missing_keys:
-        error_msg = f"Found {len(missing_keys)} missing translations in zh-CN:\n" + "\n".join(missing_keys)
+        error_msg = f"Found {len(missing_keys)} missing translations in the default locale:\n" + "\n".join(missing_keys)
         pytest.fail(error_msg)
 
 
@@ -130,7 +129,7 @@ class TestSourceCodeQuality:
         return '"' in line or "'" in line
 
     def test_no_hardcoded_chinese_in_src_classes(self):
-        """检查 src/classes/ 下不应有硬编码中文（应使用 t() 函数）"""
+        """src/classes/ should not contain hard-coded Chinese strings (use t() instead)."""
         classes_dir = get_project_root() / "src" / "classes"
         
         if not classes_dir.exists():
@@ -212,15 +211,15 @@ class TestTranslationKeysIntegrity:
         return msgids
 
     def test_all_used_msgids_are_defined_in_po(self):
-        """检查所有代码中使用的 msgid 都在 PO 文件中定义"""
+        """Every msgid used in code must be defined in the source locale PO files."""
         src_dir = get_project_root() / "src"
-        locales_dir = get_project_root() / "static/locales/zh-CN"
+        locales_dir = get_project_root() / "static/locales" / get_source_locale()
         
         if not src_dir.exists() or not locales_dir.exists():
             pytest.skip("Required directories not found")
         
         defined_msgids = set()
-        # 遍历所有 zh-CN 下的 PO 文件（包括 messages.po 和 game_configs_modules 下的）
+        # Walk every source-locale PO file (messages.po and game_configs_modules included)
         for po_file in locales_dir.rglob("*.po"):
             defined_msgids.update(self.extract_msgids_from_po(po_file))
             
@@ -267,53 +266,30 @@ class TestFormatParameterConsistency:
             return {}
 
     def test_format_params_consistency(self):
-        """检查中英文翻译的格式化参数与原始 msgid 一致"""
-        zh_po = get_project_root() / "static/locales/zh-CN/LC_MESSAGES/messages.po"
-        en_po = get_project_root() / "static/locales/en-US/LC_MESSAGES/messages.po"
-        
-        if not zh_po.exists() or not en_po.exists():
+        """Source-locale translations must keep the format parameters of their msgid."""
+        po_dir = get_project_root() / "static" / "locales" / get_source_locale() / "LC_MESSAGES"
+        po_files = sorted(po_dir.glob("*.po"))
+
+        if not po_files:
             pytest.skip("PO files not found")
-            
-        zh_pairs = self.extract_pairs(zh_po)
-        en_pairs = self.extract_pairs(en_po)
-        
+
         inconsistencies = []
-        
-        for msgid, zh_msgstr in zh_pairs.items():
-            if msgid in en_pairs:
-                en_msgstr = en_pairs[msgid]
-                
-                # If msgstr is empty (fallback to msgid), use msgid content for param extraction
-                zh_content = zh_msgstr if zh_msgstr else msgid
-                en_content = en_msgstr if en_msgstr else msgid
-                
+
+        for po_file in po_files:
+            for msgid, msgstr in self.extract_pairs(po_file).items():
                 msgid_params = self.extract_format_params(msgid)
-                zh_params = self.extract_format_params(zh_content)
-                en_params = self.extract_format_params(en_content)
-                
-                # Logic Update:
-                # 1. If msgid has params, translations MUST match (Source-based)
-                # 2. If msgid has NO params, translations MUST match EACH OTHER (Key-based)
-                
-                is_inconsistent = False
-                
-                if msgid_params:
-                    # Source-based: translations must strictly match source
-                    if zh_params != msgid_params or en_params != msgid_params:
-                        is_inconsistent = True
-                else:
-                    # Key-based: msgid has no params (e.g. "retreat_start")
-                    # But translations might have params. 
-                    # We check if ZH and EN are consistent with each other.
-                    if zh_params != en_params:
-                        is_inconsistent = True
-                
-                if is_inconsistent:
+                if not msgid_params:
+                    # Key-based msgid (e.g. "retreat_start"): no source params to compare against
+                    continue
+                # If msgstr is empty (fallback to msgid), use msgid content for param extraction
+                content = msgstr if msgstr else msgid
+                params = self.extract_format_params(content)
+                if params != msgid_params:
                     inconsistencies.append(
-                        f"msgid: {msgid[:50]}...\n"
-                        f"  Params: Original={msgid_params}, ZH={zh_params}, EN={en_params}"
+                        f"{po_file.name} msgid: {msgid[:50]}...\n"
+                        f"  Params: Original={msgid_params}, Translation={params}"
                     )
-        
+
         if inconsistencies:
             error_msg = f"Found {len(inconsistencies)} translation entries with inconsistent format parameters:\n" + "\n".join(inconsistencies[:10])
             pytest.fail(error_msg)

@@ -45,7 +45,7 @@ function updateMask() {
   const rows = Math.ceil(props.height / TILE_SIZE)
   const cols = Math.ceil(props.width / TILE_SIZE)
   
-  // 逐格正向绘制视野外黑幕，保持原先单层遮罩的不透明度。
+  // Draw the out-of-sight shroud tile by tile, keeping the original single-layer mask opacity.
   for (let tileY = 0; tileY < rows; tileY++) {
     for (let tileX = 0; tileX < cols; tileX++) {
       const distance = Math.abs(tileX - centerX) + Math.abs(tileY - centerY)
@@ -80,7 +80,7 @@ watch(
   () => [
     uiStore.selectedTarget, 
     uiStore.detailData, 
-    // 监听角色坐标变化
+    // Watch avatar position changes
     uiStore.selectedTarget?.type === 'avatar' ? avatarStore.avatars.get(uiStore.selectedTarget.id)?.x : null,
     uiStore.selectedTarget?.type === 'avatar' ? avatarStore.avatars.get(uiStore.selectedTarget.id)?.y : null
   ],

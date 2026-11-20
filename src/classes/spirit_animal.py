@@ -8,12 +8,12 @@ from src.systems.cultivation import Realm
 @dataclass
 class SpiritAnimal:
     """
-    灵兽：附着于 Avatar 的唯一“守护灵兽”。
-    仅记录名称与境界，并据境界提供固定战斗力点数加成。
+    Spirit animal: the single "guardian spirit animal" attached to an Avatar.
+    Only records the name and realm, and grants fixed battle strength points by realm.
     
-    规则：
-    - 练气/筑基/金丹/元婴 对应战斗力点数 +2/+4/+6/+8
-    - Avatar 最多只能拥有一个 spirit_animal；新的会覆盖旧的。
+    Rules:
+    - Qi Refinement/Foundation Establishment/Core Formation/Nascent Soul give +2/+4/+6/+8 battle strength points
+    - An Avatar can have at most one spirit_animal; a new one replaces the old.
     """
 
     name: str
@@ -29,12 +29,12 @@ class SpiritAnimal:
         return mapping.get(self.realm, 0)
 
     def get_info(self) -> str:
-        return f"{self.name}（{str(self.realm)}）"
+        return f"{self.name} ({str(self.realm)})"
 
     @property
     def effects(self) -> dict[str, object]:
         """
-        灵兽提供的效果集合。当前仅包含战斗力点数，后续可扩展其他键。
+        The spirit animal's effects. Currently only battle strength points; other keys may be added later.
         """
         pts = self.get_extra_strength_points()
         return {"extra_battle_strength_points": pts} if pts else {}
@@ -43,7 +43,7 @@ class SpiritAnimal:
         from src.classes.effect import format_effects_to_text
         return {
             "name": self.name,
-            "desc": f"境界：{str(self.realm)}",
+            "desc": f"Realm: {str(self.realm)}",
             "grade": str(self.realm),
             "effect_desc": format_effects_to_text(self.effects),
         }

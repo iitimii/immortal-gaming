@@ -1,7 +1,7 @@
 """
-事件管理器。
+Event manager.
 
-提供事件写入和查询 facade，底层优先使用 SQLite storage。
+Provides a facade for writing and querying events, backed preferably by SQLite storage.
 """
 from __future__ import annotations
 
@@ -16,41 +16,41 @@ if TYPE_CHECKING:
 
 class EventManager:
     """
-    事件管理器：使用 SQLite 持久化存储。
+    Event manager: uses SQLite for persistent storage.
 
-    对外提供统一事件接口：
-    - add_event: 添加事件
-    - get_recent_events: 获取最近事件
-    - get_events_by_avatar: 按角色查询
-    - get_events_between: 按角色对查询
-    - get_major_events_by_avatar: 获取角色大事
-    - get_minor_events_by_avatar: 获取角色小事
-    - get_major_events_between: 获取角色对大事
-    - get_minor_events_between: 获取角色对小事
+    Exposes a unified event interface:
+    - add_event: add an event
+    - get_recent_events: get recent events
+    - get_events_by_avatar: query by avatar
+    - get_events_between: query by avatar pair
+    - get_major_events_by_avatar: get an avatar's major events
+    - get_minor_events_by_avatar: get an avatar's minor events
+    - get_major_events_between: get an avatar pair's major events
+    - get_minor_events_between: get an avatar pair's minor events
     """
 
     def __init__(self, storage: Optional["EventStorage"] = None):
         """
-        初始化事件管理器。
+        Initialize the event manager.
 
         Args:
-            storage: SQLite 存储层。如果为 None，则使用内存模式（仅用于测试）。
+            storage: SQLite storage layer. If None, in-memory mode is used (for tests only).
         """
         self._storage = storage
         self._subject_resolver: Callable[[str], object | None] | None = None
-        # 内存后备，仅当 storage 为 None 时使用，主要用于测试。
+        # In-memory fallback, used only when storage is None, mainly for tests.
         self._memory_events: List["Event"] = []
 
     @classmethod
     def create_with_db(cls, db_path: Path) -> "EventManager":
         """
-        工厂方法：创建使用 SQLite 的事件管理器。
+        Factory method: create an event manager backed by SQLite.
 
         Args:
-            db_path: 数据库文件路径。
+            db_path: database file path.
 
         Returns:
-            配置好的 EventManager 实例。
+            A configured EventManager instance.
         """
         from src.classes.event_storage import EventStorage
         storage = EventStorage(db_path)
@@ -59,10 +59,10 @@ class EventManager:
     @classmethod
     def create_in_memory(cls) -> "EventManager":
         """
-        工厂方法：创建内存模式的事件管理器（仅用于测试）。
+        Factory method: create an in-memory event manager (for tests only).
 
         Returns:
-            内存模式的 EventManager 实例。
+            An in-memory EventManager instance.
         """
         return cls(storage=None)
 
@@ -85,12 +85,12 @@ class EventManager:
 
     def add_event(self, event: "Event") -> None:
         """
-        添加事件。
+        Add an event.
 
-        如果有 SQLite 存储，实时写入数据库。
-        否则存入内存后备列表。
+        If SQLite storage is available, write to the database immediately.
+        Otherwise store it in the in-memory fallback list.
         """
-        # 过滤空事件。
+        # Filter out empty events.
         from src.classes.event import is_null_event
         if is_null_event(event):
             return
@@ -100,7 +100,7 @@ class EventManager:
         if self._storage:
             self._storage.add_event(event)
         else:
-            # 内存后备模式。
+            # In-memory fallback mode.
             self._memory_events.append(event)
 
     @staticmethod
@@ -142,37 +142,37 @@ class EventManager:
         return rendered
 
     def get_recent_events(self, limit: int = 100) -> List["Event"]:
-        """获取最近的事件（时间正序）。"""
+        """Get recent events (chronological order)."""
         if self._storage:
             return self._storage.get_recent_events(limit=limit)
         else:
             return self._memory_events[-limit:]
 
     def get_events_by_avatar(self, avatar_id: str, *, limit: int = 50) -> List["Event"]:
-        """获取角色相关的事件（时间正序）。"""
+        """Get events related to an avatar (chronological order)."""
         return self.query_events(EventQuery(avatar_ids=(str(avatar_id),), limit=limit, chronological=True))
 
     def get_events_between(self, avatar_id1: str, avatar_id2: str, *, limit: int = 50) -> List["Event"]:
-        """获取两个角色之间的事件（时间正序）。"""
+        """Get events between two avatars (chronological order)."""
         return self.query_events(EventQuery(avatar_ids=(str(avatar_id1), str(avatar_id2)), limit=limit, chronological=True))
 
     def get_major_events_by_avatar(self, avatar_id: str, *, limit: int = 10) -> List["Event"]:
-        """获取角色的大事（长期记忆，时间正序）。"""
+        """Get an avatar's major events (long-term memory, chronological order)."""
         return self.query_events(EventQuery(avatar_ids=(str(avatar_id),), audience=EventAudience.OBSERVED,
                                             memory_scope=EventMemoryScope.MAJOR, limit=limit, chronological=True))
 
     def get_minor_events_by_avatar(self, avatar_id: str, *, limit: int = 10) -> List["Event"]:
-        """获取角色的小事（短期记忆，时间正序）。"""
+        """Get an avatar's minor events (short-term memory, chronological order)."""
         return self.query_events(EventQuery(avatar_ids=(str(avatar_id),), audience=EventAudience.OBSERVED,
                                             memory_scope=EventMemoryScope.MINOR, limit=limit, chronological=True))
 
     def get_major_events_between(self, avatar_id1: str, avatar_id2: str, *, limit: int = 10) -> List["Event"]:
-        """获取两个角色之间的大事（长期记忆，时间正序）。"""
+        """Get major events between two avatars (long-term memory, chronological order)."""
         return self.query_events(EventQuery(avatar_ids=(str(avatar_id1), str(avatar_id2)),
                                             memory_scope=EventMemoryScope.MAJOR, limit=limit, chronological=True))
 
     def get_minor_events_between(self, avatar_id1: str, avatar_id2: str, *, limit: int = 10) -> List["Event"]:
-        """获取两个角色之间的小事（短期记忆，时间正序）。"""
+        """Get minor events between two avatars (short-term memory, chronological order)."""
         return self.query_events(EventQuery(avatar_ids=(str(avatar_id1), str(avatar_id2)),
                                             memory_scope=EventMemoryScope.MINOR, limit=limit, chronological=True))
 
@@ -212,7 +212,7 @@ class EventManager:
         result = result[:query.limit]
         return EventPage(result, str(start_index + len(result)) if has_more else None)
 
-    # --- 分页查询接口（新增）---
+    # --- Paginated query interface (new) ---
 
     def get_events_paginated(
         self,
@@ -224,20 +224,20 @@ class EventManager:
         limit: int = 100,
     ) -> tuple[List["Event"], Optional[str], bool]:
         """
-        分页查询事件。
+        Query events with pagination.
 
         Args:
-            avatar_id: 按单个角色筛选。
-            avatar_id_pair: Pair 查询（两个角色之间的事件）。
-            sect_id: 按单个宗门筛选。
-            cursor: 分页 cursor，获取该位置之前的事件。
-            limit: 每页数量。
+            avatar_id: filter by a single avatar.
+            avatar_id_pair: pair query (events between two avatars).
+            sect_id: filter by a single sect.
+            cursor: pagination cursor; fetch events before this position.
+            limit: page size.
 
         Returns:
             (events, next_cursor, has_more)
-            - events: 事件列表（时间倒序，最新在前）。
-            - next_cursor: 下一页的 cursor，None 表示没有更多。
-            - has_more: 是否有更多数据。
+            - events: list of events (reverse chronological, newest first).
+            - next_cursor: cursor for the next page; None means no more.
+            - has_more: whether more data exists.
         """
         avatar_ids = avatar_id_pair or ((avatar_id,) if avatar_id else ())
         page = self.query_page(EventQuery(
@@ -249,35 +249,35 @@ class EventManager:
         ))
         return page.events, page.next_cursor, page.next_cursor is not None
 
-    # --- 清理接口 ---
+    # --- Cleanup interface ---
 
     def cleanup(self, keep_major: bool = True, before_month_stamp: Optional[int] = None) -> int:
         """
-        清理事件。
+        Clean up events.
 
         Args:
-            keep_major: 是否保留大事。
-            before_month_stamp: 删除此时间之前的事件。
+            keep_major: whether to keep major events.
+            before_month_stamp: delete events before this time.
 
         Returns:
-            删除的事件数量。
+            Number of deleted events.
         """
         if self._storage:
             return self._storage.cleanup(keep_major=keep_major, before_month_stamp=before_month_stamp)
         else:
-            # 内存模式：简单清空。
+            # In-memory mode: simply clear everything.
             count = len(self._memory_events)
             self._memory_events.clear()
             return count
 
     def count(self) -> int:
-        """获取事件总数。"""
+        """Get the total number of events."""
         if self._storage:
             return self._storage.count()
         else:
             return len(self._memory_events)
 
     def close(self) -> None:
-        """关闭资源。"""
+        """Release resources."""
         if self._storage:
             self._storage.close()

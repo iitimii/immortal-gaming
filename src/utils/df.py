@@ -18,14 +18,14 @@ def load_csv(path: Path) -> List[Dict[str, Any]]:
         return data
 
     headers = [h.strip() for h in lines[0]]
-    # 去除BOM
+    # Strip the BOM
     if headers and headers[0].startswith('\ufeff'):
         headers[0] = headers[0][1:]
 
-    # 如果有第二行（说明行），则从第三行开始读取数据
+    # If there is a second (description) row, data starts from the third row
     start_index = 2 if len(lines) > 1 else 1
     
-    # 预定义的类型转换规则 (部分核心字段)
+    # Predefined type conversion rules (some core fields)
     type_converters = {
         "id": int,
         "weight": float,
@@ -45,16 +45,16 @@ def load_csv(path: Path) -> List[Dict[str, Any]]:
             if h_idx < len(row_values):
                 val = row_values[h_idx].strip()
                 
-                # 统一处理空值
+                # Normalize empty values
                 if not val or val.lower() == 'nan':
                     val = None
                 
-                # 类型转换
+                # Type conversion
                 elif header in type_converters:
                     try:
                         val = type_converters[header](val)
                     except (ValueError, TypeError):
-                        pass # 转换失败保留原字符串
+                        pass # keep the original string if conversion fails
                 
                 row_dict[header] = val
             else:
@@ -93,14 +93,14 @@ def load_csv(path: Path) -> List[Dict[str, Any]]:
 def load_game_configs() -> dict[str, List[Dict[str, Any]]]:
     game_configs = {}
     
-    # 1. 加载共享配置 (static/game_configs/*.csv)
+    # 1. Load shared configs (static/game_configs/*.csv)
     if hasattr(CONFIG.paths, "shared_game_configs") and CONFIG.paths.shared_game_configs.exists():
         for path in CONFIG.paths.shared_game_configs.glob("*.csv"):
             data = load_csv(path)
             game_configs[path.stem] = data
 
-    # 2. 加载本地化配置 (static/locales/{lang}/game_configs/*.csv)
-    # 如果文件名相同，覆盖共享配置
+    # 2. Load localized configs (static/locales/{lang}/game_configs/*.csv)
+    # Files with the same name override the shared config
     if hasattr(CONFIG.paths, "localized_game_configs") and CONFIG.paths.localized_game_configs.exists():
         for path in CONFIG.paths.localized_game_configs.glob("*.csv"):
             data = load_csv(path)
@@ -111,7 +111,7 @@ def load_game_configs() -> dict[str, List[Dict[str, Any]]]:
 game_configs = load_game_configs()
 
 def reload_game_configs():
-    """重新加载所有 CSV 配置"""
+    """Reload all CSV configs."""
     print("[DF] Reloading game configs from csv...")
     new_data = load_game_configs()
     game_configs.clear()
@@ -120,7 +120,7 @@ def reload_game_configs():
 
 
 # =============================================================================
-# 辅助函数：让业务层代码更简洁
+# Helpers to keep business-layer code concise
 # =============================================================================
 
 def get_str(row: Dict[str, Any], key: str, default: str = "") -> str:
@@ -134,7 +134,7 @@ def get_int(row: Dict[str, Any], key: str, default: int = 0) -> int:
     if val is None:
         return default
     try:
-        return int(float(val)) # 处理可能存在的浮点数字符串 "1.0"
+        return int(float(val)) # handle float strings such as "1.0"
     except (ValueError, TypeError):
         return default
 
@@ -155,7 +155,7 @@ def get_bool(row: Dict[str, Any], key: str, default: bool = False) -> bool:
     return s in ('true', '1', 'yes', 'y')
 
 def get_list_int(row: Dict[str, Any], key: str, separator: str = None) -> List[int]:
-    """解析整数列表，如 "1|2|3" """
+    """Parse an integer list, e.g. "1|2|3" """
     if separator is None:
         separator = CONFIG.df.ids_separator
     val = row.get(key)
@@ -172,7 +172,7 @@ def get_list_int(row: Dict[str, Any], key: str, separator: str = None) -> List[i
     return res
 
 def get_list_str(row: Dict[str, Any], key: str, separator: str = None) -> List[str]:
-    """解析字符串列表"""
+    """Parse a string list."""
     if separator is None:
         separator = CONFIG.df.ids_separator
     val = row.get(key)

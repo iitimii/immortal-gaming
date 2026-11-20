@@ -20,14 +20,15 @@ if TYPE_CHECKING:
 
 class SectThinker:
     """
-    宗门周期思考生成器。
+    Sect periodic thinking generator.
 
-    输入：SectDecisionContext + 本轮决策摘要
-    输出：宗门意志口吻的短文本（30~100字）
+    Input: SectDecisionContext + this round's decision summary
+    Output: a short text in the voice of the sect's will (about 20-60 English words)
     """
 
+    # Character limits sized for English prose (the template asks for 20-60 words).
     MIN_LEN = 30
-    MAX_LEN = 100
+    MAX_LEN = 400
 
     @classmethod
     async def think(

@@ -16,8 +16,8 @@ msgid "Mortal"
 msgstr "Mortal"
 
 # Option B
-msgid "Sell new {label}『{new_name}』for spirit stones, keep current status"
-msgstr "Sell new {label}『{new_name}』for spirit stones, keep current status"
+msgid "Sell new {label} '{new_name}' for spirit stones, keep current status"
+msgstr "Sell new {label} '{new_name}' for spirit stones, keep current status"
 
 msgid "core_formation"
 msgstr "Core Formation"

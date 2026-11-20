@@ -1,733 +1,732 @@
 """
-Effects 效果系统
-================
+Effects system
+==============
 
-本文件定义了游戏中所有合法的 effect 字段。
-Effects 通过角色的 avatar.effects 属性合并并生效。
+This file defines every valid effect field in the game.
+Effects are merged and applied through the avatar.effects property.
 
-Effect 来源：
-- 宗门 (sect)
-- 功法 (technique)
-- 灵根 (root)
-- 特质 (persona)
-- 兵器和辅助装备 (weapon, auxiliary)
+Effect sources:
+- Sect (sect)
+- Technique (technique)
+- Spirit root (root)
+- Trait (persona)
+- Weapon and auxiliary equipment (weapon, auxiliary)
 """
 
 # =============================================================================
-# Effect 常量定义
+# Effect constant definitions
 # =============================================================================
 
-# --- 战斗相关 ---
+# --- Combat ---
 EXTRA_BATTLE_STRENGTH_POINTS = "extra_battle_strength_points"
 """
-额外战斗力点数
-类型: int
-结算: src/classes/battle.py
-说明: 直接增加角色的战斗力数值。
-数值参考: 
-  - 微量: 1~2 (相当于提升1-2个小境界)
-  - 中量: 3~5 (相当于提升半个大境界)
-  - 大量: 8+ (相当于提升一个大境界)
+Extra battle strength points
+Type: int
+Applied in: src/classes/battle.py
+Notes: Directly increases the avatar's battle strength.
+Reference values:
+  - Minor: 1~2 (about 1-2 minor stages)
+  - Moderate: 3~5 (about half a major realm)
+  - Major: 8+ (about one major realm)
 """
 
 EXTRA_MAX_HP = "extra_max_hp"
 """
-额外最大生命值
-类型: int
-结算: src/classes/avatar.py (__post_init__)
-说明: 增加角色的最大生命值上限。
-数值参考: 
-  - 微量: 10~30
-  - 中量: 50~100 (练气期基础HP约100)
-  - 大量: 150+
+Extra max HP
+Type: int
+Applied in: src/classes/avatar.py (__post_init__)
+Notes: Raises the avatar's maximum HP.
+Reference values:
+  - Minor: 10~30
+  - Moderate: 50~100 (base HP in Qi Refinement is about 100)
+  - Major: 150+
 """
 
 EXTRA_OBSERVATION_RADIUS = "extra_observation_radius"
 """
-额外观察半径
-类型: int
-结算: src/classes/observe.py
-说明: 增加角色的观察范围（格子数）。
-数值参考: 
-  - 微量: 1
-  - 中量: 2
-  - 大量: 3
+Extra observation radius
+Type: int
+Applied in: src/classes/observe.py
+Notes: Increases the avatar's observation range (in tiles).
+Reference values:
+  - Minor: 1
+  - Moderate: 2
+  - Major: 3
 """
 
 EXTRA_APPEARANCE = "extra_appearance"
 """
-额外颜值
-类型: int
-结算: src/classes/core/avatar/core.py (Avatar.appearance)
-说明: 在角色初始颜值基础上叠加，最终结果会被限制在 1~10。
-数值参考:
-  - 微量: 1
-  - 大量: 2
+Extra appearance
+Type: int
+Applied in: src/classes/core/avatar/core.py (Avatar.appearance)
+Notes: Added on top of the avatar's base appearance; the final result is clamped to 1~10.
+Reference values:
+  - Minor: 1
+  - Major: 2
 """
 
-# --- 修炼相关 (仙道-吐纳) ---
+# --- Cultivation (immortal path - respiration) ---
 EXTRA_RESPIRE_EXP = "extra_respire_exp"
 """
-额外吐纳经验
-类型: int
-结算: src/classes/action/respire.py
-说明: 每次吐纳结算时，额外增加的固定经验值。
-数值参考: 
-  - 微量: 5~10
-  - 中量: 20~50 (基础吐纳约每次100点经验)
-  - 大量: 100+
+Extra respiration exp
+Type: int
+Applied in: src/classes/action/respire.py
+Notes: Fixed extra exp gained each time respiration is settled.
+Reference values:
+  - Minor: 5~10
+  - Moderate: 20~50 (base respiration is about 100 exp per settlement)
+  - Major: 100+
 """
-    
+
 EXTRA_RESPIRE_EXP_MULTIPLIER = "extra_respire_exp_multiplier"
 """
-额外吐纳经验倍率
-类型: float
-结算: src/classes/action/respire.py
-说明: 每次吐纳结算时，额外增加的经验倍率。
-数值参考: 
-  - 微量: 0.1 (+10%)
-  - 中量: 0.5 (+50%)
-  - 大量: 1.0 (+100%)
+Extra respiration exp multiplier
+Type: float
+Applied in: src/classes/action/respire.py
+Notes: Extra exp multiplier applied each time respiration is settled.
+Reference values:
+  - Minor: 0.1 (+10%)
+  - Moderate: 0.5 (+50%)
+  - Major: 1.0 (+100%)
 """
 
 RESPIRE_DURATION_REDUCTION = "respire_duration_reduction"
 """
-吐纳时长缩减
-类型: float
-结算: src/classes/action/respire.py
-说明: 吐纳动作的时长缩减比例。
-数值参考: 
-  - 微量: 0.05~0.1 (缩减5%-10%)
-  - 中量: 0.15 (15%)
-  - 极限: 0.3 (30%)
+Respiration duration reduction
+Type: float
+Applied in: src/classes/action/respire.py
+Notes: Fractional reduction of the respiration action's duration.
+Reference values:
+  - Minor: 0.05~0.1 (5%-10% shorter)
+  - Moderate: 0.15 (15%)
+  - Cap: 0.3 (30%)
 """
 
-# --- 修炼相关 (武道-锻体) ---
+# --- Cultivation (martial path - body tempering) ---
 TEMPER_DURATION_REDUCTION = "temper_duration_reduction"
 """
-锻体时长缩减
-类型: float
-结算: src/classes/action/temper.py
-说明: 锻体动作的时长缩减比例。
-数值参考:
-  - 微量: 0.05~0.1
-  - 中量: 0.15
-  - 极限: 0.3
+Body tempering duration reduction
+Type: float
+Applied in: src/classes/action/temper.py
+Notes: Fractional reduction of the body tempering action's duration.
+Reference values:
+  - Minor: 0.05~0.1
+  - Moderate: 0.15
+  - Cap: 0.3
 """
 
 EXTRA_BREAKTHROUGH_SUCCESS_RATE = "extra_breakthrough_success_rate"
 """
-额外突破成功率
-类型: float
-结算: src/classes/action/breakthrough.py
-说明: 修改突破瓶颈时的成功率。
-数值参考: 
-  - 微量: 0.05 (5%)
-  - 中量: 0.1 (10%)
-  - 大量: 0.3 (30%)
+Extra breakthrough success rate
+Type: float
+Applied in: src/classes/action/breakthrough.py
+Notes: Modifies the success rate when breaking through a bottleneck.
+Reference values:
+  - Minor: 0.05 (5%)
+  - Moderate: 0.1 (10%)
+  - Major: 0.3 (30%)
 """
 
 EXTRA_RETREAT_SUCCESS_RATE = "extra_retreat_success_rate"
 """
-额外闭关成功率
-类型: float
-结算: src/classes/action/retreat.py
-说明: 闭关判定成功率的加成。
-数值参考: 
-  - 微量: 0.05 (5%)
-  - 中量: 0.1 (10%)
-  - 大量: 0.2 (20%)
+Extra secluded cultivation success rate
+Type: float
+Applied in: src/classes/action/retreat.py
+Notes: Bonus to the success check of secluded cultivation.
+Reference values:
+  - Minor: 0.05 (5%)
+  - Moderate: 0.1 (10%)
+  - Major: 0.2 (20%)
 """
 
 EXTRA_REST_EXP = "extra_rest_exp"
 """
-额外休息修为经验
-类型: int
-结算: src/classes/action/rest.py
-说明: 休息动作结算时额外获得的固定修为经验。
+Extra rest cultivation exp
+Type: int
+Applied in: src/classes/action/rest.py
+Notes: Fixed extra cultivation exp gained when the rest action is settled.
 """
 
-# --- 双修相关 ---
+# --- Dual cultivation ---
 EXTRA_DUAL_CULTIVATION_EXP = "extra_dual_cultivation_exp"
 """
-额外双修经验
-类型: int
-结算: src/classes/mutual_action/dual_cultivation.py
-说明: 双修时发起者额外获得的固定经验值。
-数值参考: 
-  - 微量: 10~30
-  - 中量: 50~100 (双修基础收益约300~500)
-  - 大量: 150+
+Extra dual cultivation exp
+Type: int
+Applied in: src/classes/mutual_action/dual_cultivation.py
+Notes: Fixed extra exp gained by the initiator during dual cultivation.
+Reference values:
+  - Minor: 10~30
+  - Moderate: 50~100 (base dual cultivation yield is about 300~500)
+  - Major: 150+
 """
 
-# --- 采集相关 ---
+# --- Gathering ---
 EXTRA_HARVEST_MATERIALS = "extra_harvest_materials"
 """
-额外采集材料数量
-类型: int
-结算: src/classes/action/harvest.py
-说明: 采集植物时额外获得的材料数量。
-数值参考: 
-  - 微量: 1
-  - 中量: 2
-  - 大量: 3
+Extra harvested materials
+Type: int
+Applied in: src/classes/action/harvest.py
+Notes: Extra materials gained when harvesting plants.
+Reference values:
+  - Minor: 1
+  - Moderate: 2
+  - Major: 3
 """
 
 EXTRA_HUNT_MATERIALS = "extra_hunt_materials"
 """
-额外狩猎材料数量
-类型: int
-结算: src/classes/action/hunt.py
-说明: 狩猎动物时额外获得的材料数量。
-数值参考: 
-  - 微量: 1
-  - 中量: 2
-  - 大量: 3
+Extra hunted materials
+Type: int
+Applied in: src/classes/action/hunt.py
+Notes: Extra materials gained when hunting animals.
+Reference values:
+  - Minor: 1
+  - Moderate: 2
+  - Major: 3
 """
 
 EXTRA_MINE_MATERIALS = "extra_mine_materials"
 """
-额外挖矿材料数量
-类型: int
-结算: src/classes/action/mine.py
-说明: 挖矿时额外获得的材料数量。
+Extra mined materials
+Type: int
+Applied in: src/classes/action/mine.py
+Notes: Extra materials gained when mining.
 """
 
 EXTRA_PLANT_INCOME = "extra_plant_income"
 """
-额外种植灵石收益
-类型: int
-结算: src/classes/action/plant.py
-说明: 种植时额外获得的灵石数量。
+Extra planting spirit stone income
+Type: int
+Applied in: src/classes/action/plant.py
+Notes: Extra spirit stones gained when planting.
 """
 
-# --- 移动相关 ---
+# --- Movement ---
 EXTRA_MOVE_STEP = "extra_move_step"
 """
-额外移动步数
-类型: int
-结算: src/classes/action/move.py
-说明: 每次移动时可以多移动的格子数。
-数值参考: 
-  - 中量: 1
-  - 大量: 2
+Extra move steps
+Type: int
+Applied in: src/classes/action/move.py
+Notes: Number of extra tiles that can be moved per move.
+Reference values:
+  - Moderate: 1
+  - Major: 2
 """
 
-# --- 捕捉相关 ---
+# --- Capture ---
 EXTRA_CATCH_SUCCESS_RATE = "extra_catch_success_rate"
 """
-额外捕捉成功率
-类型: float
-结算: src/classes/action/catch.py
-说明: 捕捉灵兽时增加的成功率。
-数值参考: 
-  - 微量: 0.05~0.1 (5%-10%)
-  - 中量: 0.2 (20%)
-  - 大量: 0.3 (30%)
+Extra capture success rate
+Type: float
+Applied in: src/classes/action/catch.py
+Notes: Added success rate when capturing a spirit beast.
+Reference values:
+  - Minor: 0.05~0.1 (5%-10%)
+  - Moderate: 0.2 (20%)
+  - Major: 0.3 (30%)
 """
 
-# --- 逃跑相关 ---
+# --- Escape ---
 EXTRA_ESCAPE_SUCCESS_RATE = "extra_escape_success_rate"
 """
-额外逃跑成功率
-类型: float
-结算: src/classes/battle.py
-说明: 从战斗中逃离的成功率加成。
-数值参考: 
-  - 微量: 0.1
-  - 中量: 0.2
-  - 大量: 0.3~0.5 (配合基础概率几乎必逃)
+Extra escape success rate
+Type: float
+Applied in: src/classes/battle.py
+Notes: Bonus to the success rate of fleeing from battle.
+Reference values:
+  - Minor: 0.1
+  - Moderate: 0.2
+  - Major: 0.3~0.5 (together with the base chance, escape is nearly guaranteed)
 """
 
-# --- 暗杀相关 ---
+# --- Assassination ---
 EXTRA_ASSASSINATE_SUCCESS_RATE = "extra_assassinate_success_rate"
 """
-额外暗杀成功率
-类型: float
-结算: src/classes/battle.py (get_assassination_success_rate)
-说明: 暗杀判定成功率的加成。
-数值参考: 
-  - 微量: 0.05 (5%)
-  - 中量: 0.1 (10%)
-  - 大量: 0.15 (15%)
+Extra assassination success rate
+Type: float
+Applied in: src/classes/battle.py (get_assassination_success_rate)
+Notes: Bonus to the assassination success check.
+Reference values:
+  - Minor: 0.05 (5%)
+  - Moderate: 0.1 (10%)
+  - Major: 0.15 (15%)
 """
 
-# --- 奇遇相关 ---
+# --- Fortune ---
 EXTRA_LUCK = "extra_luck"
 """
-额外气运
-类型: int
-结算: src/classes/effect/luck.py
-说明: 影响奇遇、厄运、秘境、顿悟、突破等“命数”相关收益。
-数值参考:
-  - 普通人: 0
-  - 有福缘: 5~10
-  - 主角模板: 15~25
-  - 倒霉体质: -5~-10
+Extra luck
+Type: int
+Applied in: src/classes/effect/luck.py
+Notes: Affects fate-related outcomes such as fortunes, misfortunes, hidden domains, epiphanies and breakthroughs.
+Reference values:
+  - Ordinary person: 0
+  - Blessed: 5~10
+  - Protagonist template: 15~25
+  - Jinxed: -5~-10
 """
 
 EXTRA_FORTUNE_PROBABILITY = "extra_fortune_probability"
 """
-额外奇遇概率
-类型: float
-结算: src/classes/fortune.py
-说明: 每月触发奇遇的额外概率（绝对值）。
-数值参考: 
-  - 基础概率通常极低 (<0.01)
-  - 微量: 0.001 (0.1%，有)
-  - 中量: 0.002~0.005 (高)
-  - 极高: 0.01 (1%，不少了)
+Extra fortune probability
+Type: float
+Applied in: src/classes/fortune.py
+Notes: Extra (absolute) monthly probability of triggering a fortune.
+Reference values:
+  - The base probability is usually very low (<0.01)
+  - Minor: 0.001 (0.1%, noticeable)
+  - Moderate: 0.002~0.005 (high)
+  - Very high: 0.01 (1%, quite a lot)
 """
 
 EXTRA_MISFORTUNE_PROBABILITY = "extra_misfortune_probability"
 """
-额外霉运概率
-类型: float
-结算: src/classes/misfortune.py
-数值参考: 
-  - 基础概率通常极低 (<0.01)
-  - 微量: 0.001 (0.1%，有)
-  - 中量: 0.002~0.005 (高)
-  - 极高: 0.01 (1%，不少了)
+Extra misfortune probability
+Type: float
+Applied in: src/classes/misfortune.py
+Reference values:
+  - The base probability is usually very low (<0.01)
+  - Minor: 0.001 (0.1%, noticeable)
+  - Moderate: 0.002~0.005 (high)
+  - Very high: 0.01 (1%, quite a lot)
 """
 
 EXTRA_OPPORTUNITY_PROBABILITY = "extra_opportunity_probability"
 """
-额外机缘概率
-类型: float
-结算: src/systems/opportunity/
-说明: 每月触发限时机缘感应的额外概率（绝对值）。
-数值参考:
-  - 基础概率通常极低 (<0.01)
-  - 微量: 0.001 (0.1%，有)
-  - 中量: 0.002~0.005 (高)
-  - 极高: 0.01 (1%，不少了)
+Extra opportunity probability
+Type: float
+Applied in: src/systems/opportunity/
+Notes: Extra (absolute) monthly probability of sensing a time-limited opportunity.
+Reference values:
+  - The base probability is usually very low (<0.01)
+  - Minor: 0.001 (0.1%, noticeable)
+  - Moderate: 0.002~0.005 (high)
+  - Very high: 0.01 (1%, quite a lot)
 """
 
-# --- 铸造相关 ---
+# --- Crafting ---
 EXTRA_CAST_SUCCESS_RATE = "extra_cast_success_rate"
 """
-额外铸造成功率
-类型: float
-结算: src/classes/action/cast.py
-说明: 铸造（Cast）动作的成功率加成。
-数值参考: 
-  - 微量: 0.05 (+5%)
-  - 中量: 0.1 (+10%)
-  - 大量: 0.2+ (+20%)
+Extra forging success rate
+Type: float
+Applied in: src/classes/action/cast.py
+Notes: Success rate bonus for the forging (Cast) action.
+Reference values:
+  - Minor: 0.05 (+5%)
+  - Moderate: 0.1 (+10%)
+  - Major: 0.2+ (+20%)
 """
 
 EXTRA_REFINE_SUCCESS_RATE = "extra_refine_success_rate"
 """
-额外炼丹成功率
-类型: float
-结算: src/classes/action/refine.py
-说明: 炼丹（Refine）动作的成功率加成。
-数值参考: 
-  - 微量: 0.05 (+5%)
-  - 中量: 0.1 (+10%)
-  - 大量: 0.2+ (+20%)
+Extra alchemy success rate
+Type: float
+Applied in: src/classes/action/refine.py
+Notes: Success rate bonus for the alchemy (Refine) action.
+Reference values:
+  - Minor: 0.05 (+5%)
+  - Moderate: 0.1 (+10%)
+  - Major: 0.2+ (+20%)
 """
 
 EXTRA_SECT_MISSION_SUCCESS_RATE = "extra_sect_mission_success_rate"
 """
-额外宗门任务成功率
-类型: float
-结算: src/classes/action/sect_mission.py
-说明: 宗门任务动作的成功率加成。
-数值参考:
-  - 微量: 0.05 (+5%)
-  - 中量: 0.1 (+10%)
-  - 大量: 0.2+ (+20%)
+Extra sect mission success rate
+Type: float
+Applied in: src/classes/action/sect_mission.py
+Notes: Success rate bonus for the sect mission action.
+Reference values:
+  - Minor: 0.05 (+5%)
+  - Moderate: 0.1 (+10%)
+  - Major: 0.2+ (+20%)
 """
 
-# --- 兵器相关 ---
+# --- Weapons ---
 EXTRA_WEAPON_PROFICIENCY_GAIN = "extra_weapon_proficiency_gain"
 """
-额外兵器熟练度增长速度
-类型: float
-结算: src/classes/action/nurture_weapon.py
-说明: 熟练度增长倍率（乘法加成）。
-数值参考: 
-  - 微量: 0.1~0.2 (+10%-20%)
-  - 中量: 0.5 (+50%)
-  - 大量: 1.0 (+100%，翻倍)
+Extra weapon proficiency growth
+Type: float
+Applied in: src/classes/action/nurture_weapon.py
+Notes: Proficiency growth multiplier (multiplicative bonus).
+Reference values:
+  - Minor: 0.1~0.2 (+10%-20%)
+  - Moderate: 0.5 (+50%)
+  - Major: 1.0 (+100%, doubled)
 """
 
 EXTRA_WEAPON_UPGRADE_CHANCE = "extra_weapon_upgrade_chance"
 """
-额外兵器升华概率
-类型: float
-结算: src/classes/action/nurture_weapon.py
-说明: 温养兵器时升华为宝物的概率加成。
-数值参考: 
-  - 基础概率: 0.05 (5%)
-  - 微量: 0.05 (+5%)
-  - 中量: 0.1 (10%)
-  - 大量: 0.15 (15%)
+Extra weapon ascension chance
+Type: float
+Applied in: src/classes/action/nurture_weapon.py
+Notes: Bonus to the chance that a nurtured weapon ascends into a treasure.
+Reference values:
+  - Base chance: 0.05 (5%)
+  - Minor: 0.05 (+5%)
+  - Moderate: 0.1 (10%)
+  - Major: 0.15 (15%)
 """
 
-# --- 生存与恢复相关 ---
+# --- Survival and recovery ---
 EXTRA_MAX_LIFESPAN = "extra_max_lifespan"
 """
-额外最大寿元
-类型: int (年)
-结算: src/classes/age.py
-说明: 增加角色的最大寿命上限。
-数值参考: 
-  - 微量: 5~10
-  - 中量: 20~50
-  - 大量: 100+
+Extra max lifespan
+Type: int (years)
+Applied in: src/classes/age.py
+Notes: Raises the avatar's maximum lifespan.
+Reference values:
+  - Minor: 5~10
+  - Moderate: 20~50
+  - Major: 100+
 """
 
 EXTRA_HP_RECOVERY_RATE = "extra_hp_recovery_rate"
 """
-额外HP恢复速率。同时影响动作SelfHeal和Simulator中的自然回复。
-类型: float
-结算: src/classes/action/self_heal.py
-说明: 疗伤时的HP恢复效率倍率。
-数值参考: 
-  - 微量: 0.1~0.2
-  - 中量: 0.5 (+50%)
-  - 大量: 1.0 (翻倍)
+Extra HP recovery rate. Affects both the SelfHeal action and natural recovery in the Simulator.
+Type: float
+Applied in: src/classes/action/self_heal.py
+Notes: HP recovery efficiency multiplier when healing.
+Reference values:
+  - Minor: 0.1~0.2
+  - Moderate: 0.5 (+50%)
+  - Major: 1.0 (doubled)
 """
 
 EXTRA_REST_HP_RECOVERY_RATE = "extra_rest_hp_recovery_rate"
 """
-额外休息恢复倍率
-类型: float
-结算: src/classes/action/rest.py
-说明: 休息动作恢复生命值时的额外倍率。
+Extra rest recovery multiplier
+Type: float
+Applied in: src/classes/action/rest.py
+Notes: Extra multiplier when the rest action restores HP.
 """
 
 DAMAGE_REDUCTION = "damage_reduction"
 """
-伤害减免
-类型: float
-结算: src/classes/battle.py
-说明: 受到伤害的减免比例（乘法减少）。
-数值参考: 
-  - 微量: 0.05
-  - 中量: 0.1
-  - 坦克: 0.2~0.3 (不建议超过0.3)
+Damage reduction
+Type: float
+Applied in: src/classes/battle.py
+Notes: Fraction of incoming damage that is reduced (multiplicative).
+Reference values:
+  - Minor: 0.05
+  - Moderate: 0.1
+  - Tank: 0.2~0.3 (not recommended above 0.3)
 """
 
 REALM_SUPPRESSION_BONUS = "realm_suppression_bonus"
 """
-境界压制加成
-类型: float
-结算: src/classes/battle.py
-说明: 当境界高于对手时，每级境界差提供的战斗力百分比加成。可以理解为“额外威压”
-数值参考: 
-  - 基础值: 0.0 (无额外加成，仅靠基础属性)
-  - 微量: 0.05 (每级差多10%战斗力)
-  - 中量: 0.1
-  - 大量: 0.15
+Realm suppression bonus
+Type: float
+Applied in: src/classes/battle.py
+Notes: When above the opponent's realm, percentage battle strength bonus per realm of difference. Think of it as "extra pressure".
+Reference values:
+  - Base: 0.0 (no extra bonus, base stats only)
+  - Minor: 0.05 (10% more battle strength per realm of difference)
+  - Moderate: 0.1
+  - Major: 0.15
 """
 
-# --- 经济相关 ---
+# --- Economy ---
 EXTRA_ITEM_SELL_PRICE_MULTIPLIER = "extra_item_sell_price_multiplier"
 """
-额外物品出售价格倍率
-类型: float
-结算: src/classes/action/sold.py
-说明: 出售物品时的价格加成倍率。
-数值参考: 
-  - 微量: 0.1 (+10%)
-  - 中量: 0.2~0.3
-  - 奸商: 0.5
+Extra item sell price multiplier
+Type: float
+Applied in: src/classes/action/sold.py
+Notes: Price bonus multiplier when selling items.
+Reference values:
+  - Minor: 0.1 (+10%)
+  - Moderate: 0.2~0.3
+  - Profiteer: 0.5
 """
 
 SHOP_BUY_PRICE_REDUCTION = "shop_buy_price_reduction"
 """
-商铺购买价格倍率减免
-类型: float
-结算: src/classes/prices.py
-说明: 降低从系统购买物品时的溢价倍率。
-数值参考: 
-  - 微量: 0.1 (倍率-0.1)
-  - 中量: 0.5 (倍率-0.5)
-限制: 最终倍率最低为 1.0
+Shop purchase price multiplier reduction
+Type: float
+Applied in: src/classes/prices.py
+Notes: Lowers the markup multiplier when buying items from the system.
+Reference values:
+  - Minor: 0.1 (multiplier -0.1)
+  - Moderate: 0.5 (multiplier -0.5)
+Limit: the final multiplier is at least 1.0
 """
 
 EXTRA_PLUNDER_MULTIPLIER = "extra_plunder_multiplier"
 """
-额外搜刮收益倍率
-类型: float
-结算: src/classes/action/plunder_people.py
-说明: 搜刮凡人时的收益倍率。
-数值参考: 
-  - 微量: 0.5 
-  - 中量: 1.0
-  - 大量: 2
+Extra plunder yield multiplier
+Type: float
+Applied in: src/classes/action/plunder_people.py
+Notes: Yield multiplier when plundering mortals.
+Reference values:
+  - Minor: 0.5
+  - Moderate: 1.0
+  - Major: 2
 """
 
 EXTRA_EAT_MORTALS_EXP_MULTIPLIER = "extra_eat_mortals_exp_multiplier"
 """
-额外吃凡人修为经验倍率
-类型: float
-结算: src/classes/action/eat_mortals.py
-说明: 妖族吃凡人时获得修为经验的倍率加成。
+Extra mortal-devouring cultivation exp multiplier
+Type: float
+Applied in: src/classes/action/eat_mortals.py
+Notes: Bonus multiplier to cultivation exp gained when a yao devours mortals.
 """
 
 EXTRA_CROSS_RACE_FRIENDLINESS = "extra_cross_race_friendliness"
 """
-跨种族初始好感修正
-类型: int
-结算: src/sim/avatar_init/
-说明: 不同种族角色生成初始关系时的好感修正。
+Cross-race initial friendliness modifier
+Type: int
+Applied in: src/sim/avatar_init/
+Notes: Friendliness modifier when generating initial relations between avatars of different races.
 """
 
-# 秘境相关
+# Hidden domains
 EXTRA_HIDDEN_DOMAIN_DROP_PROB = "extra_hidden_domain_drop_prob"
 """
-额外秘境掉落概率
-类型: float
-结算: src/classes/gathering/hidden_domain.py
-说明: 增加在秘境中获得宝物的概率。
-数值参考:
-  - 微量: 0.05
-  - 中量: 0.1
-  - 大量: 0.2
+Extra hidden domain drop probability
+Type: float
+Applied in: src/classes/gathering/hidden_domain.py
+Notes: Increases the chance of obtaining treasure in a hidden domain.
+Reference values:
+  - Minor: 0.05
+  - Moderate: 0.1
+  - Major: 0.2
 """
 
 EXTRA_HIDDEN_DOMAIN_DANGER_PROB = "extra_hidden_domain_danger_prob"
 """
-额外秘境危险概率
-类型: float
-结算: src/classes/gathering/hidden_domain.py
-说明: 增加（或减少，负值）在秘境中遇到危险的概率。
-数值参考:
-  - 降低危险: -0.1 (降低10%危险率)
-  - 增加危险: 0.1
+Extra hidden domain danger probability
+Type: float
+Applied in: src/classes/gathering/hidden_domain.py
+Notes: Increases (or, if negative, decreases) the chance of encountering danger in a hidden domain.
+Reference values:
+  - Less danger: -0.1 (10% lower danger rate)
+  - More danger: 0.1
 """
 
-# --- 宗门传道相关 ---
+# --- Sect teaching ---
 EXTRA_EPIPHANY_PROBABILITY = "extra_epiphany_probability"
 """
-额外顿悟概率
-类型: float
-结算: src/classes/gathering/sect_teaching.py
-说明: 在宗门传道大会等事件中，直接习得他人功法/经验的额外概率。
-数值参考: 
-  - 微量: 0.05
-  - 中量: 0.1
-  - 天才: 0.2
+Extra epiphany probability
+Type: float
+Applied in: src/classes/gathering/sect_teaching.py
+Notes: Extra chance to directly learn another's technique/experience during events such as the sect teaching assembly.
+Reference values:
+  - Minor: 0.05
+  - Moderate: 0.1
+  - Genius: 0.2
 """
 
-# --- 特殊权限 ---
+# --- Special permissions ---
 LEGAL_ACTIONS = "legal_actions"
 """
-合法动作列表
-类型: list[str]
-结算: 各个 action 的权限检查
-说明: 允许角色执行的特殊动作列表。
-可用值:
-  - "DevourPeople": 吞噬生灵（邪道法宝万魂幡）
-  - "InflictGu": 下蛊（蛊具）
+Legal actions list
+Type: list[str]
+Applied in: permission checks of each action
+Notes: List of special actions the avatar is allowed to perform.
+Allowed values:
+  - "DevourPeople": Devour living beings (evil treasure: Ten Thousand Souls Banner)
+  - "InflictGu": Inflict Gu (Gu tools)
 """
 
-# --- 蛊术相关 ---
+# --- Gu arts ---
 EXTRA_GU_SUCCESS_RATE = "extra_gu_success_rate"
 """
-额外下蛊成功率
-类型: float
-结算: src/systems/gu.py
-说明: 增加施展下蛊动作时的成功率。
-数值参考:
-  - 蛊具小幅: 0.03
-  - 蛊师: 0.10
-  - 蛊仙: 0.18
+Extra Gu infliction success rate
+Type: float
+Applied in: src/systems/gu.py
+Notes: Increases the success rate of the Inflict Gu action.
+Reference values:
+  - Gu tool (small): 0.03
+  - Gu Master: 0.10
+  - Gu Immortal: 0.18
 """
 
 EXTRA_GU_DURATION_MONTHS = "extra_gu_duration_months"
 """
-额外蛊持续月份
-类型: int
-结算: src/systems/gu.py
-说明: 增加成功下蛊后的持续月份。
-数值参考:
-  - 小幅: 3
-  - 蛊师: 6
-  - 蛊仙: 12
+Extra Gu duration (months)
+Type: int
+Applied in: src/systems/gu.py
+Notes: Extends the duration after a successful Gu infliction.
+Reference values:
+  - Small: 3
+  - Gu Master: 6
+  - Gu Immortal: 12
 """
 
 EXTRA_GU_RESISTANCE_RATE = "extra_gu_resistance_rate"
 """
-额外防蛊成功率修正
-类型: float
-结算: src/systems/gu.py
-说明: 降低被下蛊时的成功率。
-数值参考:
-  - 普通防护: 0.08
-  - 明显防护: 0.12
-  - 强防护: 0.18
-  - 顶级防护: 0.20
+Extra Gu resistance modifier
+Type: float
+Applied in: src/systems/gu.py
+Notes: Lowers the success rate of Gu inflicted on the avatar.
+Reference values:
+  - Basic protection: 0.08
+  - Noticeable protection: 0.12
+  - Strong protection: 0.18
+  - Top-tier protection: 0.20
 """
 
-# --- 阵法相关 ---
+# --- Formations ---
 EXTRA_FORMATION_POWER = "extra_formation_power"
 """
-额外阵法强度
-类型: float
-结算: src/systems/formation.py
-说明: 布置阵法时提高最终区域阵法效果。
-数值参考:
-  - 阵师: 0.15
-  - 阵仙: 0.35
+Extra formation power
+Type: float
+Applied in: src/systems/formation.py
+Notes: Increases the final regional formation effect when setting up a formation.
+Reference values:
+  - Formation Master: 0.15
+  - Formation Immortal: 0.35
 """
 
 EXTRA_FORMATION_DURATION_MONTHS = "extra_formation_duration_months"
 """
-额外阵法持续月份
-类型: int
-结算: src/systems/formation.py
-说明: 布置阵法时增加持续时间。
-数值参考:
-  - 阵师: 6
-  - 阵仙: 12
+Extra formation duration (months)
+Type: int
+Applied in: src/systems/formation.py
+Notes: Extends the duration when setting up a formation.
+Reference values:
+  - Formation Master: 6
+  - Formation Immortal: 12
 """
 
 FORMATION_COST_REDUCTION = "formation_cost_reduction"
 """
-布阵灵石消耗降低
-类型: float
-结算: src/systems/formation.py
-说明: 布置阵法时降低灵石消耗。
-数值参考:
-  - 阵师: 0.10
-  - 阵仙: 0.25
+Formation spirit stone cost reduction
+Type: float
+Applied in: src/systems/formation.py
+Notes: Lowers the spirit stone cost of setting up a formation.
+Reference values:
+  - Formation Master: 0.10
+  - Formation Immortal: 0.25
 """
 
 # =============================================================================
-# CSV 配置格式规范
+# CSV configuration format
 # =============================================================================
 
 """
-CSV 中 effects 列的写法（支持宽松JSON格式）:
+How to write the effects column in CSV (relaxed JSON is supported):
 
-基础格式（推荐无引号key）:
+Basic format (unquoted keys recommended):
   {extra_battle_strength_points: 3}
   {extra_battle_strength_points: 2, extra_max_hp: 50}
   {legal_actions: ['DevourPeople']}
 
-条件effect（when字段）:
+Conditional effects (when field):
   [{when: 'avatar.weapon.weapon_type == WeaponType.SWORD', extra_battle_strength_points: 3}]
-  可访问: avatar, WeaponType, EquipmentGrade, Alignment
+  Accessible names: avatar, WeaponType, EquipmentGrade, Alignment
 
-动态值（字符串表达式会被eval）:
+Dynamic values (string expressions are evaluated):
   {extra_battle_strength_points: 'avatar.weapon.special_data.get("souls", 0) * 0.1'}
 
-注意: CSV中包含逗号的effects值需要用双引号包裹，避免被误认为列分隔符
+Note: effects values containing commas must be wrapped in double quotes in CSV so they are not mistaken for column separators
 """
 
 # =============================================================================
-# Effect 合并规则
+# Effect merge rules
 # =============================================================================
 
 """
-Effects 通过 src/classes/effect/process.py 中的 _merge_effects() 函数合并。
+Effects are merged by _merge_effects() in src/classes/effect/process.py.
 
-合并规则:
-1. 列表类型 (如 legal_actions): 取并集（去重）
-2. 数值类型 (如 extra_*): 累加
-3. 其他类型: 后者覆盖前者
-4. 动态表达式 (字符串形式): 在 Avatar.effects property 中 eval 计算
+Merge rules:
+1. List values (e.g. legal_actions): union (deduplicated)
+2. Numeric values (e.g. extra_*): summed
+3. Other values: the latter overrides the former
+4. Dynamic expressions (strings): evaluated in the Avatar.effects property
 
-合并顺序（从低到高优先级）:
-1. 宗门 (sect)
-2. 功法 (technique)
-3. 灵根 (root)
-4. 特质 (persona) - 遍历所有 personas
-5. 兵器和辅助装备 (weapon, auxiliary)
+Merge order (lowest to highest priority):
+1. Sect (sect)
+2. Technique (technique)
+3. Spirit root (root)
+4. Trait (persona) - iterates over all personas
+5. Weapon and auxiliary equipment (weapon, auxiliary)
 
-最终结果通过 Avatar.effects 属性获取（实时计算）。
+The final result is obtained through the Avatar.effects property (computed live).
 """
 
 # =============================================================================
-# 所有合法 Effect 字段清单
+# List of all valid effect fields
 # =============================================================================
 
 ALL_EFFECTS = [
-    # 战斗相关
-    "extra_battle_strength_points",      # int - 额外战斗力
-    "extra_max_hp",                      # int - 额外最大生命值
-    "extra_observation_radius",          # int - 额外观察半径
-    "extra_appearance",                  # int - 额外颜值
-    "damage_reduction",                  # float - 伤害减免
-    "realm_suppression_bonus",           # float - 境界压制加成
-    
-    # 修炼相关
-    "extra_respire_exp",                 # int - 额外吐纳经验
-    "extra_respire_exp_multiplier",      # float - 额外吐纳经验倍率
-    "respire_duration_reduction",        # float - 吐纳时长缩减
-    "temper_duration_reduction",         # float - 锻体时长缩减
-    "extra_breakthrough_success_rate",   # float - 额外突破成功率
-    "extra_retreat_success_rate",        # float - 额外闭关成功率
-    "extra_rest_exp",                    # int - 额外休息修为经验
-    
-    # 双修相关
-    "extra_dual_cultivation_exp",        # int - 额外双修经验
-    
-    # 采集相关
-    "extra_harvest_materials",           # int - 额外采集材料数量
-    "extra_hunt_materials",              # int - 额外狩猎材料数量
-    "extra_mine_materials",               # int - 额外挖矿材料数量
-    "extra_plant_income",                # int - 额外种植灵石收益
-    
-    # 移动相关
-    "extra_move_step",                   # int - 额外移动步数
-    
-    # 捕捉相关
-    "extra_catch_success_rate",          # float - 额外捕捉成功率
-    
-    # 逃跑相关
-    "extra_escape_success_rate",         # float - 额外逃跑成功率
-    
-    # 暗杀相关
-    "extra_assassinate_success_rate",    # float - 额外暗杀成功率
+    # Combat
+    "extra_battle_strength_points",      # int - extra battle strength
+    "extra_max_hp",                      # int - extra max HP
+    "extra_observation_radius",          # int - extra observation radius
+    "extra_appearance",                  # int - extra appearance
+    "damage_reduction",                  # float - damage reduction
+    "realm_suppression_bonus",           # float - realm suppression bonus
 
-    # 奇遇相关
-    "extra_luck",                        # int - 额外气运
-    "extra_fortune_probability",         # float - 额外奇遇概率
-    "extra_misfortune_probability",      # float - 额外霉运概率
-    "extra_opportunity_probability",     # float - 额外机缘概率
-    
-    # 铸造相关
-    "extra_cast_success_rate",           # float - 额外铸造成功率
-    "extra_refine_success_rate",         # float - 额外炼丹成功率
-    "extra_sect_mission_success_rate",   # float - 额外宗门任务成功率
+    # Cultivation
+    "extra_respire_exp",                 # int - extra respiration exp
+    "extra_respire_exp_multiplier",      # float - extra respiration exp multiplier
+    "respire_duration_reduction",        # float - respiration duration reduction
+    "temper_duration_reduction",         # float - body tempering duration reduction
+    "extra_breakthrough_success_rate",   # float - extra breakthrough success rate
+    "extra_retreat_success_rate",        # float - extra secluded cultivation success rate
+    "extra_rest_exp",                    # int - extra rest cultivation exp
 
-    # 兵器相关
-    "extra_weapon_proficiency_gain",     # float - 额外兵器熟练度增长倍率
-    "extra_weapon_upgrade_chance",       # float - 额外兵器升华概率
-    
-    # 生存与恢复相关
-    "extra_max_lifespan",                # int - 额外最大寿元（年）
-    "extra_hp_recovery_rate",            # float - 额外HP恢复速率倍率
-    "extra_rest_hp_recovery_rate",       # float - 额外休息恢复倍率
-    
-    # 经济相关
-    "extra_item_sell_price_multiplier",  # float - 额外物品出售价格倍率
-    "shop_buy_price_reduction",          # float - 商铺购买价格倍率减免
-    "extra_plunder_multiplier",          # float - 额外搜刮收益倍率
-    "extra_eat_mortals_exp_multiplier",  # float - 额外吃凡人修为经验倍率
-    "extra_cross_race_friendliness",     # int - 跨种族初始好感修正
-    "extra_gu_success_rate",             # float - 额外下蛊成功率
-    "extra_gu_duration_months",          # int - 额外蛊持续月份
-    "extra_gu_resistance_rate",          # float - 额外防蛊成功率修正
-    "extra_formation_power",             # float - 额外阵法强度
-    "extra_formation_duration_months",   # int - 额外阵法持续月份
-    "formation_cost_reduction",          # float - 布阵灵石消耗降低
-    
-    # 秘境相关
-    "extra_hidden_domain_drop_prob",     # float - 额外秘境掉落概率
-    "extra_hidden_domain_danger_prob",   # float - 额外秘境危险概率
+    # Dual cultivation
+    "extra_dual_cultivation_exp",        # int - extra dual cultivation exp
 
-    # 宗门传道相关
-    "extra_epiphany_probability",        # float - 额外顿悟概率
+    # Gathering
+    "extra_harvest_materials",           # int - extra harvested materials
+    "extra_hunt_materials",              # int - extra hunted materials
+    "extra_mine_materials",               # int - extra mined materials
+    "extra_plant_income",                # int - extra planting spirit stone income
 
-    # 特殊权限
-    "legal_actions",                     # list[str] - 合法动作列表
+    # Movement
+    "extra_move_step",                   # int - extra move steps
+
+    # Capture
+    "extra_catch_success_rate",          # float - extra capture success rate
+
+    # Escape
+    "extra_escape_success_rate",         # float - extra escape success rate
+
+    # Assassination
+    "extra_assassinate_success_rate",    # float - extra assassination success rate
+
+    # Fortune
+    "extra_luck",                        # int - extra luck
+    "extra_fortune_probability",         # float - extra fortune probability
+    "extra_misfortune_probability",      # float - extra misfortune probability
+    "extra_opportunity_probability",     # float - extra opportunity probability
+
+    # Crafting
+    "extra_cast_success_rate",           # float - extra forging success rate
+    "extra_refine_success_rate",         # float - extra alchemy success rate
+    "extra_sect_mission_success_rate",   # float - extra sect mission success rate
+
+    # Weapons
+    "extra_weapon_proficiency_gain",     # float - extra weapon proficiency growth multiplier
+    "extra_weapon_upgrade_chance",       # float - extra weapon ascension chance
+
+    # Survival and recovery
+    "extra_max_lifespan",                # int - extra max lifespan (years)
+    "extra_hp_recovery_rate",            # float - extra HP recovery rate multiplier
+    "extra_rest_hp_recovery_rate",       # float - extra rest recovery multiplier
+
+    # Economy
+    "extra_item_sell_price_multiplier",  # float - extra item sell price multiplier
+    "shop_buy_price_reduction",          # float - shop purchase price multiplier reduction
+    "extra_plunder_multiplier",          # float - extra plunder yield multiplier
+    "extra_eat_mortals_exp_multiplier",  # float - extra mortal-devouring exp multiplier
+    "extra_cross_race_friendliness",     # int - cross-race initial friendliness modifier
+    "extra_gu_success_rate",             # float - extra Gu infliction success rate
+    "extra_gu_duration_months",          # int - extra Gu duration (months)
+    "extra_gu_resistance_rate",          # float - extra Gu resistance modifier
+    "extra_formation_power",             # float - extra formation power
+    "extra_formation_duration_months",   # int - extra formation duration (months)
+    "formation_cost_reduction",          # float - formation spirit stone cost reduction
+
+    # Hidden domains
+    "extra_hidden_domain_drop_prob",     # float - extra hidden domain drop probability
+    "extra_hidden_domain_danger_prob",   # float - extra hidden domain danger probability
+
+    # Sect teaching
+    "extra_epiphany_probability",        # float - extra epiphany probability
+
+    # Special permissions
+    "legal_actions",                     # list[str] - legal actions list
 ]
-

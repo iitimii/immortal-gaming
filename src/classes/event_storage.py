@@ -1,7 +1,7 @@
 """
-SQLite 事件存储层。
+SQLite event storage layer.
 
-提供事件的持久化存储、分页查询和清理功能。
+Provides persistent storage, paginated queries and cleanup for events.
 """
 from __future__ import annotations
 
@@ -29,64 +29,64 @@ if TYPE_CHECKING:
     from src.classes.event_observation import EventObservation
 
 def _format_time(ts: float) -> str:
-    """将 timestamp float 转换为 SQLite 兼容的 UTC 字符串"""
+    """Convert a timestamp float into a SQLite-compatible UTC string."""
     return datetime.fromtimestamp(ts, timezone.utc).strftime('%Y-%m-%d %H:%M:%S.%f')
 
 def _parse_time(ts_str: str) -> float:
-    """将 SQLite 时间字符串解析为 timestamp float"""
+    """Parse a SQLite time string into a timestamp float."""
     if not ts_str:
         return 0.0
     try:
-        # 尝试带微秒的格式
+        # Try the format with microseconds
         dt = datetime.strptime(ts_str, '%Y-%m-%d %H:%M:%S.%f')
     except ValueError:
         try:
-            # 尝试不带微秒的格式
+            # Try the format without microseconds
             dt = datetime.strptime(ts_str, '%Y-%m-%d %H:%M:%S')
         except ValueError:
             return 0.0
-    # 假设数据库存的是 UTC (naive time string from sqlite usually treated as such)
+    # Assume the database stores UTC (naive time string from sqlite usually treated as such)
     return dt.replace(tzinfo=timezone.utc).timestamp()
 
 class EventStorage:
     """
-    SQLite 事件存储层。
+    SQLite event storage layer.
 
-    提供：
-    - 实时写入事件
-    - 分页查询（cursor-based）
-    - 按角色/角色对查询
-    - 历史清理
+    Provides:
+    - Real-time event writes
+    - Paginated queries (cursor-based)
+    - Queries by avatar / avatar pair
+    - History cleanup
     """
 
     def __init__(self, db_path: Path):
         """
-        初始化数据库连接，创建表（如不存在）。
+        Initialize the database connection and create tables (if missing).
 
         Args:
-            db_path: 数据库文件路径。
+            db_path: database file path.
         """
         self._db_path = db_path
         self._conn: Optional[sqlite3.Connection] = None
-        # 单连接模型下，用可重入锁串行化所有 SQL 操作，避免读写交错污染连接状态。
+        # With a single-connection model, a reentrant lock serializes all SQL operations so interleaved reads/writes can't corrupt connection state.
         self._db_lock = threading.RLock()
         self._logger = get_logger().logger
         self._init_db()
 
     def _init_db(self) -> None:
-        """初始化数据库连接和表结构。"""
+        """Initialize the database connection and schema."""
         try:
             with self._db_lock:
-                # 确保目录存在。
+                # Ensure the directory exists.
                 self._db_path.parent.mkdir(parents=True, exist_ok=True)
 
                 self._conn = sqlite3.connect(str(self._db_path), check_same_thread=False)
                 self._conn.row_factory = sqlite3.Row
 
-                # 启用外键约束。
+                # Enable foreign key constraints.
                 self._conn.execute("PRAGMA foreign_keys = ON")
 
-                # 创建表。
+                # Create tables.
                 self._conn.executescript("""
                     CREATE TABLE IF NOT EXISTS events (
                         id TEXT PRIMARY KEY,
@@ -162,7 +162,7 @@ class EventStorage:
 
     @contextmanager
     def _transaction(self):
-        """事务上下文管理器。"""
+        """Transaction context manager."""
         with self._db_lock:
             try:
                 yield self._conn
@@ -173,15 +173,15 @@ class EventStorage:
 
     def add_event(self, event: "Event") -> bool:
         """
-        写入单个事件。
+        Write a single event.
 
-        失败时记录日志并返回 False，不抛异常。
+        On failure, logs and returns False instead of raising.
 
         Args:
-            event: 要写入的事件对象。
+            event: the event object to write.
 
         Returns:
-            写入是否成功。
+            Whether the write succeeded.
         """
         if self._conn is None:
             self._logger.error("EventStorage not initialized")
@@ -189,7 +189,7 @@ class EventStorage:
 
         try:
             with self._transaction():
-                # 插入事件主表。
+                # Insert into the main events table.
                 self._conn.execute(
                     """
                     INSERT OR IGNORE INTO events (
@@ -211,7 +211,7 @@ class EventStorage:
                     )
                 )
 
-                # 插入关联表。
+                # Insert into the association table.
                 if event.related_avatars:
                     for avatar_id in event.related_avatars:
                         self._conn.execute(
@@ -222,7 +222,7 @@ class EventStorage:
                             (event.id, str(avatar_id))
                         )
                 
-                # 插入宗门关联表。
+                # Insert into the sect association table.
                 if getattr(event, "related_sects", None):
                     for sect_id in event.related_sects:
                         self._conn.execute(
@@ -405,9 +405,9 @@ class EventStorage:
 
     def _parse_cursor(self, cursor: str) -> tuple[int, int]:
         """
-        解析复合 cursor。
+        Parse a composite cursor.
 
-        格式: {month_stamp}_{rowid}
+        Format: {month_stamp}_{rowid}
 
         Returns:
             (month_stamp, rowid)
@@ -418,7 +418,7 @@ class EventStorage:
         return int(parts[0]), int(parts[1])
 
     def _make_cursor(self, month_stamp: int, rowid: int) -> str:
-        """生成复合 cursor。"""
+        """Build a composite cursor."""
         return f"{month_stamp}_{rowid}"
 
     def _query_direct_page(
@@ -431,17 +431,17 @@ class EventStorage:
         limit: int = 100,
     ) -> EventPage["Event"]:
         """
-        分页查询事件。
+        Query events with pagination.
 
         Args:
-            avatar_id: 按单个角色筛选。
-            avatar_id_pair: Pair 查询（两个角色之间的事件）。
-            sect_id: 按单个宗门筛选。
-            cursor: 分页 cursor，获取该位置之前的事件。
-            limit: 每页数量。
+            avatar_id: filter by a single avatar.
+            avatar_id_pair: pair query (events between two avatars).
+            sect_id: filter by a single sect.
+            cursor: pagination cursor; fetch events before this position.
+            limit: page size.
 
         Returns:
-            (events, next_cursor)，next_cursor 为 None 表示没有更多。
+            (events, next_cursor); next_cursor is None when there are no more.
         """
         if self._conn is None:
             return EventPage([])
@@ -450,9 +450,9 @@ class EventStorage:
         params: list = []
         try:
             with self._db_lock:
-                # 构建查询。
+                # Build the query.
                 if avatar_id_pair:
-                    # Pair 查询：两个角色都相关的事件。
+                    # Pair query: events related to both avatars.
                     id1, id2 = avatar_id_pair
                     base_query = """
                         SELECT DISTINCT
@@ -464,7 +464,7 @@ class EventStorage:
                     """
                     params.extend([id1, id2])
                 elif avatar_id:
-                    # 单角色查询。
+                    # Single-avatar query.
                     base_query = """
                         SELECT DISTINCT
                             e.rowid, e.id, e.month_stamp, e.content, e.is_major, e.is_story,
@@ -474,7 +474,7 @@ class EventStorage:
                     """
                     params.append(avatar_id)
                 elif sect_id is not None:
-                    # 宗门查询。
+                    # Sect query.
                     base_query = """
                         SELECT DISTINCT
                             e.rowid, e.id, e.month_stamp, e.content, e.is_major, e.is_story,
@@ -484,7 +484,7 @@ class EventStorage:
                     """
                     params.append(sect_id)
                 else:
-                    # 全部事件。
+                    # All events.
                     base_query = """
                         SELECT
                             rowid, id, month_stamp, content, is_major, is_story,
@@ -492,8 +492,8 @@ class EventStorage:
                         FROM events e
                     """
 
-                # Cursor 条件（获取更旧的事件）。
-                # 使用 rowid 保证同一 month_stamp 内的确定性顺序。
+                # Cursor condition (fetch older events).
+                # Use rowid to guarantee deterministic order within the same month_stamp.
                 where_clauses = []
                 if major_scope == "major":
                     where_clauses.append("e.is_major = TRUE AND e.is_story = FALSE")
@@ -507,28 +507,28 @@ class EventStorage:
                     )
                     params.extend([cursor_month, cursor_month, cursor_rowid])
 
-                # 组装 WHERE。
+                # Assemble WHERE.
                 if where_clauses:
                     base_query += " WHERE " + " AND ".join(where_clauses)
 
-                # 排序和分页（最新的在前，向上加载更旧的）。
-                # 使用 rowid 保证同一 month_stamp 内的插入顺序。
+                # Ordering and pagination (newest first; older ones load upward).
+                # Use rowid to preserve insertion order within the same month_stamp.
                 base_query += " ORDER BY e.month_stamp DESC, e.rowid DESC LIMIT ?"
-                params.append(limit + 1)  # 多取一条判断是否有更多。
+                params.append(limit + 1)  # Fetch one extra to know whether there are more.
 
                 rows = self._conn.execute(base_query, params).fetchall()
 
-                # 判断是否有更多。
+                # Determine whether there are more.
                 has_more = len(rows) > limit
                 if has_more:
                     rows = rows[:limit]
 
-                # 构建事件对象。
+                # Build event objects.
                 events = self._build_events_from_rows(rows)
                 last_rowid = rows[-1]["rowid"] if rows else None
                 last_month_stamp = rows[-1]["month_stamp"] if rows else None
 
-                # 生成 next_cursor。
+                # Build next_cursor.
                 next_cursor = None
                 if has_more and last_rowid is not None:
                     next_cursor = self._make_cursor(last_month_stamp, last_rowid)
@@ -633,43 +633,43 @@ class EventStorage:
 
     def get_events_by_avatar(self, avatar_id: str, limit: int = 50) -> list["Event"]:
         """
-        后端用：获取角色相关事件（供 LLM prompt 使用）。
+        Backend use: get events related to an avatar (for LLM prompts).
 
-        返回最新的 N 条，按时间正序排列。
+        Returns the latest N events in chronological order.
         """
         return self.query_events(EventQuery(avatar_ids=(str(avatar_id),), limit=limit, chronological=True))
 
     def get_events_between(self, id1: str, id2: str, limit: int = 50) -> list["Event"]:
         """
-        后端用：获取两角色之间的事件。
+        Backend use: get events between two avatars.
 
-        返回最新的 N 条，按时间正序排列。
+        Returns the latest N events in chronological order.
         """
         return self.query_events(EventQuery(avatar_ids=(str(id1), str(id2)), limit=limit, chronological=True))
 
     def get_major_events_by_avatar(self, avatar_id: str, limit: int = 10) -> list["Event"]:
-        """获取角色的大事（长期记忆）。"""
+        """Get an avatar's major events (long-term memory)."""
         return self.query_events(EventQuery(
             avatar_ids=(str(avatar_id),), audience=EventAudience.OBSERVED,
             memory_scope=EventMemoryScope.MAJOR, limit=limit, chronological=True,
         ))
 
     def get_minor_events_by_avatar(self, avatar_id: str, limit: int = 10) -> list["Event"]:
-        """获取角色的小事（短期记忆，包括故事）。"""
+        """Get an avatar's minor events (short-term memory, including stories)."""
         return self.query_events(EventQuery(
             avatar_ids=(str(avatar_id),), audience=EventAudience.OBSERVED,
             memory_scope=EventMemoryScope.MINOR, limit=limit, chronological=True,
         ))
 
     def get_major_events_between(self, id1: str, id2: str, limit: int = 10) -> list["Event"]:
-        """获取两个角色之间的大事（长期记忆）。"""
+        """Get major events between two avatars (long-term memory)."""
         return self.query_events(EventQuery(
             avatar_ids=(str(id1), str(id2)), memory_scope=EventMemoryScope.MAJOR,
             limit=limit, chronological=True,
         ))
 
     def get_minor_events_between(self, id1: str, id2: str, limit: int = 10) -> list["Event"]:
-        """获取两个角色之间的小事（短期记忆）。"""
+        """Get minor events between two avatars (short-term memory)."""
         return self.query_events(EventQuery(
             avatar_ids=(str(id1), str(id2)), memory_scope=EventMemoryScope.MINOR,
             limit=limit, chronological=True,
@@ -681,20 +681,20 @@ class EventStorage:
         return list(reversed(events)) if query.chronological else events
 
     def get_recent_events(self, limit: int = 100) -> list["Event"]:
-        """获取最近的事件（供初始状态 API 使用）。"""
+        """Get the most recent events (for the initial state API)."""
         events = self.query_page(EventQuery(limit=limit)).events
-        return list(reversed(events))  # 时间正序。
+        return list(reversed(events))  # Chronological order.
 
     def cleanup(self, keep_major: bool = True, before_month_stamp: Optional[int] = None) -> int:
         """
-        清理事件。
+        Clean up events.
 
         Args:
-            keep_major: 是否保留大事。
-            before_month_stamp: 删除此时间之前的事件。
+            keep_major: whether to keep major events.
+            before_month_stamp: delete events before this time.
 
         Returns:
-            删除的事件数量。
+            Number of deleted events.
         """
         if self._conn is None:
             return 0
@@ -710,7 +710,7 @@ class EventStorage:
                 conditions.append("month_stamp < ?")
                 params.append(before_month_stamp)
 
-            # 如果没有条件且要保留大事，则无需删除任何内容
+            # If there are no conditions and major events are kept, nothing needs to be deleted
             if not conditions and keep_major:
                 return 0
 
@@ -731,7 +731,7 @@ class EventStorage:
             return 0
 
     def count(self) -> int:
-        """获取事件总数。"""
+        """Get the total number of events."""
         if self._conn is None:
             return 0
         try:
@@ -742,7 +742,7 @@ class EventStorage:
             return 0
 
     def close(self) -> None:
-        """关闭数据库连接。"""
+        """Close the database connection."""
         if self._conn:
             try:
                 with self._db_lock:

@@ -8,17 +8,17 @@ from src.classes.environment.tile import TileType, Tile
 from src.classes.core.avatar import Avatar
 from src.systems.cultivation import Realm, CultivationProgress
 
-# --- 禅定 (Meditate) 测试 ---
+# --- Meditate tests ---
 
 def test_meditate_can_start(dummy_avatar):
-    # 1. 默认状态（散修）无法禅定（因为 legal_actions 默认为空，不包含 Meditate）
-    # 注意：根据 meditate.py 的逻辑，必须显式拥有 "Meditate" 权限
+    # 1. By default (rogue cultivator) meditation is unavailable (legal_actions is empty and lacks Meditate)
+    # Note: per meditate.py, the "Meditate" permission must be granted explicitly
     can, reason = Meditate(dummy_avatar, dummy_avatar.world).can_start()
     assert can is False
-    assert "不支持禅定" in reason
+    assert "does not support Zen Meditation" in reason
 
-    # 2. 添加佛门权限
-    # dummy_avatar.effects 是只读属性，需要 mock 一个临时效果
+    # 2. Grant the Buddhist permission
+    # dummy_avatar.effects is read-only, so add a temporary effect
     dummy_avatar.temporary_effects.append({
         "source": "test_buff",
         "effects": {
@@ -31,14 +31,14 @@ def test_meditate_can_start(dummy_avatar):
     can, reason = Meditate(dummy_avatar, dummy_avatar.world).can_start()
     assert can is True
 
-    # 3. 瓶颈状态
-    dummy_avatar.cultivation_progress.level = 30 # 练气圆满瓶颈
+    # 3. Bottleneck state
+    dummy_avatar.cultivation_progress.level = 30 # Qi Refinement peak bottleneck
     can, reason = Meditate(dummy_avatar, dummy_avatar.world).can_start()
     assert can is False
-    assert "瓶颈" in reason
+    assert "bottleneck" in reason
 
 def test_meditate_execution_normal(dummy_avatar):
-    """测试普通禅定（未顿悟）"""
+    """Test a normal meditation (no epiphany)."""
     dummy_avatar.temporary_effects.append({
         "source": "test_buff",
         "effects": {
@@ -50,28 +50,28 @@ def test_meditate_execution_normal(dummy_avatar):
     
     action = Meditate(dummy_avatar, dummy_avatar.world)
     
-    # Mock 随机数使其不触发顿悟 (prob < 0.1, random > 0.1)
+    # Mock the random number so no epiphany triggers (prob < 0.1, random > 0.1)
     # BASE_PROB = 0.1
     random.seed(42) 
-    # random.random() -> 0.639... > 0.1 -> 普通禅定
+    # random.random() -> 0.639... > 0.1 -> normal meditation
     
     initial_exp = dummy_avatar.cultivation_progress.exp
     action._execute()
     
-    # 练气期 multiplier = 1
-    # 普通经验 BASE_EXP = 10
+    # Qi Refinement multiplier = 1
+    # Normal EXP BASE_EXP = 10
     expected_gain = 10 * 1 
     assert dummy_avatar.cultivation_progress.exp == initial_exp + expected_gain
     assert action._last_is_epiphany is False
 
 def test_meditate_execution_epiphany(dummy_avatar):
-    """测试禅定顿悟"""
-    # dummy_avatar.effects 是只读属性，需要 mock 一个临时效果
+    """Test a meditation epiphany."""
+    # dummy_avatar.effects is read-only, so add a temporary effect
     dummy_avatar.temporary_effects.append({
         "source": "test_buff",
         "effects": {
             "legal_actions": ["Meditate"],
-            "extra_meditate_prob": 1.0 # 强制顿悟：增加极大概率
+            "extra_meditate_prob": 1.0 # Force an epiphany with a huge probability
         },
         "start_month": int(dummy_avatar.world.month_stamp),
         "duration": 10
@@ -79,14 +79,14 @@ def test_meditate_execution_epiphany(dummy_avatar):
     
     action = Meditate(dummy_avatar, dummy_avatar.world)
     
-    # Mock add_exp，避免升级消耗导致数值不匹配
+    # Mock add_exp so level-up consumption does not skew the numbers
     dummy_avatar.cultivation_progress.add_exp = MagicMock()
     
     action._execute()
     
-    # 练气期 multiplier = 1 (REALM_RANK.get(Qi_Refinement, 0) + 1 = 1)
-    # 顿悟经验 EPIPHANY_EXP = 1500
-    # 额外加成 multiplier = 0
+    # Qi Refinement multiplier = 1 (REALM_RANK.get(Qi_Refinement, 0) + 1 = 1)
+    # Epiphany EXP EPIPHANY_EXP = 1500
+    # Extra bonus multiplier = 0
     # exp = 1500 * 1 * (1 + 0) = 1500
     expected_gain = 1500 * 1
     
@@ -94,18 +94,18 @@ def test_meditate_execution_epiphany(dummy_avatar):
     assert action._last_is_epiphany is True
 
 def test_meditate_realm_bonus(dummy_avatar):
-    """测试境界加成"""
-    # 提升至筑基期
-    # 注意：直接修改 realm 并不够，因为 REALM_RANK 可能依赖其他
-    # 还要确保 REALM_RANK.get(realm) 正确
+    """Test the realm bonus."""
+    # Raise to Foundation Establishment
+    # Note: changing realm alone may not be enough since REALM_RANK may depend on other state
+    # also make sure REALM_RANK.get(realm) is correct
     dummy_avatar.cultivation_progress.realm = Realm.Foundation_Establishment
-    # 筑基期 rank index = 1 -> multiplier = 2
+    # Foundation Establishment rank index = 1 -> multiplier = 2
     
     dummy_avatar.temporary_effects.append({
         "source": "test_buff",
         "effects": {
             "legal_actions": ["Meditate"],
-            "extra_meditate_prob": -1.0 # 抵消概率，强制普通禅定
+            "extra_meditate_prob": -1.0 # Cancel the probability to force a normal meditation
         },
         "start_month": int(dummy_avatar.world.month_stamp),
         "duration": 10
@@ -121,17 +121,17 @@ def test_meditate_realm_bonus(dummy_avatar):
     # 10 * 2 = 20
     dummy_avatar.cultivation_progress.add_exp.assert_called_with(20)
 
-# --- 教化 (Educate) 测试 ---
+# --- Educate tests ---
 
 def test_educate_can_start(avatar_in_city):
-    # avatar_in_city 已经在 CityRegion
+    # avatar_in_city is already in a CityRegion
     
-    # 1. 无权限
+    # 1. No permission
     can, reason = Educate(avatar_in_city, avatar_in_city.world).can_start()
     assert can is False
-    assert "不支持教化" in reason
+    assert "does not support Confucian Education" in reason
     
-    # 2. 添加儒门权限 (通过 temporary_effects)
+    # 2. Grant the Confucian permission (via temporary_effects)
     avatar_in_city.temporary_effects.append({
         "source": "test_buff",
         "effects": {
@@ -140,21 +140,21 @@ def test_educate_can_start(avatar_in_city):
         "start_month": int(avatar_in_city.world.month_stamp),
         "duration": 10
     })
-    # 强制重算属性
+    # Force attribute recalculation
     avatar_in_city.recalc_effects()
     
     can, reason = Educate(avatar_in_city, avatar_in_city.world).can_start()
     assert can is True
     
-    # 3. 移动到野外 (NormalRegion)
+    # 3. Move to the wilderness (NormalRegion)
     avatar_in_city.tile.region = CultivateRegion(id=99, name="Cave", desc="Cave")
     can, reason = Educate(avatar_in_city, avatar_in_city.world).can_start()
     assert can is False
-    assert "必须在城市" in reason
+    assert "Must be in a City" in reason
 
 def test_educate_execution(avatar_in_city):
-    """测试教化经验计算（半满城市为标准倍率）"""
-    # 同上，使用 temporary_effects
+    """Test Educate EXP calculation (a half-full city gives the standard multiplier)."""
+    # Same as above, using temporary_effects
     avatar_in_city.temporary_effects.append({
         "source": "test_buff",
         "effects": {
@@ -163,7 +163,7 @@ def test_educate_execution(avatar_in_city):
         "start_month": int(avatar_in_city.world.month_stamp),
         "duration": 10
     })
-    # 强制重算属性
+    # Force attribute recalculation
     avatar_in_city.recalc_effects()
     
     region = avatar_in_city.tile.region
@@ -175,25 +175,25 @@ def test_educate_execution(avatar_in_city):
     # Mock add_exp
     avatar_in_city.cultivation_progress.add_exp = MagicMock()
     
-    # 固定随机数防止人口变化干扰（虽然这里主要测经验）
+    # Fix the random number so population changes do not interfere (this mainly tests EXP)
     random.seed(1)
     
     action._execute()
     
-    # 练气期 multiplier = 1
-    # 人口倍率 = 0.5 + 50/100 = 1.0
-    # 基准经验 BASE_EXP_TOTAL = 150
+    # Qi Refinement multiplier = 1
+    # Population multiplier = 0.5 + 50/100 = 1.0
+    # Base EXP BASE_EXP_TOTAL = 150
     # 150 * 1 * 1 = 150
     # avatar_in_city.cultivation_progress.add_exp.assert_called_with(150)
     
     dummy_avatar = avatar_in_city
     dummy_avatar.cultivation_progress.add_exp.assert_called()
     args, _ = dummy_avatar.cultivation_progress.add_exp.call_args
-    # 允许一定的误差，或者先断言调用了
+    # Allow some tolerance, or first assert the call happened
     assert args[0] == 150
 
 def test_educate_population_effect(avatar_in_city):
-    """测试教化对人口的影响"""
+    """Test the effect of Educate on population."""
     avatar_in_city.temporary_effects.append({
         "source": "test_buff",
         "effects": {
@@ -202,7 +202,7 @@ def test_educate_population_effect(avatar_in_city):
         "start_month": int(avatar_in_city.world.month_stamp),
         "duration": 10
     })
-    # 强制重算属性
+    # Force attribute recalculation
     avatar_in_city.recalc_effects()
     
     region = avatar_in_city.tile.region
@@ -211,17 +211,17 @@ def test_educate_population_effect(avatar_in_city):
     
     action = Educate(avatar_in_city, avatar_in_city.world)
     
-    # 强制触发
-    # 使用 patch.object 覆盖 action._execute 内部的 random.random
-    # 注意：由于是在 action 模块内部 import random，通常需要 patch 'src.classes.action.educate.random.random'
-    # 或者直接 patch 'random.random' 如果是直接 import random
+    # Force a trigger
+    # Use patch to override random.random inside action._execute
+    # Note: since the action module imports random itself, usually patch 'src.classes.action.educate.random.random'
+    # or patch 'random.random' directly when it does a plain import random
     with patch('src.classes.action.educate.random.random', return_value=0.1):
         action._execute()
         
     assert region.population == pytest.approx(50.2)
 
 def test_educate_high_population_bonus(avatar_in_city):
-    """测试高人口城市的教化加成"""
+    """Test the Educate bonus in a high-population city."""
     avatar_in_city.temporary_effects.append({
         "source": "test_buff",
         "effects": {
@@ -230,7 +230,7 @@ def test_educate_high_population_bonus(avatar_in_city):
         "start_month": int(avatar_in_city.world.month_stamp),
         "duration": 10
     })
-    # 强制重算属性
+    # Force attribute recalculation
     avatar_in_city.recalc_effects()
     
     region = avatar_in_city.tile.region
@@ -244,7 +244,7 @@ def test_educate_high_population_bonus(avatar_in_city):
     
     action._execute()
     
-    # 满员城市倍率 = 0.5 + 100/100 = 1.5
+    # Full city multiplier = 0.5 + 100/100 = 1.5
     expected = 150 * 1 * 1.5
     # avatar_in_city.cultivation_progress.add_exp.assert_called_with(int(expected))
     

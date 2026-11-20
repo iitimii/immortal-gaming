@@ -1,5 +1,5 @@
 """
-两个角色之间的关系操作函数
+Relation operation functions between two avatars
 """
 from __future__ import annotations
 

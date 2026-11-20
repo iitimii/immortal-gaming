@@ -10,6 +10,7 @@ from src.classes.world_lore_snapshot import build_world_lore_snapshot
 from src.config import get_settings_service
 from src.run.map_snapshot import serialize_map_snapshot
 from src.systems.opportunity import serialize_opportunities
+from src.systems.time import get_date_str
 from src.systems.world_secret import serialize_world_secret
 
 from .base import SaveContext
@@ -42,7 +43,7 @@ class MetaSection:
         return {
             "version": app_config.CONFIG.meta.version,
             "save_time": datetime.now().isoformat(),
-            "game_time": f"{world.month_stamp.get_year()}年{world.month_stamp.get_month().value}月",
+            "game_time": get_date_str(int(world.month_stamp)),
             "language": snapshot.get("content_locale", str(language_manager)),
             "events_db": str(context.events_db_path.name),
             "event_count": world.event_manager.count(),

@@ -25,7 +25,7 @@ except ImportError:
 @pytest.fixture
 def temp_lang_dir(tmp_path):
     """Create a temporary language directory structure."""
-    lang_dir = tmp_path / "zh-CN"
+    lang_dir = tmp_path / "en-US"
     lang_dir.mkdir()
     return lang_dir
 
@@ -49,8 +49,8 @@ def test_compile_domain_modules_merge(temp_lang_dir):
     modules_dir = temp_lang_dir / "game_configs_modules"
     modules_dir.mkdir()
     
-    create_po_file(modules_dir / "part1.po", {"Item A": "物品A"})
-    create_po_file(modules_dir / "part2.po", {"Item B": "物品B"})
+    create_po_file(modules_dir / "part1.po", {"Item A": "Item A (translated)"})
+    create_po_file(modules_dir / "part2.po", {"Item B": "Item B (translated)"})
     
     # Run merge
     result = compile_domain_modules(temp_lang_dir, "game_configs_modules", "game_configs")
@@ -64,9 +64,9 @@ def test_compile_domain_modules_merge(temp_lang_dir):
     po = polib.pofile(str(target_po))
     entries = {e.msgid: e.msgstr for e in po}
     assert "Item A" in entries
-    assert entries["Item A"] == "物品A"
+    assert entries["Item A"] == "Item A (translated)"
     assert "Item B" in entries
-    assert entries["Item B"] == "物品B"
+    assert entries["Item B"] == "Item B (translated)"
     
     # Verify MO output
     target_mo = temp_lang_dir / "LC_MESSAGES" / "game_configs.mo"
@@ -78,7 +78,7 @@ def test_compile_domain_modules_no_modules(temp_lang_dir):
     lc_messages_dir.mkdir()
     
     # Create an existing target PO
-    create_po_file(lc_messages_dir / "game_configs.po", {"Legacy Item": "旧物品"})
+    create_po_file(lc_messages_dir / "game_configs.po", {"Legacy Item": "Legacy item (translated)"})
     
     # Run merge (pointing to non-existent modules dir)
     result = compile_domain_modules(temp_lang_dir, "non_existent_modules", "game_configs")
@@ -94,17 +94,17 @@ def test_process_language_integration(temp_lang_dir):
     # Setup modules for messages
     modules_dir = temp_lang_dir / "modules"
     modules_dir.mkdir()
-    create_po_file(modules_dir / "battle.po", {"Battle Start": "战斗开始"})
+    create_po_file(modules_dir / "battle.po", {"Battle Start": "Battle begins"})
     
     # Setup modules for game_configs
     configs_dir = temp_lang_dir / "game_configs_modules"
     configs_dir.mkdir()
-    create_po_file(configs_dir / "items.po", {"Sword": "剑"})
+    create_po_file(configs_dir / "items.po", {"Sword": "Blade"})
     
     # Setup standalone PO
     lc_messages_dir = temp_lang_dir / "LC_MESSAGES"
     lc_messages_dir.mkdir(parents=True, exist_ok=True)
-    create_po_file(lc_messages_dir / "standalone.po", {"Hello": "你好"})
+    create_po_file(lc_messages_dir / "standalone.po", {"Hello": "Hi there"})
     
     # Run process
     result = process_language(temp_lang_dir)

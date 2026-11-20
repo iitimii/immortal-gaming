@@ -14,10 +14,10 @@ def _parse_gender(value: Union[str, Gender, None]) -> Optional[Gender]:
         return None
     if isinstance(value, Gender):
         return value
-    s = str(value).strip()
-    if s == "男":
+    s = str(value).strip().lower()
+    if s in ("male", "m"):
         return Gender.MALE
-    if s == "女":
+    if s in ("female", "f"):
         return Gender.FEMALE
     return None
 
@@ -27,7 +27,7 @@ def _parse_sect(value: Union[str, int, Sect, None]) -> Optional[Sect]:
         return None
     if isinstance(value, Sect):
         return value
-    # 纯数字视为 id
+    # Pure digits are treated as an id
     if isinstance(value, int):
         return sects_by_id.get(value)
     s = str(value).strip()
@@ -98,22 +98,22 @@ def _parse_personas(value: Union[str, int, Persona, List[Union[str, int, Persona
     if value is None:
         return None
 
-    # 统一展开为列表，兼容 OmegaConf 的 ListConfig
+    # Normalize into a list; compatible with OmegaConf's ListConfig
     def _as_list(v: object) -> List[object]:
-        # Persona 自身视为标量
+        # A Persona itself is treated as a scalar
         if isinstance(v, Persona):
             return [v]
-        # 原生序列
+        # Native sequence
         if isinstance(v, (list, tuple, set)):
             return list(v)
-        # 兼容 OmegaConf.ListConfig（若存在）
+        # Compatible with OmegaConf.ListConfig (if present)
         try:
             from omegaconf import ListConfig  # type: ignore
             if isinstance(v, ListConfig):
                 return list(v)
         except Exception:
             pass
-        # 其它可迭代但非字符串：尽量展开
+        # Other non-string iterables: expand where possible
         if hasattr(v, "__iter__") and not isinstance(v, (str, bytes)):
             try:
                 return list(v)  # type: ignore
@@ -144,7 +144,7 @@ def _parse_personas(value: Union[str, int, Persona, List[Union[str, int, Persona
             p = personas_by_name.get(s)
             if p is not None:
                 result.append(p)
-    # 去重，保持顺序
+    # Deduplicate while preserving order
     seen: set[int] = set()
     unique: List[Persona] = []
     for p in result:
@@ -174,9 +174,9 @@ def create_avatar_from_request(
     relations: Optional[List[Dict[str, str]]] = None,
 ) -> Avatar:
     """
-    供前端使用的角色创建入口：支持字符串/ID 参数，且默认不生成亲友关系。
+    Avatar creation entry point for the frontend: accepts string/ID params and by default generates no family/friend relations.
     """
-    # 年龄（先取整数年龄，规划阶段只用到 age.age，不依赖 realm）
+    # Age (take an integer age first; planning only uses age.age and does not depend on realm)
     if isinstance(age, Age):
         age_years = age.age
     elif isinstance(age, int):
@@ -196,29 +196,29 @@ def create_avatar_from_request(
     if requested_race is not None:
         plan.race = requested_race
 
-    # 覆盖：性别
+    # Override: gender
     g = _parse_gender(gender)
     if g is not None:
         plan.gender = g
 
-    # 覆盖：宗门
+    # Override: sect
     s = _parse_sect(sect)
     if s is not None:
         plan.sect = s if s.accepts_race(plan.race) else None
 
-    # 覆盖：等级
+    # Override: level
     if isinstance(level, int):
         plan.level = max(LEVEL_MIN, min(LEVEL_MAX, level))
 
-    # 覆盖：坐标
+    # Override: coordinates
     if isinstance(pos, tuple) and len(pos) == 2:
         x, y = int(pos[0]), int(pos[1])
-        # 夹在地图范围内
+        # Clamp to map bounds
         x = max(0, min(world.map.width - 1, x))
         y = max(0, min(world.map.height - 1, y))
         plan.pos_x, plan.pos_y = x, y
 
-    # 根据最终等级推导境界，再构造 Age
+    # Derive realm from the final level, then build Age
     final_realm = CultivationProgress(plan.level).realm
     max_age = get_manual_avatar_age_max(final_realm)
     if age_years > max_age:
@@ -237,7 +237,7 @@ def create_avatar_from_request(
         ),
     )
 
-    # 生成
+    # Generate
     overrides: Dict[str, object] = {}
     tech_obj = _parse_technique(technique)
     if tech_obj is not None:
@@ -273,13 +273,13 @@ def create_avatar_from_request(
             if not target_id or not rel_type:
                 continue
 
-            # 尝试转为字符串ID
+            # Try converting to a string ID
             t_id_str = str(target_id)
             target = world.avatar_manager.avatars.get(t_id_str)
             if not target:
                 continue
 
-            # 解析关系
+            # Parse the relation
             rel_enum = None
             for r in Relation:
                 if r.value == rel_type:

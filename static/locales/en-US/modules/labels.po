@@ -24,5 +24,5 @@ msgid "weapon"
 msgstr "weapon"
 
 # Labels
-msgid "【Auction Items Information】"
-msgstr "【Auction Items Information】"
+msgid "[Auction Items Information]"
+msgstr "[Auction Items Information]"

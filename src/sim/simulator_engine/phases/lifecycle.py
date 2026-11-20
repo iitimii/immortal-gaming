@@ -14,8 +14,8 @@ from src.sim.avatar_awake import process_awakening
 
 
 def phase_resolve_death(world, living_avatars: list[Avatar]) -> list[Event]:
-    # 死亡结算除了生成死亡事件，还要同步维护 living_avatars。
-    # 后续 phase 会继续复用这份列表，因此这里必须把死者原地移除。
+    # Besides generating death events, death settlement must also maintain living_avatars.
+    # Later phases reuse this list, so the dead must be removed from it in place here.
     events: list[Event] = []
     dead_avatars: list[Avatar] = []
 
@@ -56,7 +56,7 @@ def phase_resolve_death(world, living_avatars: list[Avatar]) -> list[Event]:
             handle_death(world, avatar, death_reason)
             dead_avatars.append(avatar)
 
-    # 统一在循环后移除，避免边遍历边修改列表。
+    # Remove after the loop to avoid mutating the list while iterating.
     for dead in dead_avatars:
         if dead in living_avatars:
             living_avatars.remove(dead)
@@ -69,10 +69,10 @@ def phase_update_age_and_birth(world, living_avatars: list[Avatar]) -> list[Even
     for avatar in living_avatars:
         avatar.update_age(world.month_stamp)
 
-    # 凡人管理器和修真者主列表是两套管理链路，这里顺手清一次凡人侧的死者。
+    # The mortal manager and the cultivator list are separate pipelines; clean up dead mortals here as well.
     world.mortal_manager.cleanup_dead_mortals(world.month_stamp)
 
-    # 先处理觉醒，再处理出生，保持与旧模拟器相同的时序。
+    # Handle awakening first, then births, keeping the same ordering as the old simulator.
     awakening_events = process_awakening(world)
     if awakening_events:
         events.extend(awakening_events)
@@ -85,7 +85,7 @@ def phase_update_age_and_birth(world, living_avatars: list[Avatar]) -> list[Even
 
 
 async def phase_backstory_generation(living_avatars: list[Avatar]) -> None:
-    # 身世只生成一次；已有 backstory 的角色直接跳过。
+    # Backstory is generated only once; avatars that already have one are skipped.
     avatars_to_process = [avatar for avatar in living_avatars if avatar.backstory is None]
     if not avatars_to_process:
         return
@@ -94,13 +94,13 @@ async def phase_backstory_generation(living_avatars: list[Avatar]) -> None:
 
 
 async def phase_nickname_generation(living_avatars: list[Avatar]) -> list[Event]:
-    # 外号生成允许全量并发，结果里只有真正产出了事件的角色会留下记录。
+    # Nickname generation may run fully concurrently; only avatars that actually produced an event leave a record.
     results = await asyncio.gather(*[process_avatar_nickname(avatar) for avatar in living_avatars])
     return [event for event in results if event]
 
 
 async def phase_long_term_objective_thinking(living_avatars: list[Avatar]) -> list[Event]:
-    # 长期目标思考是月度例行更新，不要求角色处于空闲状态。
+    # Long-term objective thinking is a routine monthly update and does not require the avatar to be idle.
     results = await asyncio.gather(
         *[process_avatar_long_term_objective(avatar) for avatar in living_avatars]
     )

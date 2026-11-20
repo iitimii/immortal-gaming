@@ -33,7 +33,7 @@ from src.utils.born_region import get_born_region_id
 from src.classes.race import Race, get_race, roll_avatar_race
 
 
-# —— 参数常量（便于调参）——
+# -- Parameter constants (easy to tune) --
 SECT_MEMBER_RATIO: float = 2 / 3
 
 AGE_MIN: int = 16
@@ -41,37 +41,37 @@ AGE_MAX: int = 150
 LEVEL_MIN: int = 0
 LEVEL_MAX: int = 120
 
-FAMILY_PAIR_CAP_DIV: int = 5            # 家庭上限：n // 5
-FAMILY_TRIGGER_PROB: float = 0.45       # 生成家庭对概率
-FATHER_CHILD_PROB: float = 0.60         # 家庭为父子（同姓、父为男）的概率；否则母子（异姓、母为女）
-FAMILY_CHILDREN_MAX: int = 3            # 单个小家庭最多额外生成的子女人数
-FAMILY_SAME_SECT_CAP: int = 2           # 同一小家庭落在同一宗门的人数上限
+FAMILY_PAIR_CAP_DIV: int = 5            # Family cap: n // 5
+FAMILY_TRIGGER_PROB: float = 0.45       # Probability of generating a family pair
+FATHER_CHILD_PROB: float = 0.60         # Probability the family is father-child (same surname, male parent); otherwise mother-child (different surname, female parent)
+FAMILY_CHILDREN_MAX: int = 3            # Max extra children generated for a single small family
+FAMILY_SAME_SECT_CAP: int = 2           # Max members of one small family placed in the same sect
 FAMILY_PARENT_SECT_FOLLOW_PROB: float = 0.50
 FAMILY_OTHER_SECT_PROB: float = 0.30
 
-LOVERS_PAIR_CAP_DIV: int = 5            # 道侣两两预算：n // 5
-LOVERS_TRIGGER_PROB: float = 0.32       # 生成一对道侣的概率（强制异性）
+LOVERS_PAIR_CAP_DIV: int = 5            # Dao partner pair budget: n // 5
+LOVERS_TRIGGER_PROB: float = 0.32       # Probability of generating a Dao partner pair (opposite sex enforced)
 
-MASTER_PAIR_PROB: float = 0.40          # 同宗门内生成一对师徒的概率
+MASTER_PAIR_PROB: float = 0.40          # Probability of generating a master-disciple pair within a sect
 
 INITIAL_FRIENDLINESS_PAIR_CAP_DIV: int = 4
 
-PARENT_MIN_DIFF: int = 16               # 父母与子女最小年龄差
-PARENT_MAX_DIFF: int = 80               # 父母与子女最大年龄差（用于生成目标差值）
-PARENT_AGE_CAP: int = 120               # 父母年龄上限（修仙世界放宽）
+PARENT_MIN_DIFF: int = 16               # Minimum age gap between parent and child
+PARENT_MAX_DIFF: int = 80               # Maximum age gap between parent and child (used to generate the target gap)
+PARENT_AGE_CAP: int = 120               # Parent age cap (relaxed for a cultivation world)
 
-MASTER_LEVEL_MIN_DIFF: int = 20         # 师傅与徒弟最小等级差
-MASTER_LEVEL_EXTRA_MAX: int = 10        # 在最小等级差基础上的额外浮动
+MASTER_LEVEL_MIN_DIFF: int = 20         # Minimum level gap between master and disciple
+MASTER_LEVEL_EXTRA_MAX: int = 10        # Extra random range on top of the minimum level gap
 
-# 父母-子女等级差（修仙世界中通常父母更强）
-PARENT_LEVEL_MIN_DIFF: int = 10         # 父母与子女最小等级差
-PARENT_LEVEL_EXTRA_MAX: int = 10        # 在最小等级差基础上的额外浮动
+# Parent-child level gap (in a cultivation world parents are usually stronger)
+PARENT_LEVEL_MIN_DIFF: int = 10         # Minimum level gap between parent and child
+PARENT_LEVEL_EXTRA_MAX: int = 10        # Extra random range on top of the minimum level gap
 
-# —— 新凡人（单个）生成相关概率与范围 ——
-NEW_MORTAL_PARENT_PROB: float = 0.30    # 有概率是某个既有角色的子女
-NEW_MORTAL_SECT_PROB: float = 0.50      # 有概率成为某个“已有宗门”的弟子
-NEW_MORTAL_MASTER_PROB: float = 0.40    # 若成为宗门弟子，有概率拜该宗门现有人物为师
-NEW_MORTAL_LEVEL_MAX: int = 40          # 新凡人默认偏低等级上限
+# -- Probabilities and ranges for generating a single new mortal --
+NEW_MORTAL_PARENT_PROB: float = 0.30    # Chance of being the child of an existing avatar
+NEW_MORTAL_SECT_PROB: float = 0.50      # Chance of becoming a disciple of an existing sect
+NEW_MORTAL_MASTER_PROB: float = 0.40    # If a sect disciple, chance of taking an existing sect member as master
+NEW_MORTAL_LEVEL_MAX: int = 40          # Default (low) level cap for new mortals
 
 INITIAL_AGE_MAX_BY_REALM: dict[Realm, int] = {
     Realm.Qi_Refinement: 70,
@@ -394,16 +394,16 @@ def random_gender() -> Gender:
 
 class EquipmentAllocator:
     """
-    负责所有初始装备分配逻辑，提供兵器与辅助装备的统一接口。
-    （仅用于世界生成或完整角色生成，觉醒逻辑使用简化配置）
+    Handles all initial equipment assignment, providing a unified interface for weapons and auxiliary equipment.
+    (Only used for world generation or full avatar generation; awakening uses a simplified setup)
     """
 
     @staticmethod
     def assign_weapon(avatar: Avatar) -> None:
         """
-        初始兵器逻辑：
-        - 80% 继承宗门偏好兵器类型，否则完全随机
-        - 根据境界随机生成一把兵器
+        Initial weapon logic:
+        - 80% inherit the sect's preferred weapon type, otherwise fully random
+        - Randomly generate a weapon based on realm
         """
         from src.classes.items.weapon import get_random_weapon_by_realm
         from src.classes.weapon_type import WeaponType
@@ -421,8 +421,8 @@ class EquipmentAllocator:
     @staticmethod
     def assign_auxiliary(avatar: Avatar) -> None:
         """
-        初始辅助装备逻辑：
-        - 根据境界随机生成一件辅助装备
+        Initial auxiliary equipment logic:
+        - Randomly generate an auxiliary item based on realm
         """
         from src.classes.items.auxiliary import get_random_auxiliary_by_realm
         

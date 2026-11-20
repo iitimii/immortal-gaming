@@ -22,7 +22,7 @@ from src.utils.id_generator import get_avatar_id
 def _make_avatar(base_world) -> Avatar:
     avatar = Avatar(
         world=base_world,
-        name="仕官测试",
+        name="OfficialTester",
         id=get_avatar_id(),
         birth_month_stamp=create_month_stamp(Year(2000), Month.JANUARY),
         age=Age(20, Realm.Qi_Refinement, innate_max_lifespan=80),
@@ -47,9 +47,9 @@ async def test_govern_finish_grants_reputation_salary_and_promotion(avatar_in_ci
     avatar_in_city.court_reputation = 70
     base_world.dynasty = Dynasty(
         id=1,
-        name="秦",
+        name="Qin",
         desc="",
-        style_tag="尚法重军",
+        style_tag="dynasty_style_law_and_arms",
         official_preference_type="alignment",
         official_preference_value="RIGHTEOUS",
     )
@@ -64,20 +64,20 @@ async def test_govern_finish_grants_reputation_salary_and_promotion(avatar_in_ci
         start_event = action.start()
         finish_events = await action.finish()
 
-    assert "理政" in start_event.content
+    assert "begins governing" in start_event.content
     assert avatar_in_city.court_reputation == 84
     assert getattr(avatar_in_city.magic_stone, "value", avatar_in_city.magic_stone) == 1040
     assert avatar_in_city.official_rank == OFFICIAL_COUNTY
     assert avatar_in_city.last_governance_month == int(base_world.month_stamp)
     assert avatar_in_city.effects.get("extra_luck", 0) == 2
-    assert any("由无品升为县令" in event.content for event in finish_events)
+    assert any("promoted from Unranked to County Magistrate" in event.content for event in finish_events)
 
 
 def test_govern_requires_city(dummy_avatar, base_world):
     action = Govern(dummy_avatar, base_world)
     can_start, reason = action.can_start()
     assert can_start is False
-    assert "City" in reason or "城市" in reason
+    assert "City" in reason or "city" in reason
 
 
 def test_phase_update_official_system_decays_and_demotes(dummy_avatar, base_world):
@@ -92,7 +92,7 @@ def test_phase_update_official_system_decays_and_demotes(dummy_avatar, base_worl
     assert dummy_avatar.official_rank == OFFICIAL_NONE
     assert dummy_avatar.effects.get("extra_luck", 0) == 0
     assert len(events) == 1
-    assert "降为无品" in events[0].content
+    assert "falling from County Magistrate to Unranked" in events[0].content
 
 
 def test_save_and_load_preserves_official_fields(base_world, tmp_path):

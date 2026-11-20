@@ -93,7 +93,7 @@ const {
       </div>
     </div>
 
-    <!-- Host (洞府主人) -->
+    <!-- Host (cave dwelling owner) -->
     <div class="section" v-if="data.type === 'cultivate'">
       <div class="section-title">{{ t('game.info_panel.region.sections.host') }}</div>
       <RelationRow 

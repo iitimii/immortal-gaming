@@ -74,7 +74,7 @@ from src.config import RunConfig
 
 def set_runtime_run_config(
     *,
-    content_locale: str = "zh-CN",
+    content_locale: str = "en-US",
     init_npc_num: int = 0,
     sect_num: int = 0,
     npc_awakening_rate_per_month: float = 0.01,
@@ -481,7 +481,7 @@ class TestInitGameAsyncWithSects:
 
     @pytest.mark.asyncio
     async def test_init_sets_world_existed_sects(self, reset_game_instance, temp_saves_dir, mock_llm_managers):
-        """新开档时 world.existed_sects 必须被设置，否则每年一月宗门结算不会产生事件。"""
+        """A new game must set world.existed_sects, otherwise the yearly January sect settlement produces no events."""
         mock_map = MagicMock()
         mock_world = MagicMock()
         mock_world.avatar_manager.avatars = {}

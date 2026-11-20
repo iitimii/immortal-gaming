@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import random
+import re
 from typing import Any
 
 from src.classes.core.avatar import Avatar
@@ -16,27 +17,46 @@ from src.utils.llm.client import call_llm_with_task_name
 FATE_REVELATION_EVENT_TYPE = "fate_revelation"
 FATE_REVELATION_TEMPLATE_NAME = "fate_revelation.txt"
 
+# Explanatory, predictive or mechanical wording that an oracle must not contain.
+# Matched case-insensitively on whole words / phrases.
 _BANNED_ORACLE_FRAGMENTS = (
-    "预示",
-    "意味着",
-    "代表",
-    "说明",
-    "将会",
-    "必将",
-    "注定",
-    "系统",
-    "属性",
-    "概率",
-    "奖励",
-    "突破境界",
-    "成仙",
-    "飞升",
-    "称帝",
-    "必死",
-    "复仇成功",
+    "foretell",
+    "foretells",
+    "portends",
+    "means",
+    "signifies",
+    "represents",
+    "indicates",
+    "will",
+    "shall",
+    "destined",
+    "system",
+    "attribute",
+    "attributes",
+    "probability",
+    "reward",
+    "rewards",
+    "break through",
+    "breakthrough",
+    "become immortal",
+    "immortality",
+    "ascend",
+    "ascends",
+    "ascension",
+    "emperor",
+    "doomed to die",
+    "certain death",
+    "revenge fulfilled",
+    "avenged",
+)
+_BANNED_ORACLE_PATTERN = re.compile(
+    r"\b(?:" + "|".join(re.escape(fragment) for fragment in _BANNED_ORACLE_FRAGMENTS) + r")\b",
+    re.IGNORECASE,
 )
 
-_BANNED_ORACLE_MARKS = ("：", ":", "（", "）", "(", ")")
+# ASCII and full-width (\uff1a \uff08 \uff09) colon / parentheses
+_BANNED_ORACLE_MARKS = ("\uff1a", ":", "\uff08", "\uff09", "(", ")")
+_MAX_ORACLE_LENGTH = 140
 
 
 def _location_name(avatar: Avatar) -> str:
@@ -62,9 +82,9 @@ def is_valid_oracle_text(text: str) -> bool:
     text = str(text or "").strip()
     if not text:
         return False
-    if len(text) > 48:
+    if len(text) > _MAX_ORACLE_LENGTH:
         return False
-    if any(fragment in text for fragment in _BANNED_ORACLE_FRAGMENTS):
+    if _BANNED_ORACLE_PATTERN.search(text):
         return False
     if any(mark in text for mark in _BANNED_ORACLE_MARKS):
         return False
@@ -76,7 +96,7 @@ def _normalize_text(value: Any) -> str:
 
 
 def _build_fallback_event_text(trigger_text: str, oracle_text: str) -> str:
-    return f"{trigger_text}冥冥中，一句命格浮上心头：『{oracle_text}』"
+    return f"{trigger_text} From somewhere unseen, a line of fate surfaced in the mind: \"{oracle_text}\""
 
 
 def _build_prompt_infos(avatar: Avatar, world: World) -> dict:

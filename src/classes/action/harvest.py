@@ -9,16 +9,16 @@ from src.classes.race import is_yao_avatar
 
 class Harvest(TimedAction):
     """
-    采集动作，在有植物的区域进行采集，持续6个月
-    可以获得植物对应的材料
+    Harvest action: gather in a region with plants, lasting 6 months
+    Yields the plants' materials
     """
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "harvest_action_name"
     DESC_ID = "harvest_description"
     REQUIREMENTS_ID = "harvest_requirements"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "🌾"
     PARAMS = {}
 
@@ -30,14 +30,14 @@ class Harvest(TimedAction):
 
     def _execute(self) -> None:
         """
-        执行采集动作
+        Perform the harvest action
         """
         gained = execute_gather(self.avatar, "plants", "extra_harvest_materials")
         for name, count in gained.items():
             self.gained_materials[name] = self.gained_materials.get(name, 0) + count
 
     def can_start(self) -> tuple[bool, str]:
-        return check_can_start_gather(self.avatar, "plants", "植物")
+        return check_can_start_gather(self.avatar, "plants", "plants")
 
     def start(self) -> Event:
         if is_yao_avatar(self.avatar):
@@ -48,10 +48,10 @@ class Harvest(TimedAction):
                        avatar=self.avatar.name, location=self.avatar.tile.location_name)
         return Event(self.world.month_stamp, content, related_avatars=[self.avatar.id])
 
-    # TimedAction 已统一 step 逻辑
+    # TimedAction already unifies the step logic
 
     async def finish(self) -> list[Event]:
-        # 必定有产出
+        # Always yields something
         materials_desc = ", ".join([f"{k}x{v}" for k, v in self.gained_materials.items()])
         if is_yao_avatar(self.avatar):
             content = t("{avatar} finished foraging through the wilds, obtained: {materials}",

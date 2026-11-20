@@ -37,7 +37,7 @@ function subjectStyle(subject: EventSubject) {
 }
 
 function subjectTitle(event: GameEvent): string {
-  return eventSubjects(event).map(subject => subject.name).join('、')
+  return eventSubjects(event).map(subject => subject.name).join(', ')
 }
 
 function handleSubjectClick(subject: EventSubject) {
@@ -111,7 +111,7 @@ function handleSubjectClick(subject: EventSubject) {
               </span>
             </span>
             <span v-else class="event-stream-list__subjects">
-              <span class="event-stream-list__subject event-stream-list__subject--world">世界</span>
+              <span class="event-stream-list__subject event-stream-list__subject--world">World</span>
             </span>
           </div>
         </div>

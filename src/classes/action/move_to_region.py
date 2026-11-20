@@ -15,15 +15,15 @@ from src.utils.resolution import resolve_query
 
 class MoveToRegion(DefineAction, ActualActionMixin):
     """
-    移动到某个region
+    Move to a region
     """
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "move_to_region_action_name"
     DESC_ID = "move_to_region_description"
     REQUIREMENTS_ID = "move_to_region_requirements"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "🏃"
     PARAMS = {"region": "region_name"}
     PARAM_OPTION_SOURCES = {"region": ParamOptionSource.KNOWN_REGION_NAME}
@@ -34,24 +34,24 @@ class MoveToRegion(DefineAction, ActualActionMixin):
 
     def _get_target_loc(self, region: Region) -> tuple[int, int]:
         """
-        获取或生成本次移动的目标坐标。
-        如果尚未生成，则从区域坐标集合中随机选取一个。
+        Get or generate the target coordinate of this move.
+        If not yet generated, pick one at random from the region's coordinate set.
         """
         if self.target_loc is not None:
-            # 简单的校验：确保目标点属于该区域（防止区域变动等极端情况，可选）
+            # Simple check: make sure the target point belongs to the region (guards against edge cases like region changes; optional)
             return self.target_loc
 
         if hasattr(region, "cors") and region.cors:
             self.target_loc = random.choice(region.cors)
         else:
-            # 兜底：如果区域没有坐标集合，使用中心点
+            # Fallback: if the region has no coordinate set, use the center point
             self.target_loc = region.center_loc
         
         return self.target_loc
 
     def _execute(self, region: Region | str) -> None:
         """
-        移动到某个region
+        Move to a region
         """
         target_region = resolve_query(region, self.world, expected_types=[Region]).obj
         if not target_region:
@@ -72,7 +72,7 @@ class MoveToRegion(DefineAction, ActualActionMixin):
         if not r:
             return False, t("Cannot resolve region: {region}", region=region)
             
-        # 宗门总部限制：非本门弟子禁止入内
+        # Sect headquarters restriction: non-members may not enter
         if isinstance(r, SectRegion):
             if self.avatar.sect is None or self.avatar.sect.id != r.sect_id:
                 return False, t("[{region}] is another sect's territory, you are not a disciple of that sect", region=r.name)
@@ -81,10 +81,10 @@ class MoveToRegion(DefineAction, ActualActionMixin):
 
     def start(self, region: Region | str) -> Event:
         r = resolve_query(region, self.world, expected_types=[Region]).obj
-        # 这里理论上在 can_start 已经校验过，但为了安全再校验一次，如果None则不处理（实际上不会发生）
+        # In theory can_start already validated this, but check again for safety; do nothing if None (shouldn't happen)
         if r:
             region_name = r.name
-            # 在开始时就确定目标点
+            # Fix the target point at the start
             self._get_target_loc(r)
             content = t("{avatar} begins moving toward {region}",
                        avatar=self.avatar.name, region=region_name)
@@ -101,7 +101,7 @@ class MoveToRegion(DefineAction, ActualActionMixin):
 
         target_loc = self._get_target_loc(r)
         
-        # 完成条件：到达具体的随机目标点
+        # Completion condition: reach the specific random target point
         cur_loc = (self.avatar.pos_x, self.avatar.pos_y)
         done = (cur_loc == target_loc)
         

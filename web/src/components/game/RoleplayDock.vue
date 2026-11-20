@@ -46,8 +46,25 @@ const {
   handleEndConversation,
 } = useRoleplayDockState();
 
+// Storage can be missing or throw (private mode, blocked site data, some test envs).
+function readStoredDockHeight(): string | null {
+  try {
+    return window.localStorage?.getItem(DOCK_HEIGHT_STORAGE_KEY) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredDockHeight(height: number) {
+  try {
+    window.localStorage?.setItem(DOCK_HEIGHT_STORAGE_KEY, String(height));
+  } catch {
+    // Persisting the dock height is a convenience; ignore storage failures.
+  }
+}
+
 function getInitialDockHeight() {
-  const rawValue = window.localStorage.getItem(DOCK_HEIGHT_STORAGE_KEY);
+  const rawValue = readStoredDockHeight();
   const storedHeight = rawValue ? Number(rawValue) : Number.NaN;
   if (Number.isFinite(storedHeight)) {
     return Math.max(MIN_DOCK_HEIGHT, Math.min(MAX_DOCK_HEIGHT, storedHeight));
@@ -73,7 +90,7 @@ function toggleCollapsed() {
 }
 
 watch(dockHeight, (height) => {
-  window.localStorage.setItem(DOCK_HEIGHT_STORAGE_KEY, String(height));
+  writeStoredDockHeight(height);
 });
 
 watch(hasActiveRoleplay, (active) => {

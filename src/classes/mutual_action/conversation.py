@@ -16,34 +16,34 @@ if TYPE_CHECKING:
 
 
 class Conversation(MutualAction):
-    """交谈：两名角色在同一区域进行交流。
+    """Conversation: two avatars talk with each other in the same region.
 
-    - 可由"攀谈"触发，或直接发起
-    - 仅当双方处于同一 Region 时可启动
-    - LLM 负责生成对话内容
-    - 会将对话内容与后续故事写入事件系统
+    - Can be triggered by "Talk" or initiated directly
+    - Can only start when both are in the same Region
+    - The LLM generates the conversation content
+    - The conversation content and follow-up story are written to the event system
     """
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "conversation_action_name"
     DESC_ID = "conversation_description"
     REQUIREMENTS_ID = "conversation_requirements"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "🗣️"
     PARAMS = {"target_avatar": "AvatarName"}
-    RESPONSE_ACTIONS: list[str] = []  # Conversation 自动触发，不需要对方决策
+    RESPONSE_ACTIONS: list[str] = []  # Conversation triggers automatically; no decision needed from the other side
     RESPONSE_EVENT_STYLE = "none"
 
     def _get_template_path(self) -> Path:
-        # 使用专门的 conversation.txt 模板
+        # Use the dedicated conversation.txt template
         return CONFIG.paths.templates / "conversation.txt"
 
     def _build_prompt_infos(self, target_avatar: "Avatar") -> dict:
         avatar_name_1 = self.avatar.name
         avatar_name_2 = target_avatar.name
         
-        # avatar1 使用 expanded_info（包含详细信息和共同事件），避免重复
+        # avatar1 uses expanded_info (detailed info plus shared events) to avoid duplication
         expanded_info = self.avatar.get_expanded_info(other_avatar=target_avatar, detailed=True)
         
         avatar_infos = {
@@ -51,7 +51,7 @@ class Conversation(MutualAction):
             avatar_name_2: target_avatar.get_info(detailed=True),
         }
         
-        # 获取后续计划
+        # Get follow-up plans
         p1 = self.avatar.get_planned_actions_str()
         p2 = target_avatar.get_planned_actions_str()
         planned_actions_str = {
@@ -66,34 +66,34 @@ class Conversation(MutualAction):
         }
 
     def _can_start(self, target: "Avatar") -> tuple[bool, str]:
-        """交谈无额外检查条件"""
+        """Conversation has no extra start conditions."""
         return True, ""
 
-    # 覆盖 start：自定义事件消息
+    # Override start: custom event message
     def start(self, target_avatar: "Avatar|str", **kwargs) -> Event:
-        # 记录开始时间
+        # Record the start time
         self._start_month_stamp = self.world.month_stamp
         
-        # Conversation 动作不仅返回 NULL_EVENT 以避免生成“开始交谈”的冗余事件（防止与对话内容事件时序显示混乱），
-        # 同时也无需手动 add_event，因为我们希望侧边栏和历史记录都只显示最终的对话内容。
+        # The Conversation action returns NULL_EVENT to avoid a redundant "starts a conversation" event (which would confuse the display order with the conversation event),
+        # and there's no need to add_event manually, since both the sidebar and history should only show the final conversation content.
         
         return NULL_EVENT
 
     def _handle_response_result(self, target: "Avatar", result: dict) -> ActionResult:
         """
-        处理 LLM 返回的对话结果，包括对话内容和关系变化。
-        Conversation 不需要响应事件（RESPONSE_ACTIONS 为空），直接生成内容。
+        Handle the conversation result returned by the LLM, including content and relation changes.
+        Conversation needs no response events (RESPONSE_ACTIONS is empty); it generates content directly.
         """
         thinking = str(result.get("thinking", "")).strip()
         conversation_content = str(result.get("conversation_content", "")).strip()
         target.thinking = thinking
 
-        # 使用开始时间戳
+        # Use the start timestamp
         month_stamp = self._start_month_stamp if self._start_month_stamp is not None else self.world.month_stamp
 
         events_to_return = []
 
-        # 记录对话内容
+        # Record the conversation content
         if conversation_content:
             content = t("{avatar1} conversation with {avatar2}: {content}",
                        avatar1=self.avatar.name, avatar2=target.name, content=conversation_content)
@@ -108,7 +108,7 @@ class Conversation(MutualAction):
         return ActionResult(status=ActionStatus.COMPLETED, events=events_to_return)
 
     def step(self, target_avatar: "Avatar|str", **kwargs) -> ActionResult:
-        """玩家扮演时转入 runtime 对话会话，否则复用原有异步 LLM 对话逻辑。"""
+        """When the player is roleplaying, switch to a runtime conversation session; otherwise reuse the existing async LLM conversation logic."""
         target = self._get_target_avatar(target_avatar)
         if target is None or self._is_dead_avatar(target):
             return ActionResult(status=ActionStatus.FAILED, events=[])

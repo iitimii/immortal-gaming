@@ -22,7 +22,7 @@ defineProps<{
     <div class="objective-item fate-item" v-if="data.fate_revelation">
       <span class="label">{{ labels.fate }}</span>
       <span class="value fate-value">
-        <span class="fate-oracle">『{{ data.fate_revelation.oracle_text }}』</span>
+        <span class="fate-oracle">“{{ data.fate_revelation.oracle_text }}”</span>
       </span>
     </div>
     <div class="objective-item">

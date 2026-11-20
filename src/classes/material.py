@@ -7,7 +7,7 @@ from src.systems.cultivation import Realm
 @dataclass
 class Material(Item):
     """
-    材料
+    Material
     """
     id: int
     name: str
@@ -37,11 +37,11 @@ class Material(Item):
             "name": self.name,
             "desc": self.desc,
             "grade": str(self.realm),
-            "effect_desc": "" # 材料暂时没有效果字段
+            "effect_desc": "" # Materials have no effects field for now
         }
 
 def _load_materials() -> tuple[dict[int, Material], dict[str, Material]]:
-    """从配表加载 material 数据"""
+    """Load material data from the config table."""
     materials_by_id: dict[int, Material] = {}
     materials_by_name: dict[str, Material] = {}
     
@@ -59,11 +59,11 @@ def _load_materials() -> tuple[dict[int, Material], dict[str, Material]]:
     
     return materials_by_id, materials_by_name
 
-# 从配表加载 material 数据
+# Load material data from the config table
 materials_by_id, materials_by_name = _load_materials()
 
 def reload():
-    """重新加载数据"""
+    """Reload data."""
     new_id, new_name = _load_materials()
     materials_by_id.clear()
     materials_by_id.update(new_id)

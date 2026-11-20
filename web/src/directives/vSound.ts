@@ -15,17 +15,17 @@ export const vSound: Directive = {
     const { play } = useAudio();
     const type = (binding.arg || binding.value || 'click') as SoundType;
     
-    // 标记该元素已有专用音效，全局监听器应跳过
+    // Mark this element as having its own sound so the global listener skips it
     el.setAttribute('data-has-sound', type);
 
     const handler = () => {
-      // 阻止事件冒泡可能会影响业务逻辑，所以这里不阻止
+      // Do not stop propagation; that could break app logic
       play(resolveSoundType(el, type));
     };
     el.__cwsSoundHandler = handler;
     el.addEventListener('click', handler);
   },
-  // 动态更新
+  // Dynamic update
   updated(el: HTMLElement, binding) {
      const type = (binding.arg || binding.value || 'click') as SoundType;
      el.setAttribute('data-has-sound', type);

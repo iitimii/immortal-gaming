@@ -8,9 +8,9 @@ from src.i18n import t
 @dataclass(eq=False)
 class SectRegion(Region):
     """
-    宗门总部区域：
-    - 作为兜底修炼区域使用；
-    - 仅本门弟子在此吐纳时，享受等效「五行皆为 5」的灵气环境。
+    Sect headquarters region:
+    - Used as a fallback cultivation region;
+    - Only members respiring here enjoy an equivalent "all five elements at 5" qi environment.
     """
     sect_name: str = ""
     sect_id: int = -1
@@ -19,9 +19,9 @@ class SectRegion(Region):
     @property
     def essence(self) -> Essence:
         """
-        宗门总部的等效灵气设定：
-        - 五行灵气（金木水火土）密度均为 5；
-        - 仅在动作逻辑（如 Respire）中按此视为修炼环境。
+        Equivalent qi settings of sect headquarters:
+        - Five-element qi (Metal, Wood, Water, Fire, Earth) density is 5 for each;
+        - Only treated as a cultivation environment in action logic (e.g. Respire).
         """
         density = {essence_type: 5 for essence_type in EssenceType}
         return Essence(density)
@@ -37,8 +37,8 @@ class SectRegion(Region):
         info["type_name"] = t("Sect Headquarters")
         info["sect_name"] = self.sect_name
         info["sect_id"] = self.sect_id
-        # 前端可复用修炼区域的展示方式，显示「兜底」灵气环境：
-        # type 使用五种灵气翻译名用逗号拼接，例如「金,木,水,火,土」
+        # The frontend can reuse the cultivation region display, showing the "fallback" qi environment:
+        # type joins the five translated qi names with commas, e.g. "Metal,Wood,Water,Fire,Earth"
         type_label = ",".join(str(essence_type) for essence_type in EssenceType)
         info["essence"] = {
             "type": type_label,

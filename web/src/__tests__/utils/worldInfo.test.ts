@@ -1,36 +1,32 @@
 import { describe, expect, it } from 'vitest'
 import { createI18n } from 'vue-i18n'
 
-import { parseWorldInfoCsv, translateWorldInfoRows } from '@/utils/worldInfo'
+import { loadWorldInfoRows, parseWorldInfoCsv, translateWorldInfoRows } from '@/utils/worldInfo'
 import enUSGame from '@/locales/en-US/game.json'
-import jaJPGame from '@/locales/ja-JP/game.json'
-import viVNGame from '@/locales/vi-VN/game.json'
-import zhCNGame from '@/locales/zh-CN/game.json'
-import zhTWGame from '@/locales/zh-TW/game.json'
 
 describe('worldInfo utils', () => {
   it('parses world_info.csv rows after the two header lines', () => {
     const rows = parseWorldInfoCsv([
       'title,title_id,name_id,desc_id,desc',
-      '标题,标题ID,名称ID,描述ID,描述',
-      '简介,WORLD_INFO_INTRO_TITLE,WORLD_INFO_INTRO_NAME,WORLD_INFO_INTRO_DESC,这是一个诸多修士竞相修行的修仙世界。',
-      '境界,WORLD_INFO_REALM_TITLE,WORLD_INFO_REALM_NAME,WORLD_INFO_REALM_DESC,修仙的境界从弱到强。',
+      'Title,Title ID,Name ID,Description ID,Description',
+      'Introduction,WORLD_INFO_INTRO_TITLE,WORLD_INFO_INTRO_NAME,WORLD_INFO_INTRO_DESC,A cultivation world where many cultivators compete.',
+      'Realm,WORLD_INFO_REALM_TITLE,WORLD_INFO_REALM_NAME,WORLD_INFO_REALM_DESC,Cultivation realms from weak to strong.',
     ].join('\n'))
 
     expect(rows).toEqual([
       {
-        title: '简介',
+        title: 'Introduction',
         titleId: 'WORLD_INFO_INTRO_TITLE',
         nameId: 'WORLD_INFO_INTRO_NAME',
         descId: 'WORLD_INFO_INTRO_DESC',
-        fallbackDesc: '这是一个诸多修士竞相修行的修仙世界。',
+        fallbackDesc: 'A cultivation world where many cultivators compete.',
       },
       {
-        title: '境界',
+        title: 'Realm',
         titleId: 'WORLD_INFO_REALM_TITLE',
         nameId: 'WORLD_INFO_REALM_NAME',
         descId: 'WORLD_INFO_REALM_DESC',
-        fallbackDesc: '修仙的境界从弱到强。',
+        fallbackDesc: 'Cultivation realms from weak to strong.',
       },
     ])
   })
@@ -38,18 +34,18 @@ describe('worldInfo utils', () => {
   it('translates rows with i18n keys and falls back to csv text when missing', () => {
     const rows = [
       {
-        title: '简介',
+        title: 'Introduction',
         titleId: 'WORLD_INFO_INTRO_TITLE',
         nameId: 'WORLD_INFO_INTRO_NAME',
         descId: 'WORLD_INFO_INTRO_DESC',
-        fallbackDesc: '这是一个诸多修士竞相修行的修仙世界。',
+        fallbackDesc: 'A cultivation world where many cultivators compete.',
       },
       {
-        title: '境界',
+        title: 'Realm',
         titleId: 'WORLD_INFO_REALM_TITLE',
         nameId: 'WORLD_INFO_REALM_NAME',
         descId: 'WORLD_INFO_REALM_DESC',
-        fallbackDesc: '修仙的境界从弱到强。',
+        fallbackDesc: 'Cultivation realms from weak to strong.',
       },
     ]
 
@@ -71,41 +67,37 @@ describe('worldInfo utils', () => {
       },
       {
         id: 'WORLD_INFO_REALM_TITLE',
-        title: '境界',
-        name: '境界',
-        desc: '修仙的境界从弱到强。',
+        title: 'Realm',
+        name: 'Realm',
+        desc: 'Cultivation realms from weak to strong.',
       },
     ])
   })
 
-  it('provides world info entry translations for every locale and csv row', () => {
+  it('provides en-US world info entry translations for every csv row', () => {
     const rows = parseWorldInfoCsv([
       'title,title_id,name_id,desc_id,desc',
-      '标题,标题ID,名称ID,描述ID,描述',
-      '简介,WORLD_INFO_INTRO_TITLE,WORLD_INFO_INTRO_NAME,WORLD_INFO_INTRO_DESC,这是一个诸多修士竞相修行的修仙世界。',
-      '官职,WORLD_INFO_OFFICIAL_TITLE,WORLD_INFO_OFFICIAL_NAME,WORLD_INFO_OFFICIAL_DESC,修士可为朝廷理政，积累朝廷威望并领取俸禄。',
+      'Title,Title ID,Name ID,Description ID,Description',
+      'Introduction,WORLD_INFO_INTRO_TITLE,WORLD_INFO_INTRO_NAME,WORLD_INFO_INTRO_DESC,A cultivation world where many cultivators compete.',
+      'Office,WORLD_INFO_OFFICIAL_TITLE,WORLD_INFO_OFFICIAL_NAME,WORLD_INFO_OFFICIAL_DESC,CSV fallback: cultivators may serve the court.',
     ].join('\n'))
 
-    const locales = [enUSGame, zhCNGame, zhTWGame, viVNGame, jaJPGame]
-
-    for (const locale of locales) {
-      const entries = locale.world_info?.entries ?? {}
-      for (const row of rows) {
-        expect(entries[row.titleId]).toBeTruthy()
-        expect(entries[row.nameId]).toBeTruthy()
-        expect(entries[row.descId]).toBeTruthy()
-      }
+    const entries: Record<string, string> = enUSGame.world_info?.entries ?? {}
+    for (const row of [...rows, ...loadWorldInfoRows()]) {
+      expect(entries[row.titleId]).toBeTruthy()
+      expect(entries[row.nameId]).toBeTruthy()
+      expect(entries[row.descId]).toBeTruthy()
     }
   })
 
   it('uses the game namespace when resolving world info translations', () => {
     const rows = [
       {
-        title: '官职',
+        title: 'Office',
         titleId: 'WORLD_INFO_OFFICIAL_TITLE',
         nameId: 'WORLD_INFO_OFFICIAL_NAME',
         descId: 'WORLD_INFO_OFFICIAL_DESC',
-        fallbackDesc: '修士可为朝廷理政，积累朝廷威望并领取俸禄。',
+        fallbackDesc: 'CSV fallback: cultivators may serve the court.',
       },
     ]
 
@@ -137,11 +129,11 @@ describe('worldInfo utils', () => {
 
     const rows = [
       {
-        title: '官职',
+        title: 'Office',
         titleId: 'WORLD_INFO_OFFICIAL_TITLE',
         nameId: 'WORLD_INFO_OFFICIAL_NAME',
         descId: 'WORLD_INFO_OFFICIAL_DESC',
-        fallbackDesc: '修士可为朝廷理政，积累朝廷威望并领取俸禄。',
+        fallbackDesc: 'CSV fallback: cultivators may serve the court.',
       },
     ]
 
@@ -150,6 +142,6 @@ describe('worldInfo utils', () => {
     expect(translated[0]?.title).toBe('Official Rank')
     expect(translated[0]?.name).toBe('Official Rank')
     expect(translated[0]?.desc).toContain('imperial court')
-    expect(translated[0]?.desc).not.toContain('修士可为朝廷理政')
+    expect(translated[0]?.desc).not.toContain('CSV fallback')
   })
 })

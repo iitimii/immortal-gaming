@@ -16,7 +16,7 @@ def test_build_avatar_updates_includes_birth_death_and_position_deltas():
         pos_y=4,
         gender=SimpleNamespace(value="male"),
         cultivation_progress=SimpleNamespace(realm=SimpleNamespace(value="QI_REFINEMENT")),
-        current_action_name="行走",
+        current_action_name="Walking",
     )
     dead_avatar = SimpleNamespace(id="dead-1", name="Ancestor")
     living_avatar = SimpleNamespace(
@@ -46,13 +46,13 @@ def test_build_avatar_updates_includes_birth_death_and_position_deltas():
     assert updates[0]["pic_id"] == 99
     assert updates[0]["realm"] == "QI_REFINEMENT"
     assert updates[0]["cultivation"]["realm_id"] == "QI_REFINEMENT"
-    assert updates[0]["cultivation_display"] == "练气前期"
+    assert updates[0]["cultivation_display"] == "Qi Refinement Early Stage"
     assert updates[0]["action_emoji"] == "🚶"
     assert updates[1] == {
         "id": "dead-1",
         "name": "Ancestor",
         "is_dead": True,
-        "action": "已故",
+        "action": "Deceased",
     }
     assert updates[2]["id"] == "live-1"
     assert updates[2]["x"] == 7
@@ -61,7 +61,7 @@ def test_build_avatar_updates_includes_birth_death_and_position_deltas():
     assert updates[2]["pic_id"] == 1
     assert updates[2]["realm"] == "FOUNDATION_ESTABLISHMENT"
     assert updates[2]["cultivation"]["realm_id"] == "FOUNDATION_ESTABLISHMENT"
-    assert updates[2]["cultivation_display"] == "筑基前期"
+    assert updates[2]["cultivation_display"] == "Foundation Establishment Early Stage"
     assert updates[2]["action_emoji"] == "✨"
 
 

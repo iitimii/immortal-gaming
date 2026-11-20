@@ -27,8 +27,8 @@ class Year(int):
 
 class MonthStamp(int):
     """
-    0年1月 = 0
-    之后依次递增
+    Year 0, month 1 = 0
+    increasing by one per month thereafter
     """
     def get_month(self) -> Month:
         month_value = (self % 12) + 1
@@ -41,10 +41,10 @@ class MonthStamp(int):
         return MonthStamp(int(self) + other)
 
 def create_month_stamp(year: Year, month: Month) -> MonthStamp:
-    """从年和月创建MonthStamp"""
+    """Create a MonthStamp from a year and month."""
     return MonthStamp(int(year) * 12 + month.value - 1)
 
 def get_date_str(stamp: int) -> str:
-    """将 MonthStamp (int) 转换为 'X年Y月' 格式"""
+    """Convert a MonthStamp (int) to a localized year/month date string."""
     ms = MonthStamp(stamp)
     return t("date_format_year_month", year=ms.get_year(), month=ms.get_month().value)

@@ -27,25 +27,25 @@ def _is_beast_taming_sect(sect) -> bool:
     if str(getattr(sect, "name_id", "") or "") == BEAST_SECT_NAME_ID:
         return True
     # Legacy fallback for old runtime objects or saves.
-    return str(getattr(sect, "name", "") or "") == "百兽宗"
+    return str(getattr(sect, "name", "") or "") == "Ten Thousand Beasts Mountain"
 
 
 class Catch(TimedAction):
     """
-    御兽：仅百兽宗弟子可用。
-    条件：
-    - 当前处于普通区域，且该区域有动物分布
-    - 目标动物境界 <= Avatar 境界
-    结果：
-    - 按动物境界映射成功率尝试捕捉，成功则成为灵兽（覆盖旧灵兽）。
+    Tame beast: only available to disciples of Ten Thousand Beasts Mountain.
+    Conditions:
+    - Currently in a normal region where animals are distributed
+    - Target animal realm <= Avatar realm
+    Result:
+    - Attempt a capture with a success rate mapped from the animal's realm; on success it becomes the spirit animal (replacing the old one).
     """
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "catch_action_name"
     DESC_ID = "catch_description"
     REQUIREMENTS_ID = "catch_requirements"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "🕸️"
     PARAMS = {}
 
@@ -74,7 +74,7 @@ class Catch(TimedAction):
         animals = region.animals
         if not animals:
             return
-        # 若已成功捕捉过一次，本次动作内不再重复尝试
+        # If already captured once, don't try again within this action
         if self._caught_result is not None:
             return
         target = random.choice(animals)
@@ -82,9 +82,9 @@ class Catch(TimedAction):
         extra = float(self.avatar.effects.get("extra_catch_success_rate", 0) or 0)
         rate = max(0.0, min(1.0, base + extra))
         if random.random() < rate:
-            # 覆盖为新的灵兽
+            # Replace with the new spirit animal
             self.avatar.spirit_animal = SpiritAnimal(name=target.name, realm=target.realm)
-            # 记录结果供 finish 生成事件
+            # Record the result for finish to generate the event
             self._caught_result = (str(target.name), target.realm, "success")
         else:
             self._caught_result = (None, None, "fail")
@@ -96,14 +96,14 @@ class Catch(TimedAction):
         animals = region.animals
         if len(animals) == 0:
             return False, t("Current area {region} has no animals", region=region.name)
-        # 动物境界是否可御
+        # Whether the animal's realm can be tamed
         available_animals = [animal for animal in animals if self.avatar.cultivation_progress.realm >= animal.realm]
         if len(available_animals) == 0:
             return False, t("Animal realms in current area exceed character realm")
         return True, ""
 
     def start(self) -> Event:
-        # 清理状态
+        # Clean up state
         self._caught_result = None
         region = self.avatar.tile.region
         content = t("{avatar} attempts to tame spirit beast at {location}",

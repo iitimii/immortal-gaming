@@ -11,16 +11,16 @@ def _stringify_simple_value(value: Any) -> str:
     if value is None:
         return ""
     if isinstance(value, bool):
-        return "是" if value else "否"
+        return "Yes" if value else "No"
     return str(value)
 
 
 def _format_direction(value: Any) -> str:
     mapping = {
-        "north": "北",
-        "south": "南",
-        "east": "东",
-        "west": "西",
+        "north": "North",
+        "south": "South",
+        "east": "East",
+        "west": "West",
     }
     return mapping.get(str(value).lower(), _stringify_simple_value(value))
 
@@ -46,14 +46,14 @@ def _format_move_delta(action_params: dict[str, Any]) -> str:
         dy_num = 0
 
     if dx_num > 0:
-        parts.append(f"东{dx_num}")
+        parts.append(f"East {dx_num}")
     elif dx_num < 0:
-        parts.append(f"西{abs(dx_num)}")
+        parts.append(f"West {abs(dx_num)}")
 
     if dy_num > 0:
-        parts.append(f"南{dy_num}")
+        parts.append(f"South {dy_num}")
     elif dy_num < 0:
-        parts.append(f"北{abs(dy_num)}")
+        parts.append(f"North {abs(dy_num)}")
 
     return " ".join(parts)
 

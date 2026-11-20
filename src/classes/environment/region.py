@@ -22,25 +22,25 @@ if TYPE_CHECKING:
 @dataclass
 class Region(ABC):
     """
-    区域抽象基类
+    Abstract base class for regions
     """
     id: int
     name: str
     desc: str
     
-    # 核心坐标数据，由 load_map.py 注入
+    # Core coordinate data, injected by load_map.py
     cors: list[tuple[int, int]] = field(default_factory=list)
     
-    # 计算字段
+    # Computed fields
     center_loc: tuple[int, int] = field(init=False)
     area: int = field(init=False)
 
     def __post_init__(self):
-        """初始化计算字段"""
-        # 基于坐标点计算面积
+        """Initialize computed fields."""
+        # Compute the area from the coordinate points
         self.area = len(self.cors)
         
-        # 计算中心位置
+        # Compute the center position
         if self.cors:
             avg_x = sum(coord[0] for coord in self.cors) // len(self.cors)
             avg_y = sum(coord[1] for coord in self.cors) // len(self.cors)
@@ -70,8 +70,8 @@ class Region(ABC):
     @abstractmethod
     def _get_desc(self) -> str:
         """
-        返回紧跟在名字后的描述，通常包含括号，例如 '（金行灵气：5）'
-        注意，不需要包含self.desc
+        Return the description that follows the name, usually in parentheses, e.g. '(Metal qi: 5)'
+        Note: self.desc does not need to be included
         """
         pass
 
@@ -79,9 +79,9 @@ class Region(ABC):
         if current_loc is None:
             return ""
         dist = chebyshev_distance(current_loc, self.center_loc)
-        # 估算到达时间：距离 / 步长 (向上取整)
+        # Estimate the travel time: distance / step (rounded up)
         months = (dist + step_len - 1) // step_len
-        # 避免显示 0 个月
+        # Avoid showing 0 months
         months = max(1, months)
         return t(" (Distance: {months} months)", months=months)
 
@@ -103,7 +103,7 @@ class Region(ABC):
 
 @dataclass(eq=False)
 class NormalRegion(Region):
-    """普通区域"""
+    """Normal region."""
     animal_ids: list[int] = field(default_factory=list)
     plant_ids: list[int] = field(default_factory=list)
     lode_ids: list[int] = field(default_factory=list)
@@ -172,13 +172,13 @@ class NormalRegion(Region):
 
 @dataclass(eq=False)
 class CultivateRegion(Region):
-    """修炼区域（洞府/遗迹）"""
-    essence_type: EssenceType = EssenceType.GOLD # 默认值避免 dataclass 继承错误
+    """Cultivation region (cave dwelling/ruin)."""
+    essence_type: EssenceType = EssenceType.GOLD # Default value avoids a dataclass inheritance error
     essence_density: int = 0
-    sub_type: str = "cave"  # "cave" 或 "ruin"
+    sub_type: str = "cave"  # "cave" or "ruin"
     essence: Essence = field(init=False)
     
-    # 洞府主人：默认为空（无主）
+    # Cave dwelling owner: empty by default (unowned)
     host_avatar: Optional["Avatar"] = field(default=None, init=False)
 
     def __post_init__(self):
@@ -230,7 +230,7 @@ class CultivateRegion(Region):
 
 @dataclass(eq=False)
 class CityRegion(Region, StoreMixin):
-    """城市区域"""
+    """City region."""
     sell_item_ids: list[int] = field(default_factory=list)
     population: float = 80.0
     population_capacity: float = 120.0
@@ -248,18 +248,18 @@ class CityRegion(Region, StoreMixin):
         return max(0.0, min(1.0, self.population / self.population_capacity))
 
     def change_population(self, delta: float) -> None:
-        """安全修改人口，限制在 0 和容量之间。单位：万人。"""
+        """Safely change the population, clamped between 0 and capacity. Unit: ten-thousands of people."""
         self.population = max(0.0, min(self.population_capacity, self.population + delta))
 
     def get_monthly_natural_growth(self) -> float:
-        """返回当前人口状态下的月自然增长量（单位：万人），不修改状态。"""
+        """Return the monthly natural growth at the current population (unit: ten-thousands), without changing state."""
         if self.population <= 0 or self.population_capacity <= 0:
             return 0.0
         return self.MONTHLY_GROWTH_RATE * self.population * (1 - self.population / self.population_capacity)
 
     def update_population_monthly(self) -> None:
         """
-        使用标准 logistic 模型更新人口。
+        Update the population using a standard logistic model.
         dP = r * P * (1 - P / K)
         """
         growth = self.get_monthly_natural_growth()

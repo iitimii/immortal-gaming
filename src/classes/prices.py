@@ -1,14 +1,14 @@
 """
-统一价格系统
+Unified price system
 ============
 
-所有物品/装备的价格通过这个模块获取。
-价格只和对应的 realm 绑定，全局统一。
+All item/equipment prices are obtained through this module.
+Prices are bound only to the corresponding realm and are globally uniform.
 
-价格设计参考（以练气期年收入约 20-30 灵石为基准）：
-- 材料(Material): 采集物等消耗品
-- 兵器(Weapon): 稀有装备，价值较高
-- 辅助装备(Auxiliary): 法宝等，价值次于兵器
+Price design reference (based on a Qi Refinement annual income of about 20-30 spirit stones):
+- Material: gathered goods and other consumables
+- Weapon: rare equipment, relatively high value
+- Auxiliary: treasures etc., valued below weapons
 """
 from __future__ import annotations
 
@@ -22,20 +22,20 @@ if TYPE_CHECKING:
     from src.classes.items.auxiliary import Auxiliary
     from src.classes.core.avatar import Avatar
 
-# 类型别名
+# Type alias
 Sellable = Union["Material", "Weapon", "Auxiliary"]
 
 
 class Prices:
     """
-    价格体系。
-    所有城镇可交易物品/装备的价格在此统一管理。
+    Price system.
+    Prices of all items/equipment tradable in towns are managed here.
     """
     
-    # 全局购买倍率（玩家从系统购买时的溢价）
+    # Global buy multiplier (premium when the player buys from the system)
     GLOBAL_BUY_MULTIPLIER = 1.5
     
-    # 材料价格表（采集物等）
+    # Material price table (gathered goods etc.)
     MATERIAL_PRICES = {
         Realm.Qi_Refinement: 10,
         Realm.Foundation_Establishment: 30,
@@ -43,7 +43,7 @@ class Prices:
         Realm.Nascent_Soul: 70,
     }
     
-    # 兵器价格表（稀有，价值高）
+    # Weapon price table (rare, high value)
     WEAPON_PRICES = {
         Realm.Qi_Refinement: 150,
         Realm.Foundation_Establishment: 300,
@@ -51,7 +51,7 @@ class Prices:
         Realm.Nascent_Soul: 2000,
     }
     
-    # 辅助装备价格表
+    # Auxiliary price table
     AUXILIARY_PRICES = {
         Realm.Qi_Refinement: 150,
         Realm.Foundation_Establishment: 250,
@@ -60,22 +60,22 @@ class Prices:
     }
     
     def get_material_price(self, material: "Material") -> int:
-        """获取材料基础价格"""
+        """Get the base price of a material."""
         return self.MATERIAL_PRICES.get(material.realm, 10)
     
     def get_weapon_price(self, weapon: "Weapon") -> int:
-        """获取兵器基础价格"""
+        """Get the base price of a weapon."""
         return self.WEAPON_PRICES.get(weapon.realm, 100)
     
     def get_auxiliary_price(self, auxiliary: "Auxiliary") -> int:
-        """获取辅助装备基础价格"""
+        """Get the base price of an auxiliary."""
         return self.AUXILIARY_PRICES.get(auxiliary.realm, 80)
     
     def get_price(self, obj: Sellable) -> int:
         """
-        统一基础价格查询接口。
-        根据对象类型自动分发到对应的价格查询方法。
-        注意：这是物品的【基准价值】，通常等于玩家【卖出给系统】的基础价格。
+        Unified base price lookup.
+        Dispatches automatically to the matching price method by object type.
+        Note: this is the item's [base value], usually equal to the base price when the player [sells to the system].
         """
         from src.classes.material import Material
         from src.classes.items.weapon import Weapon
@@ -94,54 +94,54 @@ class Prices:
 
     def get_buying_price(self, obj: Sellable, buyer: "Avatar" = None) -> int:
         """
-        获取玩家购买价格（从系统商店购买）。
+        Get the player's buying price (buying from the system store).
         
-        计算公式：
-            基础价格 * max(1.0, GLOBAL_BUY_MULTIPLIER - 折扣)
+        Formula:
+            base price * max(1.0, GLOBAL_BUY_MULTIPLIER - discount)
             
         Args:
-            obj: 交易物品
-            buyer: 买家（用于计算折扣）
+            obj: the traded item
+            buyer: the buyer (used to compute the discount)
         """
         base_price = self.get_price(obj)
         
-        # 默认倍率 1.5
+        # Default multiplier 1.5
         multiplier = self.GLOBAL_BUY_MULTIPLIER
         
         if buyer is not None:
-            # 获取折扣 (倍率减免)
-            # 例如 0.1 表示倍率 -0.1
+            # Get the discount (multiplier reduction)
+            # e.g. 0.1 means multiplier -0.1
             reduction = float(buyer.effects.get("shop_buy_price_reduction", 0.0))
             multiplier -= reduction
             
-        # 保证倍率不低于 1.0 (原价)
+        # Ensure the multiplier is not below 1.0 (original price)
         final_multiplier = max(1.0, multiplier)
         
         return int(base_price * final_multiplier)
 
     def get_selling_price(self, obj: Sellable, seller: "Avatar" = None) -> int:
         """
-        获取玩家卖出价格（卖给系统商店）。
+        Get the player's selling price (selling to the system store).
         
-        计算公式：
-            基础价格 * (1.0 + 卖出加成)
+        Formula:
+            base price * (1.0 + sell bonus)
             
         Args:
-            obj: 交易物品
-            seller: 卖家（用于计算加成）
+            obj: the traded item
+            seller: the seller (used to compute the bonus)
         """
         base_price = self.get_price(obj)
         
         multiplier = 1.0
         
         if seller is not None:
-            # 获取卖出加成
-            # 例如 0.2 表示价格 +20%
+            # Get the sell bonus
+            # e.g. 0.2 means price +20%
             bonus = float(seller.effects.get("extra_item_sell_price_multiplier", 0.0))
             multiplier += bonus
             
         return int(base_price * multiplier)
 
 
-# 全局单例
+# Global singleton
 prices = Prices()

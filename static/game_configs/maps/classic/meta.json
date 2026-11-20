@@ -1,11 +1,11 @@
 {
   "id": "classic",
   "name_id": "MAP_PRESET_CLASSIC_NAME",
-  "name": "九州中土",
+  "name": "Central Nine Provinces",
   "desc_id": "MAP_PRESET_CLASSIC_DESC",
-  "desc": "地貌均衡，适合默认体验。",
+  "desc": "A balanced landscape suited for the default experience.",
   "size_label_id": "MAP_PRESET_SIZE_MEDIUM",
-  "size_label": "中型",
+  "size_label": "Medium",
   "version": 2,
   "is_default": true
 }

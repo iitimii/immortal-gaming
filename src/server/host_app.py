@@ -62,7 +62,7 @@ def create_llm_updated_handler(*, runtime, manager):
         await manager.broadcast(
             {
                 "type": "game_reinitialized",
-                "message": "LLM 配置成功，游戏已恢复运行",
+                "message": "LLM configured successfully; the game has resumed",
             }
         )
 

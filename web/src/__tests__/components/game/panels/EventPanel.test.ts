@@ -40,8 +40,8 @@ const mapStoreMock = reactive({
 
 const sectStoreMock = reactive({
   activeSectOptions: [
-    { label: '青云门', value: 1 },
-    { label: '天火宗', value: 2 },
+    { label: 'Qingyun Sect', value: 1 },
+    { label: 'Heavenly Fire Sect', value: 2 },
   ],
   isLoaded: true,
   isLoading: false,
@@ -72,20 +72,20 @@ vi.mock('@/stores/sect', () => ({
   useSectStore: () => sectStoreMock,
 }))
 
-function createEventPanelI18n(locale = 'zh') {
+function createEventPanelI18n(locale = 'en-US') {
   return createI18n({
     legacy: false,
     locale,
     messages: {
-      zh: {
+      'en-US': {
         game: {
           event_panel: {
             title: 'Events',
             filter_all: 'All',
-            filter_all_sects: '所有宗门',
-            filter_event_scope_all: '所有事',
-            filter_event_scope_major: '大事',
-            filter_event_scope_minor: '小事',
+            filter_all_sects: 'All Sects',
+            filter_event_scope_all: 'All Events',
+            filter_event_scope_major: 'Major',
+            filter_event_scope_minor: 'Minor',
             deceased: '(dead)',
             load_more: 'load',
             roleplay_locked: 'locked: {avatar}',
@@ -97,29 +97,7 @@ function createEventPanelI18n(locale = 'zh') {
             nickname_awarded: '{avatar_name} is now "{nickname}".',
           },
         },
-        common: { loading: 'loading', year: '年', month: '月' },
-      },
-      vi: {
-        game: {
-          event_panel: {
-            title: 'Events',
-            filter_all: 'All',
-            filter_all_sects: 'All sects',
-            filter_event_scope_all: 'All events',
-            filter_event_scope_major: 'Major',
-            filter_event_scope_minor: 'Minor',
-            deceased: '(dead)',
-            load_more: 'load',
-            roleplay_locked: 'locked: {avatar}',
-            story_subject_prefix: '[{avatar}] {content}',
-            empty_none: 'none',
-            empty_single: 'none',
-          },
-          event_templates: {
-            nickname_awarded: '{avatar_name} da duoc goi la "{nickname}".',
-          },
-        },
-        common: { loading: 'loading', year: 'Nam', month: 'Thang' },
+        common: { loading: 'loading', year: 'Y', month: 'M' },
       },
     },
   })
@@ -138,14 +116,14 @@ describe('EventPanel', () => {
     roleplayStoreMock.session.last_prompt_context = null
     sectStoreMock.refreshTerritories.mockClear()
     sectStoreMock.activeSectOptions = [
-      { label: '青云门', value: 1 },
-      { label: '天火宗', value: 2 },
+      { label: 'Qingyun Sect', value: 1 },
+      { label: 'Heavenly Fire Sect', value: 2 },
     ]
     sectStoreMock.isLoaded = true
     sectStoreMock.isLoading = false
     mapStoreMock.regions = new Map([
-      ['r1', { id: 'r1', name: '明心山', type: 'sect', sect_id: 1, sect_name: '青云门', sect_color: '#4DD0E1', x: 10, y: 10 }],
-      ['r2', { id: 'r2', name: '赤焰峰', type: 'sect', sect_id: 2, sect_name: '天火宗', sect_color: '#8D6E63', x: 20, y: 20 }],
+      ['r1', { id: 'r1', name: 'Mingxin Mountain', type: 'sect', sect_id: 1, sect_name: 'Qingyun Sect', sect_color: '#4DD0E1', x: 10, y: 10 }],
+      ['r2', { id: 'r2', name: 'Crimson Flame Peak', type: 'sect', sect_id: 2, sect_name: 'Heavenly Fire Sect', sect_color: '#8D6E63', x: 20, y: 20 }],
     ])
   })
 
@@ -272,7 +250,7 @@ describe('EventPanel', () => {
       {
         id: 'e2',
         text: '',
-        content: 'Alice joined 青云门',
+        content: 'Alice joined Qingyun Sect',
         year: 1,
         month: 2,
         timestamp: 14,
@@ -289,7 +267,7 @@ describe('EventPanel', () => {
 
     const sectNode = wrapper.find('.clickable-sect')
     expect(sectNode.exists()).toBe(true)
-    expect(sectNode.text()).toBe('青云门')
+    expect(sectNode.text()).toBe('Qingyun Sect')
     expect(sectNode.attributes('style')).toContain('rgb(77, 208, 225)')
 
     await sectNode.trigger('click')
@@ -297,7 +275,7 @@ describe('EventPanel', () => {
   })
 
   it('should render structured event text from locale template', () => {
-    const i18n = createEventPanelI18n('vi')
+    const i18n = createEventPanelI18n()
 
     eventStoreMock.events = [
       {
@@ -313,7 +291,7 @@ describe('EventPanel', () => {
         renderKey: 'nickname_awarded',
         renderParams: {
           avatar_name: 'Alice',
-          nickname: 'Xich Huyet Thanh Dia Chu',
+          nickname: 'Lord of the Crimson Blood Holy Land',
         },
       },
     ]
@@ -322,7 +300,7 @@ describe('EventPanel', () => {
       global: { plugins: [i18n] },
     })
 
-    expect(wrapper.text()).toContain('Alice da duoc goi la "Xich Huyet Thanh Dia Chu".')
+    expect(wrapper.text()).toContain('Alice is now "Lord of the Crimson Blood Holy Land".')
     expect(wrapper.text()).not.toContain('Old fallback content')
   })
 
@@ -425,7 +403,7 @@ describe('EventPanel', () => {
         relatedSects: [1],
         subjects: [
           { type: 'avatar', id: 'a1', name: 'Alice', color: 'hsl(100, 70%, 65%)' },
-          { type: 'sect', id: 1, name: '青云门', color: '#4DD0E1' },
+          { type: 'sect', id: 1, name: 'Qingyun Sect', color: '#4DD0E1' },
         ],
         isMajor: false,
         isStory: false,
@@ -440,7 +418,7 @@ describe('EventPanel', () => {
     const sectSubject = wrapper.find('.event-stream-list__subject--sect')
 
     expect(avatarSubject.text()).toBe('Alice')
-    expect(sectSubject.text()).toBe('青云门')
+    expect(sectSubject.text()).toBe('Qingyun Sect')
 
     await avatarSubject.trigger('click')
     expect(uiStoreMock.select).toHaveBeenCalledWith('avatar', 'a1')
@@ -471,7 +449,7 @@ describe('EventPanel', () => {
       global: { plugins: [i18n] },
     })
 
-    expect(wrapper.find('.event-stream-list__subject--world').text()).toBe('世界')
+    expect(wrapper.find('.event-stream-list__subject--world').text()).toBe('World')
     expect(wrapper.text()).toContain('A world event happened.')
   })
 
@@ -486,13 +464,13 @@ describe('EventPanel', () => {
     expect(sectSelect.exists()).toBe(true)
     const options = sectSelect.props('options') as Array<{ label: string; value: string | number }>
     const sectOptions = options.filter(o => o.value !== 'all')
-    expect(sectOptions.map(o => o.label)).toContain('青云门')
-    expect(sectOptions.map(o => o.label)).toContain('天火宗')
+    expect(sectOptions.map(o => o.label)).toContain('Qingyun Sect')
+    expect(sectOptions.map(o => o.label)).toContain('Heavenly Fire Sect')
   })
 
   it('sect filter options only include active sects', () => {
     sectStoreMock.activeSectOptions = [
-      { label: '青云门', value: 1 },
+      { label: 'Qingyun Sect', value: 1 },
     ]
 
     const i18n = createEventPanelI18n()
@@ -504,7 +482,7 @@ describe('EventPanel', () => {
     const sectSelect = wrapper.findComponent(NSelect)
     const options = sectSelect.props('options') as Array<{ label: string; value: string | number }>
     const sectOptions = options.filter(o => o.value !== 'all')
-    expect(sectOptions.map(o => o.label)).toEqual(['青云门'])
+    expect(sectOptions.map(o => o.label)).toEqual(['Qingyun Sect'])
   })
 
   it('selecting sect filter calls resetEvents with sect_id', async () => {
@@ -533,9 +511,9 @@ describe('EventPanel', () => {
     const majorSelect = selects[selects.length - 1]
     const options = majorSelect.props('options') as Array<{ label: string; value: string }>
     expect(options).toEqual([
-      { label: '所有事', value: 'all' },
-      { label: '大事', value: 'major' },
-      { label: '小事', value: 'minor' },
+      { label: 'All Events', value: 'all' },
+      { label: 'Major', value: 'major' },
+      { label: 'Minor', value: 'minor' },
     ])
   })
 

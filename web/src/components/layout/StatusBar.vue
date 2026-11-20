@@ -17,7 +17,7 @@ import landmarkIcon from '@/assets/icons/ui/lucide/landmark.svg'
 import clock3Icon from '@/assets/icons/ui/lucide/clock-3.svg'
 import scrollTextIcon from '@/assets/icons/ui/lucide/scroll-text.svg'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const store = useWorldStore()
 const socketStore = useSocketStore()
 const panelsRef = ref<InstanceType<typeof StatusBarPanels> | null>(null)
@@ -50,12 +50,7 @@ const avatarOverviewLabel = computed(() => {
 })
 
 const timeLabel = computed(() => {
-  const yearPart = `${store.year}${t('common.year')}`
-  const monthPart = `${store.month}${t('common.month')}`
-  if (locale.value.startsWith('ja') || locale.value.startsWith('zh')) {
-    return `${yearPart}${monthPart}`
-  }
-  return `${yearPart} ${monthPart}`
+  return `${store.year}${t('common.year')} ${store.month}${t('common.month')}`
 })
 
 function getRarityColor(rarity: string) {
@@ -252,7 +247,7 @@ function openPanel(panel: StatusBarPanelKey) {
   gap: 4px;
   white-space: nowrap;
   color: #bbb;
-  display: none; /* 暂时隐藏，因为空间可能不够 */
+  display: none; /* Hidden for now: may not fit */
 }
 
 @media (min-width: 1024px) {

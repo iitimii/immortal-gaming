@@ -1,7 +1,7 @@
 """
-测试 CSV 数据加载的正确性。
-验证代码中使用的列名与 CSV 文件中的实际列名匹配。
-采用动态多语言测试方案，不再硬编码特定语言的预期字符串。
+Test that CSV data loads correctly.
+Verify that the column names used in code match the actual CSV columns.
+Expected strings are derived dynamically per registered locale rather than hard-coded.
 """
 import pytest
 import csv
@@ -17,7 +17,7 @@ from src.i18n.locale_registry import get_default_locale, get_locale_codes
 # --- Helpers ---
 
 def read_raw_csv_as_dict(file_path):
-    """读取原始 CSV 文件，跳过描述行"""
+    """Read a raw CSV file, skipping the description row."""
     if not file_path.exists():
         return []
     
@@ -48,8 +48,8 @@ def read_raw_csv_as_dict(file_path):
 @pytest.fixture(params=get_locale_codes())
 def game_lang(request):
     """
-    参数化 Fixture：切换语言并重载游戏数据。
-    测试结束后自动恢复回默认语言环境。
+    Parametrized fixture: switch language and reload game data.
+    Restores the default locale after the test.
     """
     lang = request.param
     
@@ -69,7 +69,7 @@ def game_lang(request):
     
     yield lang
     
-    # Teardown: Restore to zh-CN for other tests
+    # Teardown: restore the default locale for other tests
     default_locale = get_default_locale()
     language_manager.set_language(default_locale)
     reload_translations()
@@ -80,10 +80,10 @@ def game_lang(request):
 
 
 class TestSectLoading:
-    """测试宗门数据加载 (多语言动态验证)"""
+    """Test sect data loading (dynamic per-locale verification)."""
 
     def test_sect_headquarter_name_loaded(self, game_lang):
-        """测试宗门驻地名称正确加载"""
+        """Sect headquarters names load correctly."""
         # Read RAW Sect CSV
         sect_csv_path = CONFIG.paths.shared_game_configs / "sect.csv"
         raw_sects = read_raw_csv_as_dict(sect_csv_path)
@@ -93,7 +93,7 @@ class TestSectLoading:
         raw_regions = read_raw_csv_as_dict(region_csv_path)
         sect_region_map = {int(r['sect_id']): r for r in raw_regions if r.get('sect_id')}
         
-        # Verify specific Sect (ID=12, 不夜城)
+        # Verify a specific sect (ID=12, Everlasting Bright Palace)
         target_id = 12
         sect = sects_by_id.get(target_id)
         assert sect is not None
@@ -123,7 +123,7 @@ class TestSectLoading:
         assert sect.headquarter.name == expected_hq_name, f"HQ name mismatch in {game_lang}"
 
     def test_sect_headquarter_desc_loaded(self, game_lang):
-        """测试宗门驻地描述正确加载"""
+        """Sect headquarters descriptions load correctly."""
         target_id = 12
         sect = sects_by_id.get(target_id)
         assert sect is not None
@@ -144,25 +144,25 @@ class TestSectLoading:
         assert sect.headquarter.desc == expected_desc, f"HQ desc mismatch in {game_lang}"
 
     def test_all_sects_have_headquarters(self, game_lang):
-        """测试所有宗门都有驻地信息"""
+        """Every sect has headquarters info."""
         for sect_id, sect in sects_by_id.items():
             assert sect.headquarter is not None
-            assert sect.headquarter.name, f"宗门 {sect.name} 的驻地名称不应为空"
+            assert sect.headquarter.name, f"Headquarters name of sect {sect.name} should not be empty"
 
     def test_sect_techniques_loaded(self, game_lang):
-        """测试宗门功法列表正确加载"""
-        sect = sects_by_id.get(1) # 明心剑宗
+        """Sect technique lists load correctly."""
+        sect = sects_by_id.get(1) # High Heaven Sword Sect
         assert sect is not None
         assert len(sect.technique_names) > 0
 
     def test_sect_without_techniques(self, game_lang):
-        """测试没有配置功法的宗门"""
-        sect = sects_by_id.get(10) # 摄魂音宗
+        """A sect without configured techniques."""
+        sect = sects_by_id.get(10) # Soul-Seizing Sound Sect
         assert sect is not None
         assert sect.technique_names == []
 
     def test_gu_and_formation_specialist_sects_have_conservative_bonus_only(self, game_lang):
-        """蛊/阵法专长宗门只提供保守加成，不直接解锁动作。"""
+        """Gu/formation specialist sects only grant conservative bonuses and do not unlock actions directly."""
         gu_sect = sects_by_id.get(5)
         formation_sect = sects_by_id.get(11)
         assert gu_sect is not None
@@ -187,11 +187,11 @@ class TestSectLoading:
 
 
 class TestTechniqueLoading:
-    """测试功法数据加载"""
+    """Test technique data loading."""
 
     def test_technique_sect_id_loaded(self, game_lang):
-        """测试功法的 sect_id 正确加载"""
-        tech_id = 30 # 草字剑诀
+        """Technique sect_id loads correctly."""
+        tech_id = 30 # Star Slashing Withered Glory Sword
         technique = techniques_by_id.get(tech_id)
         assert technique is not None
         
@@ -210,29 +210,29 @@ class TestTechniqueLoading:
         assert technique.sect_id == 1
 
     def test_technique_without_sect(self, game_lang):
-        """测试散修功法"""
+        """A rogue-cultivator technique."""
         technique = techniques_by_id.get(1)
         assert technique is not None
         assert technique.sect_id is None
 
     def test_sect_techniques_match(self, game_lang):
-        """测试宗门功法和功法的宗门ID相互匹配"""
+        """Sect techniques and technique sect IDs match each other."""
         for sect_id, sect in sects_by_id.items():
             for tech_name in sect.technique_names:
                 technique = techniques_by_name.get(tech_name)
-                # 注意：technique_names 是 string list，如果 names 不匹配（翻译问题）这里会取不到
-                # 但我们的系统设计是：sect.technique_names 是直接从 technique.csv 加载的
-                # 所以只要 reload 顺序正确（先 technique 后 sect），名字应该是一致的
-                assert technique is not None, f"功法 '{tech_name}' 应该存在 (Lang: {game_lang})"
+                # Note: technique_names is a list of strings; mismatched names (translation issues) would miss here.
+                # sect.technique_names is loaded directly from technique.csv, so as long as the reload
+                # order is correct (techniques before sects) the names stay consistent.
+                assert technique is not None, f"Technique '{tech_name}' should exist (Lang: {game_lang})"
                 assert technique.sect_id == sect_id
 
 
 class TestElixirLoading:
-    """丹药加载测试 (ID check, less dependent on lang but good to verify integrity)"""
+    """Elixir loading test (ID check, less dependent on lang but good to verify integrity)"""
 
     def test_elixir_loaded_with_item_id(self):
-        # 丹药目前没有专门的 reload 和 translation key 绑定逻辑验证需求
-        # 保持原样即可，不需要 parametrizing unless needed
+        # Elixirs currently have no dedicated reload/translation-key binding to verify,
+        # so no parametrization is needed here
         assert len(elixirs_by_id) > 0
         for elixir_id, elixir in elixirs_by_id.items():
             assert elixir_id > 0
@@ -240,7 +240,7 @@ class TestElixirLoading:
 
 
 class TestGameDataAPI:
-    """测试 API (API 测试通常在固定环境下运行，这里不使用多语言参数化以免影响 Server 状态)"""
+    """Test the API (run in a fixed environment, without locale parametrization, to avoid affecting server state)."""
 
     @pytest.fixture
     def client(self):

@@ -1,5 +1,5 @@
 """
-测试宗门等级系统
+Tests for the sect rank system
 """
 import pytest
 from src.systems.cultivation import CultivationProgress, Realm
@@ -17,7 +17,7 @@ from src.sim.avatar_init import make_avatars
 
 
 def test_rank_from_realm():
-    """测试境界到宗门职位的映射"""
+    """Mapping from realm to sect rank."""
     assert get_rank_from_realm(Realm.Qi_Refinement) == SectRank.OuterDisciple
     assert get_rank_from_realm(Realm.Foundation_Establishment) == SectRank.InnerDisciple
     assert get_rank_from_realm(Realm.Core_Formation) == SectRank.Elder
@@ -25,15 +25,15 @@ def test_rank_from_realm():
 
 
 def test_rank_display_name():
-    """测试职位显示名称"""
-    assert get_rank_display_name(SectRank.Patriarch) == "掌门"
-    assert get_rank_display_name(SectRank.Elder) == "长老"
-    assert get_rank_display_name(SectRank.InnerDisciple) == "内门弟子"
-    assert get_rank_display_name(SectRank.OuterDisciple) == "外门弟子"
+    """Rank display names."""
+    assert get_rank_display_name(SectRank.Patriarch) == "Patriarch"
+    assert get_rank_display_name(SectRank.Elder) == "Elder"
+    assert get_rank_display_name(SectRank.InnerDisciple) == "Inner Disciple"
+    assert get_rank_display_name(SectRank.OuterDisciple) == "Outer Disciple"
 
 
 def test_rank_comparison():
-    """测试职位比较"""
+    """Rank comparison."""
     assert SectRank.Patriarch > SectRank.Elder
     assert SectRank.Elder > SectRank.InnerDisciple
     assert SectRank.InnerDisciple > SectRank.OuterDisciple
@@ -41,7 +41,7 @@ def test_rank_comparison():
 
 
 def test_auto_promote():
-    """测试自动晋升逻辑"""
+    """Auto-promotion logic."""
     assert should_auto_promote(Realm.Qi_Refinement, Realm.Foundation_Establishment) == True
     assert should_auto_promote(Realm.Foundation_Establishment, Realm.Core_Formation) == True
     assert should_auto_promote(Realm.Core_Formation, Realm.Nascent_Soul) == True
@@ -50,35 +50,35 @@ def test_auto_promote():
 
 
 def test_avatar_sect_rank_assignment(base_world):
-    """测试avatar创建时宗门职位分配"""
-    # 使用 base_world fixture，不需要 load_cultivation_world_map
+    """Sect rank assignment when avatars are created."""
+    # Uses the base_world fixture; load_cultivation_world_map is not needed
     
-    # 创建多个avatar
+    # Create several avatars
     avatars_dict = make_avatars(base_world, count=20, current_month_stamp=MonthStamp(100 * 12))
     avatars = list(avatars_dict.values())
     
-    # 检查所有有宗门的avatar都有职位
+    # Every avatar with a sect must have a rank
     for avatar in avatars:
         if avatar.sect is not None:
-            assert avatar.sect_rank is not None, f"{avatar.name} 有宗门但没有职位"
-            # 职位应该匹配境界
+            assert avatar.sect_rank is not None, f"{avatar.name} has a sect but no rank"
+            # The rank should match the realm
             expected_rank = get_rank_from_realm(avatar.cultivation_progress.realm)
-            # 如果不是预期职位，只可能是元婴修士被降为长老（因为掌门唯一性）
+            # The only allowed mismatch is a Nascent Soul cultivator demoted to Elder (patriarch uniqueness)
             if avatar.sect_rank != expected_rank:
                 assert avatar.cultivation_progress.realm == Realm.Nascent_Soul
                 assert avatar.sect_rank == SectRank.Elder
         else:
-            assert avatar.sect_rank is None, f"{avatar.name} 散修不应该有职位"
+            assert avatar.sect_rank is None, f"{avatar.name} is a rogue cultivator and should have no rank"
 
 
 def test_patriarch_uniqueness(base_world):
-    """测试每个宗门只有一个掌门"""
+    """Each sect has at most one patriarch."""
     
-    # 创建足够多的avatar
+    # Create enough avatars
     avatars_dict = make_avatars(base_world, count=50, current_month_stamp=MonthStamp(100 * 12))
     avatars = list(avatars_dict.values())
     
-    # 统计每个宗门的掌门数量
+    # Count patriarchs per sect
     sect_patriarchs = {}
     for avatar in avatars:
         if avatar.sect is not None and avatar.sect_rank == SectRank.Patriarch:
@@ -87,13 +87,13 @@ def test_patriarch_uniqueness(base_world):
                 sect_patriarchs[sect_id] = []
             sect_patriarchs[sect_id].append(avatar.name)
     
-    # 确保每个宗门最多只有一个掌门
+    # Ensure each sect has at most one patriarch
     for sect_id, patriarchs in sect_patriarchs.items():
-        assert len(patriarchs) <= 1, f"宗门 {sect_id} 有多个掌门: {patriarchs}"
+        assert len(patriarchs) <= 1, f"Sect {sect_id} has multiple patriarchs: {patriarchs}"
 
 
 def test_sect_str_display(base_world):
-    """测试宗门信息显示"""
+    """Sect info display."""
     
     avatars_dict = make_avatars(base_world, count=20, current_month_stamp=MonthStamp(100 * 12))
     avatars = list(avatars_dict.values())
@@ -101,23 +101,23 @@ def test_sect_str_display(base_world):
     for avatar in avatars:
         sect_str = avatar.get_sect_str()
         if avatar.sect is None:
-            assert sect_str == "散修"
+            assert sect_str == "Rogue Cultivator"
         else:
-            # 应该包含宗门名
+            # Should contain the sect name
             assert avatar.sect.name in sect_str
-            # 应该包含职位名
+            # Should contain the rank name
             if avatar.sect_rank is not None:
                 rank_name = get_rank_display_name(avatar.sect_rank, avatar.sect)
                 assert rank_name in sect_str
 
 
 def test_cultivation_breakthrough_promotion(base_world):
-    """测试突破境界后自动晋升"""
+    """Automatic promotion after a realm breakthrough."""
     
     avatars_dict = make_avatars(base_world, count=10, current_month_stamp=MonthStamp(100 * 12))
     avatars = list(avatars_dict.values())
     
-    # 找一个练气期的宗门弟子
+    # Find a Qi Refinement sect disciple
     target_avatar = None
     for avatar in avatars:
         if avatar.sect is not None and avatar.cultivation_progress.realm == Realm.Qi_Refinement:
@@ -125,15 +125,15 @@ def test_cultivation_breakthrough_promotion(base_world):
             break
     
     if target_avatar is not None:
-        # 记录原职位
+        # Record the original rank
         old_rank = target_avatar.sect_rank
         assert old_rank == SectRank.OuterDisciple
         
-        # 突破到筑基
-        target_avatar.cultivation_progress.level = 31  # 筑基初期
+        # Break through to Foundation Establishment
+        target_avatar.cultivation_progress.level = 31  # Foundation Establishment early stage
         target_avatar.update_cultivation(31)
         
-        # 检查职位是否晋升
+        # Check that the rank was promoted
         assert target_avatar.sect_rank == SectRank.InnerDisciple
         assert target_avatar.sect_rank > old_rank
 

@@ -34,7 +34,7 @@ class TestSaveLoadLanguage:
         game_map = create_test_map()
         month_stamp = create_month_stamp(Year(100), Month.JANUARY)
         # Create dummy events db file to avoid errors
-        events_db_path = temp_save_dir / "test_lang_zh_events.db"
+        events_db_path = temp_save_dir / "test_lang_default_events.db"
         world = World.create_with_db(map=game_map, month_stamp=month_stamp, events_db_path=events_db_path)
         sim = Simulator(world)
         
@@ -46,7 +46,7 @@ class TestSaveLoadLanguage:
             language_manager.set_language(default_locale)
             
             # 3. Save
-            save_path = temp_save_dir / "test_lang_zh.json"
+            save_path = temp_save_dir / "test_lang_default.json"
             save_game(world, sim, [], save_path)
             
             # 4. Verify
@@ -57,12 +57,12 @@ class TestSaveLoadLanguage:
             assert "language" in data["meta"]
             assert data["meta"]["language"] == default_locale
             
-            # Test English
+            # Fallback locale
             world.event_manager.close() # Close db before new save
             
             language_manager.set_language(fallback_locale)
-            save_path_en = temp_save_dir / "test_lang_en.json"
-            events_db_path_en = temp_save_dir / "test_lang_en_events.db"
+            save_path_en = temp_save_dir / "test_lang_fallback.json"
+            events_db_path_en = temp_save_dir / "test_lang_fallback_events.db"
             
             # Create new world for new db path or just update existing world?
             # Easiest is to create new world
@@ -89,10 +89,12 @@ class TestSaveLoadLanguage:
     async def test_load_switches_language(self, temp_save_dir):
         """Test that loading a save with different language triggers switch."""
         
-        fallback_locale = get_fallback_locale()
-        default_locale = get_default_locale()
+        save_locale = get_default_locale()
+        # en-US is the only enabled locale, so simulate a runtime that is still
+        # on a stale/other locale to exercise the switch path.
+        stale_locale = "xx-XX"
 
-        # 1. Create a minimal save file with fallback language
+        # 1. Create a minimal save file in the enabled locale
         save_filename = "test_switch_lang.json"
         save_path = temp_save_dir / save_filename
         
@@ -101,7 +103,7 @@ class TestSaveLoadLanguage:
                 "version": "test",
                 "save_time": "2026-01-01", 
                 "game_time": "Y1M1",
-                "language": fallback_locale,
+                "language": save_locale,
                 "events_db": "test_switch_lang_events.db",
                 "event_count": 0
             },
@@ -116,8 +118,9 @@ class TestSaveLoadLanguage:
             json.dump(save_data, f)
             
         # 2. Mock dependencies
-        # Ensure current is default locale
-        language_manager._current = default_locale
+        # Pretend the runtime is currently on a different locale
+        original_current = language_manager._current
+        language_manager._current = stale_locale
         
         mock_broadcast = AsyncMock()
         
@@ -139,10 +142,12 @@ class TestSaveLoadLanguage:
             assert mock_broadcast.called
             call_args = mock_broadcast.call_args[0][0]
             assert call_args['type'] == 'toast'
-            assert fallback_locale in call_args['message']
+            assert save_locale in call_args['message']
             
             # Verify runtime locale switch was requested
-            mock_apply_locale.assert_called_once_with(fallback_locale)
+            mock_apply_locale.assert_called_once_with(save_locale)
+
+        language_manager._current = original_current
 
     @pytest.mark.asyncio
     async def test_load_no_switch_same_language(self, temp_save_dir):

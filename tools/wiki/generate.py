@@ -190,11 +190,11 @@ def _theme_for_rarity(level: str | None) -> str:
 
 def _theme_for_grade(grade: Any) -> str:
     grade_text = str(grade or "").upper()
-    if "UPPER" in grade_text or "上品" in grade_text or "THƯỢNG" in grade_text:
+    if "UPPER" in grade_text:
         return "grade-upper"
-    if "MIDDLE" in grade_text or "中品" in grade_text or "TRUNG" in grade_text:
+    if "MIDDLE" in grade_text:
         return "grade-middle"
-    if "LOWER" in grade_text or "下品" in grade_text or "HẠ" in grade_text:
+    if "LOWER" in grade_text:
         return "grade-lower"
     if "NASCENT" in grade_text:
         return "grade-nascent"
@@ -358,7 +358,8 @@ def _serialize_techniques() -> list[dict[str, Any]]:
                 "effect_desc": item.get("effect_desc"),
             },
         )
-        item["theme"] = _theme_for_grade(item.get("grade"))
+        # Use the enum id (LOWER/MIDDLE/UPPER), not the localized display label.
+        item["theme"] = _theme_for_grade(getattr(source.grade, "value", None) or item.get("grade"))
     return items
 
 

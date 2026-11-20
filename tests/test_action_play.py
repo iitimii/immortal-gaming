@@ -11,13 +11,13 @@ class TestActionPlay:
     
     @pytest.fixture
     def play_avatar(self, dummy_avatar):
-        """配置一个适合消遣的角色"""
-        # 确保没有初始临时效果
+        """Configure an avatar suitable for leisure actions."""
+        # Make sure there are no initial temporary effects
         dummy_avatar.temporary_effects = []
         return dummy_avatar
 
     def test_single_play_action_instantiation(self, play_avatar):
-        """测试单人消遣动作实例化"""
+        """Solo leisure actions can be instantiated."""
         world = play_avatar.world
         actions = [Reading, TeaTasting, Traveling, ZitherPlaying]
         
@@ -28,7 +28,7 @@ class TestActionPlay:
 
     @patch('src.classes.action.play.random.random')
     def test_single_play_benefit_trigger(self, mock_random, play_avatar):
-        """测试单人消遣触发收益"""
+        """Solo leisure action triggers its benefit."""
         # mock random < 0.05 to trigger benefit
         # CONFIG.play.base_benefit_probability is 0.05
         mock_random.return_value = 0.01 
@@ -40,11 +40,8 @@ class TestActionPlay:
         
         # Check event content
         assert len(events) == 1
-        # 检查是否包含突破概率提升的描述 (英文或中文，取决于环境，这里假设 conftest 强制了中文)
-        # conftest.py force_chinese_language fixture sets language to zh-CN
-        # "breakthrough probability increased by 20.0%" -> zh-CN: "心境提升，突破概率增加 20.0%"
-        # Let's check for "20.0%" to be safe across languages if translation fails, 
-        # or check the translation key if possible. But here we get the formatted string.
+        # The event should mention the breakthrough-rate boost.
+        # conftest.py force_default_language fixture sets language to the default locale (en-US).
         assert "20.0%" in events[0].content
         
         # Check effect applied
@@ -57,7 +54,7 @@ class TestActionPlay:
 
     @patch('src.classes.action.play.random.random')
     def test_single_play_no_benefit(self, mock_random, play_avatar):
-        """测试单人消遣未触发收益"""
+        """Solo leisure action does not trigger its benefit."""
         # mock random >= 0.05
         mock_random.return_value = 0.1 
         
@@ -71,7 +68,7 @@ class TestActionPlay:
 
     @patch('src.classes.mutual_action.play.random.random')
     def test_mutual_play_benefit(self, mock_random, play_avatar):
-        """测试双人消遣触发收益"""
+        """Mutual leisure action triggers its benefit."""
         # Setup target avatar
         target_avatar = MagicMock()
         target_avatar.name = "Friend"
@@ -94,7 +91,7 @@ class TestActionPlay:
 
     @patch('src.classes.mutual_action.play.StoryEventService.maybe_create_story', new_callable=AsyncMock)
     def test_tea_party_finish_returns_result_event(self, mock_story, play_avatar):
-        """测试茶会完成时会生成结果事件"""
+        """Tea party produces a result event on finish."""
         mock_story.return_value = None
 
         target_avatar = MagicMock()
@@ -114,7 +111,7 @@ class TestActionPlay:
 
     @patch('src.classes.mutual_action.play.StoryEventService.maybe_create_story', new_callable=AsyncMock)
     def test_chess_finish_returns_result_event(self, mock_story, play_avatar):
-        """测试下棋完成时会生成结果事件"""
+        """Chess produces a result event on finish."""
         mock_story.return_value = None
 
         target_avatar = MagicMock()

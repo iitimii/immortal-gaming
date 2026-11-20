@@ -17,39 +17,39 @@ if TYPE_CHECKING:
 @dataclass
 class SectDecisionContext:
     """
-    宗门决策上下文视图。
+    Sect decision context view.
 
-    面向“宗门自身决策 / AI / LLM”的只读快照，包含：
-    - 当前静态与基础展示信息（与 UI/详情保持一致）
-    - 当前战力与势力范围
-    - 当前经济能力（基于当前势力格与效果推导的收入能力）
-    - 当前宗门间关系（数值与理由拆解）
-    - 与本宗相关的最近若干历史事件
+    Read-only snapshot for sect self-decision / AI / LLM use, containing:
+    - Current static and basic display info (consistent with UI/detail)
+    - Current strength and territory
+    - Current economy (income capacity derived from current territory tiles and effects)
+    - Current inter-sect relations (values and reason breakdown)
+    - Recent historical events related to this sect
     """
 
-    # 基础静态 / 展示信息
+    # Basic static / display info
     basic_structured: Dict[str, Any]
     basic_text: str
 
-    # 战力与势力范围（当前快照）
+    # Strength and territory (current snapshot)
     power: Dict[str, Any]
     territory: Dict[str, Any]
     self_assessment: Dict[str, Any]
 
-    # 经济能力（当前快照）
+    # Economy (current snapshot)
     economy: Dict[str, Any]
 
-    # 宗门关系（当前快照）
+    # Sect relations (current snapshot)
     relations: List[Dict[str, Any]]
     relations_summary: str
 
-    # 历史事件（最近 N 条）
+    # Historical events (most recent N)
     history: Dict[str, Any]
 
-    # 宗门身份与治理约束
+    # Sect identity and governance constraints
     identity: Dict[str, Any] = field(default_factory=dict)
 
-    # 门规与宗门决策候选
+    # Sect rules and decision candidates
     diplomacy_targets: List[Dict[str, Any]] = field(default_factory=list)
     active_wars: List[Dict[str, Any]] = field(default_factory=list)
     rule: Dict[str, Any] = field(default_factory=dict)
@@ -65,24 +65,24 @@ def build_sect_decision_context(
     history_limit: int = 50,
 ) -> SectDecisionContext:
     """
-    构建给“宗门自身决策”使用的只读上下文。
+    Build the read-only context used for sect self-decisions.
 
-    - 所有数值（战力、势力、关系、收入能力）均基于“当前世界状态”的一次性快照；
-    - 仅历史事件部分会回溯最近 N 条与本宗相关的事件。
+    - All numbers (strength, territory, relations, income) come from a one-off snapshot of the current world state;
+    - Only the history section looks back at the most recent N events related to this sect.
     """
-    # 1. 基础信息（与现有 UI/详情保持一致）
+    # 1. Basic info (consistent with existing UI/detail)
     basic_structured = sect.get_structured_info()
     basic_text = sect.get_detailed_info()
 
-    # 2. 使用 SectManager 计算当前势力快照（战力 / 半径 / 势力格 / 冲突）
+    # 2. Use SectManager to compute the current territory snapshot (strength / radius / tiles / conflicts)
     sect_manager = SectManager(world)
-    # 通过公共接口获取 snapshot，避免在多处重复势力范围逻辑
+    # Get the snapshot via the public API to avoid duplicating territory logic
     snapshot = sect_manager.get_snapshot()
     active_sects = snapshot.active_sects
     tile_owners = snapshot.tile_owners
     sect_centers = snapshot.sect_centers
 
-    # 统计当前本宗占据的格子数与冲突格子数
+    # Count tiles held by this sect and contested tiles
     tile_count = len(snapshot.owned_tiles_by_sect.get(int(sect.id), []))
     border_tile_count = int(snapshot.border_tiles_by_sect.get(int(sect.id), 0))
 
@@ -97,13 +97,13 @@ def build_sect_decision_context(
         "tile_count": tile_count,
         "border_tile_count": border_tile_count,
         "border_pressure_ratio": (float(border_tile_count) / float(tile_count)) if tile_count > 0 else 0.0,
-        # 兼容旧字段，语义改为“与其他宗门接壤的边界压力”。
+        # Legacy field; its meaning is now "border pressure from neighboring sects".
         "conflict_tile_count": border_tile_count,
         "conflict_ratio": (float(border_tile_count) / float(tile_count)) if tile_count > 0 else 0.0,
         "headquarter_center": headquarter_center,
     }
 
-    # 3. 当前经济能力快照（不修改任何状态，仅基于当前势力格推导）
+    # 3. Current economy snapshot (no state changes, derived only from current territory tiles)
     sect_conf = getattr(CONFIG, "sect", None)
     base_income = float(getattr(sect_conf, "income_per_tile", 10)) if sect_conf else 10.0
     current_month = int(getattr(world, "month_stamp", 0))
@@ -295,8 +295,8 @@ def build_sect_decision_context(
         )
     )
 
-    # 4. 当前宗门关系快照
-    # 统一使用 SectManager + compute_sect_relations 计算关系数值与理由
+    # 4. Current sect relations snapshot
+    # Use SectManager + compute_sect_relations for relation values and reasons
     extra_breakdown_by_pair = world.get_active_sect_relation_breakdown(current_month)
     diplomacy_by_pair = world.get_active_sect_diplomacy_breakdown(
         current_month,
@@ -365,7 +365,7 @@ def build_sect_decision_context(
         if diplomacy_target["status"] == "war":
             active_wars.append(diplomacy_target)
 
-    # 简单的关系文字总结：统计友好 / 敌对数量以及最极端的关系
+    # Simple text summary: count friendly / hostile relations and the most extreme ones
     friendly_count = sum(1 for r in relations if r["value"] >= 20)
     hostile_count = sum(1 for r in relations if r["value"] <= -20)
     neutral_count = len(relations) - friendly_count - hostile_count
@@ -389,16 +389,16 @@ def build_sect_decision_context(
         f"{strongest_desc}, {weakest_desc}"
     )
 
-    # 5. 历史事件（最近 N 条，与本宗相关）
-    # 复用 EventStorage.get_events 的 sect_id 过滤能力，取最近若干条。
+    # 5. Historical events (most recent N, related to this sect)
+    # Reuse EventStorage.get_events sect_id filtering to fetch the most recent ones.
     recent_events: List[Any] = []
     if history_limit > 0:
         events, _ = event_storage.get_events(sect_id=int(sect.id), limit=history_limit)
-        # get_events 返回按时间倒序（最新在前）；这里保持该顺序即可，
-        # 或者根据需要转为时间正序。
+        # get_events returns newest first; keep that order here,
+        # or convert to chronological order if needed.
         recent_events = list(reversed(events))
 
-    # 将历史事件简单格式化为多行文本，便于 LLM 使用
+    # Format history events as multi-line text for the LLM
     lines: List[str] = []
     for ev in recent_events:
         try:

@@ -132,7 +132,7 @@ async def test_weapon_auto_equip_without_llm():
 
     assert outcome.accepted is True
     assert outcome.action == ItemDisposition.AUTO_ACCEPTED
-    assert "获得了TestRealm兵器『NewSword』并装备" in outcome.result_text
+    assert "TestAvatar obtained TestRealm Weapon 'NewSword'" in outcome.result_text
     avatar.change_weapon.assert_called_once_with(new_weapon)
     mock_llm.assert_not_called()
 
@@ -162,7 +162,7 @@ async def test_weapon_swap_accept_sells_old():
 
     assert outcome.accepted is True
     assert outcome.action == ItemDisposition.REPLACED_OLD
-    assert "换上了TestRealm兵器『NewSword』" in outcome.result_text
+    assert "TestAvatar equipped TestRealm Weapon 'NewSword'" in outcome.result_text
     avatar.sell_weapon.assert_called_once_with(old_weapon)
     avatar.change_weapon.assert_called_once_with(new_weapon)
     mock_llm.assert_called_once()
@@ -191,7 +191,7 @@ async def test_elixir_reject_sells_new():
 
     assert outcome.accepted is False
     assert outcome.action == ItemDisposition.SOLD_NEW
-    assert "卖掉了新获得的PowerPill" in outcome.result_text
+    assert "TestAvatar sold newly obtained PowerPill" in outcome.result_text
     avatar.sell_elixir.assert_called_once_with(new_elixir)
     avatar.consume_elixir.assert_not_called()
 
@@ -273,7 +273,7 @@ def test_roleplay_choice_conflict_rejects_second_pending_request():
                     "request_id": "existing-choice",
                     "type": "choice",
                     "avatar_id": avatar.id,
-                    "title": "已有请求",
+                    "title": "Existing request",
                     "description": "desc",
                     "options": [],
                 },
@@ -298,4 +298,4 @@ def test_roleplay_choice_conflict_rejects_second_pending_request():
         begin_roleplay_choice(runtime, request=request)
 
     assert exc_info.value.status_code == 409
-    assert exc_info.value.detail == "已有待处理的扮演请求"
+    assert exc_info.value.detail == "There is already a pending roleplay request"

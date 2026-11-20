@@ -31,14 +31,14 @@ def test_same_level_uses_different_display_profiles():
 
     assert canonical["realm_id"] == "FOUNDATION_ESTABLISHMENT"
     assert canonical["stage_id"] == "MIDDLE_STAGE"
-    assert canonical["display_full_name"] == "筑基中期"
-    assert martial["display_full_name"] == "易筋中成"
-    assert confucian["display_full_name"] == "明理中境"
-    assert buddhist["display_full_name"] == "比丘中境"
-    assert yao["display_full_name"] == "化形中期"
+    assert canonical["display_full_name"] == "Foundation Establishment Middle Stage"
+    assert martial["display_full_name"] == "Tendon-Tempering, Mid Attainment"
+    assert confucian["display_full_name"] == "Principle Illumination, Middle Realm"
+    assert buddhist["display_full_name"] == "Monk, Middle Realm"
+    assert yao["display_full_name"] == "Form Transformation Middle Stage"
 
     for item in [canonical, martial, confucian, buddhist, yao]:
-        assert item["canonical_full_name"] == "筑基中期"
+        assert item["canonical_full_name"] == "Foundation Establishment Middle Stage"
         assert item["realm_id"] == "FOUNDATION_ESTABLISHMENT"
         assert item["stage_id"] == "MIDDLE_STAGE"
 
@@ -51,8 +51,8 @@ def test_avatar_profile_prefers_yao_race_over_orthodoxy():
     display = build_avatar_cultivation_display(avatar)
     assert display["profile_id"] == "yao"
     assert display["realm_id"] == "CORE_FORMATION"
-    assert display["display_full_name"] == "妖丹初期"
-    assert display["canonical_full_name"] == "金丹前期"
+    assert display["display_full_name"] == "Demon Core Early Stage"
+    assert display["canonical_full_name"] == "Core Formation Early Stage"
 
 
 def test_avatar_profile_uses_orthodoxy_for_human_and_sanxiu_fallback():
@@ -63,11 +63,11 @@ def test_avatar_profile_uses_orthodoxy_for_human_and_sanxiu_fallback():
     rogue_display = build_avatar_cultivation_display(rogue_avatar)
 
     assert martial_display["profile_id"] == "wu"
-    assert martial_display["display_full_name"] == "武圣初成"
-    assert martial_display["canonical_full_name"] == "元婴前期"
+    assert martial_display["display_full_name"] == "Martial Saint, Initial Attainment"
+    assert martial_display["canonical_full_name"] == "Nascent Soul Early Stage"
 
     assert rogue_display["profile_id"] == "sanxiu"
-    assert rogue_display["display_full_name"] == "练气中期"
+    assert rogue_display["display_full_name"] == "Qi Refinement Middle Stage"
     assert rogue_display["realm_id"] == "QI_REFINEMENT"
 
 
@@ -75,8 +75,8 @@ def test_missing_profile_falls_back_to_canonical_dao_display():
     display = build_cultivation_display(CultivationProgress(level=31), profile_id="unknown")
 
     assert display["profile_id"] == "dao"
-    assert display["display_full_name"] == "筑基前期"
-    assert display["canonical_full_name"] == "筑基前期"
+    assert display["display_full_name"] == "Foundation Establishment Early Stage"
+    assert display["canonical_full_name"] == "Foundation Establishment Early Stage"
 
 
 def test_cultivation_alias_config_covers_every_profile_realm_and_stage():

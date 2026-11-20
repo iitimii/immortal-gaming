@@ -12,19 +12,19 @@ from src.classes.items.item import Item
 
 
 class ElixirType(Enum):
-    """丹药类型"""
-    Breakthrough = "Breakthrough"  # 破境
-    Lifespan = "Lifespan"          # 延寿
-    BurnBlood = "BurnBlood"        # 燃血
-    Heal = "Heal"                  # 疗伤
+    """Elixir type."""
+    Breakthrough = "Breakthrough"  # Breakthrough
+    Lifespan = "Lifespan"          # Lifespan extension
+    BurnBlood = "BurnBlood"        # Blood burning
+    Heal = "Heal"                  # Healing
     Unknown = "Unknown"
 
 
 @dataclass
 class Elixir(Item):
     """
-    丹药类
-    字段与 static/game_configs/elixir.csv 对应
+    Elixir
+    Fields correspond to static/game_configs/elixir.csv
     """
     id: int
     name: str
@@ -39,16 +39,16 @@ class Elixir(Item):
         return hash(self.id)
 
     def get_info(self, detailed: bool = False) -> str:
-        """获取信息"""
+        """Get info."""
         if detailed:
             return self.get_detailed_info()
         return f"{self.name}"
 
     def get_detailed_info(self) -> str:
-        """获取详细信息"""
+        """Get detailed info."""
         from src.i18n import t
         effect_part = t(" Effect: {effect_desc}", effect_desc=self.effect_desc) if self.effect_desc else ""
-        return f"{self.name}（{str(self.realm)}·{self._get_type_name()}，{self.desc}）{effect_part}"
+        return f"{self.name} ({str(self.realm)} · {self._get_type_name()}, {self.desc}){effect_part}"
     
     def _get_type_name(self) -> str:
         from src.i18n import t
@@ -62,8 +62,8 @@ class Elixir(Item):
         return t(msgid)
 
     def get_colored_info(self) -> str:
-        """获取带颜色标记的信息，供前端渲染使用"""
-        # 使用对应境界的颜色
+        """Get info with color markup for frontend rendering."""
+        # Use the color of the matching realm
         r, g, b = self.realm.color_rgb
         return f"<color:{r},{g},{b}>{self.get_info()}</color>"
 
@@ -85,24 +85,24 @@ class Elixir(Item):
 @dataclass
 class ConsumedElixir:
     """
-    已服用的丹药记录
+    Record of a consumed elixir
     """
     elixir: Elixir
-    consume_time: int  # 服用时的 MonthStamp
+    consume_time: int  # MonthStamp at consumption
     _expire_time: Union[int, float] = field(init=False)
 
     def __post_init__(self):
         self._expire_time = self.consume_time + self._get_max_duration()
 
     def _get_max_duration(self) -> Union[int, float]:
-        """获取丹药的最长持续时间"""
+        """Get the elixir's maximum duration."""
         effects = self.elixir.effects
         if isinstance(effects, dict):
             effects = [effects]
         
         max_d = 0
         for eff in effects:
-            # 如果没有 duration_month 字段，视为永久效果
+            # Without a duration_month field, treat it as a permanent effect
             if "duration_month" not in eff:
                 return float('inf')
             max_d = max(max_d, int(eff.get("duration_month", 0)))
@@ -110,13 +110,13 @@ class ConsumedElixir:
 
     def is_completely_expired(self, current_month: int) -> bool:
         """
-        判断丹药是否彻底失效（所有效果都过期）
+        Determine whether the elixir has completely expired (all effects expired)
         """
         return current_month >= self._expire_time
 
     def get_active_effects(self, current_month: int) -> List[dict[str, object]]:
         """
-        获取当前时间点仍然有效的 effects 列表
+        Get the list of effects still active at the current time
         """
         active = []
         effects = self.elixir.effects
@@ -124,12 +124,12 @@ class ConsumedElixir:
             effects = [effects]
         
         for eff in effects:
-            # 永久效果
+            # Permanent effect
             if "duration_month" not in eff:
                 active.append(eff)
                 continue
             
-            # 有时限效果
+            # Timed effect
             duration = int(eff.get("duration_month", 0))
             if duration > 0:
                 if current_month < self.consume_time + duration:
@@ -140,8 +140,8 @@ class ConsumedElixir:
 
 def _load_elixirs() -> tuple[Dict[int, Elixir], Dict[str, List[Elixir]]]:
     """
-    加载丹药配置
-    :return: (id索引字典, name索引字典(值为list))
+    Load elixir config
+    :return: (index by id, index by name (values are lists))
     """
     elixirs_by_id: Dict[int, Elixir] = {}
     elixirs_by_name: Dict[str, List[Elixir]] = {}
@@ -155,19 +155,19 @@ def _load_elixirs() -> tuple[Dict[int, Elixir], Dict[str, List[Elixir]]]:
         desc = get_str(row, "desc")
         price = get_int(row, "price")
         
-        # 解析境界
+        # Parse the realm
         realm_str = get_str(row, "realm")
-        # 尝试匹配 Realm 枚举
-        realm = Realm.Qi_Refinement # 默认
+        # Try to match the Realm enum
+        realm = Realm.Qi_Refinement # Default
         for r in Realm:
             if r.value == realm_str or r.name == realm_str:
                 realm = r
                 break
                 
-        # 解析类型
+        # Parse the type
         elixir_type = ElixirType(get_str(row, "type"))
             
-        # 解析 effects
+        # Parse effects
         effects = load_effect_from_str(get_str(row, "effects"))
         effect_desc = format_effects_to_text(effects)
 
@@ -188,7 +188,7 @@ def _load_elixirs() -> tuple[Dict[int, Elixir], Dict[str, List[Elixir]]]:
             elixirs_by_name[name] = []
         elixirs_by_name[name].append(elixir)
         
-        # 注册到全局注册表
+        # Register in the global registry
         from src.classes.items.registry import ItemRegistry
         ItemRegistry.register(elixir.id, elixir)
 
@@ -199,7 +199,7 @@ elixirs_by_id: Dict[int, Elixir] = {}
 elixirs_by_name: Dict[str, List[Elixir]] = {}
 
 def reload():
-    """重新加载数据"""
+    """Reload data."""
     new_id, new_name = _load_elixirs()
     
     elixirs_by_id.clear()
@@ -208,17 +208,17 @@ def reload():
     elixirs_by_name.clear()
     elixirs_by_name.update(new_name)
 
-# 模块初始化时执行一次
+# Run once at module import
 reload()
 
 
 def get_elixirs_by_realm(realm: Realm) -> List[Elixir]:
-    """获取指定境界的所有丹药"""
+    """Get all elixirs of the given realm."""
     return [e for e in elixirs_by_id.values() if e.realm == realm]
 
 
 def get_random_elixir_by_realm(realm: Realm) -> Optional[Elixir]:
-    """获取指定境界的随机丹药"""
+    """Get a random elixir of the given realm."""
     candidates = get_elixirs_by_realm(realm)
     if not candidates:
         return None

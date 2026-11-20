@@ -145,32 +145,32 @@ def _build_item_exchange_options(
     old_name = current_item.name if current_item else ""
 
     accept_desc = t(
-        "{action} new {label}『{new_name}』",
+        "{action} new {label} '{new_name}'",
         action=spec.action_verb,
         label=spec.label,
         new_name=new_name,
     )
     if current_item and spec.sell_item is not None:
-        accept_desc += t(", sell old {label}『{old_name}』", label=spec.label, old_name=old_name)
+        accept_desc += t(", sell old {label} '{old_name}'", label=spec.label, old_name=old_name)
     elif current_item:
         accept_desc += t(
-            ", {replace} old {label}『{old_name}』",
+            ", {replace} old {label} '{old_name}'",
             replace=spec.replace_verb,
             label=spec.label,
             old_name=old_name,
         )
 
-    reject_desc = t("Abandon『{new_name}』", new_name=new_name)
+    reject_desc = t("Abandon '{new_name}'", new_name=new_name)
     if request.reject_mode == RejectMode.SELL_NEW and spec.sell_item is not None:
         reject_desc = t(
-            "Sell new {label}『{new_name}』for spirit stones, keep current status",
+            "Sell new {label} '{new_name}' for spirit stones, keep current status",
             label=spec.label,
             new_name=new_name,
         )
     elif current_item:
-        reject_desc += t(", keep current『{old_name}』", old_name=old_name)
+        reject_desc += t(", keep current '{old_name}'", old_name=old_name)
     if request.reject_mode == RejectMode.LEAVE_AT_SOURCE:
-        reject_desc = t("Leave『{new_name}』where it was found", new_name=new_name)
+        reject_desc = t("Leave '{new_name}' where it was found", new_name=new_name)
 
     return [
         SingleChoiceOption(
@@ -265,7 +265,7 @@ class ItemExchangeScenario(SingleChoiceScenario[ItemExchangeOutcome]):
             return ItemExchangeOutcome(
                 decision=decision,
                 result_text=t(
-                    "{avatar_name} obtained {grade} {label}『{item_name}』and {action}.",
+                    "{avatar_name} obtained {grade} {label} '{item_name}' and {action}.",
                     avatar_name=avatar.name,
                     grade=grade,
                     label=self.spec.label,
@@ -290,7 +290,7 @@ class ItemExchangeScenario(SingleChoiceScenario[ItemExchangeOutcome]):
             return ItemExchangeOutcome(
                 decision=decision,
                 result_text=t(
-                    "{avatar_name} {done} {grade} {label}『{item_name}』.",
+                    "{avatar_name} {done} {grade} {label} '{item_name}'.",
                     avatar_name=avatar.name,
                     done=self.spec.done_verb,
                     grade=grade,

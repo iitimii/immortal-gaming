@@ -29,7 +29,7 @@ export function useRegionDetailPanel(data: () => RegionDetail) {
         const normalized = part.toUpperCase()
         return ATTRIBUTE_KEYS.has(normalized) ? t(`attributes.${normalized}`) : part
       })
-      .join('、')
+      .join(', ')
   }
 
   function getRegionTypeExplanation(): string {

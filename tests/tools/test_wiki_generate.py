@@ -63,7 +63,7 @@ def test_wiki_generate_actions_match_registry(tmp_path: Path):
     output_dir = tmp_path / "wiki"
     generate(output_dir)
 
-    payload = json.loads((output_dir / "data" / "zh-CN.json").read_text(encoding="utf-8"))
+    payload = json.loads((output_dir / "data" / "en-US.json").read_text(encoding="utf-8"))
     action_items = payload["tabs"]["actions"]["items"]
 
     assert len(action_items) == len(list(ActionRegistry.all_actual()))
@@ -82,7 +82,7 @@ def test_wiki_generate_adds_meta_and_theme_fields(tmp_path: Path):
     output_dir = tmp_path / "wiki"
     generate(output_dir)
 
-    payload = json.loads((output_dir / "data" / "zh-CN.json").read_text(encoding="utf-8"))
+    payload = json.loads((output_dir / "data" / "en-US.json").read_text(encoding="utf-8"))
 
     persona = payload["tabs"]["personas"]["items"][0]
     sect = payload["tabs"]["sects"]["items"][0]
@@ -114,7 +114,7 @@ def test_wiki_generate_elixirs_include_realm(tmp_path: Path):
     output_dir = tmp_path / "wiki"
     generate(output_dir)
 
-    payload = json.loads((output_dir / "data" / "zh-CN.json").read_text(encoding="utf-8"))
+    payload = json.loads((output_dir / "data" / "en-US.json").read_text(encoding="utf-8"))
     elixir = payload["tabs"]["elixirs"]["items"][0]
 
     assert elixir["realm"]
@@ -128,7 +128,7 @@ def test_wiki_generate_item_and_resource_categories_are_tabs(tmp_path: Path):
     output_dir = tmp_path / "wiki"
     generate(output_dir)
 
-    payload = json.loads((output_dir / "data" / "zh-CN.json").read_text(encoding="utf-8"))
+    payload = json.loads((output_dir / "data" / "en-US.json").read_text(encoding="utf-8"))
 
     assert "items" not in payload["tabs"]
     assert "resources" not in payload["tabs"]
@@ -143,7 +143,7 @@ def test_wiki_generate_keeps_only_useful_relations(tmp_path: Path):
     output_dir = tmp_path / "wiki"
     generate(output_dir)
 
-    payload = json.loads((output_dir / "data" / "zh-CN.json").read_text(encoding="utf-8"))
+    payload = json.loads((output_dir / "data" / "en-US.json").read_text(encoding="utf-8"))
 
     weapon = payload["tabs"]["weapons"]["items"][0]
     elixir = payload["tabs"]["elixirs"]["items"][0]
@@ -161,7 +161,7 @@ def test_wiki_generate_hidden_domains_and_sect_tasks(tmp_path: Path):
     output_dir = tmp_path / "wiki"
     generate(output_dir)
 
-    payload = json.loads((output_dir / "data" / "zh-CN.json").read_text(encoding="utf-8"))
+    payload = json.loads((output_dir / "data" / "en-US.json").read_text(encoding="utf-8"))
     hidden_domain = payload["tabs"]["hidden_domains"]["items"][0]
     sect_task = payload["tabs"]["sect_tasks"]["items"][0]
 
@@ -185,7 +185,7 @@ def test_wiki_generate_attaches_images_and_copies_assets(tmp_path: Path):
     output_dir = tmp_path / "wiki"
     generate(output_dir)
 
-    payload = json.loads((output_dir / "data" / "zh-CN.json").read_text(encoding="utf-8"))
+    payload = json.loads((output_dir / "data" / "en-US.json").read_text(encoding="utf-8"))
 
     world_info = payload["tabs"]["world"]["items"][0]
     sect = next(item for item in payload["tabs"]["sects"]["items"] if str(item["id"]) == "1")
@@ -213,7 +213,7 @@ def test_wiki_generate_keeps_text_only_sections_without_decorative_images(tmp_pa
     output_dir = tmp_path / "wiki"
     generate(output_dir)
 
-    payload = json.loads((output_dir / "data" / "zh-CN.json").read_text(encoding="utf-8"))
+    payload = json.loads((output_dir / "data" / "en-US.json").read_text(encoding="utf-8"))
     world_info = payload["tabs"]["world"]["items"][0]
     race = next(item for item in payload["tabs"]["races"]["items"] if item["id"] == "human")
 
@@ -235,7 +235,7 @@ def test_wiki_serve_generates_once_when_inputs_match(tmp_path: Path, monkeypatch
         data_dir = output_dir / "data"
         data_dir.mkdir()
         (data_dir / "registry.json").write_text("{}", encoding="utf-8")
-        return ["zh-CN"]
+        return ["en-US"]
 
     monkeypatch.setattr(serve, "build_input_fingerprint", lambda: "same-inputs")
     monkeypatch.setattr(serve, "generate", fake_generate)
@@ -244,12 +244,12 @@ def test_wiki_serve_generates_once_when_inputs_match(tmp_path: Path, monkeypatch
 
     regenerated, locales = serve.ensure_generated(output_dir)
     assert regenerated is True
-    assert locales == ["zh-CN"]
+    assert locales == ["en-US"]
     assert len(calls) == 1
 
     regenerated, locales = serve.ensure_generated(output_dir)
     assert regenerated is False
-    assert locales == ["zh-CN"]
+    assert locales == ["en-US"]
     assert len(calls) == 1
 
     manifest = serve.read_manifest(output_dir)

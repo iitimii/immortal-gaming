@@ -26,11 +26,11 @@ def _resolve_child_race(parent1: Avatar, parent2: Avatar):
 
 def process_births(world: World) -> list[Event]:
     """
-    处理世界中的生育逻辑。
-    遍历所有存活角色，检查符合条件的道侣并尝试生成子女。
+    Handle birth logic in the world.
+    Iterate over all living avatars, check eligible Dao companions and try to produce children.
     
     Returns:
-        生成的事件列表
+        List of generated events
     """
     events = []
     
@@ -42,7 +42,7 @@ def process_births(world: World) -> list[Event]:
     living_avatars = world.avatar_manager.get_living_avatars()
 
     for avatar in living_avatars:
-        # 1. 寻找道侣
+        # 1. Find Dao companions
         partner: Avatar | None = None
         for target, state in avatar.relations.items():
             if Relation.IS_LOVER_OF in state.identity_relations:
@@ -55,8 +55,8 @@ def process_births(world: World) -> list[Event]:
         if partner.is_dead:
             continue
         
-        # 2. 去重 (只处理一次 A-B)
-        # 使用ID排序确保唯一性
+        # 2. Deduplicate (only handle A-B once)
+        # Sort by ID to ensure uniqueness
         id1, id2 = sorted([str(avatar.id), str(partner.id)])
         couple_id = (id1, id2)
         
@@ -64,10 +64,10 @@ def process_births(world: World) -> list[Event]:
             continue
         processed_couples.add(couple_id)
         
-        # 3. 检查时间 (关系需持续 > 12 个月)
+        # 3. Check the time (the relation must have lasted > 12 months)
         start_time = avatar.relation_start_dates.get(partner.id, 0)
         if partner.id not in avatar.relation_start_dates:
-             # 补录时间为当前时间，避免每帧都检查
+             # Backfill the time as now, to avoid checking every frame
              avatar.relation_start_dates[partner.id] = current_time
              partner.relation_start_dates[avatar.id] = current_time
              start_time = current_time
@@ -75,11 +75,11 @@ def process_births(world: World) -> list[Event]:
         if current_time - start_time <= 12:
             continue
         
-        # 4. 检查数量限制 (任一方达到上限即停止)
+        # 4. Check the count limit (stop once either side reaches the limit)
         if len(avatar.children) >= max_children or len(partner.children) >= max_children:
             continue
             
-        # 5. 概率判定
+        # 5. Probability roll
         if random.random() < birth_rate:
             event = _create_child_for_couple(world, avatar, partner)
             if event:
@@ -89,26 +89,26 @@ def process_births(world: World) -> list[Event]:
 
 def _create_child_for_couple(world: World, parent1: Avatar, parent2: Avatar) -> Event:
     """
-    为一对伴侣创建子女
+    Create a child for a pair of partners
     """
-    # 1. 确定父系 (用于姓氏)
-    # 优先取男性为父，若同性则随机或取 parent1
+    # 1. Determine the paternal line (for the surname)
+    # Prefer the male as father; if same-sex, pick parent1
     father = parent1 if parent1.gender == Gender.MALE else (parent2 if parent2.gender == Gender.MALE else parent1)
     
-    # 2. 生成基础信息
+    # 2. Generate basic info
     child_gender = random.choice(list(Gender))
     
-    # 获取父姓
-    father_surname = father.name[0] # 简单取首字
+    # Get the father's surname
+    father_surname = (father.name.split() or [""])[0] # Names are "Surname Given"; take the first part
     
-    # 使用公共API生成名字
+    # Generate the name via the public API
     child_race = _resolve_child_race(parent1, parent2)
     if child_race.is_yao:
         child_name = get_random_name_for_race(child_gender, child_race)
     else:
         child_name = get_random_name_with_surname(child_gender, father_surname, sect=None)
     
-    # 3. 创建对象
+    # 3. Create the object
     child = Mortal(
         id=get_avatar_id(),
         name=child_name,
@@ -119,14 +119,14 @@ def _create_child_for_couple(world: World, parent1: Avatar, parent2: Avatar) -> 
         born_region_id=get_born_region_id(world, parents=[parent1, parent2], race=child_race)
     )
     
-    # 4. 绑定关系
+    # 4. Bind relations
     parent1.children.append(child)
     parent2.children.append(child)
     
-    # 5. 注册到世界凡人管理器
+    # 5. Register with the world's mortal manager
     world.mortal_manager.register_mortal(child)
     
-    # 6. 生成事件文本
+    # 6. Generate the event text
     # key: "{p1} and {p2} gave birth to a {gender} named {child}."
     gender_str_key = "son" if child_gender == Gender.MALE else "daughter"
     gender_str = t(gender_str_key)

@@ -53,7 +53,7 @@ def create_mock_avatar(level, realm=None, stage=None, effects=None, technique_at
 
 class TestBattleStrength:
     def test_base_strength_qi_early_min(self):
-        # 练气前期 1级
+        # Early Qi Refinement, level 1
         # Base: 10, Stage: 0
         avatar = create_mock_avatar(1, Realm.Qi_Refinement, Stage.Early_Stage)
         strength = get_base_strength(avatar)
@@ -61,7 +61,7 @@ class TestBattleStrength:
         assert strength == expected
 
     def test_base_strength_qi_late_max(self):
-        # 练气后期 30级
+        # Late Qi Refinement, level 30
         # Base: 10, Stage: 5
         avatar = create_mock_avatar(30, Realm.Qi_Refinement, Stage.Late_Stage)
         strength = get_base_strength(avatar)
@@ -69,7 +69,7 @@ class TestBattleStrength:
         assert strength == pytest.approx(expected)
 
     def test_base_strength_foundation_early_min(self):
-        # 筑基前期 31级
+        # Early Foundation Establishment, level 31
         # Base: 20, Stage: 0
         avatar = create_mock_avatar(31, Realm.Foundation_Establishment, Stage.Early_Stage)
         strength = get_base_strength(avatar)
@@ -77,7 +77,7 @@ class TestBattleStrength:
         assert strength == expected
 
     def test_base_strength_nascent_middle(self):
-        # 元婴中期 105级
+        # Middle Nascent Soul, level 105
         # Base: 40, Stage: 2.5
         avatar = create_mock_avatar(105, Realm.Nascent_Soul, Stage.Middle_Stage)
         strength = get_base_strength(avatar)
@@ -93,9 +93,9 @@ class TestBattleStrength:
 
 class TestCombatMechanics:
     def test_realm_gap_win_rate(self):
-        # 筑基前期 vs 练气巅峰
-        # 筑基前期: 20.0
-        # 练气巅峰: 15.0 (10 + 5)
+        # Early Foundation Establishment vs peak Qi Refinement
+        # Early Foundation Establishment: 20.0
+        # Peak Qi Refinement: 15.0 (10 + 5)
         # Diff: 5.0
         p1 = create_mock_avatar(31, Realm.Foundation_Establishment, Stage.Early_Stage)
         p2 = create_mock_avatar(30, Realm.Qi_Refinement, Stage.Late_Stage)
@@ -107,9 +107,9 @@ class TestCombatMechanics:
         assert rate < 0.69
 
     def test_massive_gap_win_rate(self):
-        # 元婴 vs 练气
-        # 元婴: 40+
-        # 练气: 10+
+        # Nascent Soul vs Qi Refinement
+        # Nascent Soul: 40+
+        # Qi Refinement: 10+
         # Diff > 20 -> should be close to max win rate
         p1 = create_mock_avatar(91, Realm.Nascent_Soul, Stage.Early_Stage)
         p2 = create_mock_avatar(1, Realm.Qi_Refinement, Stage.Early_Stage)

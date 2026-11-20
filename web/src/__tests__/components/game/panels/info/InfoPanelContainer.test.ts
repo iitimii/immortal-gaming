@@ -8,11 +8,11 @@ import { useUiStore } from '@/stores/ui'
 function createInfoPanelI18n() {
   return createI18n({
     legacy: false,
-    locale: 'zh-CN',
+    locale: 'en-US',
     messages: {
-      'zh-CN': {
+      'en-US': {
         ui: {
-          close: '关闭',
+          close: 'Close',
         },
       },
     },
@@ -101,13 +101,13 @@ describe('InfoPanelContainer', () => {
     uiStore.selectedTarget = { type: 'region', id: 'region-1' }
     uiStore.detailData = {
       id: 'region-1',
-      name: '千机谷',
-      type_name: '宗门驻地',
+      name: 'Thousand Mechanisms Valley',
+      type_name: 'Sect Headquarters',
     } as any
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.text()).toContain('千机谷')
-    expect(wrapper.text()).not.toContain('宗门驻地')
-    expect(wrapper.text()).not.toContain('固有地名')
+    expect(wrapper.text()).toContain('Thousand Mechanisms Valley')
+    expect(wrapper.text()).not.toContain('Sect Headquarters')
+    expect(wrapper.text()).not.toContain('Fixed Place Name')
   })
 })

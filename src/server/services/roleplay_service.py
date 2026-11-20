@@ -81,7 +81,7 @@ def _find_choice_option_text(pending: dict[str, Any], selected_key: str) -> str:
             title = str(option.get("title") or "").strip()
             description = str(option.get("description") or "").strip()
             if title and description:
-                return f"{title}：{description}"
+                return f"{title}: {description}"
             if title:
                 return title
             if description:

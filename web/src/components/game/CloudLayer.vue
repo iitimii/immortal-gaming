@@ -29,7 +29,7 @@ const MAX_CLOUDS = {
   'low': 1,
   'high': 5
 }
-const SPAWN_CHANCE = 0.01 // 稍微提高生成检测频率，因为有最大数量限制
+const SPAWN_CHANCE = 0.01 // Slightly higher spawn check rate, since the cloud count is capped
 
 function getCloudFreq() {
   const freq = mapStore.renderConfig.cloud_frequency || 'none'

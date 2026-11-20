@@ -11,10 +11,10 @@ from src.classes.environment.map import Map
 
 def _build_minimal_world_with_sects():
   """
-  构造一个带有世界和两个宗门的最小环境，用于测试 /api/v1/query/sect-relations。
-  仅验证接口结构和基本计算是否正常工作。
+  Build a minimal environment with a world and two sects for testing /api/v1/query/sect-relations.
+  Only verifies the response structure and basic computation.
   """
-  # 构造简单地图
+  # Build a simple map
   game_map = Map(width=5, height=5)
   month_stamp = create_month_stamp(Year(100), Month.JANUARY)
 
@@ -25,7 +25,7 @@ def _build_minimal_world_with_sects():
     month_stamp=month_stamp,
   )
 
-  # 构造两个宗门
+  # Build two sects
   hq = SectHeadQuarter(name="HQ", desc="", image=None)  # type: ignore[arg-type]
   sect1 = Sect(
     id=1,
@@ -50,7 +50,7 @@ def _build_minimal_world_with_sects():
 
   world.existed_sects = [sect1, sect2]
 
-  # 构造 SectManager 并挂到 sim 上
+  # Build a SectManager and attach it to the simulator
   from src.sim.simulator import Simulator
 
   sim = Simulator(world)
@@ -61,10 +61,10 @@ def _build_minimal_world_with_sects():
 
 @pytest.fixture
 def api_client(monkeypatch):
-  # 准备世界和模拟器
+  # Prepare the world and simulator
   world, sim = _build_minimal_world_with_sects()
 
-  # 注入到全局 game_instance
+  # Inject into the global game_instance
   main.game_instance["world"] = world
   main.game_instance["sim"] = sim
 
@@ -73,7 +73,7 @@ def api_client(monkeypatch):
 
 
 def test_get_sect_relations_basic(api_client: TestClient):
-  """基本接口连通性与返回结构校验。"""
+  """Basic endpoint connectivity and response structure check."""
   resp = api_client.get("/api/v1/query/sect-relations")
   assert resp.status_code == 200
 
@@ -82,7 +82,7 @@ def test_get_sect_relations_basic(api_client: TestClient):
   relations = data["relations"]
   assert isinstance(relations, list)
 
-  # 只有两个宗门，应当只产生一条关系记录
+  # With only two sects there should be exactly one relation record
   assert len(relations) <= 1
   if relations:
     rel = relations[0]
@@ -91,6 +91,6 @@ def test_get_sect_relations_basic(api_client: TestClient):
     assert isinstance(rel["value"], int)
     assert rel["diplomacy_status"] in {"war", "peace"}
     assert isinstance(rel["diplomacy_duration_months"], int)
-    # reason_breakdown 为包含详细 delta/meta 的结构化原因列表
+    # reason_breakdown is a structured list of reasons with detailed delta/meta
     assert isinstance(rel["reason_breakdown"], list)
 

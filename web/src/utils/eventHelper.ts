@@ -4,7 +4,7 @@ import type { GameEvent } from '../types/core';
 export const MAX_EVENTS = 300;
 
 /**
- * 处理新事件列表，转换为 Domain 对象并分配序列号
+ * Convert incoming events into domain objects and assign sequence numbers
  */
 export function processNewEvents(rawEvents: EventDTO[], currentYear: number, currentMonth: number): GameEvent[] {
   if (!rawEvents || rawEvents.length === 0) return [];
@@ -46,14 +46,14 @@ export function processNewEvents(rawEvents: EventDTO[], currentYear: number, cur
 }
 
 /**
- * 合并并排序事件列表
- * 1. 优先使用 createdAt (精确时间戳) 升序
- * 2. 其次按月时间戳升序
- * 3. 最后按序列号升序
- * 4. 保留最新的 MAX_EVENTS 条
+ * Merge and sort event lists
+ * 1. createdAt (precise timestamp) ascending first
+ * 2. then month stamp ascending
+ * 3. then sequence number ascending
+ * 4. keep the newest MAX_EVENTS
  */
 export function mergeAndSortEvents(existingEvents: GameEvent[], newEvents: GameEvent[]): GameEvent[] {
-  // 合并
+  // Merge
   const combined = [...existingEvents]; // Copy existing
   // Add new ones only if not exists (by id)
   const existingIds = new Set(existingEvents.map(e => e.id));
@@ -64,25 +64,25 @@ export function mergeAndSortEvents(existingEvents: GameEvent[], newEvents: GameE
   }
   
   combined.sort((a, b) => {
-    // 0. 如果都有 createdAt，优先比较
-    // 注意：SQLite 可能没有返回历史数据的 createdAt，或者为 0
+    // 0. Compare createdAt first when both have it
+    // Note: SQLite may return no createdAt (or 0) for historical data
     if (a.createdAt && b.createdAt && a.createdAt > 0 && b.createdAt > 0) {
         // float comparison
         return a.createdAt - b.createdAt;
     }
 
-    // 1. 先按时间戳升序（最旧的月在上面）
+    // 1. Timestamp ascending (oldest month on top)
     const ta = a.timestamp;
     const tb = b.timestamp;
     if (tb !== ta) {
       return ta - tb;
     }
     
-    // 2. 时间相同时，按原始逻辑顺序升序（先发生的在上面）
-    // 如果其中一个有 createdAt 而另一个没有（不太可能，除非混合了旧数据）
-    // 假设 tick 数据有 createdAt，API 数据也有。
+    // 2. Same time: original logical order ascending (earlier first)
+    // If only one has createdAt (unlikely unless mixed with old data)
+    // we assume both tick and API data carry createdAt.
     
-    // 如果没有 createdAt，回退到 _seq
+    // Without createdAt, fall back to _seq
     const seqA = a._seq ?? -1;
     const seqB = b._seq ?? -1;
     
@@ -91,7 +91,7 @@ export function mergeAndSortEvents(existingEvents: GameEvent[], newEvents: GameE
     return seqA - seqB;
   });
   
-  // 保留最新的 N 条
+  // Keep the newest N
   if (combined.length > MAX_EVENTS) {
     return combined.slice(-MAX_EVENTS);
   }
@@ -100,7 +100,7 @@ export function mergeAndSortEvents(existingEvents: GameEvent[], newEvents: GameE
 }
 
 /**
- * 根据角色 ID 哈希生成一致的 HSL 颜色。
+ * Derive a stable HSL color from a hash of the avatar ID.
  */
 export function avatarIdToColor(id: string): string {
   let hash = 0;
@@ -131,7 +131,7 @@ export interface EventContentToken {
 }
 
 /**
- * 根据角色列表构建 name -> { id, color } 映射表。
+ * Build a name -> { id, color } map from the avatar list.
  */
 export function buildAvatarColorMap(
   avatars: Array<{ id: string; name?: string }>
@@ -146,8 +146,8 @@ export function buildAvatarColorMap(
 }
 
 /**
- * 根据宗门列表构建 name -> { id, color } 映射。
- * 颜色来自后端透传的 sect.csv color，缺省时使用白色。
+ * Build a name -> { id, color } map from the sect list.
+ * Colors come from sect.csv via the backend; white when missing.
  */
 export function buildSectColorMap(
   sects: Array<{ sect_id?: number; sect_name?: string; sect_color?: string }>
@@ -175,7 +175,7 @@ export function escapeHtml(text: string): string {
 }
 
 /**
- * 将事件文本拆分为安全渲染 token，避免在组件里使用 v-html。
+ * Split event text into safe render tokens so components avoid v-html.
  */
 export function tokenizeEventContent(
   text: string,
@@ -187,7 +187,7 @@ export function tokenizeEventContent(
   for (const [name, info] of colorMap.entries()) {
     entityByName.set(name, { type: 'avatar', id: info.id, color: info.color });
   }
-  // 同名冲突时保留角色优先级，避免破坏原有行为。
+  // On name clashes avatars win, preserving existing behavior.
   for (const [name, info] of sectColorMap.entries()) {
     if (!entityByName.has(name)) {
       entityByName.set(name, { type: 'sect', id: info.id, color: info.color });
@@ -233,7 +233,7 @@ export function tokenizeEventContent(
         color: info.color,
       });
     } else {
-      // 理论上不会走到这里；保底退化为普通文本，避免渲染异常。
+      // Should be unreachable; fall back to plain text to avoid render errors.
       tokens.push({
         type: 'text',
         text: matchedText,
@@ -254,15 +254,15 @@ export function tokenizeEventContent(
 }
 
 /**
- * 高亮文本中的角色名，返回 HTML 字符串。
- * 生成的 span 带有 data-avatar-id 属性，可用于点击跳转。
+ * Highlight avatar names in text and return an HTML string.
+ * Each span has a data-avatar-id attribute for click-through.
  *
- * 实现说明：
- * - 使用单次正则替换（而非多次 replaceAll），避免重叠名字问题。
- * - 例如 "张三" 和 "张三丰"，多次 replaceAll 会导致 "张三丰" 中的 "张三" 被错误匹配。
- * - 单次正则 /(张三丰|张三)/g 配合长名字优先排序，正则引擎匹配 "张三丰" 后会跳过这3个字符，
- *   不会再回头匹配 "张三"。
- * - /g flag 确保所有出现都被替换（一次扫描，callback 被调用多次）。
+ * Implementation notes:
+ * - Uses a single regex replace (not repeated replaceAll) to handle overlapping names.
+ * - E.g. with "Zhang San" and "Zhang Sanfeng", repeated replaceAll would wrongly match "Zhang San" inside "Zhang Sanfeng".
+ * - A single /(Zhang Sanfeng|Zhang San)/g with longer names first consumes "Zhang Sanfeng" as a whole,
+ *   so "Zhang San" is never matched inside it.
+ * - The /g flag replaces every occurrence (one pass, callback called per match).
  */
 export function highlightAvatarNames(
   text: string,

@@ -20,7 +20,7 @@ class WorldLore:
 
 class WorldLoreManager:
     """
-    开局阶段根据“世界观与历史”文本，对本局地点、宗门、功法和装备文本做一次性全量重写。
+    At game start, rewrites this run's location, sect, technique and equipment texts all at once based on the "world lore and history" text.
     """
 
     def __init__(self, world: "World"):
@@ -32,7 +32,7 @@ class WorldLoreManager:
         if not lore_text:
             return
 
-        self.logger.info("[WorldLore] 正在根据世界观与历史重塑世界...")
+        self.logger.info("[WorldLore] Reshaping the world from the world lore and history...")
         context = build_world_lore_context(self.world, lore_text)
         draft = await WorldLoreRewriteRunner(context).run()
         apply_world_lore_rewrite(self.world, draft)
@@ -42,4 +42,4 @@ class WorldLoreManager:
             draft=draft,
             rewrite_config=context.config,
         )
-        self.logger.info("[WorldLore] 世界观与历史塑形完成")
+        self.logger.info("[WorldLore] World lore and history shaping complete")

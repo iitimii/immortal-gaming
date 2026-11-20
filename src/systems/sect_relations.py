@@ -25,19 +25,19 @@ def _clamp(value: int, min_value: int, max_value: int) -> int:
 
 def _compute_pair_score(a: Sect, b: Sect, border_contact_edges: int) -> Tuple[int, List[dict]]:
     """
-    计算一对宗门之间的关系数值与理由。
-    数值范围：-100 ~ 100。
-    构成要素：
-        - 阵营：正邪相对 -40，同阵营 +20，中立相关 0。
-        - 道统：相同 +10，不同 -15。
-        - 势力边界接触：接壤越密集，关系越紧张。
+    Compute the relation value and reasons between a pair of sects.
+    Range: -100 to 100.
+    Components:
+        - Alignment: righteous vs evil -40, same alignment +20, involving neutral 0.
+        - Orthodoxy: same +10, different -15.
+        - Territory border contact: the denser the shared border, the tenser the relation.
     """
     from src.classes.alignment import Alignment
 
     score = 0
     breakdown: List[dict] = []
 
-    # 阵营
+    # Alignment
     align_a = getattr(a, "alignment", None)
     align_b = getattr(b, "alignment", None)
     if align_a is not None and align_b is not None:
@@ -59,7 +59,7 @@ def _compute_pair_score(a: Sect, b: Sect, border_contact_edges: int) -> Tuple[in
                 }
             )
 
-    # 道统
+    # Orthodoxy
     orth_a = getattr(a, "orthodoxy_id", "") or ""
     orth_b = getattr(b, "orthodoxy_id", "") or ""
     if orth_a and orth_b:
@@ -80,7 +80,7 @@ def _compute_pair_score(a: Sect, b: Sect, border_contact_edges: int) -> Tuple[in
                 }
             )
 
-    # 势力范围冲突（线性）
+    # Territory conflict (linear)
     if border_contact_edges > 0:
         sect_conf = getattr(CONFIG, "sect", None)
         dense_threshold = int(getattr(sect_conf, "territory_dense_border_threshold", 8)) if sect_conf else 8
@@ -94,7 +94,7 @@ def _compute_pair_score(a: Sect, b: Sect, border_contact_edges: int) -> Tuple[in
                 "delta": -penalty,
                 "meta": {
                     "border_contact_edges": border_contact_edges,
-                    # 兼容旧前端/旧提示词的字段名，语义上已退化为“边界接触强度”。
+                    # Field name kept for old frontend/prompts; its meaning is now "border contact intensity".
                     "overlap_tiles": border_contact_edges,
                 },
             }
@@ -112,28 +112,28 @@ def compute_sect_relations(
     diplomacy_by_pair: Dict[Tuple[int, int], List[dict]] | None = None,
 ) -> List[dict]:
     """
-    计算一组宗门之间的关系。
+    Compute relations among a group of sects.
 
     Args:
-        sects: 需要计算的宗门列表（建议只传 active 宗门）。
-        tile_owners: 地图中每个格子被哪些宗门占据的映射。
+        sects: Sects to compute (preferably only active sects).
+        tile_owners: Mapping of each map tile to the sects occupying it.
 
     Returns:
-        列表，每项结构：
+        A list where each item is:
         {
             "sect_a_id": int,
             "sect_a_name": str,
             "sect_b_id": int,
             "sect_b_name": str,
             "value": int,                # -100 ~ 100
-            "reason_breakdown": list[dict],   # 每条包含 reason / delta / meta
+            "reason_breakdown": list[dict],   # each entry contains reason / delta / meta
         }
     """
     sect_list = [s for s in sects if s is not None]
     if len(sect_list) < 2:
         return []
 
-    # 预建 id -> sect 映射，避免后续多次遍历
+    # Pre-build an id -> sect map to avoid repeated iteration
     sect_by_id: Dict[int, Sect] = {int(s.id): s for s in sect_list}
 
     if border_contact_counts is None:
@@ -156,7 +156,7 @@ def compute_sect_relations(
 
     results: List[dict] = []
 
-    # 遍历所有两两组合
+    # Iterate over all pairs
     ids = sorted(sect_by_id.keys())
     for i in range(len(ids)):
         for j in range(i + 1, len(ids)):

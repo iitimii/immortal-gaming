@@ -9,14 +9,14 @@ from src.sim.load.load_game import load_game
 def test_save_and_load_preserves_dynasty(base_world, tmp_path):
     base_world.dynasty = Dynasty(
         id=2,
-        name="宋",
-        desc="重文轻武，典章繁密，民间书院兴盛。",
-        royal_surname="上官",
+        name="Song",
+        desc="Values letters over arms; its statutes are elaborate and private academies flourish.",
+        royal_surname="Shangguan",
         effect_desc="",
         effects={},
         current_emperor=Emperor(
-            surname="上官",
-            given_name="景天",
+            surname="Shangguan",
+            given_name="Jingtian",
             birth_month_stamp=int(base_world.month_stamp) - 28 * 12,
             max_age=80,
         ),
@@ -30,8 +30,8 @@ def test_save_and_load_preserves_dynasty(base_world, tmp_path):
 
     new_world, _new_sim, _new_sects = load_game(save_path)
     assert new_world.dynasty is not None
-    assert new_world.dynasty.name == "宋"
-    assert new_world.dynasty.royal_surname == "上官"
-    assert new_world.dynasty.title == "宋朝"
+    assert new_world.dynasty.name == "Song"
+    assert new_world.dynasty.royal_surname == "Shangguan"
+    assert new_world.dynasty.title == "Song Dynasty"
     assert new_world.dynasty.current_emperor is not None
-    assert new_world.dynasty.current_emperor.name == "上官景天"
+    assert new_world.dynasty.current_emperor.name == "Shangguan Jingtian"

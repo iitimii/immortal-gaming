@@ -1,9 +1,9 @@
 """
-通用日志模块
-功能：
-1. 自动记录各种调用的输入和输出（目前主要用于LLM）
-2. 启动时自动删除一周以前的日志文件
-3. 日志文件按日期分组
+General-purpose logging module.
+Features:
+1. Automatically records inputs and outputs of calls (currently mainly LLM calls)
+2. Deletes log files older than one week on startup
+3. Groups log files by date
 """
 
 import logging
@@ -17,32 +17,32 @@ from src.config.data_paths import get_data_paths
 from src.utils.config import CONFIG
 
 class Logger:
-    """通用日志记录器"""
+    """General-purpose logger."""
     
     def __init__(self, log_dir: str | os.PathLike | None = None):
         """
-        初始化日志记录器
+        Initialize the logger.
         
         Args:
-            log_dir: 日志文件存储目录
+            log_dir: directory where log files are stored
         """
         self.log_dir = Path(log_dir) if log_dir is not None else get_data_paths().logs_dir
         self.log_dir.mkdir(parents=True, exist_ok=True)
         
-        # 清理旧日志文件
+        # Clean up old log files
         self._cleanup_old_logs()
         
-        # 设置当前日志文件
+        # Set up the current log file
         self._setup_current_logger()
     
     def _cleanup_old_logs(self):
-        """删除一周以前的日志文件"""
+        """Delete log files older than one week."""
         cutoff_date = datetime.now() - timedelta(days=7)
         
         for log_file in self.log_dir.glob("*.log"):
             try:
-                # 从文件名中提取日期
-                date_str = log_file.stem.split("_")[-1]  # 取最后一部分作为日期
+                # Extract the date from the file name
+                date_str = log_file.stem.split("_")[-1]  # use the last segment as the date
                 file_date = datetime.strptime(date_str, "%Y%m%d")
                 
                 if file_date < cutoff_date:
@@ -52,26 +52,26 @@ class Logger:
                 print(f"Error processing log file {log_file}: {e}")
     
     def _setup_current_logger(self):
-        """设置当前日期的日志记录器"""
+        """Set up the logger for the current date."""
         current_date = datetime.now().strftime("%Y%m%d")
         log_filename = f"{current_date}.log"
         self.log_file_path = self.log_dir / log_filename
         
-        # 创建日志记录器
+        # Create the logger
         self.logger = logging.getLogger(f"logger_{current_date}")
         self.logger.setLevel(logging.INFO)
         
-        # 清除现有的处理器（避免重复记录）
+        # Clear existing handlers (avoid duplicate records)
         self.logger.handlers.clear()
         
-        # 创建文件处理器
+        # Create the file handler
         handler = logging.FileHandler(
             self.log_file_path,
             encoding='utf-8',
             mode='a'
         )
         
-        # 设置日志格式
+        # Set the log format
         formatter = logging.Formatter(
             '%(asctime)s - %(levelname)s - %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S'
@@ -80,10 +80,10 @@ class Logger:
         
         self.logger.addHandler(handler)
         
-        # 不向根日志记录器传播
+        # Do not propagate to the root logger
         self.logger.propagate = False
         
-        # 记录版本号
+        # Record the version number
         if hasattr(CONFIG, "meta") and hasattr(CONFIG.meta, "version"):
             self.logger.info(f"========== Game Start (Version: {CONFIG.meta.version}) ==========")
         else:
@@ -96,16 +96,16 @@ class Logger:
                           duration: Optional[float] = None,
                           additional_info: Optional[dict] = None):
         """
-        记录LLM交互
+        Record an LLM interaction.
         
         Args:
-            model_name: 使用的模型名称
-            prompt: 输入的提示词
-            response: LLM的响应
-            duration: 调用耗时（秒）
-            additional_info: 额外信息
+            model_name: name of the model used
+            prompt: input prompt
+            response: LLM response
+            duration: call duration (seconds)
+            additional_info: extra information
         """
-        # 机器可读的摘要（不包含大段文本，避免 JSON 转义导致 \ 混杂）
+        # Machine-readable summary (no large text blocks, to avoid JSON escaping clutter with \)
         log_data = {
             "timestamp": datetime.now().isoformat(),
             "model_name": model_name,
@@ -117,23 +117,23 @@ class Logger:
         if additional_info:
             log_data.update(additional_info)
         
-        # 记录可解析的 JSON 摘要
+        # Record a parseable JSON summary
         log_message = f"LLM_INTERACTION: {json.dumps(log_data, ensure_ascii=False)}"
         self.logger.info(log_message)
 
-        # 记录更友好的原始多行文本，避免引号被转义
+        # Record friendlier raw multi-line text so quotes are not escaped
         self.logger.info("LLM_PROMPT:\n%s", prompt)
         self.logger.info("LLM_RESPONSE:\n%s", response)
     
     def log_error(self, error_message: str, prompt: str = None):
         """
-        记录错误
+        Record an error.
         
         Args:
-            error_message: 错误信息
-            prompt: 相关的提示词（可选）
+            error_message: error message
+            prompt: related prompt (optional)
         """
-        # 错误摘要（不含原始 prompt，避免转义干扰）
+        # Error summary (without the raw prompt, to avoid escaping noise)
         log_data = {
             "timestamp": datetime.now().isoformat(),
             "error": error_message,
@@ -142,16 +142,16 @@ class Logger:
         log_message = f"LLM_ERROR: {json.dumps(log_data, ensure_ascii=False)}"
         self.logger.error(log_message)
 
-        # 如提供 prompt，追加原始多行文本便于排查
+        # If a prompt is provided, append the raw multi-line text for debugging
         if prompt:
             self.logger.error("LLM_ERROR_PROMPT:\n%s", prompt)
     
     def get_today_stats(self) -> dict:
         """
-        获取今日统计信息
+        Get today's statistics.
         
         Returns:
-            dict: 包含今日调用次数、总耗时等信息
+            dict: today's call count, total duration, etc.
         """
         if not self.log_file_path.exists():
             return {
@@ -188,23 +188,23 @@ class Logger:
         return stats
 
 
-# 全局日志记录器实例
+# Global logger instance
 _logger = None
 
 def get_logger() -> Logger:
-    """获取全局日志记录器实例"""
+    """Get the global logger instance."""
     global _logger
     if _logger is None:
         _logger = Logger()
     return _logger
 
-# LLM专用的便捷函数
+# LLM convenience helpers
 def log_llm_call(model_name: str, prompt: str, response: str, duration: float = None):
-    """便捷函数：记录LLM调用"""
+    """Convenience helper: record an LLM call."""
     logger = get_logger()
     logger.log_llm_interaction(model_name, prompt, response, duration)
 
 def log_llm_error(error_message: str, prompt: str = None):
-    """便捷函数：记录LLM错误"""
+    """Convenience helper: record an LLM error."""
     logger = get_logger()
     logger.log_error(error_message, prompt)

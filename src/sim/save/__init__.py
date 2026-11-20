@@ -1,10 +1,10 @@
-"""存档功能模块
+"""Save game module
 
-延迟导入以避免循环依赖
+Uses lazy imports to avoid circular dependencies
 """
 
 def __getattr__(name):
-    """延迟导入，避免在模块级别触发循环依赖"""
+    """Lazy import to avoid triggering circular dependencies at module level"""
     if name == "save_game":
         from .save_game import save_game
         return save_game

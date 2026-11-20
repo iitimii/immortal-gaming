@@ -68,7 +68,7 @@ function fitMap() {
 
 watch(() => [props.screenWidth, props.screenHeight], () => {
   if (viewport) {
-    // 窗口尺寸变化时，重新适配地图。
+    // Refit the map when the window is resized.
     fitMap()
   }
 })

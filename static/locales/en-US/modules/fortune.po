@@ -14,9 +14,9 @@ msgstr ""
 
 # Fortune Event Text - Technique
 msgid ""
-"You comprehended an upper-grade technique『{technique_name}』in your fortune."
+"You comprehended an upper-grade technique '{technique_name}' in your fortune."
 msgstr ""
-"You comprehended a superior-grade technique『{technique_name}』in your "
+"You comprehended a superior-grade technique '{technique_name}' in your "
 "fortune."
 
 msgid "You comprehended superior technique '{technique}' during the fortune."
@@ -30,16 +30,16 @@ msgstr ""
 "fortune."
 
 # Fortune Event Text - Auxiliary
-msgid "You discovered a {realm} auxiliary『{auxiliary_name}』in your fortune."
-msgstr "You discovered a {realm} auxiliary『{auxiliary_name}』in your fortune."
+msgid "You discovered a {realm} auxiliary '{auxiliary_name}' in your fortune."
+msgstr "You discovered a {realm} auxiliary '{auxiliary_name}' in your fortune."
 
 # Fortune - discovery intro messages
 msgid "You discovered a {realm} weapon '{weapon}' during the fortune."
 msgstr "You discovered a {realm} weapon '{weapon}' during the fortune."
 
 # Fortune Event Text - Weapon
-msgid "You discovered a {realm} weapon『{weapon_name}』in your fortune."
-msgstr "You discovered a {realm} weapon『{weapon_name}』in your fortune."
+msgid "You discovered a {realm} weapon '{weapon_name}' in your fortune."
+msgstr "You discovered a {realm} weapon '{weapon_name}' in your fortune."
 
 msgid "fortune_dynamic_story_prompt"
 msgstr ""

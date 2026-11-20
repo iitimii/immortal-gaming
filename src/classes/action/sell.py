@@ -16,18 +16,18 @@ from src.classes.items.auxiliary import Auxiliary
 
 class Sell(InstantAction):
     """
-    在城镇出售指定名称的物品/装备。
-    如果是材料：一次性卖出持有的全部数量。
-    如果是装备：卖出当前装备的（如果是当前装备）。
-    收益通过 avatar.sell_material() / sell_weapon() / sell_auxiliary() 结算。
+    Sell an item/equipment by name in a town.
+    Materials: sell the entire held quantity at once.
+    Equipment: sell the currently equipped item (if it is equipped).
+    Proceeds are settled via avatar.sell_material() / sell_weapon() / sell_auxiliary().
     """
     
-    # 多语言 ID
+    # i18n IDs
     ACTION_NAME_ID = "sell_action_name"
     DESC_ID = "sell_description"
     REQUIREMENTS_ID = "sell_requirements"
     
-    # 不需要翻译的常量
+    # Constants that need no translation
     EMOJI = "💰"
     PARAMS = {"target_name": "str"}
     PARAM_OPTION_SOURCES = {"target_name": ParamOptionSource.SELLABLE_ITEM_NAME}
@@ -37,7 +37,7 @@ class Sell(InstantAction):
         if not isinstance(region, CityRegion):
             return False, t("Can only execute in city areas")
         
-        # 使用通用解析逻辑获取物品原型和类型
+        # Use the generic resolution logic to get the item prototype and type
         res = resolve_query(target_name, expected_types=[Material, Weapon, Auxiliary])
         if not res.is_valid:
             return False, t("Do not possess item/equipment: {name}", name=target_name)
@@ -45,24 +45,24 @@ class Sell(InstantAction):
         obj = res.obj
         normalized_name = normalize_goods_name(target_name)
         
-        # 1. 如果是材料，检查背包
+        # 1. If it's a material, check the inventory
         if isinstance(obj, Material):
             if self.avatar.get_material_quantity(obj) > 0:
-                pass # 检查通过
+                pass # Check passed
             else:
                 return False, t("Do not possess material: {name}", name=target_name)
 
-        # 2. 如果是兵器，检查当前装备
+        # 2. If it's a weapon, check the current equipment
         elif isinstance(obj, Weapon):
             if self.avatar.weapon and normalize_goods_name(self.avatar.weapon.name) == normalized_name:
-                pass # 检查通过
+                pass # Check passed
             else:
                 return False, t("Do not possess equipment: {name}", name=target_name)
 
-        # 3. 如果是辅助装备，检查当前装备
+        # 3. If it's an auxiliary, check the current equipment
         elif isinstance(obj, Auxiliary):
             if self.avatar.auxiliary and normalize_goods_name(self.avatar.auxiliary.name) == normalized_name:
-                pass # 检查通过
+                pass # Check passed
             else:
                 return False, t("Do not possess equipment: {name}", name=target_name)
         
@@ -87,15 +87,15 @@ class Sell(InstantAction):
             quantity = self.avatar.get_material_quantity(obj)
             self.avatar.sell_material(obj, quantity)
         elif isinstance(obj, Weapon):
-            # 需要再确认一次是否是当前装备
+            # Confirm again that it is the current equipment
              if self.avatar.weapon and normalize_goods_name(self.avatar.weapon.name) == normalized_name:
                 self.avatar.sell_weapon(obj)
-                self.avatar.change_weapon(None) # 卖出后卸下
+                self.avatar.change_weapon(None) # Unequip after selling
         elif isinstance(obj, Auxiliary):
-            # 需要再确认一次是否是当前装备
+            # Confirm again that it is the current equipment
              if self.avatar.auxiliary and normalize_goods_name(self.avatar.auxiliary.name) == normalized_name:
                 self.avatar.sell_auxiliary(obj)
-                self.avatar.change_auxiliary(None) # 卖出后卸下
+                self.avatar.change_auxiliary(None) # Unequip after selling
 
     def start(self, target_name: str) -> Event:
         res = resolve_query(target_name)

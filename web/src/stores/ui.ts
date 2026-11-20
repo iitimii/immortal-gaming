@@ -33,13 +33,13 @@ export const useUiStore = defineStore('ui', () => {
   const systemMenuContext = ref<SystemMenuContext>('game');
   const llmConfigError = ref('');
   
-  // 详情数据 (可能为空，或正在加载)
-  // 使用 shallowRef 避免深层响应式转换带来的性能开销 (对于大型嵌套对象，如 AvatarDetail)
+  // Detail data (may be empty or still loading)
+  // Use shallowRef to avoid deep reactivity overhead (large nested objects such as AvatarDetail)
   const detailData = shallowRef<AvatarDetail | RegionDetail | SectDetail | POIDetail | null>(null);
   const isLoadingDetail = ref(false);
   const detailError = ref<string | null>(null);
 
-  // 请求计数器，用于处理竞态条件。
+  // Request counter to handle race conditions.
   let detailRequestId = 0;
 
   // --- Actions ---
@@ -62,7 +62,7 @@ export const useUiStore = defineStore('ui', () => {
   }
 
   function clearHoverCache() {
-    // 清除详情缓存，强制下次选择时重新加载。
+    // Clear the detail cache so the next selection reloads.
     detailData.value = null;
   }
 
@@ -99,13 +99,13 @@ export const useUiStore = defineStore('ui', () => {
   async function refreshDetail() {
     if (!selectedTarget.value) return;
 
-    // 每次请求增加计数器，只接受最新请求的响应。
+    // Bump the counter per request; only accept the latest response.
     const currentRequestId = ++detailRequestId;
     const target = { ...selectedTarget.value };
     isLoadingDetail.value = true;
     detailError.value = null;
 
-    // 检查是否应该接受响应：requestId 匹配且 target 未变化。
+    // Accept the response only if requestId matches and the target is unchanged.
     const shouldAcceptResponse = () =>
       currentRequestId === detailRequestId &&
       selectedTarget.value?.type === target.type &&

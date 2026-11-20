@@ -13,121 +13,120 @@ class TestSelfHealAction:
     @pytest.fixture
     def healing_avatar(self, dummy_avatar):
         """
-        基于 dummy_avatar 扩展，
-        设置 HP 为半血，以便可以进行疗伤。
+        Extends dummy_avatar with half HP so healing is possible.
         """
         dummy_avatar.hp = HP(100, 50) # 50/100 HP
-        # effects 是 property，无法直接赋值，需要 mock 或者通过 effects mixin 覆盖
-        # 这里 dummy_avatar 使用了 Real Avatar 类，所以 effects property 会去读 self._effects 或者计算
+        # effects is a property and cannot be assigned directly; mock it or override via the effects mixin
+        # dummy_avatar is a real Avatar, so the effects property reads self._effects or computes it
         return dummy_avatar
 
     @pytest.fixture
     def sect_region(self):
-        return SectRegion(id=999, name="青云门总部", desc="测试宗门总部", sect_id=42, sect_name="青云门")
+        return SectRegion(id=999, name="Azure Cloud Sect Headquarters", desc="Test sect headquarters", sect_id=42, sect_name="Azure Cloud Sect")
     
     @pytest.fixture
     def normal_region(self):
-        return NormalRegion(id=101, name="荒野", desc="测试荒野")
+        return NormalRegion(id=101, name="Wilderness", desc="Test wilderness")
 
     @pytest.fixture
     def mock_sect(self, sect_region):
         sect = MagicMock(spec=Sect)
         sect.id = sect_region.sect_id
-        sect.name = "青云门"
+        sect.name = "Azure Cloud Sect"
         sect.headquarter = MagicMock()
-        sect.headquarter.name = "一个过时的旧名字"
+        sect.headquarter.name = "An outdated old name"
         return sect
 
     def test_can_start_basic(self, healing_avatar):
-        """测试基本启动条件：HP不满即可"""
-        # Action 类通常需要 (avatar, world) 参数
+        """Basic start condition: HP is not full."""
+        # Action classes usually take (avatar, world)
         action = SelfHeal(healing_avatar, healing_avatar.world)
         can, reason = action.can_start()
         assert can is True
         assert reason == ""
 
     def test_cannot_start_full_hp(self, healing_avatar):
-        """测试满血不能启动"""
+        """Cannot start at full HP."""
         healing_avatar.hp.cur = 100
         action = SelfHeal(healing_avatar, healing_avatar.world)
         can, reason = action.can_start()
         assert can is False
-        assert "HP已满" in reason
+        assert "HP is full" in reason
 
     def test_execute_in_wild_no_bonus(self, healing_avatar, normal_region):
-        """测试在野外（非宗门）的基础回复（10%）"""
-        # 设置位置
+        """Base recovery (10%) in the wild (not a sect)."""
+        # Set location
         healing_avatar.tile = Tile(0, 0, TileType.PLAIN)
         healing_avatar.tile.region = normal_region
-        healing_avatar.sect = None # 散修
+        healing_avatar.sect = None # rogue cultivator
         
-        # Mock effects 为空
+        # Mock empty effects
         with patch.object(type(healing_avatar), 'effects', new_callable=lambda: {}) as mock_effects:
              action = SelfHeal(healing_avatar, healing_avatar.world)
              action._execute()
 
-        # 预期：基础回复 10% * 100 = 10
-        # 初始 50 -> 60
+        # Expected: base recovery 10% * 100 = 10
+        # starting 50 -> 60
         assert healing_avatar.hp.cur == 60
         assert action._healed_total == 10
 
     def test_execute_in_wild_with_persona_bonus(self, healing_avatar, normal_region):
-        """测试在野外带有 '苟' 特质加成（+50% efficiency）"""
-        # 设置位置
+        """Recovery in the wild with a cautious-persona bonus (+50% efficiency)."""
+        # Set location
         healing_avatar.tile = Tile(0, 0, TileType.PLAIN)
         healing_avatar.tile.region = normal_region
         
-        # Mock effects 带有加成
+        # Mock effects with a bonus
         with patch.object(type(healing_avatar), 'effects', new_callable=lambda: {"extra_self_heal_efficiency": 0.5}):
             action = SelfHeal(healing_avatar, healing_avatar.world)
             action._execute()
 
-        # 预期：基础 0.1 * (1 + 0.5) = 0.15
-        # 回复 15 点 -> 50 + 15 = 65
+        # Expected: base 0.1 * (1 + 0.5) = 0.15
+        # recovers 15 -> 50 + 15 = 65
         assert healing_avatar.hp.cur == 65
         assert action._healed_total == 15
 
     def test_execute_in_sect_hq_as_member(self, healing_avatar, sect_region, mock_sect):
-        """测试宗门弟子在总部回复（直接回满）"""
-        # 设置位置
-        # TileType.SECT 可能不存在，检查源码通常用 TileType.CITY 或 PLAIN，关键是 region
-        # 如果需要区分 TileType，请检查 src/classes/tile.py，这里先用 PLAIN 并确保 region 是 SectRegion
-        # 不过为了保险，我们可以查看 TileType 定义。
-        # 暂时用 PLAIN，关键是 region 类型。
+        """A sect member at their HQ recovers fully."""
+        # Set location
+        # TileType.SECT may not exist; the source usually uses CITY or PLAIN, what matters is the region
+        # If TileType matters, check src/classes/tile.py; here we use PLAIN and make the region a SectRegion
+        # To be safe, the TileType definition can be checked.
+        # Use PLAIN for now; the region type is what matters.
         healing_avatar.tile = Tile(0, 0, TileType.PLAIN)
         healing_avatar.tile.region = sect_region
         
-        # 设置宗门身份
+        # Set sect membership
         healing_avatar.sect = mock_sect
 
         with patch.object(type(healing_avatar), 'effects', new_callable=lambda: {}):
             action = SelfHeal(healing_avatar, healing_avatar.world)
             action._execute()
 
-        # 预期：直接回满 -> 100
+        # Expected: fully healed -> 100
         assert healing_avatar.hp.cur == 100
         assert action._healed_total == 50
 
     def test_execute_in_sect_hq_not_member(self, healing_avatar, sect_region):
-        """测试非本门弟子在某宗门总部（视为普通区域回复）"""
-        # 设置位置
+        """A non-member at a sect HQ (treated as normal-region recovery)."""
+        # Set location
         healing_avatar.tile = Tile(0, 0, TileType.PLAIN)
         healing_avatar.tile.region = sect_region
         
-        # 散修（或无匹配宗门）
+        # rogue cultivator (or no matching sect)
         healing_avatar.sect = None 
 
         with patch.object(type(healing_avatar), 'effects', new_callable=lambda: {}):
             action = SelfHeal(healing_avatar, healing_avatar.world)
             action._execute()
 
-        # 预期：基础回复 10% = 10
+        # Expected: base recovery 10% = 10
         assert healing_avatar.hp.cur == 60
         assert action._healed_total == 10
 
     def test_heal_overflow_clamp(self, healing_avatar, normal_region):
-        """测试回复溢出处理（不超过 MaxHP）"""
-        healing_avatar.hp.cur = 95 # 只差5点
+        """Recovery overflow handling (never exceeds max HP)."""
+        healing_avatar.hp.cur = 95 # only 5 missing
         healing_avatar.tile = Tile(0, 0, TileType.PLAIN)
         healing_avatar.tile.region = normal_region
 
@@ -135,6 +134,6 @@ class TestSelfHealAction:
             action = SelfHeal(healing_avatar, healing_avatar.world)
             action._execute()
 
-        # 预期：基础回复 10点，但只缺5点 -> 回复5点，当前100
+        # Expected: base recovery 10 but only 5 missing -> recovers 5, now 100
         assert healing_avatar.hp.cur == 100
         assert action._healed_total == 5

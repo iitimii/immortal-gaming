@@ -1,4 +1,4 @@
-"""LLM 客户端核心调用逻辑"""
+"""Core LLM client call logic."""
 
 import json
 import urllib.request
@@ -19,7 +19,7 @@ from .exceptions import LLMError, ParseError, ProviderCallError, ProviderFailure
 from .runtime_mode import is_test_mode_enabled
 from .test_mode_fallbacks import TestModeLLMUnavailable, resolve_test_mode_task
 
-# 模块级信号量，懒加载
+# Module-level semaphore, lazily created
 _SEMAPHORE: Optional[asyncio.Semaphore] = None
 _SEMAPHORE_LIMIT: Optional[int] = None
 _LLM_FAILURE_HANDLER: Optional[Callable[[str], Awaitable[None] | None]] = None
@@ -47,10 +47,11 @@ _BILLING_KEYWORDS = (
     "payment required",
     "billing details",
     "free token quota",
-    "余额不足",
-    "配额不足",
-    "额度不足",
-    "额度不够",
+    # Chinese-language providers' "insufficient balance/quota" phrases, kept as escapes.
+    "\u4f59\u989d\u4e0d\u8db3",
+    "\u914d\u989d\u4e0d\u8db3",
+    "\u989d\u5ea6\u4e0d\u8db3",
+    "\u989d\u5ea6\u4e0d\u591f",
 )
 _BILLING_KEYWORD_HTTP_STATUSES = {400, 402, 403, 429}
 
@@ -167,12 +168,12 @@ def _build_quota_message(
 ) -> str:
     if "longcat.chat" in base_url.lower():
         return (
-            f"LongCat API Key 免费 Token 配额不足，请到 LongCat 用量信息页申请提额或更换 Key。"
-            f"服务商返回: {provider_msg}"
+            f"LongCat API Key has run out of free token quota. Request a quota increase on the LongCat usage page or use a different key. "
+            f"Provider response: {provider_msg}"
         )
     return (
-        f"额度不足或计费受限({code_str})，请检查账号余额、Token 配额或服务商用量限制。"
-        f"服务商返回: {provider_msg}"
+        f"Insufficient quota or billing restricted ({code_str}). Check your account balance, token quota, or provider usage limits. "
+        f"Provider response: {provider_msg}"
     )
 
 
@@ -181,7 +182,7 @@ def classify_llm_error(error_raw: str | ProviderCallError, *, base_url: str = ""
         if error_raw.kind is ProviderFailureKind.NETWORK:
             return LLMFailureInfo(
                 kind=LLMFailureKind.TEMPORARY_NETWORK,
-                user_message=f"网络连接失败，请检查 Base URL 是否可达或本地代理设置。(底层错误: {error_raw.message})",
+                user_message=f"Network connection failed. Check that the Base URL is reachable and your local proxy settings. (Underlying error: {error_raw.message})",
                 provider_message=error_raw.message,
             )
         if error_raw.kind is ProviderFailureKind.HTTP:
@@ -192,7 +193,7 @@ def classify_llm_error(error_raw: str | ProviderCallError, *, base_url: str = ""
             )
         return LLMFailureInfo(
             kind=LLMFailureKind.UNKNOWN,
-            user_message=f"未知错误: {error_raw.message}",
+            user_message=f"Unknown error: {error_raw.message}",
             provider_message=error_raw.message,
         )
 
@@ -200,7 +201,7 @@ def classify_llm_error(error_raw: str | ProviderCallError, *, base_url: str = ""
         reason = error_raw.split("::", 1)[1]
         return LLMFailureInfo(
             kind=LLMFailureKind.TEMPORARY_NETWORK,
-            user_message=f"网络连接失败，请检查 Base URL 是否可达或本地代理设置。(底层错误: {reason})",
+            user_message=f"Network connection failed. Check that the Base URL is reachable and your local proxy settings. (Underlying error: {reason})",
             provider_message=reason,
         )
 
@@ -212,7 +213,7 @@ def classify_llm_error(error_raw: str | ProviderCallError, *, base_url: str = ""
 
     return LLMFailureInfo(
         kind=LLMFailureKind.UNKNOWN,
-        user_message=f"未知错误: {error_raw}",
+        user_message=f"Unknown error: {error_raw}",
         provider_message=error_raw,
     )
 
@@ -240,41 +241,41 @@ def _classify_http_error(code_str: str, body_str: str, *, base_url: str) -> LLMF
                 kind=LLMFailureKind.CONFIG_REQUIRED,
                 http_status=http_status,
                 provider_message=provider_msg,
-                user_message=f"身份验证失败(401)，请检查 API Key 是否填写正确。服务商返回: {provider_msg}",
+                user_message=f"Authentication failed (401). Check that the API Key is correct. Provider response: {provider_msg}",
             )
     if code_str == "403":
             return LLMFailureInfo(
                 kind=LLMFailureKind.CONFIG_REQUIRED,
                 http_status=http_status,
                 provider_message=provider_msg,
-                user_message=f"访问被拒绝(403)，可能是模型未授权或 IP 受限。服务商返回: {provider_msg}",
+                user_message=f"Access denied (403). The model may not be authorized or your IP may be restricted. Provider response: {provider_msg}",
             )
     if code_str == "404":
             return LLMFailureInfo(
                 kind=LLMFailureKind.CONFIG_REQUIRED,
                 http_status=http_status,
                 provider_message=provider_msg,
-                user_message=f"找不到服务(404)，请检查 Base URL 是否正确(通常需要以 /v1 结尾)，或模型名是否存在。服务商返回: {provider_msg}",
+                user_message=f"Service not found (404). Check that the Base URL is correct (it usually ends with /v1) and that the model name exists. Provider response: {provider_msg}",
             )
     if code_str == "429":
             return LLMFailureInfo(
                 kind=LLMFailureKind.RATE_LIMITED,
                 http_status=http_status,
                 provider_message=provider_msg,
-                user_message=f"额度超限或请求频繁(429)，请检查账号余额。服务商返回: {provider_msg}",
+                user_message=f"Quota exceeded or too many requests (429). Check your account balance. Provider response: {provider_msg}",
             )
     if code_str.startswith("5"):
             return LLMFailureInfo(
                 kind=LLMFailureKind.PROVIDER_UNAVAILABLE,
                 http_status=http_status,
                 provider_message=provider_msg,
-                user_message=f"服务商内部异常({code_str})，请稍后重试。服务商返回: {provider_msg}",
+                user_message=f"Provider internal error ({code_str}). Please try again later. Provider response: {provider_msg}",
             )
     return LLMFailureInfo(
         kind=LLMFailureKind.UNKNOWN,
         http_status=http_status,
         provider_message=provider_msg,
-        user_message=f"请求失败({code_str})。服务商返回: {provider_msg}",
+        user_message=f"Request failed ({code_str}). Provider response: {provider_msg}",
     )
 
 
@@ -294,7 +295,7 @@ def _get_semaphore() -> asyncio.Semaphore:
 
 
 def _call_openai(config: LLMConfig, prompt: str) -> str:
-    """使用原生 urllib 调用 (OpenAI 兼容接口)"""
+    """Call via plain urllib (OpenAI-compatible API)."""
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {config.api_key}",
@@ -309,7 +310,7 @@ def _call_openai(config: LLMConfig, prompt: str) -> str:
     if not url:
         raise ValueError("Base URL is required for requests mode (OpenAI Compatible)")
 
-    # URL 规范化处理：确保指向 chat/completions
+    # Normalize the URL so it points to chat/completions
     if "chat/completions" not in url:
         url = url.rstrip("/")
         url = f"{url}/chat/completions"
@@ -345,7 +346,7 @@ def _call_openai(config: LLMConfig, prompt: str) -> str:
 
 
 def _call_anthropic(config: LLMConfig, prompt: str) -> str:
-    """使用原生 urllib 调用 (Anthropic 原生接口)"""
+    """Call via plain urllib (native Anthropic API)."""
     headers = {
         "Content-Type": "application/json",
         "x-api-key": config.api_key,
@@ -362,7 +363,7 @@ def _call_anthropic(config: LLMConfig, prompt: str) -> str:
     if not url:
         raise ValueError("Base URL is required for Anthropic API")
 
-    # URL 规范化处理：确保指向 /v1/messages
+    # Normalize the URL so it points to /v1/messages
     if "/messages" not in url:
         url = url.rstrip("/")
         if not url.endswith("/v1"):
@@ -379,11 +380,11 @@ def _call_anthropic(config: LLMConfig, prompt: str) -> str:
     try:
         with urllib.request.urlopen(req, timeout=120) as response:
             result = json.loads(response.read().decode("utf-8"))
-        # Anthropic 响应格式: {"content": [{"type": "text", "text": "..."}]}
+        # Anthropic response format: {"content": [{"type": "text", "text": "..."}]}
         for block in result.get("content", []):
             if block.get("type") == "text":
                 return block["text"]
-        raise Exception("UNKNOWN_ERROR::Anthropic 响应中未找到 text 内容")
+        raise Exception("UNKNOWN_ERROR::No text content found in the Anthropic response")
     except urllib.error.HTTPError as e:
         error_body = e.read().decode("utf-8")
         raise ProviderCallError(
@@ -404,7 +405,7 @@ def _call_anthropic(config: LLMConfig, prompt: str) -> str:
 
 
 def _call_with_requests(config: LLMConfig, prompt: str) -> str:
-    """根据 api_format 分发到对应的调用实现"""
+    """Dispatch to the implementation matching api_format."""
     if config.api_format == "anthropic":
         return _call_anthropic(config, prompt)
     return _call_openai(config, prompt)
@@ -412,8 +413,8 @@ def _call_with_requests(config: LLMConfig, prompt: str) -> str:
 
 async def call_llm(prompt: str, mode: LLMMode = LLMMode.NORMAL) -> str:
     """
-    基础 LLM 调用，自动控制并发
-    使用 urllib 直接调用 OpenAI 兼容接口
+    Basic LLM call with automatic concurrency control.
+    Calls the OpenAI-compatible API directly via urllib.
     """
     if is_test_mode_enabled():
         raise TestModeLLMUnavailable("raw_llm_call")
@@ -439,7 +440,7 @@ async def call_llm_json(
     mode: LLMMode = LLMMode.NORMAL,
     max_retries: int | None = None
 ) -> dict:
-    """调用 LLM 并解析为 JSON，带重试"""
+    """Call the LLM and parse the result as JSON, with retries."""
     if max_retries is None:
         max_retries = int(getattr(CONFIG.ai, "max_parse_retries", 0))
     
@@ -452,10 +453,10 @@ async def call_llm_json(
             last_error = e
             if attempt < max_retries:
                 continue
-            raise LLMError(f"解析失败（重试 {max_retries} 次后）", cause=last_error) from last_error
+            raise LLMError(f"Parsing failed (after {max_retries} retries)", cause=last_error) from last_error
     
     # This should never be reached, but satisfies type checker.
-    raise LLMError("未知错误")
+    raise LLMError("Unknown error")
 
 
 async def call_llm_with_template(
@@ -464,7 +465,7 @@ async def call_llm_with_template(
     mode: LLMMode = LLMMode.NORMAL,
     max_retries: int | None = None
 ) -> dict:
-    """使用模板调用 LLM"""
+    """Call the LLM with a template."""
     template = load_template(template_path)
     prompt = build_prompt(template, infos)
     return await call_llm_json(prompt, mode, max_retries)
@@ -477,16 +478,16 @@ async def call_llm_with_task_name(
     max_retries: int | None = None
 ) -> dict:
     """
-    根据任务名称自动选择 LLM 模式并调用
+    Automatically pick the LLM mode by task name and call it.
     
     Args:
-        task_name: 任务名称，用于在 config.yml 中查找对应的模式
-        template_path: 模板路径
-        infos: 模板参数
-        max_retries: 最大重试次数
+        task_name: task name, used to look up its mode in config.yml
+        template_path: template path
+        infos: template parameters
+        max_retries: maximum number of retries
         
     Returns:
-        dict: LLM 返回的 JSON 数据
+        dict: JSON data returned by the LLM
     """
     if is_test_mode_enabled():
         return resolve_test_mode_task(task_name, infos)
@@ -498,14 +499,14 @@ async def call_llm_with_task_name(
 
 def test_connectivity(mode: LLMMode = LLMMode.NORMAL, config: Optional[LLMConfig] = None) -> tuple[bool, str]:
     """
-    测试 LLM 服务连通性 (同步版本)
+    Test LLM service connectivity (synchronous).
     
     Args:
-        mode: 测试使用的模式 (NORMAL/FAST)，如果传入 config 则忽略此参数
-        config: 直接使用该配置进行测试
+        mode: mode to test (NORMAL/FAST); ignored if config is given
+        config: test with this config directly
         
     Returns:
-        tuple[bool, str]: (是否成功, 错误信息)，成功时错误信息为空字符串
+        tuple[bool, str]: (success, error message); the error message is empty on success
     """
     try:
         if config is None:

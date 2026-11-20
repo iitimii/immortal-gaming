@@ -9,17 +9,17 @@ if TYPE_CHECKING:
 
 class Gathering(ABC):
     """
-    多人聚集事件/场景的抽象基类。
-    用于处理如“拍卖会”、“宗门大比”、“秘境开启”等多角色参与的复杂事件。
+    Abstract base class for multi-avatar gathering events/scenes.
+    Handles complex multi-avatar events such as "auctions", "sect competitions", "hidden domain openings".
     """
     
-    # 是否允许打断重大行为
+    # Whether major actions may be interrupted
     CAN_INTERRUPT_MAJOR: bool = False
     
     def _can_avatar_join(self, avatar: "Avatar") -> bool:
         """
-        判断角色是否可以参加该聚会。
-        综合判定 avatar.can_join_gathering 以及是否处于不可打断的重大行为中。
+        Determine whether the avatar can join this gathering.
+        Combines avatar.can_join_gathering with whether the avatar is in an uninterruptible major action.
         """
         if not avatar.can_join_gathering:
             return False
@@ -32,33 +32,33 @@ class Gathering(ABC):
     @abstractmethod
     def is_start(self, world: "World") -> bool:
         """
-        检测该 Gathering 是否应该开始。
-        通常基于时间、地点或特定触发条件。
+        Check whether this Gathering should start.
+        Usually based on time, location or specific trigger conditions.
         """
         pass
 
     @abstractmethod
     def get_related_avatars(self, world: "World") -> List[int]:
         """
-        获取参与该 Gathering 的角色 ID 列表。
+        Get the list of avatar IDs participating in this Gathering.
         """
         pass
 
     @abstractmethod
     def get_info(self, world: "World") -> str:
         """
-        获取 Gathering 的描述信息。
+        Get the Gathering's description.
         """
         pass
 
     @abstractmethod
     async def execute(self, world: "World") -> List[Event]:
         """
-        执行 Gathering 的具体逻辑。
+        Execute the Gathering's concrete logic.
         
-        备注：
-        因为 Gathering 被设计为瞬时结算（在一个 step 内完成），
-        所以不需要 finish 函数。所有的交互和结果都在 execute 中一次性处理完毕。
+        Notes:
+        Because a Gathering is designed to settle instantly (within one step),
+        no finish function is needed. All interactions and results are handled at once in execute.
         """
         pass
 
@@ -67,24 +67,24 @@ GATHERING_REGISTRY: List[Type[Gathering]] = []
 
 def register_gathering(cls: Type[Gathering]):
     """
-    装饰器：注册 Gathering 类
+        Decorator: register a Gathering class
     """
     GATHERING_REGISTRY.append(cls)
     return cls
 
 class GatheringManager:
     def __init__(self):
-        # 实例化所有注册的 Gathering
+        # Instantiate all registered Gatherings
         self.gatherings: List[Gathering] = [cls() for cls in GATHERING_REGISTRY]
 
     async def check_and_run_all(self, world: "World") -> List[Event]:
         """
-        检查所有 Gathering，若满足条件则执行
+        Check all Gatherings and execute those whose conditions are met
         """
         events = []
         for gathering in self.gatherings:
             if gathering.is_start(world):
-                # 执行 Gathering 逻辑
+                # Execute the Gathering logic
                 gathering_events = await gathering.execute(world)
                 if gathering_events:
                     events.extend(gathering_events)

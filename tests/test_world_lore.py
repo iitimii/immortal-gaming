@@ -37,7 +37,7 @@ def test_world_lore_structure(base_world):
     assert isinstance(base_world.world_lore, WorldLore)
     assert base_world.world_lore.text == ""
 
-    lore_text = "这是一个宗门林立、正邪对峙的修仙世界。"
+    lore_text = "A cultivation world crowded with sects, where the righteous and the demonic stand opposed."
     base_world.set_world_lore(lore_text)
     assert base_world.world_lore.text == lore_text
     assert t("World lore and history") not in base_world.static_info
@@ -59,8 +59,8 @@ def test_world_lore_static_info_key_is_localized(base_world):
 def test_world_lore_apply_updates_indexes(base_world):
     sect = Sect(
         id=1,
-        name="旧宗门",
-        desc="旧描述",
+        name="Old Sect",
+        desc="Old description",
         member_act_style="",
         alignment=Alignment.RIGHTEOUS,
         headquarter=None,
@@ -68,49 +68,49 @@ def test_world_lore_apply_updates_indexes(base_world):
     )
     technique = Technique(
         id=1,
-        name="旧功法",
+        name="Old Technique",
         attribute=TechniqueAttribute.GOLD,
         grade=TechniqueGrade.LOWER,
-        desc="旧功法描述",
+        desc="Old technique description",
         weight=1.0,
         condition="",
     )
     weapon = Weapon(
         id=101,
-        name="旧灵剑",
+        name="Old Spirit Sword",
         weapon_type=WeaponType.SWORD,
         realm=Realm.Qi_Refinement,
-        desc="旧武器描述",
+        desc="Old weapon description",
     )
 
     draft = WorldLoreRewriteDraft(
-        sects={1: EntityRewrite(id=1, name="新宗门", desc="新描述")},
-        techniques={1: EntityRewrite(id=1, name="新功法", desc="新功法描述")},
-        weapons={101: EntityRewrite(id=101, name="新灵剑", desc="新武器描述")},
+        sects={1: EntityRewrite(id=1, name="New Sect", desc="New description")},
+        techniques={1: EntityRewrite(id=1, name="New Technique", desc="New technique description")},
+        weapons={101: EntityRewrite(id=101, name="New Spirit Sword", desc="New weapon description")},
     )
 
     with patch.dict(sect_module.sects_by_id, {1: sect}, clear=True), \
-         patch.dict(sect_module.sects_by_name, {"旧宗门": sect}, clear=True), \
+         patch.dict(sect_module.sects_by_name, {"Old Sect": sect}, clear=True), \
          patch.dict(technique_module.techniques_by_id, {1: technique}, clear=True), \
-         patch.dict(technique_module.techniques_by_name, {"旧功法": technique}, clear=True), \
+         patch.dict(technique_module.techniques_by_name, {"Old Technique": technique}, clear=True), \
          patch.dict(weapon_module.weapons_by_id, {101: weapon}, clear=True), \
-         patch.dict(weapon_module.weapons_by_name, {"旧灵剑": weapon}, clear=True):
+         patch.dict(weapon_module.weapons_by_name, {"Old Spirit Sword": weapon}, clear=True):
         apply_world_lore_rewrite(base_world, draft)
 
-        assert sect.name == "新宗门"
-        assert sect.desc == "新描述"
-        assert "旧宗门" not in sect_module.sects_by_name
-        assert sect_module.sects_by_name["新宗门"] is sect
+        assert sect.name == "New Sect"
+        assert sect.desc == "New description"
+        assert "Old Sect" not in sect_module.sects_by_name
+        assert sect_module.sects_by_name["New Sect"] is sect
 
-        assert technique.name == "新功法"
-        assert technique.desc == "新功法描述"
-        assert "旧功法" not in technique_module.techniques_by_name
-        assert technique_module.techniques_by_name["新功法"] is technique
+        assert technique.name == "New Technique"
+        assert technique.desc == "New technique description"
+        assert "Old Technique" not in technique_module.techniques_by_name
+        assert technique_module.techniques_by_name["New Technique"] is technique
 
-        assert weapon.name == "新灵剑"
-        assert weapon.desc == "新武器描述"
-        assert "旧灵剑" not in weapon_module.weapons_by_name
-        assert weapon_module.weapons_by_name["新灵剑"] is weapon
+        assert weapon.name == "New Spirit Sword"
+        assert weapon.desc == "New weapon description"
+        assert "Old Spirit Sword" not in weapon_module.weapons_by_name
+        assert weapon_module.weapons_by_name["New Spirit Sword"] is weapon
 
 
 def test_world_lore_syncs_sect_region_metadata():
@@ -124,16 +124,16 @@ def test_world_lore_syncs_sect_region_metadata():
     apply_world_lore_rewrite(
         world,
         WorldLoreRewriteDraft(
-            sects={sect.id: EntityRewrite(id=sect.id, name="太虚宗", desc="新的宗门描述")},
-            regions={region.id: EntityRewrite(id=region.id, name="太虚天宫", desc="新的驻地描述")},
+            sects={sect.id: EntityRewrite(id=sect.id, name="Great Void Sect", desc="New sect description")},
+            regions={region.id: EntityRewrite(id=region.id, name="Great Void Celestial Palace", desc="New headquarters description")},
         ),
     )
 
-    assert sect.name == "太虚宗"
-    assert region.name == "太虚天宫"
-    assert region.sect_name == "太虚宗"
-    assert sect.headquarter.name == "太虚天宫"
-    assert sect.headquarter.desc == "新的驻地描述"
+    assert sect.name == "Great Void Sect"
+    assert region.name == "Great Void Celestial Palace"
+    assert region.sect_name == "Great Void Sect"
+    assert sect.headquarter.name == "Great Void Celestial Palace"
+    assert sect.headquarter.desc == "New headquarters description"
     reload_all_static_data()
 
 
@@ -142,7 +142,7 @@ def test_world_lore_planner_uses_current_map_and_overrides():
         map=load_cultivation_world_map("island_seas"),
         month_stamp=create_month_stamp(Year(1), Month.JANUARY),
     )
-    context = build_world_lore_context(world, "群岛末法世界")
+    context = build_world_lore_context(world, "Archipelago world in the Dharma-Ending Age")
     jobs = build_world_lore_jobs(context)
     region_jobs = [job for job in jobs if job.kind == "regions"]
 
@@ -160,7 +160,7 @@ async def test_world_lore_runner_uses_rewrite_tasks_and_fallback(base_world):
 
     context = WorldLoreRewriteContext(
         world=base_world,
-        lore_text="末法废土",
+        lore_text="Dharma-Ending wasteland",
         map_summary={"map_id": "test"},
         style_guide={},
         config=WorldLoreRewriteConfig(
@@ -174,9 +174,9 @@ async def test_world_lore_runner_uses_rewrite_tasks_and_fallback(base_world):
         id="regions#1",
         kind="regions",
         task_name="world_lore_region_rewrite",
-        entities=[{"id": 1, "name": "旧城", "desc": "旧描述"}],
-        entity_label="地点",
-        instructions="重写地点",
+        entities=[{"id": 1, "name": "Old Town", "desc": "Old description"}],
+        entity_label="location",
+        instructions="Rewrite locations",
         result_field="entities",
         map_summary=context.map_summary,
         style_guide=context.style_guide,
@@ -185,18 +185,18 @@ async def test_world_lore_runner_uses_rewrite_tasks_and_fallback(base_world):
 
     async def fake_call(**kwargs):
         assert kwargs["task_name"] == "world_lore_region_rewrite"
-        return {"entities": [{"id": 1, "name": "新城", "desc": "被风沙与残阳重塑的旧城。"}]}
+        return {"entities": [{"id": 1, "name": "New Town", "desc": "An old town reshaped by wind, sand and the setting sun."}]}
 
     with patch("src.systems.world_lore_rewrite.runner.call_llm_with_task_name", new_callable=AsyncMock) as mock_llm:
         mock_llm.side_effect = fake_call
         partial = await WorldLoreRewriteRunner(context)._run_job(job, 9999999999)
 
-    assert partial.regions[1].name == "新城"
+    assert partial.regions[1].name == "New Town"
     assert partial.llm_count == 1
 
 
 def test_save_load_preserves_world_lore(base_world, tmp_path):
-    base_world.set_world_lore("上古大战后，宗门秩序被重写。")
+    base_world.set_world_lore("After the ancient great war, the order of the sects was rewritten.")
     simulator = Simulator(base_world)
     save_path = tmp_path / "world_lore_save.json"
 
@@ -204,7 +204,7 @@ def test_save_load_preserves_world_lore(base_world, tmp_path):
     assert ok is True
 
     loaded_world, _, _ = load_game(save_path)
-    assert loaded_world.world_lore.text == "上古大战后，宗门秩序被重写。"
+    assert loaded_world.world_lore.text == "After the ancient great war, the order of the sects was rewritten."
 
 
 def test_world_lore_snapshot_reapplies_static_changes():
@@ -218,16 +218,16 @@ def test_world_lore_snapshot_reapplies_static_changes():
     weapon_id = next(iter(weapons_by_id))
     auxiliary_id = next(iter(auxiliaries_by_id))
 
-    world.map.regions[region_id].name = "太虚古城"
-    world.map.regions[region_id].desc = "被改写后的区域描述"
-    sects_by_id[sect_id].name = "太虚宗"
-    sects_by_id[sect_id].desc = "被改写后的宗门描述"
-    techniques_by_id[technique_id].name = "太虚玄功"
-    techniques_by_id[technique_id].desc = "被改写后的功法描述"
-    weapons_by_id[weapon_id].name = "太虚剑"
-    weapons_by_id[weapon_id].desc = "被改写后的兵器描述"
-    auxiliaries_by_id[auxiliary_id].name = "太虚佩"
-    auxiliaries_by_id[auxiliary_id].desc = "被改写后的辅助装备描述"
+    world.map.regions[region_id].name = "Great Void Ancient City"
+    world.map.regions[region_id].desc = "Rewritten region description"
+    sects_by_id[sect_id].name = "Great Void Sect"
+    sects_by_id[sect_id].desc = "Rewritten sect description"
+    techniques_by_id[technique_id].name = "Great Void Mystic Art"
+    techniques_by_id[technique_id].desc = "Rewritten technique description"
+    weapons_by_id[weapon_id].name = "Great Void Sword"
+    weapons_by_id[weapon_id].desc = "Rewritten weapon description"
+    auxiliaries_by_id[auxiliary_id].name = "Great Void Pendant"
+    auxiliaries_by_id[auxiliary_id].desc = "Rewritten auxiliary description"
 
     snapshot = build_world_lore_snapshot(world)
 
@@ -238,13 +238,13 @@ def test_world_lore_snapshot_reapplies_static_changes():
     )
     apply_world_lore_snapshot(fresh_world, snapshot)
 
-    assert fresh_world.map.regions[region_id].name == "太虚古城"
-    assert fresh_world.map.regions[region_id].desc == "被改写后的区域描述"
-    assert sects_by_id[sect_id].name == "太虚宗"
-    assert sects_by_id[sect_id].desc == "被改写后的宗门描述"
-    assert techniques_by_id[technique_id].name == "太虚玄功"
-    assert weapons_by_id[weapon_id].name == "太虚剑"
-    assert auxiliaries_by_id[auxiliary_id].name == "太虚佩"
+    assert fresh_world.map.regions[region_id].name == "Great Void Ancient City"
+    assert fresh_world.map.regions[region_id].desc == "Rewritten region description"
+    assert sects_by_id[sect_id].name == "Great Void Sect"
+    assert sects_by_id[sect_id].desc == "Rewritten sect description"
+    assert techniques_by_id[technique_id].name == "Great Void Mystic Art"
+    assert weapons_by_id[weapon_id].name == "Great Void Sword"
+    assert auxiliaries_by_id[auxiliary_id].name == "Great Void Pendant"
 
 
 def test_world_lore_snapshot_rebuilds_sect_metadata_links():
@@ -255,10 +255,10 @@ def test_world_lore_snapshot_rebuilds_sect_metadata_links():
     sect_id = next(iter(sects_by_id))
     region = next(r for r in world.map.sect_regions.values() if getattr(r, "sect_id", None) == sect_id)
 
-    sects_by_id[sect_id].name = "天机阁"
-    sects_by_id[sect_id].desc = "执掌天数与秘闻。"
-    region.name = "观星台"
-    region.desc = "高台可观九天星象。"
+    sects_by_id[sect_id].name = "Heavenly Secrets Pavilion"
+    sects_by_id[sect_id].desc = "Keeper of heaven's numbers and hidden lore."
+    region.name = "Stargazing Terrace"
+    region.desc = "A high terrace from which the stars of the nine heavens can be observed."
 
     snapshot = build_world_lore_snapshot(world)
 
@@ -270,10 +270,10 @@ def test_world_lore_snapshot_rebuilds_sect_metadata_links():
     apply_world_lore_snapshot(fresh_world, snapshot)
 
     fresh_region = next(r for r in fresh_world.map.sect_regions.values() if getattr(r, "sect_id", None) == sect_id)
-    assert sects_by_id[sect_id].name == "天机阁"
-    assert fresh_region.sect_name == "天机阁"
-    assert sects_by_id[sect_id].headquarter.name == "观星台"
-    assert sects_by_id[sect_id].headquarter.desc == "高台可观九天星象。"
+    assert sects_by_id[sect_id].name == "Heavenly Secrets Pavilion"
+    assert fresh_region.sect_name == "Heavenly Secrets Pavilion"
+    assert sects_by_id[sect_id].headquarter.name == "Stargazing Terrace"
+    assert sects_by_id[sect_id].headquarter.desc == "A high terrace from which the stars of the nine heavens can be observed."
     reload_all_static_data()
 
 
@@ -287,15 +287,15 @@ def test_save_load_preserves_world_lore_snapshot_after_static_reload(tmp_path):
     technique_id = next(iter(techniques_by_id))
     weapon_id = next(iter(weapons_by_id))
 
-    world.set_world_lore("天下格局被重新书写。")
-    world.map.regions[region_id].name = "天机城"
-    world.map.regions[region_id].desc = "城中遍布观星台。"
-    sects_by_id[sect_id].name = "天机阁"
-    sects_by_id[sect_id].desc = "执掌天数与秘闻。"
-    techniques_by_id[technique_id].name = "天机演道诀"
-    techniques_by_id[technique_id].desc = "以星象推衍大道。"
-    weapons_by_id[weapon_id].name = "天机尺"
-    weapons_by_id[weapon_id].desc = "可定山河方位。"
+    world.set_world_lore("The shape of the world has been rewritten.")
+    world.map.regions[region_id].name = "Heavenly Secrets City"
+    world.map.regions[region_id].desc = "Stargazing terraces fill the city."
+    sects_by_id[sect_id].name = "Heavenly Secrets Pavilion"
+    sects_by_id[sect_id].desc = "Keeper of heaven's numbers and hidden lore."
+    techniques_by_id[technique_id].name = "Heavenly Secrets Dao-Deduction Art"
+    techniques_by_id[technique_id].desc = "Deduces the Great Dao from the stars."
+    weapons_by_id[weapon_id].name = "Heavenly Secrets Ruler"
+    weapons_by_id[weapon_id].desc = "Can fix the bearings of mountains and rivers."
     world.world_lore_snapshot = build_world_lore_snapshot(world)
 
     simulator = Simulator(world)
@@ -306,12 +306,12 @@ def test_save_load_preserves_world_lore_snapshot_after_static_reload(tmp_path):
     reload_all_static_data()
 
     loaded_world, _, _ = load_game(save_path)
-    assert loaded_world.world_lore.text == "天下格局被重新书写。"
-    assert loaded_world.map.regions[region_id].name == "天机城"
-    assert loaded_world.map.regions[region_id].desc == "城中遍布观星台。"
-    assert sects_by_id[sect_id].name == "天机阁"
-    assert sects_by_id[sect_id].desc == "执掌天数与秘闻。"
-    assert techniques_by_id[technique_id].name == "天机演道诀"
-    assert techniques_by_id[technique_id].desc == "以星象推衍大道。"
-    assert weapons_by_id[weapon_id].name == "天机尺"
-    assert weapons_by_id[weapon_id].desc == "可定山河方位。"
+    assert loaded_world.world_lore.text == "The shape of the world has been rewritten."
+    assert loaded_world.map.regions[region_id].name == "Heavenly Secrets City"
+    assert loaded_world.map.regions[region_id].desc == "Stargazing terraces fill the city."
+    assert sects_by_id[sect_id].name == "Heavenly Secrets Pavilion"
+    assert sects_by_id[sect_id].desc == "Keeper of heaven's numbers and hidden lore."
+    assert techniques_by_id[technique_id].name == "Heavenly Secrets Dao-Deduction Art"
+    assert techniques_by_id[technique_id].desc == "Deduces the Great Dao from the stars."
+    assert weapons_by_id[weapon_id].name == "Heavenly Secrets Ruler"
+    assert weapons_by_id[weapon_id].desc == "Can fix the bearings of mountains and rivers."

@@ -1,8 +1,8 @@
 """
-读档功能模块。
+Load game module.
 
-顶层函数只负责路径解析、文件 IO、section registry 编排和错误处理。具体恢复
-顺序集中在 save/load section registry 中维护。
+Top-level functions only handle path resolution, file IO, section registry orchestration, and error handling. The concrete restore
+order is maintained centrally in the save/load section registry.
 """
 
 from __future__ import annotations
@@ -23,9 +23,9 @@ if TYPE_CHECKING:
 
 def get_events_db_path(save_path: Path) -> Path:
     """
-    根据存档路径计算事件数据库路径。
+    Compute the events database path from the save path.
 
-    例如：save_20260105_1423.json -> save_20260105_1423_events.db
+    Example: save_20260105_1423.json -> save_20260105_1423_events.db
     """
     return save_path.with_suffix("").with_name(save_path.stem + "_events.db")
 
@@ -41,10 +41,10 @@ def _resolve_load_path(save_path: Optional[Path]) -> Path:
 
 
 def load_game(save_path: Optional[Path] = None) -> Tuple["World", "Simulator", List["Sect"]]:
-    """从文件加载游戏状态。"""
+    """Load game state from a file."""
     resolved_save_path = _resolve_load_path(save_path)
     if not resolved_save_path.exists():
-        raise FileNotFoundError(f"存档文件不存在: {resolved_save_path}")
+        raise FileNotFoundError(f"Save file does not exist: {resolved_save_path}")
 
     try:
         with open(resolved_save_path, "r", encoding="utf-8") as f:
@@ -53,7 +53,7 @@ def load_game(save_path: Optional[Path] = None) -> Tuple["World", "Simulator", L
         meta = save_data.get("meta", {})
         print(
             f"Loading save (Version: {meta.get('version', 'unknown')}, "
-            f"游戏时间: {meta.get('game_time', 'unknown')})"
+            f"Game time: {meta.get('game_time', 'unknown')})"
         )
 
         context = LoadContext(save_path=resolved_save_path, save_data=save_data)
@@ -70,10 +70,10 @@ def load_game(save_path: Optional[Path] = None) -> Tuple["World", "Simulator", L
 
 
 def check_save_compatibility(save_path: Path) -> Tuple[bool, str]:
-    """检查存档兼容性。当前开发阶段不做严格版本阻断。"""
+    """Check save compatibility. During the current development phase, no strict version blocking is done."""
     try:
         with open(save_path, "r", encoding="utf-8") as f:
             json.load(f)
         return True, ""
     except Exception as exc:
-        return False, f"无法读取存档文件: {exc}"
+        return False, f"Unable to read save file: {exc}"

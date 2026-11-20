@@ -136,7 +136,7 @@ def _solve_constrained_values(
 
 class MortalPlanner:
     """
-    负责单个角色的前期规划（宗门、性别、关系、出生点等）。
+    Handles up-front planning for a single avatar (sect, gender, relations, birthplace, etc.).
     """
 
     @staticmethod
@@ -211,7 +211,7 @@ class MortalPlanner:
 
 class PopulationPlanner:
     """
-    负责批量角色的宗门/关系规划。
+    Handles sect/relation planning for a batch of avatars.
     """
 
     @staticmethod
@@ -245,7 +245,7 @@ class PopulationPlanner:
         planned_surname: list[Optional[str]] = [None] * n
         planned_relations: dict[tuple[int, int], Relation] = {}
 
-        # — 家庭 —
+        # -- Family --
         unused_indices = list(range(n))
         random.shuffle(unused_indices)
         family_groups: list[list[int]] = []
@@ -294,7 +294,7 @@ class PopulationPlanner:
 
         leftover = unused_indices[:]
 
-        # — 道侣 —
+        # -- Dao partners --
         random.shuffle(leftover)
         lovers_budget = max(0, n // lovers_pair_cap_div)
         i = 0
@@ -315,7 +315,7 @@ class PopulationPlanner:
                 lovers_budget -= 1
             i += 2
 
-        # — 师徒（同宗门）—
+        # -- Master-disciple (same sect) --
         if use_sects and existed_sects:
             members_by_sect: dict[int, list[int]] = {s.id: [] for s in existed_sects}
             for idx, sect in enumerate(planned_sect):

@@ -2,7 +2,7 @@ import { useSettingStore } from '../stores/setting';
 import { withBasePublicPath } from '@/utils/assetUrls';
 import { logWarn } from '@/utils/appError';
 
-// 音频资源配置 - 使用 ogg 格式
+// Sound assets (ogg)
 const SOUND_URLS = {
   click: withBasePublicPath('sfx/click.ogg'),
   cancel: withBasePublicPath('sfx/cancel.ogg'),
@@ -12,7 +12,7 @@ const SOUND_URLS = {
 
 export type SoundType = keyof typeof SOUND_URLS;
 
-// 单例模式维护 AudioContext 和 Buffers
+// Singleton AudioContext and buffers
 let audioContext: AudioContext | null = null;
 const buffers: Partial<Record<SoundType, AudioBuffer>> = {};
 
@@ -24,7 +24,7 @@ type AudioWindow = typeof window & {
 export function useAudio() {
   const settingStore = useSettingStore();
 
-  // 1. 初始化并预加载 (建议在 main.ts 或 App.vue 挂载时调用)
+  // 1. Init and preload (call when main.ts or App.vue mounts)
   async function init() {
     if (typeof window === 'undefined') return;
 
@@ -39,9 +39,9 @@ export function useAudio() {
       }
     }
     
-    // 预加载所有音效
+    // Preload all sounds
     const loadPromises = Object.entries(SOUND_URLS).map(async ([key, url]) => {
-      if (buffers[key as SoundType]) return; // 避免重复加载
+      if (buffers[key as SoundType]) return; // Skip already loaded
 
       try {
         const response = await fetch(url);
@@ -59,12 +59,12 @@ export function useAudio() {
     await Promise.all(loadPromises);
   }
 
-  // 2. 播放逻辑
+  // 2. Playback
   function play(type: SoundType = 'click') {
     if (settingStore.sfxVolume <= 0 || !audioContext || !buffers[type]) return;
 
-    // 浏览器策略：如果 Context 被暂停（通常发生在无交互的页面加载时），需要恢复
-    // 必须在用户交互事件中调用 resume
+    // Browser policy: a suspended context (common before any user interaction) must be resumed
+    // resume() must be called from a user interaction
     if (audioContext.state === 'suspended') {
       Promise.resolve(audioContext.resume()).catch((e) => logWarn('Audio resume context', e));
     }
@@ -78,13 +78,13 @@ export function useAudio() {
 
     source.buffer = buffers[type]!;
     
-    // 创建增益节点控制音量
+    // Gain node for volume
     gainNode.gain.value = settingStore.sfxVolume;
     
     source.connect(gainNode);
     gainNode.connect(audioContext.destination);
     
-    source.start(0); // 立即播放，无延迟
+    source.start(0); // Play immediately
   }
 
   return { init, play };
