@@ -73,3 +73,4 @@ Suggested mapping:
 - `chart-bar.svg`: world statistics
 - `milestone.svg`: world chronicle of firsts
 - `download.svg`: export or download data (event chronicle export)
+- `keyboard.svg`: keyboard shortcuts help

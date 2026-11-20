@@ -3,12 +3,14 @@ import { useI18n } from 'vue-i18n'
 import houseIcon from '@/assets/icons/ui/lucide/house.svg'
 import logOutIcon from '@/assets/icons/ui/lucide/log-out.svg'
 import chevronRightIcon from '@/assets/icons/ui/lucide/chevron-right.svg'
+import keyboardIcon from '@/assets/icons/ui/lucide/keyboard.svg'
 
 const { t } = useI18n()
 
 const emit = defineEmits<{
   (e: 'return-to-main'): void
   (e: 'exit-game'): void
+  (e: 'show-shortcuts'): void
 }>()
 </script>
 
@@ -20,6 +22,17 @@ const emit = defineEmits<{
     </div>
 
     <div class="other-actions">
+      <button class="custom-action-btn shortcuts-entry" @click="emit('show-shortcuts')" v-sound="'open'">
+        <div class="btn-content">
+          <div class="btn-icon" :style="{ '--icon-url': `url(${keyboardIcon})` }" aria-hidden="true"></div>
+          <div class="btn-text-group">
+            <span class="btn-title">{{ t('shortcuts.menu_entry') }}</span>
+            <span class="btn-desc">{{ t('shortcuts.menu_entry_desc') }}</span>
+          </div>
+        </div>
+        <div class="btn-arrow" :style="{ '--icon-url': `url(${chevronRightIcon})` }" aria-hidden="true"></div>
+      </button>
+
       <button class="custom-action-btn" @click="emit('return-to-main')" v-sound>
         <div class="btn-content">
           <div class="btn-icon" :style="{ '--icon-url': `url(${houseIcon})` }" aria-hidden="true"></div>
