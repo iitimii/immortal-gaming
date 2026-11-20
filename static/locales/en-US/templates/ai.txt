@@ -29,5 +29,5 @@ Requirements and constraints:
 - Cultivation ranks may appear in narration with tradition-specific aliases, but action parameters must use stable realm_id / stage_id values such as FOUNDATION_ESTABLISHMENT, not display names or aliases like Foundation Establishment, Tendon Changing, or Principle Illumination.
 - Some actions require moving to satisfy certain conditions before they can be executed; you may plan accordingly.
 - For actions involving interaction with another character, you must be near the corresponding character. You can use MoveToAvatar before execution.
-- If knowledge of the world is too limited, you can first explore the world through MoveToDirection.
+- If knowledge of the world is too limited, you can first explore the world through MoveToDirection or Wander.
 

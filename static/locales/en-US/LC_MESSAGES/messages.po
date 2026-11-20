@@ -1044,6 +1044,40 @@ msgstr "Point of interest is unknown"
 msgid "Point of interest is out of bounds"
 msgstr "Point of interest is out of bounds"
 
+# Action: Wander
+msgid "wander_action_name"
+msgstr "Wander"
+
+msgid "wander_description"
+msgstr ""
+"Roam the land for 2 months to broaden your horizons, drifting toward nearby "
+"regions you do not know yet; regions you pass through become known, and luck"
+" may bring a small find"
+
+msgid "wander_requirements"
+msgstr "No restrictions"
+
+msgid "wander_cannot_start_dead"
+msgstr "The dead cannot wander"
+
+msgid "wander_start_event"
+msgstr ""
+"{avatar} sets out from {location} to wander the land and broaden their "
+"horizons"
+
+msgid "wander_finish_event"
+msgstr ""
+"{avatar} finished wandering at {location} without coming upon any new place"
+
+msgid "wander_finish_discovered_event"
+msgstr "{avatar} finished wandering and came to know new places: {regions}"
+
+msgid "wander_find_material_event"
+msgstr "While wandering, {avatar} stumbled upon {material}"
+
+msgid "wander_find_spirit_stones_event"
+msgstr "While wandering, {avatar} stumbled upon {amount} spirit stones"
+
 # Alignment
 msgid "righteous"
 msgstr "Righteous"
