@@ -1,0 +1,11 @@
+msgid ""
+msgstr ""
+"Language: en-US\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+# World statistics death reason categories
+msgid "Killed in battle"
+msgstr "Killed in battle"
+
+msgid "Other causes"
+msgstr "Other causes"

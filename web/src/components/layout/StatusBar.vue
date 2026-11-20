@@ -16,6 +16,7 @@ import usersIcon from '@/assets/icons/ui/lucide/users.svg'
 import landmarkIcon from '@/assets/icons/ui/lucide/landmark.svg'
 import clock3Icon from '@/assets/icons/ui/lucide/clock-3.svg'
 import scrollTextIcon from '@/assets/icons/ui/lucide/scroll-text.svg'
+import chartBarIcon from '@/assets/icons/ui/lucide/chart-bar.svg'
 
 const { t } = useI18n()
 const store = useWorldStore()
@@ -34,6 +35,7 @@ type StatusBarPanelKey =
   | 'phenomenonSelector'
   | 'avatarOverview'
   | 'worldSecret'
+  | 'worldStatistics'
 
 const phenomenonColor = computed(() => {
   const p = store.currentPhenomenon
@@ -144,6 +146,14 @@ function openPanel(panel: StatusBarPanelKey) {
         :color="STATUS_BAR_COLORS.neutral"
         :disable-popover="true"
         @trigger-click="openPanel('avatarOverview')"
+      />
+
+      <StatusWidget
+        :label="t('game.status_bar.world_statistics.label')"
+        :icon="chartBarIcon"
+        :color="STATUS_BAR_COLORS.worldStatistics"
+        :disable-popover="true"
+        @trigger-click="openPanel('worldStatistics')"
       />
 
       <StatusWidget

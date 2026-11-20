@@ -62,6 +62,18 @@ describe('public api module migration', () => {
     expect(getMock).toHaveBeenCalledWith('/api/v1/query/sects/territories')
   })
 
+  it('worldApi fetches and normalizes world statistics from /api/v1', async () => {
+    const { worldApi } = await import('@/api/modules/world')
+    getMock.mockResolvedValue({ living_count: 0, deceased: { total: 1, top_reasons: [] } })
+
+    const stats = await worldApi.fetchWorldStatistics()
+
+    expect(getMock).toHaveBeenCalledWith('/api/v1/query/world/statistics')
+    expect(stats.livingCount).toBe(0)
+    expect(stats.deceased.total).toBe(1)
+    expect(stats.realms).toEqual([])
+  })
+
   it('systemApi uses /api/v1 lifecycle and save endpoints', async () => {
     const { systemApi } = await import('@/api/modules/system')
     getMock.mockResolvedValue({ status: 'idle' })

@@ -50,6 +50,7 @@ class GameQueryDependencies:
     get_roleplay_session_query: Any
     get_world_secret_meta_query: Any
     get_world_secret_overview_query: Any
+    get_world_statistics_query: Any
 
 
 class GameQueryService:
@@ -93,6 +94,7 @@ class GameQueryService:
             build_public_roleplay_session=self.get_roleplay_session,
             build_public_world_secret_meta=self.get_world_secret_meta,
             build_public_world_secret_overview=self.get_world_secret_overview,
+            build_public_world_statistics=self.get_world_statistics,
         )
 
     def _resolve_avatar_pic_id(self, avatar: Any) -> int:
@@ -239,3 +241,6 @@ class GameQueryService:
 
     def get_world_secret_overview(self) -> dict:
         return self._deps.get_world_secret_overview_query(self._deps.runtime)
+
+    def get_world_statistics(self) -> dict:
+        return self._deps.get_world_statistics_query(self._deps.runtime)

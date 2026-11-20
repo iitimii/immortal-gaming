@@ -124,6 +124,7 @@ def configure_routes_and_mounts(
     build_roleplay_session=None,
     build_world_secret_meta=None,
     build_world_secret_overview=None,
+    build_world_statistics=None,
     create_public_command_router,
     run_start_game=None,
     run_reinit_game=None,
@@ -216,6 +217,7 @@ def configure_routes_and_mounts(
             build_roleplay_session=build_roleplay_session,
             build_world_secret_meta=build_world_secret_meta,
             build_world_secret_overview=build_world_secret_overview,
+            build_world_statistics=build_world_statistics,
         )
     )
 

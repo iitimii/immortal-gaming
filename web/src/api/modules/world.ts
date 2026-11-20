@@ -14,6 +14,7 @@ import type {
   MapPresetsResponseDTO,
   WorldSecretMetaResponseDTO,
   WorldSecretOverviewResponseDTO,
+  WorldStatisticsResponseDTO,
 } from '../../types/api';
 import {
   normalizeInitialState,
@@ -24,6 +25,7 @@ import {
 import { normalizeMortalOverview } from '../mappers/mortal';
 import { normalizeDynastyDetail, normalizeDynastyOverview } from '../mappers/dynasty';
 import { normalizeAvatarOverview } from '../mappers/avatarOverview';
+import { normalizeWorldStatistics } from '../mappers/worldStatistics';
 
 export const worldApi = {
   async fetchInitialState() {
@@ -96,5 +98,10 @@ export const worldApi = {
 
   fetchWorldSecretOverview() {
     return httpClient.get<WorldSecretOverviewResponseDTO>('/api/v1/query/world-secrets/overview');
+  },
+
+  async fetchWorldStatistics() {
+    const data = await httpClient.get<WorldStatisticsResponseDTO>('/api/v1/query/world/statistics');
+    return normalizeWorldStatistics(data);
   },
 };
