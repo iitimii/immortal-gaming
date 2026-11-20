@@ -144,3 +144,15 @@ def test_avatar_metrics_multiple_tags():
     assert "injured" in metrics.tags
     assert "battle" in metrics.tags
     assert "custom_event" in metrics.tags
+
+
+def test_record_metrics_snapshots_spirit_stones(dummy_avatar):
+    """record_metrics reads spirit stones from MagicStone.value (it used to crash on .amount)."""
+    dummy_avatar.enable_metrics_tracking = True
+    dummy_avatar.magic_stone.value = 321
+
+    snapshot = dummy_avatar.record_metrics(tags=["breakthrough"])
+
+    assert snapshot is not None
+    assert snapshot.spirit_stones == 321
+    assert "breakthrough" in snapshot.tags
