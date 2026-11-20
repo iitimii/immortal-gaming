@@ -3,6 +3,7 @@ import type {
   SaveFileDTO,
   InitStatusDTO,
   SetSpeedResponseDTO,
+  StepOnceResponseDTO,
   RunConfigDTO,
   AppSettingsDTO,
   AppSettingsPatchDTO
@@ -23,6 +24,10 @@ export const systemApi = {
 
   setSpeed(speed: number) {
     return httpClient.post<SetSpeedResponseDTO>('/api/v1/command/game/set-speed', { speed });
+  },
+
+  stepOnce() {
+    return httpClient.post<StepOnceResponseDTO>('/api/v1/command/game/step', {});
   },
 
   fetchSaves() {

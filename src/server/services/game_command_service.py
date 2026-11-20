@@ -9,6 +9,7 @@ from fastapi import HTTPException
 
 from src.config import RunConfig, get_settings_service
 from src.i18n import t
+from src.server.services.public_api_contract import raise_public_error
 
 
 @dataclass(slots=True)
@@ -59,6 +60,7 @@ class GameCommandDependencies:
     get_load_game: Any
     get_events_db_path: Any
     roleplay_commands: Any
+    get_simulation_stepper: Any = None
 
 
 class GameCommandService:
@@ -94,6 +96,7 @@ class GameCommandService:
             run_pause_game_and_drain=self.pause_game_and_drain,
             run_resume_game=self.resume_game,
             run_set_simulation_speed=self.set_simulation_speed,
+            run_step_once=self.step_once,
             run_cleanup_events=self.cleanup_events,
             run_set_phenomenon=self.set_phenomenon,
             run_create_avatar=self.create_avatar,
@@ -155,6 +158,62 @@ class GameCommandService:
             "status": "ok",
             "speed": applied,
             "allowed_speeds": runtime.get_allowed_simulation_speeds(),
+        }
+
+    def _ensure_manual_step_allowed(self) -> None:
+        runtime = self._deps.runtime
+        if runtime.get("init_status") != "ready" or not runtime.get("world") or not runtime.get("sim"):
+            raise_public_error(
+                status_code=503,
+                code="GAME_NOT_READY",
+                message="Game is not initialized",
+            )
+        if runtime.get("roleplay_auto_paused", False):
+            raise_public_error(
+                status_code=409,
+                code="ROLEPLAY_AWAITING_INPUT",
+                message="Roleplay is waiting for a player decision",
+                details={"pause_reason": runtime.get_pause_reason()},
+            )
+        if not runtime.get("is_paused", False):
+            raise_public_error(
+                status_code=409,
+                code="GAME_NOT_PAUSED",
+                message="Pause the game before stepping manually",
+            )
+
+    async def step_once(self) -> dict:
+        """Advance the paused world by exactly one month."""
+        runtime = self._deps.runtime
+        self._ensure_manual_step_allowed()
+        if not runtime.try_begin_manual_step():
+            raise_public_error(
+                status_code=409,
+                code="STEP_IN_PROGRESS",
+                message="A manual step is already running",
+            )
+        try:
+            # Preconditions are re-checked inside the mutation lock in case a
+            # loop step that was already running changed them meanwhile.
+            result = await self._deps.get_simulation_stepper().step_and_broadcast(
+                before_step=self._ensure_manual_step_allowed,
+            )
+        finally:
+            runtime.finish_manual_step()
+
+        if result is None:
+            raise_public_error(
+                status_code=409,
+                code="STEP_ABORTED",
+                message="The game was reset before the step completed",
+            )
+        return {
+            "status": "ok",
+            "year": result.year,
+            "month": result.month,
+            "event_count": len(result.events),
+            "auto_saved": result.auto_saved,
+            "world_revision": runtime.world_revision,
         }
 
     async def set_long_term_objective(self, req: Any) -> dict:

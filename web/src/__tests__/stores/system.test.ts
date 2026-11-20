@@ -9,6 +9,7 @@ vi.mock('@/api', () => ({
     pauseGame: vi.fn(),
     resumeGame: vi.fn(),
     setSpeed: vi.fn(),
+    stepOnce: vi.fn(),
   },
 }))
 
@@ -189,6 +190,95 @@ describe('useSystemStore', () => {
       await poll
 
       expect(store.simulationSpeed).toBe(4)
+    })
+  })
+
+  describe('stepOnce', () => {
+    const stepResponse = {
+      status: 'ok' as const,
+      year: 101,
+      month: 3,
+      event_count: 2,
+      auto_saved: false,
+      world_revision: 7,
+    }
+
+    function makeReadyAndPaused() {
+      store.initStatus = createMockStatus({ status: 'ready', progress: 100 })
+      store.setInitialized(true)
+      store.isManualPaused = true
+    }
+
+    it('canStepOnce is true only when ready and manually paused', () => {
+      expect(store.canStepOnce).toBe(false)
+
+      makeReadyAndPaused()
+      expect(store.canStepOnce).toBe(true)
+
+      store.isManualPaused = false
+      expect(store.canStepOnce).toBe(false)
+
+      store.isManualPaused = true
+      store.setInitialized(false)
+      expect(store.canStepOnce).toBe(false)
+    })
+
+    it('calls the API, tracks the busy state and returns the result', async () => {
+      makeReadyAndPaused()
+      let resolveStep: (value: typeof stepResponse) => void = () => {}
+      vi.mocked(systemApi.stepOnce).mockImplementation(
+        () => new Promise((resolve) => { resolveStep = resolve }),
+      )
+
+      const pending = store.stepOnce()
+      expect(store.isStepping).toBe(true)
+      expect(store.canStepOnce).toBe(false)
+
+      resolveStep(stepResponse)
+      const result = await pending
+
+      expect(systemApi.stepOnce).toHaveBeenCalledTimes(1)
+      expect(result).toEqual(stepResponse)
+      expect(store.isStepping).toBe(false)
+      expect(store.canStepOnce).toBe(true)
+    })
+
+    it('ignores repeated calls while a step is in flight', async () => {
+      makeReadyAndPaused()
+      let resolveStep: (value: typeof stepResponse) => void = () => {}
+      vi.mocked(systemApi.stepOnce).mockImplementation(
+        () => new Promise((resolve) => { resolveStep = resolve }),
+      )
+
+      const first = store.stepOnce()
+      const second = await store.stepOnce()
+      resolveStep(stepResponse)
+      await first
+
+      expect(second).toBeNull()
+      expect(systemApi.stepOnce).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not call the API when the game is running', async () => {
+      makeReadyAndPaused()
+      store.isManualPaused = false
+
+      const result = await store.stepOnce()
+
+      expect(result).toBeNull()
+      expect(systemApi.stepOnce).not.toHaveBeenCalled()
+    })
+
+    it('clears the busy state and logs when the API rejects', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      makeReadyAndPaused()
+      vi.mocked(systemApi.stepOnce).mockRejectedValue(new Error('GAME_NOT_PAUSED'))
+
+      const result = await store.stepOnce()
+
+      expect(result).toBeNull()
+      expect(store.isStepping).toBe(false)
+      expect(consoleSpy).toHaveBeenCalled()
     })
   })
 

@@ -22,6 +22,7 @@ Suggested mapping:
 - `menu.svg`: game menu button
 - `play.svg`: resume button
 - `pause.svg`: pause button
+- `step-forward.svg`: advance one month while paused
 - `sparkles.svg`: start game or world phenomenon
 - `folder-open.svg`: load game
 - `save.svg`: save game

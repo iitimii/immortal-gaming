@@ -522,6 +522,15 @@ export interface SetSpeedResponseDTO {
   allowed_speeds: number[];
 }
 
+export interface StepOnceResponseDTO {
+  status: 'ok';
+  year: number;
+  month: number;
+  event_count: number;
+  auto_saved: boolean;
+  world_revision: number;
+}
+
 export type RoleplayPromptRequestType = 'decision' | 'choice' | 'conversation';
 export type RoleplayChoiceVariant = 'accept' | 'reject' | 'default';
 export type RoleplaySessionStatus =

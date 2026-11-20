@@ -3,6 +3,8 @@ from __future__ import annotations
 from types import SimpleNamespace
 from typing import Any, Callable
 
+from src.server.loop_runtime import create_simulation_stepper
+
 
 def create_runtime_hooks(
     *,
@@ -84,30 +86,35 @@ def create_runtime_hooks(
     def trigger_auto_save(world, sim):
         trigger_auto_save_impl(world=world, sim=sim, sects_by_id=static_data.sects_by_id)
 
+    simulation_stepper = create_simulation_stepper(
+        runtime=runtime,
+        manager=manager,
+        build_avatar_updates=lambda: build_avatar_updates(
+            world=runtime.get("world"),
+            resolve_avatar_pic_id=lambda avatar: resolve_avatar_pic_id(
+                avatar_assets=avatar_assets,
+                avatar=avatar,
+            ),
+            resolve_avatar_action_emoji=resolve_avatar_action_emoji,
+        ),
+        build_tick_state=lambda avatar_updates, events, world: build_tick_state(
+            world=world,
+            events=events,
+            avatar_updates=avatar_updates,
+            serialize_events_for_client=serialize_events_for_client,
+            serialize_phenomenon=serialize_phenomenon,
+            serialize_active_domains=serialize_active_domains,
+        ),
+        should_trigger_auto_save=lambda world: should_trigger_auto_save(world=world),
+        trigger_auto_save=trigger_auto_save,
+        build_auto_save_toast=build_auto_save_toast,
+    )
+
     async def game_loop():
         await run_game_loop_forever(
             game_instance=game_state,
             runtime=runtime,
-            manager=manager,
-            build_avatar_updates=lambda: build_avatar_updates(
-                world=runtime.get("world"),
-                resolve_avatar_pic_id=lambda avatar: resolve_avatar_pic_id(
-                    avatar_assets=avatar_assets,
-                    avatar=avatar,
-                ),
-                resolve_avatar_action_emoji=resolve_avatar_action_emoji,
-            ),
-            build_tick_state=lambda avatar_updates, events, world: build_tick_state(
-                world=world,
-                events=events,
-                avatar_updates=avatar_updates,
-                serialize_events_for_client=serialize_events_for_client,
-                serialize_phenomenon=serialize_phenomenon,
-                serialize_active_domains=serialize_active_domains,
-            ),
-            should_trigger_auto_save=lambda world: should_trigger_auto_save(world=world),
-            trigger_auto_save=trigger_auto_save,
-            build_auto_save_toast=build_auto_save_toast,
+            stepper=simulation_stepper,
             get_logger=get_logger,
         )
 
@@ -115,5 +122,6 @@ def create_runtime_hooks(
         update_init_progress=update_init_progress,
         init_game_async=init_game_async,
         trigger_auto_save=trigger_auto_save,
+        simulation_stepper=simulation_stepper,
         game_loop=game_loop,
     )

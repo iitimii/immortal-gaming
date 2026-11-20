@@ -4,6 +4,7 @@ import { defineComponent, ref } from 'vue'
 import { useUiStore } from '@/stores/ui'
 import { useSocketStore } from '@/stores/socket'
 import { useSystemStore } from '@/stores/system'
+import { useRoleplayStore } from '@/stores/roleplay'
 import { useGameControl } from '@/composables/useGameControl'
 
 const createTestComponent = () => {
@@ -137,6 +138,76 @@ describe('useGameControl', () => {
 
     expect(setSpeedSpy).toHaveBeenCalledWith(4)
     wrapper.unmount()
+  })
+
+  describe('step once', () => {
+    function makeStoreSteppable() {
+      systemStore.initStatus = {
+        status: 'ready',
+        phase: 0,
+        phase_name: '',
+        progress: 100,
+        elapsed_seconds: 0,
+        error: null,
+        llm_check_failed: false,
+        llm_error_message: '',
+      }
+      systemStore.setInitialized(true)
+      systemStore.isManualPaused = true
+    }
+
+    it('forwards stepOnce to the system store when stepping is allowed', () => {
+      const stepSpy = vi.spyOn(systemStore, 'stepOnce').mockResolvedValue(null)
+      makeStoreSteppable()
+      const { component } = createTestComponent()
+      const wrapper = mount(component)
+
+      expect(wrapper.vm.canStepOnce).toBe(true)
+      wrapper.vm.stepOnce()
+
+      expect(stepSpy).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
+    it('disables stepping while the game is running', () => {
+      const stepSpy = vi.spyOn(systemStore, 'stepOnce').mockResolvedValue(null)
+      makeStoreSteppable()
+      systemStore.isManualPaused = false
+      const { component } = createTestComponent()
+      const wrapper = mount(component)
+
+      expect(wrapper.vm.canStepOnce).toBe(false)
+      wrapper.vm.stepOnce()
+
+      expect(stepSpy).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    it('disables stepping while roleplay waits for player input', () => {
+      const stepSpy = vi.spyOn(systemStore, 'stepOnce').mockResolvedValue(null)
+      makeStoreSteppable()
+      const roleplayStore = useRoleplayStore()
+      roleplayStore.session = { ...roleplayStore.session, status: 'awaiting_decision' }
+      const { component } = createTestComponent()
+      const wrapper = mount(component)
+
+      expect(wrapper.vm.canStepOnce).toBe(false)
+      wrapper.vm.stepOnce()
+
+      expect(stepSpy).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    it('exposes the busy state from the system store', () => {
+      makeStoreSteppable()
+      systemStore.isStepping = true
+      const { component } = createTestComponent()
+      const wrapper = mount(component)
+
+      expect(wrapper.vm.isStepping).toBe(true)
+      expect(wrapper.vm.canStepOnce).toBe(false)
+      wrapper.unmount()
+    })
   })
 
   it('resumes backend after websocket reconnect when game is active and not manually paused', async () => {

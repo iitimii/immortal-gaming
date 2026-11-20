@@ -61,6 +61,8 @@ class GameSessionRuntime:
         self._state = state
         self._mutation_lock = asyncio.Lock()
         self._world_revision = 0
+        # Runtime-only guard for the manual "step once" command; never saved.
+        self._manual_step_in_flight = False
         self._ensure_owned_roleplay_session()
 
     def get(self, key: str, default: Any = None) -> Any:
@@ -224,6 +226,19 @@ class GameSessionRuntime:
 
     def reset_simulation_speed(self) -> None:
         self._state["simulation_speed"] = DEFAULT_SIMULATION_SPEED
+
+    def try_begin_manual_step(self) -> bool:
+        """Claim the manual step slot; False when another manual step is running."""
+        if self._manual_step_in_flight:
+            return False
+        self._manual_step_in_flight = True
+        return True
+
+    def finish_manual_step(self) -> None:
+        self._manual_step_in_flight = False
+
+    def is_manual_step_in_flight(self) -> bool:
+        return self._manual_step_in_flight
 
     def set_roleplay_auto_paused(self, paused: bool) -> None:
         self._state["roleplay_auto_paused"] = bool(paused)
