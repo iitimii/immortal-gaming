@@ -17,6 +17,7 @@ import StatusBar from './components/layout/StatusBar.vue'
 import EventPanel from './components/game/panels/EventPanel.vue'
 import SystemMenu from './components/SystemMenu.vue'
 import LoadingOverlay from './components/LoadingOverlay.vue'
+import KeyboardShortcutsOverlay from './components/KeyboardShortcutsOverlay.vue'
 import menuIcon from '@/assets/icons/ui/lucide/menu.svg'
 import playIcon from '@/assets/icons/ui/lucide/play.svg'
 import pauseIcon from '@/assets/icons/ui/lucide/pause.svg'
@@ -29,6 +30,8 @@ import { useBgm } from './composables/useBgm'
 import { useSidebarResize } from './composables/useSidebarResize'
 import { useAppShell } from './composables/useAppShell'
 import { useSystemMenuFlow } from './composables/useSystemMenuFlow'
+import { installKeyboardShortcuts, openShortcutHelp } from './composables/useKeyboardShortcuts'
+import { useGameShortcuts } from './composables/useGameShortcuts'
 import { logError } from './utils/appError'
 
 // Stores
@@ -89,7 +92,6 @@ const {
   isManualPaused,
   simulationSpeed,
   allowedSpeeds,
-  handleKeydown: controlHandleKeydown,
   toggleManualPause,
   setSimulationSpeed,
   isStepping,
@@ -98,9 +100,6 @@ const {
 } = useGameControl({
   gameInitialized,
   showMenu,
-  canCloseMenu,
-  openGameMenu,
-  closeMenu: handleMenuClose,
 })
 
 const settingsHydrated = computed(() => settingStore.hydrated)
@@ -137,12 +136,27 @@ const {
   onResumeGame: () => systemStore.resume(),
 })
 
-// Event handlers
-function onKeydown(e: KeyboardEvent) {
-  if (shouldBlockControls.value) return
-  controlHandleKeydown(e)
+// Keyboard shortcuts: one window listener; game-scoped shortcuts only fire in the game scene
+installKeyboardShortcuts({ isGameActive: () => !shouldBlockControls.value })
+useGameShortcuts({
+  showMenu,
+  canCloseMenu,
+  openGameMenu,
+  closeMenu: handleMenuClose,
+  toggleManualPause,
+  setSimulationSpeed,
+  simulationSpeed,
+  allowedSpeeds,
+  stepOnce,
+  canStepOnce,
+})
+
+function handleShowShortcuts() {
+  handleMenuCloseWrapper()
+  openShortcutHelp()
 }
 
+// Event handlers
 function handleSelection(target: { type: 'avatar' | 'region' | 'poi'; id: string; name?: string }) {
   uiStore.select(target.type, target.id)
 }
@@ -192,7 +206,6 @@ function focusRoleplayDock() {
 }
 
 onMounted(() => {
-  window.addEventListener('keydown', onKeydown)
   syncLayoutCssVars(sidebarWidth.value)
   settingStore.hydrate().finally(() => {
     useAudio().init()
@@ -201,7 +214,6 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', onKeydown)
   document.documentElement.style.removeProperty('--cws-sidebar-width')
 })
 
@@ -308,7 +320,10 @@ watch(sidebarWidth, width => {
           @llm-ready="handleLLMReady"
           @return-to-main="handleReturnToMain"
           @exit-game="() => handleSplashAction('exit')"
+          @show-shortcuts="handleShowShortcuts"
         />
+
+        <KeyboardShortcutsOverlay />
 
         <LoadingOverlay 
           v-if="showLoadingOverlay"
