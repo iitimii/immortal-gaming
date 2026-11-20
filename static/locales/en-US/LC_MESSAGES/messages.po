@@ -2404,6 +2404,36 @@ msgstr "{avatar} discovered a grave at {location}: {poi}"
 msgid "{avatar} discovered a point of interest at {location}: {poi}"
 msgstr "{avatar} discovered a point of interest at {location}: {poi}"
 
+msgid "event_export_title"
+msgstr "Chronicle of the Cultivation World"
+
+msgid "event_export_world_date"
+msgstr "Exported at: {date}"
+
+msgid "event_export_map"
+msgstr "Map: {map_id}"
+
+msgid "event_export_scope_avatar"
+msgstr "Related to: {avatar}"
+
+msgid "event_export_scope_major"
+msgstr "Major events only"
+
+msgid "event_export_scope_years"
+msgstr "Years: {from_year} to {to_year}"
+
+msgid "event_export_event_count"
+msgstr "Events: {count}"
+
+msgid "event_export_empty"
+msgstr "No events were recorded for this selection."
+
+msgid "event_export_year_heading"
+msgstr "Year {year}"
+
+msgid "event_export_month_label"
+msgstr "Month {month}"
+
 # Execution Results
 msgid "{avatar_name} {done} {grade} {label} '{item_name}'."
 msgstr "{avatar_name} {done} {grade} {label} '{item_name}'."

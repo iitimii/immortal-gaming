@@ -160,7 +160,18 @@
     "story_subject_prefix": "[{avatar}] {content}",
     "empty_dual": "No events between these two",
     "empty_single": "No events for this cultivator",
-    "empty_none": "No events"
+    "empty_none": "No events",
+    "export": "Export",
+    "export_title": "Export Chronicle",
+    "export_format": "Format",
+    "export_format_markdown": "Markdown",
+    "export_format_json": "JSON",
+    "export_scope": "Scope",
+    "export_scope_all": "All events",
+    "export_scope_avatar": "Only {avatar}",
+    "export_scope_major": "Major events only",
+    "export_download": "Download",
+    "export_failed": "Export failed: {error}"
   },
   "roleplay": {
     "panel": {

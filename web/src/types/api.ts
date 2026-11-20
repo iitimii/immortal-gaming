@@ -495,6 +495,17 @@ export interface FetchEventsParams {
   limit?: number;
 }
 
+export type EventExportFormat = 'markdown' | 'json';
+
+/** Query params for GET /api/v1/query/events/export (file download). */
+export interface EventExportParams {
+  format: EventExportFormat;
+  avatar_id?: string;
+  major_only?: boolean;
+  from_year?: number;
+  to_year?: number;
+}
+
 // --- Status ---
 
 export interface InitStatusDTO {
